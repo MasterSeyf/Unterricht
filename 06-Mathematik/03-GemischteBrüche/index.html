@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interaktive Bruchwerkstatt für die 6. Klasse: Brüche addieren und subtrahieren mit Streifenmodell, Kreismodell und gemischten Zahlen.">
+<title>Bruchwerkstatt V07 – Brüche entdecken</title>
+<style>
+  :root {
+    --ink: #18243a;
+    --muted: #68758a;
+    --line: #e3e9f1;
+    --paper: #ffffff;
+    --bg: #f3f6fb;
+    --navy: #182640;
+    --navy2: #243957;
+    --teal: #1ba99b;
+    --teal-dark: #117e77;
+    --orange: #f2a34a;
+    --blue: #6489f5;
+    --purple: #8968d8;
+    --green: #1eaa72;
+    --red: #d85d69;
+    --shadow: 0 12px 36px rgba(29, 49, 79, .075);
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: ui-rounded, "Avenir Next", Avenir, "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.45;
+  }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 3px solid rgba(100,137,245,.42); outline-offset: 3px;
+  }
+  .topbar { background: var(--navy); color: #fff; position: relative; overflow: hidden; }
+  .topbar::after { content:""; position:absolute; width:390px; height:390px; right:-95px; top:-250px; border:48px solid rgba(255,255,255,.045); border-radius:50%; pointer-events:none; }
+  .topbar-inner { max-width:1220px; padding:16px 24px 11px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:18px; position:relative; z-index:1; }
+  .brand { display:flex; gap:12px; align-items:center; font-weight:850; letter-spacing:-.035em; font-size:21px; flex:none; }
+  .brand-mark { width:42px; height:42px; border-radius:14px; display:grid; place-items:center; background:#fff; color:var(--navy); box-shadow: inset 0 -4px 0 rgba(24,38,64,.1); transform:rotate(-4deg); }
+  .brand-mark svg { width:26px; height:26px; }
+  .topbar-right { display:flex; flex-direction:column; align-items:flex-end; gap:7px; min-width:0; }
+  .top-note { color:#cad5e7; font-size:11px; font-weight:750; letter-spacing:.08em; text-align:right; }
+  .topbar-progress-wrap { position:relative; z-index:1; border-top:1px solid rgba(255,255,255,.1); background:rgba(8,18,36,.16); }
+  .topbar-progress-inner { max-width:1220px; margin:0 auto; padding:9px 24px 12px; }
+  .topbar-progress-main { display:grid; grid-template-columns:auto minmax(120px,1fr); gap:14px; align-items:center; }
+  .top-progress-count { color:#bfcce0; font-size:11px; font-weight:800; white-space:nowrap; }
+  .top-progress-track { width:100%; height:6px; border-radius:99px; background:rgba(255,255,255,.16); overflow:hidden; }
+  .top-progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#42d5bc,#8de4bd); border-radius:inherit; transition:width .35s ease; }
+  .page { max-width:1220px; margin:0 auto; padding:24px 24px 48px; }
+  .intro { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin: 2px 0 15px; }
+  .eyebrow { color:var(--teal-dark); font-size:11px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; margin-bottom:8px; }
+  h1 { font-size:clamp(27px, 3vw, 36px); letter-spacing:-.045em; line-height:1.06; margin:0; }
+  .intro p { margin:10px 0 0; color:var(--muted); font-size:15px; max-width:620px; }
+  .class-pill { flex:none; display:flex; align-items:center; gap:8px; border:1px solid #dfe8f0; border-radius:999px; padding:10px 14px; background:#fff; color:#48566b; font-size:12px; font-weight:800; box-shadow:0 4px 14px rgba(29,49,79,.035); }
+  .class-pill .dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px #e2f8ef; }
+  .modebar { display:flex; gap:5px; align-items:center; padding:4px; background:rgba(255,255,255,.09); width:max-content; max-width:100%; border:1px solid rgba(255,255,255,.12); border-radius:12px; margin:0; }
+  .mode-tab { border:0; border-radius:8px; background:transparent; color:#d2dced; font-size:12px; font-weight:850; padding:8px 12px; white-space:nowrap; transition:.18s ease; }
+  .mode-tab[aria-selected="true"] { background:#fff; color:var(--ink); box-shadow:0 3px 10px rgba(5,14,30,.16); }
+  .mode-tab .tab-icon { margin-right:5px; }
+  .progress-card { background:#fff; border:1px solid var(--line); border-radius:17px; padding:15px 19px; margin-bottom:18px; box-shadow:0 4px 17px rgba(29,49,79,.025); }
+  .progress-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:11px; }
+  .progress-title { font-size:13px; font-weight:900; }
+  .progress-count { font-size:12px; font-weight:800; color:var(--muted); }
+  .progress-track { width:100%; height:8px; border-radius:99px; background:#edf1f6; overflow:hidden; }
+  .progress-fill { height:100%; width:0%; background:linear-gradient(90deg, var(--teal), #63d0ae); border-radius:inherit; transition:width .35s ease; }
+  .world-steps { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; margin-top:13px; }
+  .world-step { display:flex; align-items:center; gap:7px; color:#9aa5b5; font-size:11px; line-height:1.2; font-weight:850; }
+  .world-number { width:23px; height:23px; border-radius:8px; display:grid; place-items:center; flex:none; background:#edf1f6; color:#8d9aab; }
+  .world-step.active { color:var(--ink); }
+  .world-step.active .world-number { color:#fff; background:var(--navy2); }
+  .world-step.done { color:var(--teal-dark); }
+  .world-step.done .world-number { background:#dff8ef; color:var(--teal-dark); }
+  .workspace { display:block; }
+  .mission-question { text-align:center; padding:14px 20px 15px; margin:0 0 14px; border-radius:18px; background:#fff; border:1px solid var(--line); box-shadow:0 5px 18px rgba(29,49,79,.035); }
+  .mission-question-count { display:inline-block; color:var(--teal-dark); background:#e6f8f3; border-radius:7px; padding:4px 8px; font-size:9px; letter-spacing:.1em; font-weight:950; text-transform:uppercase; }
+  .mission-question-title { margin:7px 0 3px; font-size:19px; line-height:1.15; letter-spacing:-.03em; }
+  .mission-question-prompt { margin:0; color:var(--muted); font-size:12px; }
+  .mission-equation { display:flex; align-items:center; justify-content:center; gap:16px; min-height:60px; max-width:500px; margin:10px auto 0; padding:9px 14px; border-radius:13px; background:#f7f9fc; border:1px solid #edf1f6; }
+  .mission-equation .frac { font-size:21px; }
+  .mission-equation .frac .num { padding-bottom:4px; }
+  .mission-equation .frac .den { padding-top:4px; }
+  .mission-equation .operator { font-size:24px; }
+  .mission-question .answer-mark { font-size:24px; }
+  .mission-models-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:18px; align-items:stretch; }
+  .mission-model-card { min-width:0; }
+  .mission-model-card .model-head { padding:19px 20px 15px; }
+  .mission-model-card .model-content { padding:16px 18px 19px; }
+  .mission-check-panel { margin-top:18px; padding:18px 22px 16px; }
+  .mission-check-head { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:12px; }
+  .mission-check-title { margin:0; font-size:17px; letter-spacing:-.02em; }
+  .mission-check-subtitle { margin:4px 0 0; color:var(--muted); font-size:12px; }
+  .check-task-count { flex:none; color:#7c889a; background:#f3f6fa; border:1px solid #e5ebf2; border-radius:9px; padding:7px 10px; font-size:11px; font-weight:900; }
+  .mission-check-panel .task-actions { margin-top:12px; }
+  .mission-check-panel .bottom-nav { margin-top:13px; padding-top:11px; }
+  .mission-check-panel .feedback { margin-top:12px; }
+  .panel { min-width:0; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .task-panel { padding:25px 26px 23px; position:relative; }
+  .task-panel::before { content:""; position:absolute; left:0; top:0; width:100%; height:5px; background:linear-gradient(90deg,var(--teal),#93dbb9); }
+  .task-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:20px; }
+  .stage-chip { background:#e6f8f3; color:#11796e; padding:7px 10px; border-radius:8px; text-transform:uppercase; letter-spacing:.075em; font-size:10px; font-weight:950; }
+  .task-num { color:#8a96a8; font-size:12px; font-weight:850; white-space:nowrap; }
+  .task-heading { font-size:25px; letter-spacing:-.035em; line-height:1.14; margin:0 0 9px; }
+  .task-instruction { color:var(--muted); font-size:14px; margin:0 0 18px; }
+  .equation-box { display:flex; align-items:center; justify-content:center; gap:19px; min-height:103px; background:#f7f9fc; border:1px solid #edf1f6; border-radius:17px; padding:15px; margin:0 0 21px; }
+  .frac { display:inline-flex; flex-direction:column; align-items:center; justify-content:center; vertical-align:middle; font-variant-numeric:tabular-nums; min-width:31px; line-height:1; font-size:22px; font-weight:850; }
+  .frac .num { padding:0 5px 5px; }
+  .frac .den { border-top:2px solid currentColor; padding:5px 5px 0; min-width:100%; text-align:center; }
+  .frac.large { font-size:29px; min-width:42px; }
+  .frac.large .num { padding-bottom:7px; }
+  .frac.large .den { padding-top:7px; border-top-width:2.5px; }
+  .mixed-number { display:inline-flex; align-items:center; justify-content:center; gap:5px; white-space:nowrap; }
+  .whole-number { display:inline-block; font-size:inherit; font-weight:900; line-height:1; }
+  .whole-number.whole-large { font-size:29px; }
+  .number-sign { display:inline-block; font-size:inherit; font-weight:900; margin-right:2px; }
+  .operator { font-size:29px; font-weight:850; color:#8793a5; line-height:1; }
+  .operator.op-add { color:var(--teal-dark); }
+  .operator.op-sub { color:#d58c35; }
+  .answer-mark { color:#9aa6b7; font-size:28px; font-weight:700; }
+  .answer-area { margin-bottom:17px; }
+  .field-label { display:block; font-size:12px; font-weight:900; color:#46536a; margin-bottom:9px; }
+  .answer-fields { display:flex; align-items:center; gap:10px; }
+  .answer-fraction-input { display:flex; flex-direction:column; align-items:center; gap:5px; width:76px; }
+  .answer-fraction-input input { width:76px; height:43px; border:1.5px solid #dce4ee; background:#fff; border-radius:10px; text-align:center; font-size:19px; font-weight:850; color:var(--ink); padding:4px; }
+  .input-rule { width:54px; height:2px; background:#738097; border-radius:3px; }
+  .answer-help { font-size:11px; color:#8490a2; margin-left:3px; }
+  .answer-instruction { background:#f4f8ff; border:1px solid #e2eafb; border-radius:12px; padding:12px 13px; color:#566682; font-size:12px; line-height:1.5; }
+  .result-pick-cell { border:0; padding:0; cursor:pointer; transition:background .12s, transform .12s, opacity .12s; }
+  .result-pick-cell.selected, .result-pick-cell.filled { background:var(--fill); }
+  .result-pick-cell:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 0 0 2px rgba(100,137,245,.17); }
+  .result-pick-cell:focus-visible { position:relative; z-index:2; outline:3px solid rgba(100,137,245,.55); outline-offset:1px; }
+  .result-pick-cell:disabled { cursor:not-allowed; opacity:.38; }
+  .partition-select { display:block; width:100%; max-width:100%; margin-top:5px; padding:4px 3px; border:1px solid #dce4ee; border-radius:7px; background:#fff; color:#526178; font-size:10px; font-weight:800; }
+  .partition-select:disabled { background:#f5f7fa; color:#8b96a6; }
+  .result-pick-sector { cursor:pointer; transition:fill .12s, opacity .12s; }
+  .result-pick-sector:hover:not(.not-possible) { filter:brightness(.94); stroke:#18243a; stroke-width:2.4; }
+  .result-pick-sector:focus { outline:none; filter:drop-shadow(0 0 2px rgba(100,137,245,.9)); }
+  .result-pick-sector.not-possible { pointer-events:none; opacity:.38; }
+  .result-pick-sector { cursor:pointer; }
+  .interactive-pie { overflow:visible; }
+  .primary-btn, .secondary-btn, .quiet-btn { border:0; border-radius:12px; font-weight:900; transition:transform .15s, box-shadow .15s, background .15s; }
+  .primary-btn { background:var(--navy); color:white; padding:13px 17px; box-shadow:0 5px 0 #0e192b; }
+  .primary-btn:hover { background:#263a5b; transform:translateY(-1px); box-shadow:0 6px 0 #0e192b; }
+  .primary-btn:active { transform:translateY(3px); box-shadow:0 2px 0 #0e192b; }
+  .primary-btn:disabled { cursor:not-allowed; opacity:.5; transform:none; box-shadow:none; }
+  .secondary-btn { background:#e6f8f3; color:#11796e; padding:11px 14px; }
+  .secondary-btn:hover { background:#d3f2e8; }
+  .quiet-btn { background:transparent; color:#6a7890; padding:9px 10px; }
+  .quiet-btn:hover { background:#f0f3f8; color:var(--ink); }
+  .task-actions { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .task-actions .primary-btn { flex:1; min-width:145px; }
+  .feedback { border-radius:13px; padding:12px 14px; margin-top:15px; font-size:13px; display:flex; align-items:flex-start; gap:9px; }
+  .feedback .feedback-icon { font-size:17px; line-height:1.2; }
+  .feedback.success { color:#147450; background:#e9fbf3; border:1px solid #c8f2df; }
+  .feedback.error { color:#9f4b3e; background:#fff3ed; border:1px solid #ffe0d3; }
+  .feedback.neutral { color:#5b6381; background:#f3f1ff; border:1px solid #e5e0ff; }
+  .explanation { background:#f7fafc; border-left:3px solid var(--teal); padding:12px 14px; border-radius:0 10px 10px 0; margin-top:12px; font-size:12px; color:#526178; }
+  .explanation strong { color:var(--ink); }
+  .hint-box { border:1px dashed #d6ddea; background:#fbfcfe; color:#58677f; border-radius:12px; font-size:12px; padding:12px 14px; margin-top:12px; }
+  .hint-box strong { display:block; color:#34435c; margin-bottom:3px; }
+  .bottom-nav { display:flex; align-items:center; justify-content:space-between; gap:8px; border-top:1px solid #edf1f6; margin-top:20px; padding-top:16px; }
+  .nav-btn { border:0; background:transparent; color:#607089; font-size:12px; font-weight:850; padding:8px 1px; }
+  .nav-btn:hover:not(:disabled) { color:var(--teal-dark); }
+  .nav-btn:disabled { opacity:.32; cursor:not-allowed; }
+  .model-panel { padding:0; display:flex; flex-direction:column; }
+  .model-head { padding:23px 24px 17px; border-bottom:1px solid #edf1f6; }
+  .model-headline { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .model-title { font-size:18px; font-weight:900; letter-spacing:-.025em; margin:0; }
+  .model-subtitle { color:var(--muted); font-size:12px; margin:5px 0 0; }
+  .model-spark { width:40px; height:40px; border-radius:13px; background:#fff4e4; display:grid; place-items:center; flex:none; font-size:21px; }
+  .model-tabs { display:flex; gap:6px; background:#f0f3f8; border-radius:10px; padding:4px; margin-top:17px; width:max-content; }
+  .model-tab { border:0; border-radius:7px; padding:8px 12px; background:transparent; color:#7c889a; font-size:11px; font-weight:900; }
+  .model-tab[aria-pressed="true"] { background:#fff; color:var(--ink); box-shadow:0 2px 6px rgba(29,49,79,.08); }
+  .model-content { padding:19px 24px 23px; flex:1; }
+  .model-expression { display:flex; align-items:center; justify-content:center; gap:12px; background:#f7f9fc; border-radius:13px; padding:12px; margin-bottom:18px; color:var(--ink); }
+  .model-expression .frac { font-size:18px; }
+  .model-expression .frac .num { padding-bottom:4px; }
+  .model-expression .frac .den { padding-top:4px; border-top-width:1.5px; }
+  .model-expression .operator { font-size:21px; }
+  .model-rows { display:flex; flex-direction:column; gap:17px; }
+  .model-row { display:grid; grid-template-columns:94px minmax(0,1fr); gap:12px; align-items:center; }
+  .row-label { font-size:12px; color:#5e6b80; font-weight:850; }
+  .row-label strong { display:block; color:var(--ink); font-size:13px; margin-bottom:3px; }
+  .row-label small { font-size:10px; color:#8793a5; font-weight:750; }
+  .strip-units { display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .strip-unit { display:grid; gap:2px; height:29px; width:100%; max-width:100%; padding:2px; border:1px solid #dfe6ef; border-radius:7px; background:#fff; overflow:hidden; }
+  .strip-cell { min-width:0; border-radius:2px; background:#edf1f6; }
+  .strip-cell.filled { background:var(--fill); }
+  .strip-cell.result-outline { background:repeating-linear-gradient(135deg,#f0f3f8,#f0f3f8 4px,#e1e7f0 4px,#e1e7f0 8px); }
+  .whole-caption { font-size:9px; color:#9aa5b5; text-align:right; margin-top:1px; }
+  .pie-units { display:flex; align-items:center; gap:9px; flex-wrap:wrap; min-height:72px; }
+  .result-pie-units { align-items:flex-start; gap:10px; }
+  .result-pie-unit { display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .pie-svg { width:68px; height:68px; overflow:visible; flex:none; }
+  .pie-placeholder { width:68px; height:68px; border:2px dashed #d9e0e9; border-radius:50%; display:grid; place-items:center; color:#9ba6b6; font-size:23px; font-weight:800; flex:none; }
+  .model-divider { border:0; border-top:1px dashed #e0e6ef; margin:0; }
+  .model-note { display:flex; gap:10px; align-items:flex-start; background:#f4f8ff; color:#566682; border:1px solid #e2eafb; border-radius:12px; margin-top:19px; padding:11px 13px; font-size:11px; }
+  .model-note .note-icon { color:var(--blue); font-size:16px; }
+  .legend { display:flex; align-items:center; gap:13px; flex-wrap:wrap; color:#8995a6; font-size:10px; font-weight:800; margin-top:17px; }
+  .legend-item { display:flex; align-items:center; gap:5px; }
+  .legend-dot { width:8px; height:8px; border-radius:3px; display:inline-block; }
+  .memory-card { display:grid; grid-template-columns:52px 1fr; gap:15px; align-items:start; margin-top:18px; padding:19px 22px; background:#fff; border:1px solid var(--line); border-radius:18px; }
+  .memory-icon { width:48px; height:48px; border-radius:15px; display:grid; place-items:center; background:#eff2ff; font-size:23px; }
+  .memory-title { font-weight:950; font-size:13px; margin:0 0 5px; }
+  .memory-text { margin:0; color:#63718a; font-size:12px; }
+  .memory-text b { color:#34435c; }
+  .memory-formula { display:inline-flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:8px; padding:7px 10px; border-radius:9px; background:#f6f8fc; color:#4e5c74; font-size:11px; font-weight:850; }
+  .memory-formula .arrow { color:var(--teal-dark); font-size:15px; }
+  .hidden { display:none !important; }
+  /* Lab */
+  .lab-intro { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin:4px 0 19px; }
+  .lab-intro h2 { margin:0; font-size:25px; letter-spacing:-.035em; }
+  .lab-intro p { margin:7px 0 0; color:var(--muted); font-size:13px; max-width:670px; }
+  .lab-grid { display:grid; grid-template-columns:minmax(280px,.9fr) minmax(380px,1.1fr); gap:18px; align-items:stretch; }
+  .builder-panel { padding:22px; }
+  .builder-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:15px; }
+  .builder-heading h3 { font-size:16px; margin:0; letter-spacing:-.02em; }
+  .builder-heading span { font-size:10px; font-weight:900; color:#8b97a8; text-transform:uppercase; letter-spacing:.1em; }
+  .fraction-builder { border:1px solid #e4eaf2; border-radius:15px; padding:15px; margin-bottom:11px; background:#fcfdff; }
+  .builder-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .builder-name { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:900; }
+  .builder-name .legend-dot { width:10px; height:10px; }
+  .select-wrap { position:relative; }
+  .select-wrap select { background:#fff; border:1px solid #dce4ee; border-radius:9px; padding:7px 27px 7px 9px; color:#3f4d64; font-size:12px; font-weight:800; }
+  .builder-fracline { display:flex; align-items:center; gap:12px; margin:12px 0 9px; }
+  .builder-number { display:flex; align-items:center; gap:7px; min-width:0; }
+  .builder-number .builder-whole { min-width:20px; text-align:center; }
+  .builder-whole { font-size:30px; font-weight:950; color:var(--ink); line-height:1; }
+  .builder-controls { display:flex; flex-direction:column; gap:6px; margin-left:auto; }
+  .builder-control { display:flex; align-items:center; gap:6px; justify-content:flex-end; }
+  .builder-control-label { color:#8793a5; font-size:10px; font-weight:800; min-width:43px; text-align:right; }
+  .adjust-value { display:inline-grid; place-items:center; min-width:20px; color:#35445c; font-size:12px; font-weight:950; font-variant-numeric:tabular-nums; }
+  .builder-control .small-adjust { gap:4px; }
+  .builder-control .adjust-btn { width:26px; height:27px; font-size:16px; }
+  .builder-control .adjust-btn:disabled { opacity:.35; cursor:not-allowed; background:#f3f5f8; }
+  .builder-bigfrac { font-size:30px; font-weight:900; min-width:59px; display:flex; flex-direction:column; align-items:center; line-height:1; }
+  .builder-bigfrac .num { padding:0 7px 5px; }
+  .builder-bigfrac .den { border-top:2px solid currentColor; padding:5px 7px 0; min-width:100%; text-align:center; }
+  .small-adjust { display:flex; align-items:center; gap:7px; }
+  .adjust-btn { width:31px; height:31px; border:1px solid #dce4ee; border-radius:9px; background:#fff; color:#4a5a73; font-size:18px; font-weight:750; display:grid; place-items:center; }
+  .adjust-btn:hover { background:#eef5ff; }
+  .adjust-hint { color:#97a2b2; font-size:10px; }
+  .fraction-builder .builder-top { margin-bottom:2px; }
+  .builder-denominator-hint { color:#9aa5b5; font-size:10px; margin:0 0 4px 1px; }
+  .clickable-cells { display:grid; gap:3px; width:100%; margin-top:9px; }
+  .pick-cell { border:0; min-width:0; height:20px; border-radius:4px; background:#e9eef5; padding:0; transition:background .12s, transform .12s; }
+  .pick-cell[aria-pressed="true"] { background:var(--fill); }
+  .pick-cell:hover { transform:translateY(-2px); }
+  .cell-instruction { color:#8b97a8; font-size:10px; margin-top:6px; }
+  .operation-choice { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:14px 0; }
+  .operation-btn { padding:11px; border:1.5px solid #e1e7ef; border-radius:12px; background:#fff; color:#738096; font-size:17px; font-weight:950; }
+  .operation-btn[aria-pressed="true"][data-op="+"] { border-color:#9ce1d1; background:#e8faf5; color:#0c8678; }
+  .operation-btn[aria-pressed="true"][data-op="-"] { border-color:#f3d2a5; background:#fff5e8; color:#bf7b24; }
+  .builder-footer { color:#8a96a7; font-size:11px; margin:12px 0 16px; }
+  .builder-footer b { color:#53627a; }
+  .model-panel.lab-model .model-content { padding-bottom:23px; }
+  .lab-model .model-note { margin-top:16px; }
+  .lab-result { padding:14px; border-radius:13px; background:#f1f8ff; border:1px solid #e0eafb; margin-top:15px; }
+  .lab-result-top { display:flex; align-items:center; justify-content:space-between; gap:9px; }
+  .lab-result-title { font-size:11px; font-weight:900; color:#64728a; }
+  .lab-answer { font-size:25px; font-weight:950; letter-spacing:-.03em; display:flex; align-items:center; gap:13px; margin-top:8px; }
+  .lab-answer .equals { color:#94a0b0; }
+  .lab-answer .frac { font-size:25px; }
+  .lab-result small { display:block; margin-top:8px; color:#718099; font-size:11px; }
+  .lab-result .primary-btn { padding:10px 13px; font-size:12px; box-shadow:0 3px 0 #0e192b; }
+  .lab-reset { border:0; background:transparent; color:#8190a4; font-size:11px; font-weight:850; }
+  .lab-reset:hover { color:var(--ink); }
+  .finale { text-align:center; padding:22px 8px 8px; }
+  .finale-medal { font-size:54px; margin-bottom:12px; filter:drop-shadow(0 8px 8px rgba(242,163,74,.16)); }
+  .finale h2 { margin:0; font-size:28px; letter-spacing:-.04em; }
+  .finale p { color:var(--muted); font-size:14px; max-width:370px; margin:11px auto 20px; }
+  .finale-stats { display:flex; justify-content:center; gap:10px; margin:0 auto 22px; flex-wrap:wrap; }
+  .stat-chip { border:1px solid #e3e9f1; background:#f8fafc; border-radius:12px; padding:10px 13px; font-size:12px; color:#718096; }
+  .stat-chip strong { display:block; color:var(--ink); font-size:18px; }
+  .footer-note { text-align:center; margin-top:27px; color:#9aa5b5; font-size:10px; }
+  @media (max-width:900px) {
+    .workspace, .mission-models-grid, .lab-grid { grid-template-columns:1fr; }
+    .model-panel { min-height:400px; }
+    .intro { align-items:flex-start; flex-direction:column; }
+    .class-pill { align-self:flex-start; }
+    .topbar-inner { align-items:flex-start; }
+  }
+  @media (max-width:540px) {
+    .topbar-inner { padding:13px 14px 10px; align-items:flex-start; flex-direction:column; gap:10px; }
+    .topbar-right { align-items:flex-start; width:100%; gap:6px; }
+    .top-note { display:block; text-align:left; font-size:9px; }
+    .topbar-progress-inner { padding:8px 14px 10px; }
+    .topbar-progress-main { grid-template-columns:1fr auto; gap:6px 10px; }
+    .top-progress-count { font-size:10px; }
+    .top-progress-track { grid-column:1 / -1; grid-row:2; }
+    .page { padding:14px 13px 30px; }
+    .intro { margin:0 0 11px; }
+    .brand { font-size:18px; }
+    .brand-mark { width:37px; height:37px; }
+    .modebar { width:auto; }
+    .mode-tab { flex:initial; padding:8px 11px; font-size:11px; }
+    .mission-question { padding:12px 12px 13px; margin-bottom:11px; }
+    .mission-question-title { font-size:17px; }
+    .mission-equation { gap:11px; min-height:55px; }
+    .mission-question .frac { font-size:19px; }
+    .task-panel { padding:22px 17px 18px; }
+    .mission-check-panel { padding:17px 15px 14px; }
+    .mission-check-head { align-items:flex-start; flex-direction:column; gap:7px; }
+    .model-head { padding:20px 17px 15px; }
+    .model-content { padding:17px 15px 20px; }
+    .equation-box { gap:12px; }
+    .model-row { grid-template-columns:78px minmax(0,1fr); gap:8px; }
+    .strip-unit { height:25px; }
+    .memory-card { grid-template-columns:42px 1fr; padding:16px; gap:11px; }
+    .memory-icon { width:40px; height:40px; }
+    .lab-intro { flex-direction:column; align-items:flex-start; }
+    .mission-check-panel .task-actions .primary-btn { min-width:0; padding:12px 8px; font-size:13px; }
+    .mission-check-panel .task-actions .secondary-btn { padding:11px 8px; font-size:12px; white-space:nowrap; }
+    .builder-panel { padding:17px; }
+    .pie-svg, .pie-placeholder { width:58px; height:58px; }
+    .pie-units { gap:7px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; } }
+  @media print {
+    body { background:#fff; }
+    .topbar { background:#fff; color:#111; border-bottom:2px solid #111; }
+    .top-note, .modebar, .topbar-progress-wrap, .task-actions, .bottom-nav, .model-tabs, .footer-note, .class-pill, .lab-reset { display:none !important; }
+    .page { max-width:none; padding:12px; }
+    .panel,.progress-card,.memory-card { box-shadow:none; break-inside:avoid; }
+    .workspace,.lab-grid { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="24" height="24" rx="6" stroke="#1ba99b" stroke-width="2"/><path d="M7 14h18M7 18h18M14 7v18M18 7v18" stroke="#1ba99b" stroke-width="1.6" opacity=".85"/><path d="M6 7h7v6H6z" fill="#f2a34a"/><path d="M19 19h7v6h-7z" fill="#6489f5"/></svg>
+      </span>
+      <span>Bruchwerkstatt</span>
+    </div>
+    <div class="topbar-right">
+      <div class="top-note">MATHE · KLASSE 6 · ENTDECKEN & ÜBEN</div>
+      <nav class="modebar" aria-label="Arbeitsmodus">
+        <button class="mode-tab" data-mode="mission" aria-selected="true"><span class="tab-icon">🚀</span>Missionen</button>
+        <button class="mode-tab" data-mode="lab" aria-selected="false"><span class="tab-icon">🎨</span>Freies Labor</button>
+      </nav>
+    </div>
+  </div>
+  <div class="topbar-progress-wrap">
+    <div class="topbar-progress-inner">
+      <div class="topbar-progress-main">
+        <div class="top-progress-count" id="progressCount">0 von 15 Aufgaben gelöst</div>
+        <div class="top-progress-track" role="progressbar" aria-label="Aufgabenfortschritt" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0" id="progressBar"><div class="top-progress-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+<main class="page">
+  <section class="intro" aria-labelledby="mainTitle">
+    <div>
+      <h1 id="mainTitle">Brüche? Stück für Stück! <span aria-hidden="true">🧩</span></h1>
+    </div>
+  </section>
+
+  <section id="missionView" aria-label="Aufgabenmissionen">
+    <section class="mission-question" id="missionQuestion" aria-live="polite" aria-label="Aktuelle Aufgabe"></section>
+    <div class="mission-models-grid" aria-label="Das in diesem Level verwendete Bruchmodell">
+      <section class="panel model-panel mission-model-card" id="missionStripCard" aria-label="Streifenmodell">
+        <div class="model-head">
+          <div class="model-headline">
+            <div><h2 class="model-title">▤ Streifenmodell</h2><p class="model-subtitle">Vergleiche die Stücke der beiden Brüche.</p></div>
+            <div class="model-spark" aria-hidden="true">▰</div>
+          </div>
+        </div>
+        <div class="model-content" id="missionStripModel"></div>
+      </section>
+      <section class="panel model-panel mission-model-card hidden" id="missionPieCard" aria-label="Kreismodell">
+        <div class="model-head">
+          <div class="model-headline">
+            <div><h2 class="model-title">◉ Kreismodell</h2><p class="model-subtitle">Dieselbe Rechnung als Kreise.</p></div>
+            <div class="model-spark" aria-hidden="true">🥧</div>
+          </div>
+        </div>
+        <div class="model-content" id="missionPieModel"></div>
+      </section>
+    </div>
+
+    <section class="panel mission-check-panel" id="taskPanel" aria-live="polite"></section>
+
+    <section class="memory-card" id="memoryCard">
+      <div class="memory-icon" aria-hidden="true">💡</div>
+      <div>
+        <h3 class="memory-title" id="memoryTitle">Merke: gleichnamige Brüche</h3>
+        <p class="memory-text" id="memoryText">Sind die Nenner gleich, sind alle Stücke gleich groß. Du zählst die Zähler zusammen oder ziehst sie voneinander ab. Der Nenner bleibt gleich.</p>
+        <div class="memory-formula" id="memoryFormula"><span>2/7</span><span>+</span><span>3/7</span><span class="arrow">→</span><span>5/7</span></div>
+      </div>
+    </section>
+  </section>
+
+  <section id="labView" class="hidden" aria-label="Freies Bruchlabor">
+    <div class="lab-intro">
+      <div>
+        <div class="eyebrow">Probieren ohne Punktedruck</div>
+        <h2>Dein Bruch-Labor 🎨</h2>
+        <p>Wähle die Brüche aus, indem du Teile antippst. Wechsle zwischen Plus und Minus und schau dir an, was passiert. Tipp: Überlege erst selbst, wie das Ergebnis aussehen müsste.</p>
+      </div>
+      <button class="lab-reset" data-action="reset-lab">↺ Zurücksetzen</button>
+    </div>
+    <div class="lab-grid">
+      <section class="panel builder-panel">
+        <div class="builder-heading"><h3>1. Stelle deine Brüche ein</h3><span>Antippen & färben</span></div>
+        <div id="fractionBuilders"></div>
+        <div class="operation-choice" role="group" aria-label="Rechenart auswählen">
+          <button class="operation-btn" data-action="lab-op" data-op="+" aria-pressed="true">＋ Addieren</button>
+          <button class="operation-btn" data-action="lab-op" data-op="-" aria-pressed="false">− Subtrahieren</button>
+        </div>
+        <div class="builder-footer"><b>So geht’s:</b> Stelle Zähler, Nenner und ganze Einheiten mit −/+ ein oder tippe direkt die Stücke an. Danach wählst du Plus oder Minus.</div>
+        <button class="primary-btn" style="width:100%" data-action="toggle-lab-result" id="labRevealBtn">Ergebnis anzeigen ✨</button>
+        <div id="labResultBox" class="lab-result hidden" aria-live="polite"></div>
+      </section>
+      <section class="panel model-panel lab-model" aria-label="Live-Bruchmodell">
+        <div class="model-head">
+          <div class="model-headline">
+            <div><h2 class="model-title">Deine Rechnung in Bildern</h2><p class="model-subtitle">Die Teile werden bei jeder Änderung neu sortiert.</p></div>
+            <div class="model-spark" aria-hidden="true">🪄</div>
+          </div>
+          <div class="model-tabs" role="group" aria-label="Darstellung auswählen">
+            <button class="model-tab" data-model="strips" aria-pressed="true">▤ Streifenmodell</button>
+            <button class="model-tab" data-model="pies" aria-pressed="false">◉ Kreismodell</button>
+          </div>
+        </div>
+        <div class="model-content" id="labModel"></div>
+      </section>
+    </div>
+    <section class="memory-card">
+      <div class="memory-icon" aria-hidden="true">🧩</div>
+      <div><h3 class="memory-title">Forscherfrage</h3><p class="memory-text">Was musst du tun, wenn die Nenner verschieden sind? Finde eine Einteilung, bei der beide Brüche aus gleich großen Stücken bestehen. Diese Stücke heißen <b>gemeinsame Nennerstücke</b>.</p></div>
+    </section>
+  </section>
+  <div class="footer-note">Tipp für den Unterricht: Die Anwendung funktioniert offline, sobald diese HTML-Datei gespeichert ist. Fortschritte werden nicht übertragen.</div>
+</main>
+<script>
+(() => {
+  'use strict';
+  const tasks = [
+    // Level 1: Streifenmodell — gleichnamige Brüche, gemischte Zahlen schon früh.
+    {id:1, world:0, title:'Gleich große Stücke', aN:1,aD:4,op:'+',bN:2,bD:4, hint:'Beide Brüche sind in Viertel eingeteilt. Zähle die Viertel zusammen.', prompt:'Addiere die Viertel.'},
+    {id:2, world:0, title:'Mehr als ein Ganzes', aN:3,aD:5,op:'+',bN:4,bD:5, mixed:true, hint:'Fünf Fünftel ergeben ein Ganzes. Was bleibt von sieben Fünfteln übrig?', prompt:'Schreibe das Ergebnis als gemischte Zahl.'},
+    {id:3, world:0, title:'Ein Ganzes und ein Viertel', aWhole:1,aN:1,aD:4,op:'+',bN:2,bD:4, hint:'Zähle zuerst die ganzen Einheiten und dann die Viertel zusammen.', prompt:'Rechne 1 1/4 + 2/4.'},
+
+    // Level 2: Kreismodell — ganze Einheiten und Ausleihen.
+    {id:4, world:1, title:'Das nächste Ganze erreichen', aWhole:1,aN:2,aD:3,op:'+',bN:1,bD:3, hint:'Drei Drittel ergeben ein Ganzes. Wie viele Ganze sind es zusammen?', prompt:'Rechne 1 2/3 + 1/3.'},
+    {id:5, world:1, title:'Ausleihen beim Subtrahieren', aWhole:2,aN:1,aD:4,op:'-',bN:3,bD:4, hint:'Zerlege eines der beiden Ganzen in vier Viertel. Dann kannst du drei Viertel wegnehmen.', prompt:'Rechne 2 1/4 − 3/4.'},
+    {id:6, world:1, title:'Gemischt und ungleichnamig', aWhole:1,aN:1,aD:2,op:'+',bN:3,bD:4, hint:'Stelle die Hälfte als zwei Viertel dar. Addiere danach die Bruchteile und das Ganze.', prompt:'Rechne 1 1/2 + 3/4.'},
+
+    // Level 3: Streifenmodell — gemeinsame Nenner, weiter mit gemischten Zahlen.
+    {id:7, world:2, title:'Halbe plus Viertel', aN:1,aD:2,op:'+',bN:1,bD:4, hint:'Teile die Hälfte gedanklich in zwei Viertel. Welche Stückgröße passt zu beiden Brüchen?', prompt:'Finde gemeinsame Stücke und addiere.'},
+    {id:8, world:2, title:'Ein Ganzes und Sechstel', aWhole:1,aN:1,aD:3,op:'+',bN:1,bD:6, hint:'Ein Drittel entspricht zwei Sechsteln. Danach kannst du die Sechstel zusammenzählen.', prompt:'Rechne 1 1/3 + 1/6.'},
+    {id:9, world:2, title:'Drittel und Viertel', aN:2,aD:3,op:'+',bN:1,bD:4, hint:'Zwölf gleiche Stücke passen sowohl zu Dritteln als auch zu Vierteln.', prompt:'Finde einen gemeinsamen Nenner.'},
+
+    // Level 4: Kreismodell — mehrere gemischte Zahlen.
+    {id:10, world:3, title:'Zwei gemischte Zahlen addieren', aWhole:1,aN:3,aD:4,op:'+',bWhole:1,bN:2,bD:3, hint:'Addiere zuerst die ganzen Einheiten. Für die Viertel und Drittel brauchst du einen gemeinsamen Nenner.', prompt:'Rechne 1 3/4 + 1 2/3.'},
+    {id:11, world:3, title:'Gemischte Zahlen subtrahieren', aWhole:3,aN:1,aD:5,op:'-',bWhole:1,bN:3,bD:10, hint:'Schreibe beide Zahlen in Zehntel um. Achte darauf, dass 1/5 zwei Zehntel sind.', prompt:'Rechne 3 1/5 − 1 3/10.'},
+    {id:12, world:3, title:'Ein Ganzes bleibt übrig', aWhole:2,aN:1,aD:6,op:'-',bN:3,bD:4, hint:'Finde den gemeinsamen Nenner 12. Danach ziehst du 9 Zwölftel von 26 Zwölfteln ab.', prompt:'Rechne 2 1/6 − 3/4.'},
+
+    // Level 5: Streifenmodell — Transfer und Knobelaufgaben.
+    {id:13, world:4, title:'Der Spaziergang', aWhole:1,aN:1,aD:2,op:'+',bN:2,bD:3, hint:'Mia läuft zuerst 1 1/2 km und danach 2/3 km. Wandle die Hälften in Sechstel um.', prompt:'Wie weit läuft Mia insgesamt? Gib das Ergebnis als gemischte Zahl an.'},
+    {id:14, world:4, title:'Bleibt genug übrig?', aWhole:3,aN:1,aD:2,op:'-',bWhole:1,bN:3,bD:4, hint:'Wandle 1/2 in Viertel um. Schreibe dann beide gemischten Zahlen mit Vierteln und Ganzen.', prompt:'Rechne 3 1/2 − 1 3/4.'},
+    {id:15, world:4, title:'Die Bruch-Profi-Challenge', aWhole:2,aN:1,aD:3,op:'+',bWhole:1,bN:1,bD:6, hint:'Ein Drittel entspricht zwei Sechsteln. Rechne die ganzen Einheiten und die Sechstel zusammen.', prompt:'Rechne 2 1/3 + 1 1/6.'}
+  ];
+  const worlds = [
+    {name:'Brüche starten', short:'Gleichnamig', start:1, end:3, memoryTitle:'Merke: gleichnamige Brüche', memoryText:'Sind die Nenner gleich, sind alle Stücke gleich groß. Addiere oder subtrahiere die Zähler; der Nenner bleibt gleich. Fünf Fünftel ergeben ein Ganzes.', formula:'<span>3/5</span><span>+</span><span>4/5</span><span class="arrow">→</span><span>7/5 = 1 2/5</span>'},
+    {name:'Ganze und Bruchteile', short:'Ganze nutzen', start:4, end:6, memoryTitle:'Merke: gemischte Zahlen', memoryText:'Eine gemischte Zahl besteht aus ganzen Einheiten und einem Bruchteil. Beim Subtrahieren kannst du ein Ganzes in gleich große Bruchteile zerlegen, wenn du mehr Bruchteile wegnehmen musst, als du gerade hast.', formula:'<span>2 1/4</span><span>→</span><span>1 + 5/4</span>'},
+    {name:'Gemeinsame Nenner', short:'Nenner finden', start:7, end:9, memoryTitle:'Merke: unterschiedliche Nenner', memoryText:'Bei unterschiedlichen Nennern suchst du gleich große Stücke. Ein gemeinsamer Nenner hilft dir, beide Brüche fair zu vergleichen und anschließend zu addieren oder zu subtrahieren.', formula:'<span>1/2</span><span>+</span><span>1/4</span><span class="arrow">→</span><span>2/4 + 1/4</span>'},
+    {name:'Gemischte Zahlen', short:'Gemischt rechnen', start:10, end:12, memoryTitle:'Merke: gemischte Zahlen verrechnen', memoryText:'Du kannst gemischte Zahlen als unechte Brüche schreiben. Erweitere auf einen gemeinsamen Nenner, rechne die Zähler und wandle das Ergebnis bei Bedarf zurück in eine gemischte Zahl.', formula:'<span>1 3/4</span><span>+</span><span>1 2/3</span><span class="arrow">→</span><span>3 5/12</span>'},
+    {name:'Anwenden und knobeln', short:'Profi-Runde', start:13, end:15, memoryTitle:'Merke: Rechenplan', memoryText:'1. Ganze und Bruchteile erkennen. 2. Gemeinsame Stücke finden. 3. Addieren oder subtrahieren. 4. Das Ergebnis als gemischte Zahl schreiben und wenn möglich kürzen.', formula:'<span>erst angleichen</span><span class="arrow">→</span><span>dann rechnen</span>'}
+  ];
+  const colors = {a:'#1ba99b', b:'#f2a34a', result:'#6489f5'};
+  const state = {
+    mode:'mission', index:0, model:'strips', solved:new Set(), attempts:{}, answers:{}, partitions:{}, hints:new Set(), feedback:{},
+    lab:{aWhole:0,aN:1,aD:2,bWhole:0,bN:1,bD:4,op:'+',show:false}
+  };
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const gcd = (a,b) => { a=Math.abs(a); b=Math.abs(b); while(b){const t=b;b=a%b;a=t;} return a||1; };
+  const lcm = (a,b) => Math.abs(a*b)/gcd(a,b);
+  const reduced = (n,d) => { if (!d) return {n:0,d:1}; const g=gcd(n,d); return {n:n/g,d:d/g}; };
+  const fractionNumerator = (x, which) => (Number(x[which+'Whole'] || 0) * x[which+'D']) + x[which+'N'];
+  const resultFor = (x) => { const den=lcm(x.aD,x.bD); const an=fractionNumerator(x,'a')*(den/x.aD), bn=fractionNumerator(x,'b')*(den/x.bD); return {n:x.op==='+'?an+bn:an-bn,d:den,an,bn,den}; };
+  const isMixedTask = (x) => Boolean((x.aWhole||0) || (x.bWhole||0) || x.mixed || (x.world>=1));
+  const fracHTML = (n,d,cls='') => `<span class="frac ${cls}" aria-label="${n} geteilt durch ${d}"><span class="num">${n}</span><span class="den">${d}</span></span>`;
+  function operandPlainText(x, which) {
+    const whole=Number(x[which+'Whole']||0), n=x[which+'N'], d=x[which+'D'];
+    if(whole && n) return `${whole} ${n}/${d}`;
+    if(whole) return String(whole);
+    return `${n}/${d}`;
+  }
+  function operandHTML(x, which, cls='') {
+    const whole=Number(x[which+'Whole']||0), n=x[which+'N'], d=x[which+'D'];
+    if(whole && n) return `<span class="mixed-number"><span class="whole-number ${cls==='large'?'whole-large':''}">${whole}</span>${fracHTML(n,d,cls)}</span>`;
+    if(whole) return `<span class="whole-number ${cls==='large'?'whole-large':''}">${whole}</span>`;
+    return fracHTML(n,d,cls);
+  }
+  function mixedPlainText(n,d) {
+    if(n<0) return `−${mixedPlainText(-n,d)}`;
+    if(n<d) return formatFraction(n,d);
+    const whole=Math.floor(n/d), rem=n%d;
+    if(rem===0) return String(whole);
+    return `${whole} ${formatFraction(rem,d)}`;
+  }
+  function numberHTML(n,d,mixed=false,cls='') {
+    const negative=n<0; n=Math.abs(n);
+    if(mixed && n>=d) {
+      const whole=Math.floor(n/d), rem=n%d;
+      if(rem===0) return `<span class="whole-number ${cls==='large'?'whole-large':''}">${negative?'−':''}${whole}</span>`;
+      const remainder=reduced(rem,d);
+      return `<span class="mixed-number">${negative?'<span class="whole-number">−</span>':''}<span class="whole-number ${cls==='large'?'whole-large':''}">${whole}</span>${fracHTML(remainder.n,remainder.d,cls)}</span>`;
+    }
+    const remainder=reduced(n,d);
+    return `${negative?'<span class="number-sign">−</span>':''}${fracHTML(remainder.n,remainder.d,cls)}`;
+  }
+  function resultPlainText(t, r) {
+    const plain=isMixedTask(t)?mixedPlainText(r.n,r.d):formatFraction(r.n,r.d);
+    const improper=formatFraction(r.n,r.d);
+    return isMixedTask(t) && plain!==improper ? `${plain} (= ${improper})` : plain;
+  }
+  const opHTML = (op) => `<span class="operator ${op==='+'?'op-add':'op-sub'}" aria-label="${op==='+'?'plus':'minus'}">${op==='+'?'+':'−'}</span>`;
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const currentTask = () => tasks[state.index];
+  const currentWorld = () => worlds[Math.min(worlds.length-1, Math.floor(state.index/3))];
+  const modelTypeForTask = (t) => t.world % 2 === 0 ? 'strips' : 'pies';
+  const modelNameForTask = (t) => modelTypeForTask(t)==='strips' ? 'Streifenmodell' : 'Kreismodell';
+  const maxModelDenominator = 24;
+  function taskPartitions(t) {
+    if (!state.partitions[t.id]) state.partitions[t.id] = {a:t.aD, b:t.bD, result:resultFor(t).d};
+    // Upgrade any in-memory states created by an earlier layout version.
+    if (!Number.isInteger(state.partitions[t.id].result)) state.partitions[t.id].result = resultFor(t).d;
+    return state.partitions[t.id];
+  }
+  function partitionOptionsHTML(which, originalDenominator, selectedDenominator, disabled=false) {
+    const options=[];
+    if(which==='result') {
+      for(let d=1; d<=maxModelDenominator; d++) options.push(`<option value="${d}" ${d===selectedDenominator?'selected':''}>${d} Teil${d===1?'':'e'}</option>`);
+    } else {
+      for(let d=originalDenominator; d<=maxModelDenominator; d+=originalDenominator) {
+        options.push(`<option value="${d}" ${d===selectedDenominator?'selected':''}>${d} Teile</option>`);
+      }
+    }
+    const label=which==='a'?'für den ersten Bruch':which==='b'?'für den zweiten Bruch':'für das Ergebnis';
+    return `<select class="partition-select" data-partition="${which}" aria-label="Einteilung ${label}" ${disabled?'disabled':''}>${options.join('')}</select>`;
+  }
+  function changePartition(which, value) {
+    const t=currentTask(); if(!t || state.solved.has(t.id)) return;
+    const denominator=Number(value);
+    if(!Number.isInteger(denominator) || denominator<1 || denominator>maxModelDenominator) return;
+    const parts=taskPartitions(t);
+    if(which==='a' || which==='b') {
+      const original=which==='a'?t.aD:t.bD;
+      if(denominator<original || denominator%original!==0) return;
+    }
+    if(parts[which]===denominator) return;
+    parts[which]=denominator;
+    // Only changing the result's own partition invalidates the selected result.
+    // Changing either source partition must not control or erase the answer partition.
+    if(which==='result') delete state.answers[t.id];
+    delete state.feedback[t.id];
+    renderMissionTask();
+    renderMissionModel();
+  }
+
+  function renderProgress() {
+    const count=state.solved.size;
+    $('#progressCount').textContent=`${count} von ${tasks.length} Aufgaben gelöst`;
+    $('#progressFill').style.width=`${100*count/tasks.length}%`;
+    $('#progressBar').setAttribute('aria-valuenow',String(count));
+    $('#progressBar').setAttribute('aria-valuemax',String(tasks.length));
+  }
+  function memoryUpdate() {
+    const w=currentWorld();
+    $('#memoryTitle').textContent=w.memoryTitle;
+    $('#memoryText').textContent=w.memoryText;
+    $('#memoryFormula').innerHTML=w.formula;
+  }
+  function renderMissionQuestion() {
+    const host=$('#missionQuestion');
+    if(state.index>=tasks.length) { host.classList.add('hidden'); host.innerHTML=''; return; }
+    host.classList.remove('hidden');
+    const t=currentTask(), solved=state.solved.has(t.id), r=resultFor(t);
+    const equation=`${operandHTML(t,'a','large')}${opHTML(t.op)}${operandHTML(t,'b','large')}<span class="operator">=</span>${solved?numberHTML(r.n,r.d,isMixedTask(t),'large'):'<span class="answer-mark">?</span>'}`;
+    host.innerHTML=`<div class="mission-question-count">Aufgabe ${state.index+1} von ${tasks.length}</div><h2 class="mission-question-title">${esc(t.title)}</h2><p class="mission-question-prompt">${esc(t.prompt||'Berechne das Ergebnis und stelle es im Modell dar.')}</p><div class="mission-equation" aria-label="${esc(operandPlainText(t,'a'))} ${t.op==='+'?'plus':'minus'} ${esc(operandPlainText(t,'b'))} gleich ${solved?esc(resultPlainText(t,r)):'unbekannt'}">${equation}</div>`;
+  }
+  function renderMissionTask() {
+    const host=$('#taskPanel');
+    if (state.index >= tasks.length) {
+      host.innerHTML=`<div class="finale"><div class="finale-medal" aria-hidden="true">🏆</div><h2>Bruch-Profi freigeschaltet!</h2><p>Du hast alle 15 Aufgaben in fünf Levels geschafft. Du hast früh mit gemischten Zahlen gerechnet und deine Kenntnisse bis zu kniffligen Sachaufgaben erweitert. Beide Bruchmodelle findest du weiterhin im freien Labor.</p><div class="finale-stats"><div class="stat-chip"><strong>${state.solved.size}/${tasks.length}</strong>Aufgaben gelöst</div><div class="stat-chip"><strong>${Object.values(state.attempts).reduce((a,b)=>a+b,0)}</strong>Rechenversuche</div><div class="stat-chip"><strong>${worlds.length}</strong>Levels</div></div><button class="primary-btn" data-action="restart">Missionen noch einmal spielen ↻</button><div style="margin-top:9px"><button class="quiet-btn" data-mode="lab">Zum freien Bruch-Labor →</button></div></div>`;
+      return;
+    }
+    const t=currentTask(), solved=state.solved.has(t.id), hint=state.hints.has(t.id), feedback=state.feedback[t.id];
+    host.innerHTML=`
+      <div class="mission-check-head">
+        <div><h2 class="mission-check-title">${solved?'Richtig gelöst!':'Prüfe deine Antwort'}</h2><p class="mission-check-subtitle">Wähle die Ergebnisstücke im ${modelNameForTask(t)}. Das Modell wechselt automatisch von Level zu Level. Die Einteilung des Ergebnisses kannst du unabhängig einstellen.</p></div>
+      </div>
+      <div class="task-actions">
+        ${solved?'<button class="primary-btn" data-action="next">Nächste Aufgabe →</button>':'<button class="primary-btn" data-action="check">Antwort prüfen ✓</button>'}
+        <button class="secondary-btn" data-action="hint" aria-expanded="${hint?'true':'false'}">${hint?'Tipp schließen':'Tipp anzeigen 💡'}</button>
+      </div>
+      ${feedback?`<div class="feedback ${feedback.kind}" role="status"><span class="feedback-icon">${feedback.kind==='success'?'🎉':feedback.kind==='error'?'🧭':'💡'}</span><div>${feedback.text}</div></div>`:''}
+      ${hint?`<div class="hint-box"><strong>Ein kleiner Denkanstoß</strong>${esc(t.hint)}</div>`:''}
+      ${solved?`<div class="explanation"><strong>So geht’s:</strong> ${explanation(t)} <br><strong>Ergebnis:</strong> ${resultPlainText(t,resultFor(t))}</div>`:''}
+      <div class="bottom-nav"><button class="nav-btn" data-action="prev" ${state.index===0?'disabled':''}>← Zurück</button><span style="color:#a0aabc;font-size:10px;font-weight:800">${solved?'MISSION GESCHAFFT':'NIMM DIR ZEIT ZUM NACHDENKEN'}</span><button class="nav-btn" data-action="next" ${!solved?'disabled':''}>${state.index===tasks.length-1?'Abschluss →':'Weiter →'}</button></div>`;
+  }
+  function formatFraction(n,d) { const r=reduced(n,d); return `${r.n}/${r.d}`; }
+  function explanation(t) {
+    const r=resultFor(t);
+    const hasMixed=Boolean((t.aWhole||0)||(t.bWhole||0));
+    if(hasMixed) {
+      const an=fractionNumerator(t,'a'), bn=fractionNumerator(t,'b');
+      return `Schreibe die gemischten Zahlen als unechte Brüche: ${operandPlainText(t,'a')} = ${an}/${t.aD} und ${operandPlainText(t,'b')} = ${bn}/${t.bD}. Mit dem gemeinsamen Nenner ${r.den} ergibt sich ${r.an}/${r.den} ${t.op==='+'?'+':'−'} ${r.bn}/${r.den} = ${r.n}/${r.den}.`;
+    }
+    if(t.aD===t.bD) {
+      if(t.mixed && r.n>=r.d) return `Die Nenner sind gleich. ${t.aN} ${t.op==='+'?'+' : '−'} ${t.bN} = ${r.n} Fünftel. ${r.d}/${r.d} ergeben ein Ganzes, also ist das Ergebnis ${resultPlainText(t,r)}.`;
+      return `Die Nenner sind gleich. ${t.aN} ${t.op==='+'?'+' : '−'} ${t.bN} = ${r.n}; der Nenner ${t.aD} bleibt stehen.`;
+    }
+    const a=r.an, b=r.bn;
+    return `Gemeinsamer Nenner: ${r.den}. ${t.aN}/${t.aD} = ${a}/${r.den} und ${t.bN}/${t.bD} = ${b}/${r.den}. Dann ${a} ${t.op==='+'?'+':'−'} ${b} = ${r.n}.`;
+  }
+  function segmentsHTML(n,d,color,resultMode=false) {
+    const total=resultMode?Math.max(2,Math.min(4,Math.ceil(n/d))):Math.max(1,Math.min(4,Math.ceil(n/d)));
+    let remaining=n, html='';
+    for(let unit=0;unit<total;unit++) {
+      const fill=Math.max(0,Math.min(d,remaining)); remaining-=fill;
+      const cells=Array.from({length:d},(_,i)=>`<span class="strip-cell ${i<fill?'filled':''}" style="${i<fill?`--fill:${color}`:''}"></span>`).join('');
+      html+=`<div class="strip-unit" style="grid-template-columns:repeat(${d},minmax(0,1fr))" aria-label="${fill} von ${d} Teilen gefärbt">${cells}</div>`;
+      if(total>1) html+=`<div class="whole-caption">${unit===0?'1. Ganzes':unit===1?'2. Ganzes':unit===2?'3. Ganzes':'4. Ganzes'}</div>`;
+    }
+    return html;
+  }
+  function pieSVG(n,d,color,resultMode=false) {
+    const pieces=resultMode?Math.max(2,Math.min(4,Math.ceil(n/d))):Math.max(1,Math.min(4,Math.ceil(n/d)));
+    let remain=n, out='';
+    for(let p=0;p<pieces;p++) {
+      const fill=Math.max(0,Math.min(d,remain)); remain-=fill;
+      let paths='';
+      if(d===1) {
+        paths=`<circle cx="50" cy="50" r="44" fill="${fill>0?color:'#edf1f6'}" stroke="#fff" stroke-width="1.6"/>`;
+      } else {
+        for(let i=0;i<d;i++) {
+          const start=-90+i*360/d, end=-90+(i+1)*360/d;
+          const x1=50+44*Math.cos(start*Math.PI/180), y1=50+44*Math.sin(start*Math.PI/180);
+          const x2=50+44*Math.cos(end*Math.PI/180), y2=50+44*Math.sin(end*Math.PI/180);
+          const large=(end-start)>180?1:0;
+          paths+=`<path d="M 50 50 L ${x1.toFixed(3)} ${y1.toFixed(3)} A 44 44 0 ${large} 1 ${x2.toFixed(3)} ${y2.toFixed(3)} Z" fill="${i<fill?color:'#edf1f6'}" stroke="#fff" stroke-width="1.4"/>`;
+        }
+      }
+      out+=`<svg class="pie-svg" viewBox="0 0 100 100" role="img" aria-label="${fill} von ${d} Teilen gefärbt">${paths}<circle cx="50" cy="50" r="44" fill="none" stroke="#dfe6ef" stroke-width="1.1"/></svg>`;
+      if(pieces>1) out+=`<span class="whole-caption">${p===0?'1. Ganzes':p===1?'2. Ganzes':'3. Ganzes'}</span>`;
+    }
+    return out;
+  }
+  function resultPickStripsHTML(d, selected) {
+    let html='';
+    for(let unit=0;unit<4;unit++) {
+      const cells=Array.from({length:d},(_,i)=>{
+        const count=unit*d+i+1, picked=count<=selected;
+        return `<button type="button" class="strip-cell result-pick-cell ${picked?'filled selected':''}" style="--fill:${colors.result}" data-action="pick-result" data-count="${count}" aria-pressed="${picked?'true':'false'}" aria-label="${count} Ergebnisstück${count===1?'':'e'} auswählen"></button>`;
+      }).join('');
+      html+=`<div class="strip-unit" style="grid-template-columns:repeat(${d},minmax(0,1fr))" aria-label="${unit===0?'1. Ganzes':unit===1?'2. Ganzes':unit===2?'3. Ganzes':'4. Ganzes'} mit ${d} Teilen">${cells}</div><div class="whole-caption">${unit===0?'1. Ganzes':unit===1?'2. Ganzes':unit===2?'3. Ganzes':'4. Ganzes'}</div>`;
+    }
+    return `<div class="strip-units">${html}</div>`;
+  }
+  function resultPickPiesHTML(d, selected) {
+    let html='';
+    for(let unit=0;unit<4;unit++) {
+      const offset=unit*d;
+      let paths='';
+      if(d===1) {
+        const count=offset+1, picked=count<=selected;
+        paths=`<circle class="result-pick-sector" cx="50" cy="50" r="44" data-action="pick-result" data-count="${count}" role="button" tabindex="0" aria-disabled="false" aria-pressed="${picked?'true':'false'}" aria-label="${count} Ergebnisstück auswählen" fill="${picked?colors.result:'#edf1f6'}" stroke="#fff" stroke-width="1.6"/>`;
+      } else {
+        for(let i=0;i<d;i++) {
+          const start=-90+i*360/d, end=-90+(i+1)*360/d;
+          const x1=50+44*Math.cos(start*Math.PI/180), y1=50+44*Math.sin(start*Math.PI/180);
+          const x2=50+44*Math.cos(end*Math.PI/180), y2=50+44*Math.sin(end*Math.PI/180);
+          const count=offset+i+1, picked=count<=selected;
+          paths+=`<path class="result-pick-sector" d="M 50 50 L ${x1.toFixed(3)} ${y1.toFixed(3)} A 44 44 0 0 1 ${x2.toFixed(3)} ${y2.toFixed(3)} Z" data-action="pick-result" data-count="${count}" role="button" tabindex="0" aria-disabled="false" aria-pressed="${picked?'true':'false'}" aria-label="${count} Ergebnisstück${count===1?'':'e'} auswählen" fill="${picked?colors.result:'#edf1f6'}" stroke="#fff" stroke-width="1.4"/>`;
+        }
+      }
+      html+=`<div class="result-pie-unit"><svg class="pie-svg interactive-pie" viewBox="0 0 100 100" role="group" aria-label="${unit===0?'1. Ganzes':unit===1?'2. Ganzes':unit===2?'3. Ganzes':'4. Ganzes'}: alle ${d} Teile anklickbar">${paths}<circle cx="50" cy="50" r="44" fill="none" stroke="#dfe6ef" stroke-width="1.1" pointer-events="none"/></svg><span class="whole-caption">${unit===0?'1. Ganzes':unit===1?'2. Ganzes':unit===2?'3. Ganzes':'4. Ganzes'}</span></div>`;
+    }
+    return `<div class="pie-units result-pie-units">${html}</div>`;
+  }
+  function buildModelHTML(x, modelType, showResult, mission=true) {
+    const r=resultFor(x);
+    const parts=mission && x.id ? taskPartitions(x) : null;
+    const d=mission ? parts.result : r.den;
+    const dA=mission ? parts.a : r.den;
+    const dB=mission ? parts.b : r.den;
+    const partitionMatched=!mission || dA===dB;
+    const an=mission ? fractionNumerator(x,'a')*(dA/x.aD) : r.an;
+    const bn=mission ? fractionNumerator(x,'b')*(dB/x.bD) : r.bn;
+    const selectedData=mission && x.id ? state.answers[x.id] : null;
+    const selected=selectedData && Number(selectedData.d)===d ? Number(selectedData.n) : 0;
+    const resultCount=showResult ? Math.abs(r.n*d/r.d) : selected;
+    const originalA=operandPlainText(x,'a'), originalB=operandPlainText(x,'b');
+    const eqA=x.aD===r.den?originalA:`${originalA} = ${r.an}/${r.den}`;
+    const eqB=x.bD===r.den?originalB:`${originalB} = ${r.bn}/${r.den}`;
+    const rows=mission ? [
+      {label:'Erster Bruch',sub:'',n:an,d:dA,color:colors.a,result:false,partitionKey:'a',originalD:x.aD},
+      {label:x.op==='+'?'Dazu kommt':'Wird weggenommen',sub:'',n:bn,d:dB,color:colors.b,result:false,partitionKey:'b',originalD:x.bD},
+      {label:showResult?'Ergebnis':'Dein Ergebnis',sub:showResult?`${Math.abs(r.n*d/r.d)} von ${d} Stücken`:(selected?`${selected} von ${d} Stücken gewählt`:'Tippe auf die Stücke'),n:resultCount,d:d,color:colors.result,result:true,partitionKey:'result',originalD:r.d}
+    ] : [
+      {label:'Erster Bruch',sub:eqA,n:an,d,color:colors.a},
+      {label:x.op==='+'?'Dazu kommt':'Wird weggenommen',sub:eqB,n:bn,d,color:colors.b},
+      {label:showResult?(r.n<0?'Negatives Ergebnis':'Ergebnis'):'Dein Ergebnis',sub:showResult?`${r.n<0?'−':''}${Math.abs(r.n)}/${d}`:(selected?`${selected} von ${d} Stücken gewählt`:'Tippe auf die Stücke'),n:Math.abs(r.n),d,color:colors.result,result:true}
+    ];
+    // The question/equation is shown once in the centered task banner for mission mode.
+    const expression=mission?'':`<div class="model-expression">${operandHTML(x,'a')}${opHTML(x.op)}${operandHTML(x,'b')}<span class="operator">=</span>${showResult?numberHTML(r.n,r.d,isMixedTask(x)):'<span class="answer-mark">?</span>'}</div>`;
+    let rowHTML='';
+    rows.forEach((row,i)=>{
+      const hiddenResult=row.result&&!showResult&&!mission;
+      const selectableResult=row.result&&!showResult&&mission;
+      let visual='';
+      if(selectableResult) {
+        visual=modelType==='strips'?resultPickStripsHTML(d,selected):resultPickPiesHTML(d,selected);
+      } else if(hiddenResult) {
+        visual=modelType==='strips'?`<div class="strip-units"><div class="strip-unit" style="grid-template-columns:repeat(${d},minmax(0,1fr))">${Array.from({length:d},()=>'<span class="strip-cell result-outline"></span>').join('')}</div><div class="whole-caption">Noch nicht aufgedeckt</div></div>`:`<div class="pie-units"><div class="pie-placeholder">?</div></div>`;
+      } else if(modelType==='strips') {
+        visual=`<div class="strip-units">${segmentsHTML(row.n,row.d,row.color,row.result)}</div>`;
+      } else {
+        visual=`<div class="pie-units ${row.result?'result-pie-units':''}">${pieSVG(row.n,row.d,row.color,row.result)}</div>`;
+      }
+      let rowLabel='';
+      if(mission && row.partitionKey) {
+        rowLabel=`<strong>${row.label}</strong>${partitionOptionsHTML(row.partitionKey,row.originalD,row.d,showResult)}`;
+      } else {
+        rowLabel=`<strong>${row.label}</strong><small>${row.sub}</small>`;
+      }
+      rowHTML+=`${i===2?'<hr class="model-divider">':''}<div class="model-row"><div class="row-label">${rowLabel}</div>${visual}</div>`;
+    });
+    let note='';
+    if(mission) {
+      note=!partitionMatched
+        ? 'Die Ausgangsbrüche sind unterschiedlich eingeteilt. Suche zum Vergleichen gemeinsame Stückgrößen. Die Einteilung des Ergebnisses stellst du unabhängig ein; eine richtige Antwort wird trotzdem akzeptiert.'
+        : 'Die Ausgangsbrüche sind gleich eingeteilt. Du kannst die Einteilung des Ergebnisses unabhängig einstellen; geprüft wird der mathematische Wert deiner Auswahl.';
+    } else {
+      note = r.n<0
+        ? `Der zweite Bruch ist größer als der erste. Das Ergebnis wäre negativ (−${Math.abs(r.n)}/${d}). Für diese Übung gilt: Wähle beim Minus einen ersten Bruch, der mindestens so groß ist wie der zweite.`
+        : isMixedTask(x)
+          ? `Die gemischten Zahlen werden als ganze Einheiten und gleich große Bruchteile dargestellt. Für die Rechnung kannst du sie auch als unechte Brüche schreiben.`
+          : x.aD===x.bD
+            ? `Jedes Stück ist ${d===1?'ein Ganzes':`1/${d} des Ganzen`} groß. Zähle die gefärbten Stücke – bei Minus zählst du weggenommene Stücke wieder ab.`
+            : `Gemeinsamer Nenner: ${d}. Wir denken beide Brüche in ${d===1?'Ganzen':`${d} gleich große Teile`} um. So lassen sich die Stücke fair vergleichen und verrechnen.`;
+    }
+    return `${expression}<div class="model-rows">${rowHTML}</div><div class="model-note"><span class="note-icon">ⓘ</span><span>${note}</span></div><div class="legend"><span class="legend-item"><i class="legend-dot" style="background:${colors.a}"></i>1. Bruch</span><span class="legend-item"><i class="legend-dot" style="background:${colors.b}"></i>2. Bruch</span><span class="legend-item"><i class="legend-dot" style="background:${colors.result}"></i>Ergebnis</span></div>`;
+  }
+  function renderMissionModel() {
+    const stripHost=$('#missionStripModel'), pieHost=$('#missionPieModel');
+    const stripCard=$('#missionStripCard'), pieCard=$('#missionPieCard');
+    const t=state.index<tasks.length ? currentTask() : tasks[tasks.length-1];
+    const activeModel=modelTypeForTask(t);
+    stripCard.classList.toggle('hidden',activeModel!=='strips');
+    pieCard.classList.toggle('hidden',activeModel!=='pies');
+    if(state.index>=tasks.length) {
+      const done=`<div style="text-align:center;padding:28px 10px"><div style="font-size:38px;margin-bottom:8px">🌟</div><h3 style="font-size:17px;margin:0 0 7px">Du hast es geschafft!</h3><p style="font-size:12px;color:var(--muted);margin:0">Im freien Labor kannst du weiterhin zwischen Streifen- und Kreismodell wechseln.</p></div>`;
+      if(activeModel==='strips'){stripHost.innerHTML=done;pieHost.innerHTML='';}else{pieHost.innerHTML=done;stripHost.innerHTML='';}
+      return;
+    }
+    const solved=state.solved.has(t.id);
+    if(activeModel==='strips') { stripHost.innerHTML=buildModelHTML(t,'strips',solved,true); pieHost.innerHTML=''; }
+    else { pieHost.innerHTML=buildModelHTML(t,'pies',solved,true); stripHost.innerHTML=''; }
+  }
+  function updateModelTabs() {
+    $$('[data-model]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.model===state.model)));
+  }
+  function renderMemoryAndMission() {
+    renderProgress(); memoryUpdate(); renderMissionQuestion(); renderMissionTask(); renderMissionModel(); updateModelTabs();
+  }
+  function switchMode(mode) {
+    state.mode=mode;
+    $('#missionView').classList.toggle('hidden',mode!=='mission');
+    $('#labView').classList.toggle('hidden',mode!=='lab');
+    $$('.mode-tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.mode===mode)));
+    if(mode==='lab') renderLab();
+  }
+  function showFeedback(id,kind,text) { state.feedback[id]={kind,text}; }
+  function pickMissionResult(count) {
+    const t=currentTask();
+    if(!t || state.solved.has(t.id)) return;
+    const parts=taskPartitions(t), d=parts.result;
+    const maxCount=4*d;
+    if(!Number.isInteger(count) || count<1 || count>maxCount) return;
+    const prevData=state.answers[t.id];
+    const previous=prevData && Number(prevData.d)===d ? Number(prevData.n) : -1;
+    if(previous===count) {
+      const next=count-1;
+      if(next===0) delete state.answers[t.id];
+      else state.answers[t.id]={n:String(next),d:String(d)};
+    } else {
+      state.answers[t.id]={n:String(count),d:String(d)};
+    }
+    delete state.feedback[t.id];
+    renderMissionTask();
+    renderMissionModel();
+  }
+  function checkAnswer() {
+    const t=currentTask(); if(!t || state.solved.has(t.id)) return;
+    const parts=taskPartitions(t);
+    const selected=state.answers[t.id];
+    if(!selected || Number(selected.n)<1) {
+      showFeedback(t.id,'neutral',`Wähle zuerst im ${modelNameForTask(t)}, wie viele Ergebnisstücke gefärbt sein sollen.`);
+      renderMissionTask(); renderMissionModel(); return;
+    }
+    const n=Number(selected.n), d=Number(selected.d);
+    if(d!==parts.result) {
+      delete state.answers[t.id];
+      showFeedback(t.id,'neutral','Die Einteilung des Ergebnisses wurde geändert. Wähle das Ergebnis bitte noch einmal im Bild.');
+      renderMissionTask(); renderMissionModel(); return;
+    }
+    state.attempts[t.id]=(state.attempts[t.id]||0)+1;
+    const r=resultFor(t);
+    if(n*r.d===r.n*d) {
+      state.solved.add(t.id);
+      showFeedback(t.id,'success',state.attempts[t.id]===1?'Richtig beim ersten Versuch! Stark gerechnet.':'Genau richtig! Du hast die Stücke richtig verrechnet.');
+    } else {
+      const tip=state.attempts[t.id]>=2?' Schau auf die gefärbten Stücke und zähle noch einmal.':' Schau dir die gefärbten Ergebnisstücke an und probiere es erneut.';
+      showFeedback(t.id,'error','Noch nicht ganz. Passe deine Auswahl im Modell an und prüfe erneut.'+tip);
+    }
+    renderMemoryAndMission();
+  }
+  function goNext() {
+    if(state.index>=tasks.length) return;
+    const t=currentTask();
+    if(!state.solved.has(t.id)) return;
+    state.index=Math.min(tasks.length,state.index+1);
+    renderMemoryAndMission();
+  }
+  function goPrev() { state.index=Math.max(0,state.index-1); renderMemoryAndMission(); }
+  function toggleHint() { const t=currentTask(); if(!t)return; state.hints.has(t.id)?state.hints.delete(t.id):state.hints.add(t.id); renderMissionTask(); }
+  function restart() { state.index=0; state.solved.clear(); state.attempts={}; state.answers={}; state.partitions={}; state.hints.clear(); state.feedback={}; renderMemoryAndMission(); switchMode('mission'); }
+
+  function renderBuilder(which) {
+    const lab=state.lab, isA=which==='a';
+    const n=lab[which+'N'], d=lab[which+'D'], whole=Number(lab[which+'Whole']||0), color=colors[which];
+    const label=isA?'Bruch A':'Bruch B';
+    const cells=Array.from({length:d},(_,i)=>`<button type="button" class="pick-cell" style="--fill:${color}" data-action="pick-cell" data-which="${which}" data-cell="${i+1}" aria-pressed="${i<n?'true':'false'}" aria-label="${i+1} von ${d} Teilen auswählen"></button>`).join('');
+    return `<div class="fraction-builder">
+      <div class="builder-top"><div class="builder-name"><i class="legend-dot" style="background:${color}"></i>${label}</div><span class="adjust-hint">Werte mit − / + ändern</span></div>
+      <div class="builder-fracline"><div class="builder-number">${whole?`<span class="builder-whole">${whole}</span>`:''}<div class="builder-bigfrac" style="color:${color}"><span class="num">${n}</span><span class="den">${d}</span></div></div>
+        <div class="builder-controls">
+          <div class="builder-control"><span class="builder-control-label">Zähler</span><div class="small-adjust"><button class="adjust-btn" data-action="adjust" data-which="${which}" data-delta="-1" aria-label="Zähler von ${label} um eins verringern" ${n<=0?'disabled':''}>−</button><span class="adjust-value">${n}</span><button class="adjust-btn" data-action="adjust" data-which="${which}" data-delta="1" aria-label="Zähler von ${label} um eins erhöhen" ${n>=d?'disabled':''}>+</button></div></div>
+          <div class="builder-control"><span class="builder-control-label">Nenner</span><div class="small-adjust"><button class="adjust-btn" data-action="adjust-denom" data-which="${which}" data-delta="-1" aria-label="Nenner von ${label} um eins verringern" ${d<=2?'disabled':''}>−</button><span class="adjust-value">${d}</span><button class="adjust-btn" data-action="adjust-denom" data-which="${which}" data-delta="1" aria-label="Nenner von ${label} um eins erhöhen" ${d>=12?'disabled':''}>+</button></div></div>
+          <div class="builder-control"><span class="builder-control-label">Ganze</span><div class="small-adjust"><button class="adjust-btn" data-action="adjust-whole" data-which="${which}" data-delta="-1" aria-label="Ganze Einheiten von ${label} um eins verringern" ${whole<=0?'disabled':''}>−</button><span class="adjust-value">${whole}</span><button class="adjust-btn" data-action="adjust-whole" data-which="${which}" data-delta="1" aria-label="Ganze Einheiten von ${label} um eins erhöhen" ${whole>=3?'disabled':''}>+</button></div></div>
+        </div>
+      </div>
+      <div class="clickable-cells" style="grid-template-columns:repeat(${d},minmax(0,1fr))" role="group" aria-label="Bruchteile von ${label} auswählen">${cells}</div><div class="cell-instruction">Tippe auf ein Kästchen, um den Zähler zu ändern. Zähler, Nenner und Ganze kannst du auch mit − und + einstellen.</div>
+    </div>`;
+  }
+  function renderLab() {
+    $('#fractionBuilders').innerHTML=renderBuilder('a')+renderBuilder('b');
+    $$('[data-action="lab-op"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.op===state.lab.op)));
+    $('#labModel').innerHTML=buildModelHTML(state.lab,state.model,state.lab.show,false);
+    $('#labRevealBtn').textContent=state.lab.show?'Ergebnis wieder verbergen ↺':'Ergebnis anzeigen ✨';
+    const box=$('#labResultBox');
+    box.classList.toggle('hidden',!state.lab.show);
+    if(state.lab.show) {
+      const r=resultFor(state.lab), red=reduced(r.n,r.d);
+      const extra=(red.n!==r.n||red.d!==r.d)?`Gekürzt: ${red.n}/${red.d}.`:'Der Bruch ist bereits vollständig gekürzt.';
+      const labMixed=isMixedTask(state.lab);
+      box.innerHTML=`<div class="lab-result-top"><span class="lab-result-title">DEIN ERGEBNIS</span><span style="font-size:16px">🎉</span></div><div class="lab-answer">${operandHTML(state.lab,'a')}<span class="equals">${state.lab.op==='+'?'+':'−'}</span>${operandHTML(state.lab,'b')}<span class="equals">=</span>${numberHTML(red.n,red.d,labMixed)}</div><small>${operandPlainText(state.lab,'a')} ${state.lab.op} ${operandPlainText(state.lab,'b')} = ${labMixed?mixedPlainText(r.n,r.d):formatFraction(r.n,r.d)}. ${extra}</small>`;
+    }
+    updateModelTabs();
+  }
+  function updateLab(mutator) { mutator(state.lab); state.lab.show=false; renderLab(); }
+  function changeDenom(which, delta) {
+    updateLab(l=>{
+      const oldD=Number(l[which+'D']);
+      const nextD=Math.max(2,Math.min(12,oldD+Number(delta)));
+      l[which+'D']=nextD;
+      // Keep the chosen numerator valid after changing the number of parts.
+      l[which+'N']=Math.max(0,Math.min(nextD,Number(l[which+'N'])));
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    const modeButton=event.target.closest('[data-mode]');
+    if(modeButton) { switchMode(modeButton.dataset.mode); return; }
+    const modelButton=event.target.closest('[data-model]');
+    if(modelButton) { state.model=modelButton.dataset.model; updateModelTabs(); if(state.mode==='mission')renderMissionModel(); else renderLab(); return; }
+    const btn=event.target.closest('[data-action]'); if(!btn)return;
+    const action=btn.dataset.action;
+    if(action==='pick-result') { pickMissionResult(Number(btn.dataset.count)); return; }
+    if(action==='check') checkAnswer();
+    else if(action==='next') goNext();
+    else if(action==='prev') goPrev();
+    else if(action==='hint') toggleHint();
+    else if(action==='restart') restart();
+    else if(action==='adjust') {
+      const which=btn.dataset.which, delta=Number(btn.dataset.delta);
+      updateLab(l=>{l[which+'N']=Math.max(0,Math.min(l[which+'D'],l[which+'N']+delta));});
+    } else if(action==='adjust-whole') {
+      const which=btn.dataset.which, delta=Number(btn.dataset.delta);
+      updateLab(l=>{l[which+'Whole']=Math.max(0,Math.min(3,(l[which+'Whole']||0)+delta));});
+    } else if(action==='adjust-denom') {
+      changeDenom(btn.dataset.which,Number(btn.dataset.delta));
+    } else if(action==='pick-cell') {
+      const which=btn.dataset.which, cell=Number(btn.dataset.cell);
+      updateLab(l=>{l[which+'N']=l[which+'N']===cell?cell-1:cell;});
+    } else if(action==='lab-op') {
+      updateLab(l=>{l.op=btn.dataset.op;});
+    } else if(action==='toggle-lab-result') {
+      state.lab.show=!state.lab.show; renderLab();
+    } else if(action==='reset-lab') {
+      state.lab={aWhole:0,aN:1,aD:2,bWhole:0,bN:1,bD:4,op:'+',show:false}; renderLab();
+    }
+  });
+  document.addEventListener('change',(event)=>{
+    const partitionSelect=event.target.closest('[data-partition]');
+    if(partitionSelect) changePartition(partitionSelect.dataset.partition,partitionSelect.value);
+  });
+  document.addEventListener('keydown',(event)=>{
+    const sector=event.target.closest('[data-action="pick-result"]');
+    if(sector && (event.key==='Enter' || event.key===' ')) {
+      event.preventDefault();
+      if(sector.getAttribute('aria-disabled')!=='true') pickMissionResult(Number(sector.dataset.count));
+    }
+  });
+
+  renderMemoryAndMission();
+  renderLab();
+})();
+</script>
+</body>
+</html>
