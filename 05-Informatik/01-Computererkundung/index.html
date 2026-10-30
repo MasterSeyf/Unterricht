@@ -1,1 +1,2264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Informatik-Abenteuer: Der PC-Führerschein: V19</title>
+  <style>
+    :root{
+      --desk-color:#a1887f;
+      --highlight:#ffeb3b;
+      --good:#4caf50;
+      --warn:#ff9800;
+      --info:#2196f3;
+      --info-light:#e3f2fd;
+      --bad:#e57373;
+    }
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#e0f2f1;margin:0;overflow-x:hidden;user-select:none;}
 
+    /* STARTBILDSCHIRM */
+    .desk-container{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+    .instruction-banner{background:#fff;padding:15px 40px;border-radius:30px;box-shadow:0 4px 10px rgba(0,0,0,0.15);margin-top:30px;z-index:10;text-align:center;}
+    .desk-surface{position:relative;width:800px;height:500px;background:var(--desk-color);border-radius:20px 20px 0 0;margin-top:50px;border-top:20px solid #795548;box-shadow:inset 0 20px 50px rgba(0,0,0,0.2);}
+    .item-click{position:absolute;cursor:pointer;transition:0.3s;filter:drop-shadow(0 10px 5px rgba(0,0,0,0.4));text-align:center;}
+    .item-click:hover{transform:scale(1.1);filter:brightness(1.2) drop-shadow(0 15px 8px rgba(0,0,0,0.5));}
+    #start-monitor{top:20px;left:250px;font-size:180px;}
+    #start-keyboard{top:280px;left:230px;font-size:130px;}
+    #start-mouse{top:290px;left:470px;font-size:70px;transform:rotate(-15deg);}
+
+    /* DETAIL-SCREENS */
+    .detail-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f5f5;z-index:100;padding:20px;box-sizing:border-box;overflow-y:auto;text-align:center;}
+    .active{display:block;animation:fadeIn 0.35s ease;}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    .back-btn{position:absolute;top:20px;left:20px;padding:10px 20px;background:var(--bad);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:16px;font-weight:700;z-index:200;}
+    .back-btn:hover{background:#ef5350;}
+
+    /* FORTSCHRITTSANZEIGE */
+    .progress-counter {
+      font-size: 16px; background: var(--info); color: white; padding: 6px 14px; 
+      border-radius: 20px; margin-left: 15px; vertical-align: middle; 
+      font-weight: bold; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: background 0.3s;
+    }
+    .progress-counter.done { background: var(--good); }
+
+    /* MONITOR / DESKTOP */
+    .win-screen{
+      width:800px;height:450px;background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Solid_blue.svg/800px-Solid_blue.svg.png') center/cover;
+      background-color:#0078D7;border:20px solid #222;border-bottom:30px solid #111;border-radius:10px;margin:40px auto;position:relative;
+      box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    }
+    .win-icon{width:70px;margin:15px;color:#fff;text-align:center;cursor:pointer;font-size:40px;text-shadow:1px 1px 3px black;transition:0.2s; z-index: 50;}
+    .win-icon:hover{background:rgba(255,255,255,0.2);border-radius:5px;}
+    .win-icon span{display:block;font-size:14px;margin-top:5px;}
+    .win-taskbar{position:absolute;bottom:0;width:100%;height:40px;background:rgba(10, 10, 10, 0.9);display:flex;justify-content:space-between;align-items:center;padding:0 10px;box-sizing:border-box;z-index: 100;}
+    .win-start{color:#fff;font-size:24px;cursor:pointer;padding:5px 15px;border-radius:5px;transition:0.2s;}
+    .win-start:hover{background:rgba(255,255,255,0.2);color:#00bfff;}
+    .win-clock{color:#fff;font-size:14px;cursor:pointer;text-align:right;padding:5px;border-radius:5px;}
+    .win-clock:hover{background:rgba(255,255,255,0.2);}
+
+    #file-drop-target{
+      width:260px;height:120px;border:3px dashed rgba(255,255,255,0.8);border-radius:10px;
+      position:absolute;right:18px;top:40px;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;
+      background:rgba(0,0,0,0.12);font-weight:800;pointer-events:none;opacity:0;transition:all .3s ease; z-index: 10;
+    }
+    #file-drop-target.show{opacity:1;}
+
+    /* MAUS */
+    .big-mouse{width:250px;height:400px;border:8px solid #333;border-radius:120px;margin:40px auto;position:relative;background:#eceff1;box-shadow:0 15px 30px rgba(0,0,0,0.2);}
+    .mouse-part{position:absolute;cursor:pointer;transition:0.2s;display:flex;align-items:center;justify-content:center;font-weight:bold;color:rgba(0,0,0,0.5);font-size:20px;}
+    .mouse-part:hover{background:#cfd8dc;color:black;}
+    .m-left{top:0;left:0;width:48%;height:160px;border-right:3px solid #333;border-bottom:3px solid #333;border-top-left-radius:120px;background:#bbdefb;} 
+    .m-right{top:0;right:0;width:48%;height:160px;border-left:3px solid #333;border-bottom:3px solid #333;border-top-right-radius:120px;background:#ffccbc;} 
+    .m-wheel{top:50px;left:50%;transform:translateX(-50%);width:30px;height:70px;background:#c8e6c9;border-radius:15px;z-index:10;border:2px solid #222;} 
+    .m-wheel:hover{background:#a5d6a7;}
+    .m-side-button{z-index:8;width:38px;height:17px;padding:0;border:2px solid #455a64;border-radius:7px;background:linear-gradient(180deg,#dfe5e9,#9eabb3);box-shadow:0 2px 0 #607d8b;cursor:pointer;}
+    .m-side-button:hover,.m-side-button.m-side-group-hl{background:#90a4ae;box-shadow:0 0 0 3px rgba(33,150,243,.28),0 2px 0 #455a64;border-color:#1976d2;}
+    .m-side-back{left:-5px;top:205px;transform:skewY(-10deg);}
+    .m-side-forward{left:-5px;top:233px;transform:skewY(-10deg);}
+    .m-side-button:focus-visible{outline:3px solid var(--info);outline-offset:2px;}
+
+    /* INFO MODAL */
+    #info-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;}
+    #info-modal{
+      display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+      background:#fff;padding:26px;border-radius:15px;box-shadow:0 15px 50px rgba(0,0,0,0.5);
+      z-index:1000;max-width:560px;border:5px solid var(--info);text-align:left;
+    }
+    #info-modal h2{margin-top:0;color:#1976d2;}
+    #info-modal p{font-size:18px;line-height:1.5;margin-bottom:10px;}
+    #info-modal .taskbox{border:2px dashed var(--warn);background:#fff3e0;border-radius:12px;padding:12px 14px;margin-top:12px;}
+    #info-modal .taskbox b{color:#e65100;}
+    .btn-close{padding:10px 20px;background:var(--good);color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;margin-top:15px;width:100%;font-weight:800;}
+    .btn-close:hover{background:#388e3c;}
+
+    /* ERFOLGS-POP-UP */
+    #success-overlay{
+      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.6);z-index:3000;
+    }
+    .success-box{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      background:#fff;padding:30px 40px;border-radius:20px;text-align:center;
+      box-shadow:0 10px 40px rgba(0,0,0,0.6);border:6px solid var(--good);
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      from { transform:translate(-50%,-50%) scale(0.5); opacity:0; }
+      to { transform:translate(-50%,-50%) scale(1); opacity:1; }
+    }
+
+    /* ÜBUNGSBEREICHE UNTEN */
+    .exercise-area{
+      display:none;margin:24px auto 10px;border:3px dashed var(--warn);padding:16px 18px;background:#fff3e0;border-radius:10px;
+      width:min(900px,95vw);text-align:left;
+    }
+    .exercise-area h3{margin:0 0 8px 0;}
+    .status{margin-top:10px;font-weight:bold;}
+    .status.good{color:#1b5e20;}
+    .status.wait{color:#e65100;}
+    .badge{display:inline-block;padding:3px 10px;border-radius:999px;background:#e3f2fd;border:1px solid #90caf9;color:#0d47a1;font-weight:800;font-size:12px;}
+
+    #custom-menu{display:none;position:absolute;background:#fff;border:1px solid #ccc;box-shadow:2px 2px 5px rgba(0,0,0,0.2);width:200px;z-index:2000;text-align:left;}
+    .menu-item{padding:10px 15px;cursor:pointer;font-size:16px;}
+    .menu-item:hover{background:var(--info);color:#fff;}
+    .menu-goal{font-weight:bold;border-top:1px solid #eee;color:#d32f2f;}
+    .menu-goal:hover{background:var(--good);color:#fff;}
+
+    #scroll-box{height:170px;overflow:auto;border:2px solid #ffb74d;border-radius:10px;background:#fff;padding:10px;}
+    #scroll-inner{height:520px;padding:6px 4px;}
+
+    /* ===== TASTATUR LAYOUT ===== */
+    .keyboard-wrapper {
+      display: flex; gap: 15px; align-items: flex-end; justify-content: center;
+      background: #cfd8dc; padding: 20px; border-radius: 16px; border: 4px solid #90a4ae;
+      margin: 30px auto; box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+      width: max-content; max-width: 95vw; overflow-x: auto;
+    }
+
+    .kb-main {
+      display: grid;
+      grid-template-columns: repeat(60, min(1.3vw, 13px)); 
+      grid-template-rows: repeat(5, 48px); gap: 6px;
+    }
+
+    .kb-arrows {
+      display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px); gap: 6px;
+    }
+
+    .k-key {
+      background: #fff; border: 2px solid #90a4ae; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 4px 0 #90a4ae;
+      transition: 0.1s; user-select: none; color: #37474f; padding: 0 4px;
+    }
+    
+    .k-key:hover { filter: brightness(0.95); }
+    .k-key:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+    /* Spalten-Breiten */
+    .s-3 { grid-column: span 3; } .s-4 { grid-column: span 4; } .s-5 { grid-column: span 5; }
+    .s-6 { grid-column: span 6; } .s-7 { grid-column: span 7; } .s-8 { grid-column: span 8; }
+    .s-11 { grid-column: span 11; } .s-28 { grid-column: span 28; }
+    .k-enter-iso { grid-column: span 6; grid-row: span 2; display: flex; flex-direction: column; }
+
+    /* --- FARBEN FÜR AUFGABEN-TASTEN --- */
+    .k-num-task { background: #e0f7fa; } 
+    .k-umlaut { background: #fff9c4; } 
+    .k-backspace { background: #ffccbc; } 
+    .k-tab { background: #d1c4e9; } 
+    .k-enter { background: #bbdefb; } 
+    .k-caps { background: #f8bbd0; } 
+    .k-shift { background: #ffe082; } 
+    .k-space { background: #c8e6c9; } 
+    .k-altgr { background: #e6ee9c; } 
+    .k-arrow-task { background: #b2dfdb; } 
+
+    /* Hover-Effekte Buchstaben */
+    .k-group-hl { outline: 3px solid var(--info); background: var(--info-light) !important; border-color: var(--info) !important; color: #0d47a1 !important; z-index: 5;}
+    
+    /* Hover-Effekte Zahlen */
+    .k-number-hl { outline: 3px solid #00acc1; background: #b2ebf2 !important; border-color: #00acc1 !important; color: #006064 !important; z-index: 5;}
+
+    /* Hover-Effekte Umlaute & ß */
+    .k-umlaut-hl { outline: 3px solid #fbc02d; background: #fff59d !important; border-color: #fbc02d !important; color: #f57f17 !important; z-index: 5;}
+
+    /* Hover-Tips */
+    .hover-tip {
+      display:none; position:fixed; z-index:1500;
+      background:#fff; border:3px solid var(--info); border-radius:12px; padding:12px 14px;
+      box-shadow:0 12px 35px rgba(0,0,0,0.35); max-width:min(520px,92vw); text-align:left;
+    }
+    .hover-tip h3{margin:0 0 6px 0;color:#1976d2;font-size:18px;}
+    .hover-tip p{margin:0;font-size:16px;line-height:1.35;color:#1b1b1b;}
+
+    .task-input { font-size: 18px; padding: 10px; border: 2px solid #90caf9; border-radius: 8px; margin-top: 10px; width: 300px; max-width: 100%; }
+
+    /* STARTBILDSCHIRM: Vorschauen der drei Lernbereiche */
+    .start-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;width:190px;color:#fff;font-size:19px;font-weight:800;text-shadow:1px 2px 3px #3e2723;}
+    .start-progress{font-size:13px;font-weight:700;background:rgba(255,255,255,.92);color:#263238;border-radius:999px;padding:4px 9px;text-shadow:none;box-shadow:0 2px 5px rgba(0,0,0,.2);}
+    .preview-monitor{width:132px;height:105px;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 8px 5px rgba(0,0,0,.35));}
+    .preview-monitor-screen{width:122px;height:77px;background:linear-gradient(135deg,#1687d8,#0b4e91);border:8px solid #222;border-bottom-width:9px;border-radius:7px;box-sizing:border-box;position:relative;}
+    .preview-monitor-screen:before{content:"";position:absolute;left:12px;top:12px;width:22px;height:17px;border:2px solid rgba(255,255,255,.8);border-radius:2px;box-shadow:30px 0 0 -2px rgba(255,255,255,.22),0 24px 0 -2px rgba(255,255,255,.22);}
+    .preview-monitor-neck{width:18px;height:13px;background:#555;}
+    .preview-monitor-base{width:58px;height:7px;background:#333;border-radius:5px;}
+    .preview-keyboard{width:150px;height:75px;padding:8px;background:#cfd8dc;border:4px solid #90a4ae;border-radius:9px;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(3,1fr);gap:4px;box-sizing:border-box;transform:perspective(160px) rotateX(9deg);filter:drop-shadow(0 8px 5px rgba(0,0,0,.3));}
+    .preview-keyboard span{background:#fff;border:1px solid #90a4ae;border-radius:3px;box-shadow:0 2px 0 #90a4ae;}
+    .preview-keyboard span:nth-child(4n){background:#d1e8f8;}
+    .preview-keyboard span:last-child{grid-column:span 4;}
+    .preview-mouse{width:66px;height:100px;border:5px solid #333;border-radius:34px;background:#eceff1;position:relative;box-sizing:border-box;filter:drop-shadow(0 8px 5px rgba(0,0,0,.3));}
+    .preview-mouse:before{content:"";position:absolute;left:50%;top:0;height:36px;border-left:2px solid #333;}
+    .preview-mouse:after{content:"";position:absolute;left:50%;top:13px;transform:translateX(-50%);width:9px;height:19px;border-radius:8px;background:#90a4ae;border:1px solid #333;}
+    .preview-mouse-left,.preview-mouse-right{position:absolute;top:0;width:50%;height:34px;box-sizing:border-box;background:#bbdefb;border-bottom:2px solid #333;}
+    .preview-mouse-left{left:0;border-radius:28px 0 0 0;border-right:1px solid #333;}
+    .preview-mouse-right{right:0;background:#ffccbc;border-radius:0 28px 0 0;border-left:1px solid #333;}
+    #all-levels-done{display:none;margin:16px auto 0;padding:12px 22px;background:#e8f5e9;color:#1b5e20;border:2px solid #66bb6a;border-radius:14px;font-size:18px;font-weight:800;max-width:760px;box-shadow:0 4px 12px rgba(0,0,0,.15);}
+    /* Bewegliche Desktop-Symbole und Kontextmenü */
+    .win-icon.desktop-object{cursor:grab;touch-action:none;}
+    .win-icon.desktop-object:active{cursor:grabbing;}
+    #desktop-context-menu{display:none;position:fixed;z-index:2500;background:#fff;border:1px solid #b0bec5;border-radius:7px;box-shadow:0 5px 18px rgba(0,0,0,.28);width:205px;text-align:left;padding:4px 0;color:#263238;}
+    .desktop-menu-item{padding:9px 13px;cursor:pointer;font-size:15px;}
+    .desktop-menu-item:hover{background:#e3f2fd;color:#0d47a1;}
+    .desktop-menu-separator{border-top:1px solid #e0e0e0;margin:4px 0;}
+    .monitor-task{display:none;}
+    .game-choice{display:inline-block;margin:5px;padding:10px 14px;border:2px solid #90caf9;border-radius:10px;background:#fff;color:#263238;font-weight:800;font-size:15px;cursor:pointer;}
+    .game-choice:hover{background:#e3f2fd;border-color:#2196f3;}
+    .game-status{font-weight:800;margin-top:8px;min-height:22px;}
+    .game-status.good{color:#1b5e20;}
+    .game-status.wait{color:#e65100;}
+    .k-number{flex-direction:column;gap:0;padding:2px;}
+    .key-shift-symbol{font-size:11px;line-height:12px;color:#c62828;align-self:flex-start;margin-left:3px;font-weight:900;}
+    .key-number-main{font-size:16px;line-height:19px;}
+    .kb-arrows{background:#eceff1;border:3px solid #90a4ae;border-radius:12px;padding:10px;gap:5px;position:relative;align-self:flex-end;}
+    .kb-arrows:before{content:"Pfeiltasten";position:absolute;top:-25px;left:0;right:0;text-align:center;font-size:13px;color:#455a64;font-weight:800;}
+    #tab-advanced-task{display:none;margin-top:16px;padding:14px;background:#ede7f6;border:2px solid #9575cd;border-radius:12px;}
+    #tab-advanced-task .task-input{width:180px;max-width:28%;margin:6px;}
+    #tab-advanced-status{font-weight:800;margin-top:8px;}
+    @media(max-width:850px){
+      .desk-surface{width:96vw;height:500px;margin-top:28px;}
+      .instruction-banner{margin:15px 10px 0;padding:12px 18px;}
+      #start-monitor{left:calc(50% - 95px);}
+      #start-keyboard{left:4%;top:270px;}
+      #start-mouse{left:auto;right:4%;top:285px;}
+      .start-choice{width:160px;}
+    }
+
+
+    /* Überschreibt die früheren Emoji-Schriftgrößen der Startsymbole. */
+    #start-monitor,#start-keyboard,#start-mouse{font-size:19px;transform:none;}
+    #start-monitor{top:20px;left:305px;}
+    #start-keyboard{top:270px;left:165px;}
+    #start-mouse{top:278px;left:510px;right:auto;}
+    #start-monitor:hover,#start-keyboard:hover,#start-mouse:hover{transform:scale(1.06);}
+    @media(max-width:850px){
+      #start-monitor{top:8px;left:calc(50% - 95px);}
+      #start-keyboard{top:270px;left:4%;}
+      #start-mouse{top:278px;left:auto;right:4%;}
+    }
+
+
+
+    /* === V03: Desktop-Symbole liegen unabhängig voneinander auf einer absoluten Ebene === */
+    .win-screen{box-sizing:border-box;width:min(860px,96vw);height:490px;border:20px solid #222;border-bottom:30px solid #111;overflow:hidden;}
+    /* Dezente, direkt in den unteren rechten Monitorrahmen integrierte Stromsteuerung */
+    .monitor-stage{position:relative;width:min(860px,96vw);margin:40px auto 0;box-sizing:border-box;}
+    .monitor-stage .win-screen{width:100%;margin:0 auto;}
+    @media(max-width:850px){.monitor-stage{width:calc(100vw - 40px);}}
+    /* LED und Druckknopf liegen nebeneinander und mittig in der unteren Monitorblende. */
+    .monitor-hardware-controls{position:absolute;right:9px;bottom:6px;width:34px;height:18px;z-index:950;display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:6px;pointer-events:none;}
+    .monitor-power-led{display:block;flex:0 0 6px;width:6px;height:6px;border:1px solid #101010;border-radius:50%;background:#43a047;box-shadow:0 0 5px rgba(67,160,71,.9);pointer-events:none;}
+    .monitor-power-led.is-off{background:#757575;box-shadow:inset 0 0 2px #222;}
+    .monitor-power-button{display:flex;align-items:center;justify-content:center;flex:0 0 18px;width:18px;height:18px;padding:0;border:1px solid #090909;border-radius:50%;background:linear-gradient(145deg,#555 0%,#242424 58%,#111 100%);color:#d7d7d7;font-family:Arial,sans-serif;font-size:11px;line-height:1;font-weight:700;cursor:pointer;pointer-events:auto;box-shadow:inset 0 1px 1px rgba(255,255,255,.2),0 1px 1px rgba(0,0,0,.65);}
+    .monitor-power-button:hover{filter:brightness(1.25);}
+    .monitor-power-button:active{background:linear-gradient(145deg,#171717,#3b3b3b);box-shadow:inset 0 1px 2px rgba(0,0,0,.7);}
+    .monitor-power-button:focus-visible{outline:2px solid #ffeb3b;outline-offset:2px;}
+    @media(max-width:580px){
+      .monitor-hardware-controls{right:7px;bottom:6px;width:31px;height:17px;gap:5px;}
+      .monitor-power-led{flex-basis:5px;width:5px;height:5px;}
+      .monitor-power-button{flex-basis:17px;width:17px;height:17px;font-size:10px;}
+    }
+    #monitor-off-overlay{display:none;position:absolute;inset:0;z-index:900;background:#929292;cursor:not-allowed;}
+    #monitor-off-overlay[aria-hidden="false"]{display:block;}
+    .win-icon.desktop-object{position:absolute;width:88px;height:86px;min-height:86px;transition:none!important;margin:0;padding:3px 2px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:grab;touch-action:none;user-select:none;z-index:30;line-height:1.05;}
+    .win-icon.desktop-object span{font-size:12px;line-height:1.2;max-width:84px;overflow-wrap:anywhere;}
+    .win-icon.desktop-object.dragging{z-index:300;cursor:grabbing;filter:drop-shadow(0 8px 8px rgba(0,0,0,.4));}
+    .win-taskbar{height:40px;left:0;right:0;width:100%;padding:0;box-sizing:border-box;}
+    .win-start,.win-clock{height:40px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;margin:0;border-radius:0;}
+    .win-start{padding:0 16px;min-width:105px;}
+    .win-clock{padding:0 12px;min-width:115px;flex-direction:column;gap:1px;line-height:1.1;}
+    #file-drop-target{z-index:15;top:28px;right:18px;width:230px;height:115px;}
+    #desktop-context-menu{position:fixed;}
+    .drag-ghost{z-index:5000;opacity:.9;filter:drop-shadow(0 10px 9px rgba(0,0,0,.35));}
+
+    /* Papierkorb als geöffnetes Datei-Fenster */
+    #trash-window{display:none;position:absolute;z-index:110;left:115px;top:55px;width:min(620px,calc(100% - 140px));min-height:210px;background:#f5f7fa;border:1px solid #718096;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.45);color:#263238;text-align:left;overflow:hidden;}
+    .trash-window-titlebar{height:36px;padding:0 10px;background:linear-gradient(180deg,#f9fbfd,#dce5ec);display:flex;align-items:center;justify-content:space-between;font-weight:800;border-bottom:1px solid #aab7c4;}
+    .trash-window-titlebar button{border:0;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:#37474f;padding:0 5px;}
+    .trash-window-toolbar,.trash-file{display:grid;grid-template-columns:minmax(180px,1.35fr) minmax(105px,1fr) minmax(90px,.8fr);gap:10px;align-items:center;}
+    .trash-window-toolbar{min-height:32px;padding:0 12px;border-bottom:1px solid #d1d9df;background:#edf2f6;font-size:12px;color:#52616b;}
+    .trash-window-files{min-height:112px;padding:8px 10px;display:flex;flex-direction:column;align-items:stretch;gap:4px;background:#fff;}
+    .trash-file{width:100%;min-height:44px;margin:0;padding:5px 8px;box-sizing:border-box;color:#263238;font-size:13px;text-shadow:none;cursor:grab;touch-action:none;border:1px solid transparent;border-radius:5px;user-select:none;background:#fff;}
+    .trash-file:hover{background:#eaf4ff;border-color:#8bbbe8;}
+    .trash-file-name{display:flex;align-items:center;gap:9px;min-width:0;font-size:13px;font-weight:700;}
+    .trash-file-icon{font-size:23px;line-height:1;flex:0 0 25px;text-align:center;}
+    .trash-file-meta{font-size:12px;color:#52616b;overflow-wrap:anywhere;}
+    .trash-empty{padding:18px 10px;color:#607d8b;font-size:14px;}
+
+    /* Einfaches Malprogramm für das wiederhergestellte Klassenfahrt-Bild */
+    #paint-window{display:none;position:absolute;z-index:180;left:80px;top:48px;width:min(640px,calc(100% - 100px));background:#f4f6f8;border:1px solid #637381;border-radius:9px;box-shadow:0 12px 32px rgba(0,0,0,.48);color:#263238;text-align:left;overflow:hidden;}
+    .paint-titlebar{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:linear-gradient(180deg,#f9fbfd,#dce5ec);border-bottom:1px solid #aab7c4;font-weight:800;cursor:grab;touch-action:none;user-select:none;}
+    .paint-titlebar:active{cursor:grabbing;}
+    .paint-titlebar button{border:0;background:transparent;font-size:23px;line-height:1;cursor:pointer;color:#37474f;padding:0 5px;touch-action:auto;}
+    .paint-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;box-sizing:border-box;width:100%;padding:7px 8px;background:#edf2f6;border-bottom:1px solid #ccd5dc;}
+    .paint-toolbar button{box-sizing:border-box;flex:0 0 32px;width:32px;height:32px;padding:0;border:1px solid #9eabb5;border-radius:6px;background:#fff;font-size:18px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+    .paint-toolbar button.active{outline:2px solid #1976d2;background:#e3f2fd;}
+    .paint-palette{display:flex;align-items:center;justify-content:space-between;gap:4px;flex:1;min-width:0;}
+    .paint-color{width:20px;height:20px;min-width:20px;flex:0 0 20px;padding:0!important;border-radius:50%!important;border:2px solid #fff!important;box-shadow:0 0 0 1px #8a969e;}
+    .paint-fill-tool span{display:inline-block;transform:rotate(-28deg);font-size:18px;}
+    #paint-canvas{display:block;width:calc(100% - 20px);height:230px;margin:10px;background:#fff;border:1px solid #b0bec5;border-radius:4px;touch-action:none;cursor:crosshair;}
+    .paint-hint{margin:0;padding:0 10px 9px;font-size:11px;line-height:16px;color:#546e7a;white-space:nowrap;}
+    #paint-eraser-preview{position:fixed;display:none;z-index:9998;pointer-events:none;box-sizing:border-box;border:2px solid #263238;background:rgba(255,255,255,.18);outline:1px dashed rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(0,0,0,.22);transform:translate(-50%,-50%);}
+    @media(max-width:740px){.paint-toolbar{flex-wrap:wrap;}.paint-palette{order:3;flex-basis:100%;}.paint-hint{white-space:normal;}}
+    @media(max-width:580px){#paint-window{left:54px;top:60px;width:calc(100% - 66px);}#paint-canvas{height:180px;}}
+
+    /* Tastatur: Zeichengruppe und zusätzlicher Navigationsblock */
+    .k-symbol-group{background:#ffe0b2!important;border-color:#e0a14d!important;}
+    .k-symbol-group:hover{outline:3px solid #ef8f24;background:#ffcc80!important;}
+    .kb-main{grid-template-rows:repeat(6,48px);}
+    .kb-function-row{grid-column:1 / -1;display:grid;grid-template-columns:repeat(60,min(1.3vw,13px));grid-template-rows:48px;gap:6px;align-items:stretch;}
+    .k-function-key{background:#e2e8f0;font-size:12px;}
+    .k-function-key.k-function-group-hl{outline:3px solid #607d8b;background:#cfd8dc!important;border-color:#607d8b!important;z-index:5;}
+    .k-sharp-s{flex-direction:column;gap:0;padding:2px;}
+    .k-symbol-group.k-symbol-group-hl{outline:3px solid #ef8f24;background:#ffcc80!important;border-color:#ef8f24!important;z-index:5;}
+    .k-arrow-task.k-arrow-group-hl{outline:3px solid #00897b;background:#80cbc4!important;border-color:#00897b!important;color:#004d40!important;z-index:5;}
+    .k-nav-key.k-home-end-hl{outline:3px solid #5e35b1;background:#d1c4e9!important;border-color:#5e35b1!important;z-index:5;}
+    .k-nav-key.k-page-scroll-hl{outline:3px solid #3949ab;background:#c5cae9!important;border-color:#3949ab!important;z-index:5;}
+    .k-print-group.k-print-group-hl{outline:3px solid #546e7a;background:#cfd8dc!important;border-color:#546e7a!important;z-index:5;}
+    .kb-extra-keys{display:flex;gap:6px;justify-content:center;}
+    .kb-extra-keys .k-key{width:48px;height:38px;font-size:9px;padding:0 2px;white-space:normal;line-height:1.05;background:#d9e3ec;}
+    .hover-tip-group{border-color:#607d8b;}
+    .kb-right-side{display:flex;flex-direction:column;align-items:center;gap:22px;align-self:flex-end;padding-bottom:0;}
+    .kb-navigation{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:6px;background:#eceff1;border:3px solid #90a4ae;border-radius:12px;padding:10px;position:relative;}
+    .kb-navigation:before{content:"Navigationstasten";position:absolute;top:-25px;left:0;right:0;text-align:center;font-size:13px;color:#455a64;font-weight:800;}
+    .k-nav-key{font-size:12px!important;padding:0 2px!important;background:#d9e3ec;}
+    .kb-arrows{margin-top:0;}
+    #tab-advanced-task{display:none;margin-top:16px;padding:14px;background:#ede7f6;border:2px solid #9575cd;border-radius:12px;}
+    #tab-advanced-task h3{margin:0 0 8px;}
+    #tab-advanced-task .task-input{width:160px;max-width:28%;margin:6px;background:#faf8ff;}
+    #tab-advanced-task .task-input:focus{outline:3px solid #7e57c2;}
+    #tab-advanced-status{font-weight:800;margin-top:8px;}
+
+    @media(max-width:850px){
+      .win-screen{height:470px;}
+      #trash-window{left:110px;width:calc(100% - 125px);top:48px;}
+      .keyboard-wrapper{max-width:96vw;}
+    }
+    @media(max-width:580px){
+      .win-screen{height:440px;border-width:12px;border-bottom-width:25px;}
+      .win-icon.desktop-object{width:70px;min-height:68px;font-size:31px;}
+      .win-icon.desktop-object span{font-size:10px;}
+      #trash-window{left:72px;top:46px;width:calc(100% - 82px);min-height:225px;}
+      .trash-window-toolbar,.trash-file{grid-template-columns:minmax(120px,1.3fr) minmax(75px,.85fr) minmax(65px,.7fr);gap:5px;}
+      .trash-window-toolbar{font-size:10px;padding:0 7px;}
+      .trash-window-files{gap:5px;padding:7px;}
+      .trash-file{padding:5px 4px;}
+      .trash-file-name,.trash-file-meta{font-size:10px;}
+      .trash-file-icon{font-size:18px;flex-basis:20px;}
+      .kb-function-row{grid-template-columns:repeat(60,min(1.3vw,13px));}
+      .kb-extra-keys .k-key{width:42px;height:36px;font-size:8px;}
+      .keyboard-wrapper{justify-content:flex-start;}
+    }
+
+
+
+    /* === V05: Tastaturbereiche präzise an den Tastenreihen ausrichten === */
+    .keyboard-wrapper{align-items:flex-start;}
+    .kb-main{grid-template-rows:repeat(6,48px);}
+    .kb-function-row{
+      grid-column:1 / -1;
+      grid-row:1;
+      display:grid;
+      grid-template-columns:repeat(60,min(1.3vw,13px));
+      grid-template-rows:48px;
+      gap:6px;
+      align-items:stretch;
+    }
+    .k-esc-key{grid-column:1 / span 4;font-size:12px;}
+    .kb-function-packs{
+      grid-column:5 / 61;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:clamp(8px,1vw,14px);
+      min-width:0;
+    }
+    .kb-function-pack{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;min-width:0;}
+    .kb-function-pack .k-key{box-sizing:border-box;min-width:0;width:100%;height:48px;padding:0 2px;}
+    .k-esc-key{box-sizing:border-box;height:48px;}
+    .kb-right-side{position:relative;display:block;flex:0 0 156px;width:156px;height:318px;align-self:flex-start;padding:0;margin:0;}
+    .kb-extra-keys{position:absolute;top:0;left:0;display:grid;grid-template-columns:repeat(3,48px);gap:6px;width:156px;height:48px;}
+    .kb-extra-keys .k-key{box-sizing:border-box;width:48px;height:48px;min-width:0;font-size:9px;line-height:1.05;padding:0 2px;}
+    .kb-navigation{
+      position:absolute;top:54px;left:0;
+      display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:6px;
+      width:156px;height:102px;padding:0;margin:0;
+      background:transparent!important;border:0!important;border-radius:0;
+    }
+    .kb-navigation:before,.kb-arrows:before{display:none!important;content:none!important;}
+    .kb-arrows{
+      position:absolute;top:216px;left:0;align-self:auto;
+      display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:6px;
+      width:156px;height:102px;padding:0;margin:0;
+      background:transparent!important;border:0!important;border-radius:0;
+    }
+    .kb-navigation .k-nav-key,.kb-arrows .k-arrow-task{
+      box-sizing:border-box;width:48px;height:48px;min-width:48px;min-height:48px;
+      background:transparent!important;border:2px solid transparent!important;
+      box-shadow:none!important;border-radius:6px;color:#37474f;
+    }
+    .kb-navigation .k-nav-key:hover,.kb-arrows .k-arrow-task:hover{background:rgba(33,150,243,.10)!important;filter:none;}
+    .kb-navigation .k-nav-key:active,.kb-arrows .k-arrow-task:active{transform:none;box-shadow:none!important;}
+    .kb-arrows .arrow-empty{width:48px;height:48px;}
+    .kb-extra-keys .k-print-group{height:48px;min-height:48px;}
+    .trash-window-titlebar{cursor:move;touch-action:none;user-select:none;}
+    .trash-window-titlebar button{cursor:pointer;touch-action:auto;}
+    .trash-file{touch-action:none;}
+    .trash-window-files{min-height:112px;height:auto;}
+    #trash-window{height:auto;}
+    #scroll-inner{height:auto!important;min-height:650px;padding:6px 4px;}
+    #scroll-inner>p:first-child{margin-top:0;}
+    @media(max-width:580px){
+      /* Auch auf schmalen Displays bleiben die Tasten exakt auf den Reihen ausgerichtet; die Tastatur kann horizontal scrollen. */
+      .kb-right-side{flex-basis:156px;width:156px;}
+      .kb-extra-keys{grid-template-columns:repeat(3,48px);width:156px;}
+      .kb-extra-keys .k-key{box-sizing:border-box;width:48px;height:48px;font-size:9px;}
+      .kb-navigation,.kb-arrows{grid-template-columns:repeat(3,48px);width:156px;}
+      .kb-navigation .k-nav-key,.kb-arrows .k-arrow-task,.kb-arrows .arrow-empty{box-sizing:border-box;width:48px;height:48px;min-width:48px;min-height:48px;}
+      .kb-navigation{grid-template-rows:repeat(2,48px);height:102px;}
+      .kb-arrows{grid-template-rows:repeat(2,48px);height:102px;}
+    }
+
+
+    /* === V06: sichtbare Tastenumrisse und maßgerechte Funktionstasten === */
+    .keyboard-wrapper{--kb-column:min(1.3vw,13px);}
+    .kb-main{grid-template-columns:repeat(60,var(--kb-column));}
+    .kb-function-row{grid-template-columns:repeat(60,var(--kb-column));}
+    .kb-function-packs{display:flex!important;justify-content:space-between;align-items:stretch;width:100%;min-width:0;gap:0;}
+    .kb-function-pack{display:flex!important;flex:0 0 auto;gap:6px;min-width:0;width:max-content;}
+    .kb-function-pack .k-function-key{
+      box-sizing:border-box;flex:0 0 auto;width:calc(var(--kb-column) + var(--kb-column) + var(--kb-column) + var(--kb-column) + 18px);
+      min-width:0;height:48px;padding:0 2px;font-size:12px;
+    }
+    .kb-navigation .k-nav-key,.kb-arrows .k-arrow-task{
+      background:transparent!important;border:2px solid #90a4ae!important;
+      box-shadow:0 3px 0 #90a4ae!important;
+    }
+    .kb-navigation .k-nav-key:hover,.kb-arrows .k-arrow-task:hover{background:rgba(33,150,243,.10)!important;}
+    .kb-navigation .k-nav-key:active,.kb-arrows .k-arrow-task:active{box-shadow:0 1px 0 #90a4ae!important;}
+    .k-enter-iso{clip-path:polygon(0 0,100% 0,100% 100%,18% 100%,18% 50%,0 50%);border-radius:6px;overflow:hidden;position:relative;}
+    .k-enter-iso::after{content:"";position:absolute;left:18%;top:50%;bottom:1px;border-left:2px solid #90a4ae;pointer-events:none;}
+    .k-enter-iso span{align-self:center;}
+    .k-menu-key{padding:0!important;}
+    .k-menu-symbol{width:19px;height:19px;box-sizing:border-box;border:2px solid #37474f;border-radius:2px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;}
+    .k-menu-symbol i{display:block;width:8px;height:1.5px;background:#37474f;border-radius:2px;}
+    .k-angle-key{flex-direction:column;gap:0;padding:2px;}
+    .k-angle-key .key-shift-symbol{font-size:12px;line-height:1;align-self:flex-end;margin-right:4px;}
+    .k-angle-key .key-number-main{font-size:17px;line-height:1;}
+    .alt-switch-game{margin:12px 0;padding:14px;border:2px solid #90caf9;border-radius:12px;background:linear-gradient(135deg,#e3f2fd,#f3e5f5);}
+    .alt-switch-windows{display:flex;gap:14px;justify-content:center;align-items:stretch;margin:12px 0;flex-wrap:wrap;}
+    .alt-switch-window{width:180px;min-height:82px;padding:12px;border:3px solid #90a4ae;border-radius:10px;background:#fff;box-shadow:0 4px 0 #cfd8dc;transition:transform .2s,border-color .2s,box-shadow .2s;}
+    .alt-switch-window.active{border-color:#2196f3;box-shadow:0 4px 0 #64b5f6;transform:translateY(-4px);}
+    .alt-switch-window strong{display:block;font-size:17px;margin-bottom:6px;}
+    .alt-switch-hint{font-weight:700;color:#1565c0;}
+
+    /* === V07: Funktionstasten mit drei gleich breiten Zwischenräumen === */
+    .kb-function-row{grid-column:1 / -1;display:flex;align-items:stretch;width:100%;min-width:0;}
+    .kb-function-packs{display:flex!important;justify-content:space-between!important;align-items:stretch;width:100%;min-width:0;gap:0;}
+    .kb-function-pack{display:flex!important;flex:0 0 auto;gap:6px;min-width:0;width:max-content;}
+    .kb-function-pack .k-function-key{box-sizing:border-box;flex:0 0 auto;width:calc(var(--kb-column) * 4 + 18px);min-width:0;height:48px;padding:0 2px;font-size:12px;}
+    .k-esc-key{box-sizing:border-box;flex:0 0 auto;width:calc(var(--kb-column) * 4 + 18px);height:48px;grid-column:auto;font-size:12px;}
+
+    /* Pfeiltasten zeigen dauerhaft ihre bisherige Auswahlfarbe. */
+    .kb-arrows .k-arrow-task{background:#80cbc4!important;border-color:#00897b!important;color:#004d40!important;box-shadow:0 3px 0 #00897b!important;}
+    .kb-arrows .k-arrow-task.k-arrow-group-hl{background:#80cbc4!important;border-color:#00897b!important;color:#004d40!important;outline:3px solid #00897b;}
+
+    /* Alle Navigationstasten erhalten dieselbe Farbe, auch gruppenübergreifend. */
+    .kb-navigation .k-nav-key{background:#d1c4e9!important;border-color:#5e35b1!important;color:#311b92!important;box-shadow:0 3px 0 #5e35b1!important;}
+    .kb-navigation .k-nav-key.k-home-end-hl,.kb-navigation .k-nav-key.k-page-scroll-hl{background:#d1c4e9!important;border-color:#5e35b1!important;color:#311b92!important;outline:3px solid #5e35b1;}
+
+    @media(max-width:580px){
+      .kb-function-row{width:100%;}
+      .kb-function-packs{width:100%;}
+      .k-esc-key,.kb-function-pack .k-function-key{width:calc(var(--kb-column) * 4 + 18px);}
+    }
+
+  
+    /* V12: # steht in der Grundreihe direkt zwischen Ä und dem unteren Enter-Schenkel. */
+    .k-enter-iso{grid-column:55 / span 6 !important;grid-row:3 / span 2 !important;}
+    .k-hash-key{grid-column:52 / span 4 !important;grid-row:4 !important;position:relative;z-index:6;}
+  
+
+    /* V13/V14: vollständig umrandete ISO-Entertaste; Unterkanten an + und # ausgerichtet */
+    .k-enter-iso{
+      clip-path:none!important;
+      border:0!important;
+      border-radius:0!important;
+      box-shadow:none!important;
+      background:transparent!important;
+      overflow:visible!important;
+      position:relative!important;
+      padding:0!important;
+    }
+    .k-enter-iso::after{display:none!important;}
+    .k-enter-iso .enter-key-outline{
+      position:absolute;inset:0;width:100%;height:100%;display:block;
+      z-index:0;pointer-events:none;overflow:visible;
+    }
+    .k-enter-iso .enter-key-outline path{
+      fill:#bbdefb;stroke:#90a4ae;stroke-width:3;
+      stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;
+    }
+    .k-enter-iso .enter-key-content{
+      position:relative;z-index:1;align-self:center;display:flex;
+      flex-direction:column;align-items:center;justify-content:center;
+      line-height:1.1;pointer-events:none;
+    }
+    .k-enter-iso .enter-key-content span{align-self:center;}
+
+    /* Infofenster erscheinen mit einem kurzen, gut sichtbaren Einplopp-Effekt. */
+    @keyframes infoModalPopIn{
+      0%{opacity:0;transform:translate(-50%,-50%) scale(.72);}
+      72%{opacity:1;transform:translate(-50%,-50%) scale(1.035);}
+      100%{opacity:1;transform:translate(-50%,-50%) scale(1);}
+    }
+    #info-modal.info-pop-in{animation:infoModalPopIn .36s cubic-bezier(.175,.885,.32,1.275) both;}
+    #info-overlay.info-overlay-pop-in{animation:infoOverlayFadeIn .22s ease-out both;}
+    @keyframes infoOverlayFadeIn{from{opacity:0;}to{opacity:1;}}
+
+    /* Ab sechs Dateien bleibt die Papierkorb-Liste auf fünf sichtbare Zeilen begrenzt. */
+    .trash-window-files.is-scrollable{
+      box-sizing:border-box;max-height:252px;overflow-y:auto;overflow-x:hidden;
+      overscroll-behavior:contain;scrollbar-gutter:stable;
+    }
+    .desktop-menu-item.disabled{opacity:.55;cursor:not-allowed;}
+    .paint-fill-tool svg{display:block;width:24px;height:24px;overflow:visible;}
+    @media(max-width:580px){.trash-window-files.is-scrollable{max-height:254px;}}
+
+  </style>
+</head>
+<body>
+
+  <div id="success-overlay">
+    <div class="success-box">
+      <h2 style="color:#2e7d32;margin-top:0;font-size:28px;">🎉 Super gemacht! 🎉</h2>
+      <p style="font-size:18px;">Du hast die Aufgabe erfolgreich erledigt.</p>
+      <button class="btn-close" style="width:auto;margin-top:10px;font-size:18px;" onclick="closeSuccessPopup()">Klasse!</button>
+    </div>
+  </div>
+
+  <div id="screen-desk" class="desk-container">
+    <div class="instruction-banner">
+      <h1 style="margin:0;color:#3e2723;">Willkommen an deinem Arbeitsplatz!</h1>
+      <p style="font-size:18px;margin-bottom:0;">Klicke auf den Monitor, die Tastatur oder die Maus, um sie dir ganz genau anzusehen.</p>
+    </div>
+
+    <div class="desk-surface" aria-label="Schreibtisch mit Bildschirm, Tastatur und Maus">
+      <div id="start-monitor" class="item-click start-choice" onclick="openDetail('screen-monitor')">
+        <div class="preview-monitor"><div class="preview-monitor-screen"></div><div class="preview-monitor-neck"></div><div class="preview-monitor-base"></div></div>
+        <span>Bildschirm</span><span class="start-progress" id="start-score-monitor">0 / 8 erledigt</span>
+      </div>
+      <div id="start-keyboard" class="item-click start-choice" onclick="openDetail('screen-keyboard')">
+        <div class="preview-keyboard"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <span>Tastatur</span><span class="start-progress" id="start-score-keyboard">0 / 18 erledigt</span>
+      </div>
+      <div id="start-mouse" class="item-click start-choice" onclick="openDetail('screen-mouse')">
+        <div class="preview-mouse"><div class="preview-mouse-left"></div><div class="preview-mouse-right"></div></div>
+        <span>Maus</span><span class="start-progress" id="start-score-mouse">0 / 3 erledigt</span>
+      </div>
+    </div>
+    <div id="all-levels-done">🏆 Fantastisch! Du hast alle Aufgaben zu Bildschirm, Tastatur und Maus erfolgreich abgeschlossen!</div>
+  </div>
+
+  <div id="screen-monitor" class="detail-screen">
+    <button class="back-btn" onclick="goBack()">⬅ Zurück zum Schreibtisch</button>
+    <h1>Der Monitor & Windows <span class="progress-counter" id="prog-monitor">0 / 8 Aufgaben</span></h1>
+
+    <div class="monitor-stage" id="monitor-stage">
+    <div class="win-screen" id="win-screen" oncontextmenu="showDesktopContextMenu(event)">
+      <div class="win-icon desktop-object" id="icon-browser" data-desktop-file="true" data-file-name="Browser" data-file-icon="🌐" data-original-location="Desktop" style="left:18px;top:16px;" onclick="openBrowserIcon()">🌐<span>Browser</span></div>
+      <div class="win-icon desktop-object" id="icon-files" data-desktop-file="true" data-file-name="Dateien" data-file-icon="📁" data-original-location="Desktop" style="left:18px;top:112px;" onclick="openFilesIcon()">📁<span>Dateien</span></div>
+      <div class="win-icon desktop-object" id="icon-trash" data-file-icon="🗑️" style="left:18px;top:208px;" onclick="openTrashFolder()">🗑️<span>Papierkorb</span></div>
+
+      <div id="file-drop-target">Ziel: Dateien hier ablegen</div>
+      <div id="trash-window" role="group" aria-label="Geöffneter Papierkorb">
+        <div class="trash-window-titlebar" title="Fenster durch Ziehen verschieben"><span>🗑️ Papierkorb</span><button type="button" aria-label="Fenster schließen" onclick="document.getElementById('trash-window').style.display='none'">×</button></div>
+        <div class="trash-window-toolbar"><span>Name</span><span>Ursprünglicher Speicherort</span><span>Gelöscht am</span></div>
+        <div class="trash-window-files" id="trash-window-files">
+          <div id="trash-file-math" class="trash-file" data-file-name="Mathe-Hausaufgaben.docx" data-file-icon="📄" data-original-location="Dokumente" data-deleted-date="28.10.2026" title="Datei mit der Maus auf den Desktop ziehen">
+            <span class="trash-file-name"><span class="trash-file-icon">📄</span>Mathe-Hausaufgaben.docx</span><span class="trash-file-meta">Dokumente</span><span class="trash-file-meta">28.10.2026</span>
+          </div>
+          <div id="trash-file-photo" class="trash-file" data-file-name="Klassenfahrt.jpg" data-file-icon="🖼️" data-original-location="Bilder" data-deleted-date="29.10.2026" title="Datei mit der Maus auf den Desktop ziehen">
+            <span class="trash-file-name"><span class="trash-file-icon">🖼️</span>Klassenfahrt.jpg</span><span class="trash-file-meta">Bilder</span><span class="trash-file-meta">29.10.2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="paint-window" role="dialog" aria-label="Malprogramm" oncontextmenu="event.preventDefault()">
+        <div class="paint-titlebar" title="Fenster durch Ziehen verschieben"><span>🎨 Malprogramm: Klassenfahrt.jpg</span><button type="button" aria-label="Malprogramm schließen" onclick="closePaintProgram()">×</button></div>
+        <div class="paint-toolbar">
+          <button type="button" class="paint-tool active" data-paint-tool="pen" aria-label="Stift" title="Stift">✏️</button>
+          <button type="button" class="paint-tool" data-paint-tool="eraser" aria-label="Radiergummi" title="Radiergummi">🧽</button>
+          <button type="button" class="paint-tool paint-fill-tool" data-paint-tool="fill" aria-label="Ausfüllen" title="Ausfüllen">
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <g transform="rotate(27 14 16)">
+                <path d="M6 10 Q14 7 23 10 L21.5 27 Q14.5 30 8 27 Z" fill="#e4a84b" stroke="#654b35" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M6 10 Q14 13 23 10 L22.7 14 Q14 17 6.5 14 Z" fill="#42a5f5" stroke="#1565c0" stroke-width="1.2"/>
+                <path d="M8 10 Q14 4.5 21 10" fill="none" stroke="#654b35" stroke-width="1.6" stroke-linecap="round"/>
+              </g>
+              <path d="M23 11 C27 13 25 17 29 19" fill="none" stroke="#2196f3" stroke-width="2.8" stroke-linecap="round"/>
+              <path d="M27 22 C24.7 25 26.2 27.5 28.3 27.5 C30.5 27.5 31.1 24.8 27 22Z" fill="#2196f3"/>
+              <path d="M22 19 C20.5 21 21.3 22.5 22.7 22.5 C24.1 22.5 24.4 20.8 22 19Z" fill="#64b5f6"/>
+            </svg>
+          </button>
+          <div class="paint-palette" aria-label="Farbauswahl">
+            <button type="button" class="paint-color active" data-paint-color="#202124" style="background:#202124" aria-label="Schwarz" title="Schwarz"></button>
+            <button type="button" class="paint-color" data-paint-color="#e53935" style="background:#e53935" aria-label="Rot" title="Rot"></button>
+            <button type="button" class="paint-color" data-paint-color="#fb8c00" style="background:#fb8c00" aria-label="Orange" title="Orange"></button>
+            <button type="button" class="paint-color" data-paint-color="#fdd835" style="background:#fdd835" aria-label="Gelb" title="Gelb"></button>
+            <button type="button" class="paint-color" data-paint-color="#43a047" style="background:#43a047" aria-label="Grün" title="Grün"></button>
+            <button type="button" class="paint-color" data-paint-color="#00897b" style="background:#00897b" aria-label="Türkis" title="Türkis"></button>
+            <button type="button" class="paint-color" data-paint-color="#1e88e5" style="background:#1e88e5" aria-label="Blau" title="Blau"></button>
+            <button type="button" class="paint-color" data-paint-color="#8e24aa" style="background:#8e24aa" aria-label="Lila" title="Lila"></button>
+            <button type="button" class="paint-color" data-paint-color="#d81b60" style="background:#d81b60" aria-label="Pink" title="Pink"></button>
+            <button type="button" class="paint-color" data-paint-color="#ffffff" style="background:#ffffff" aria-label="Weiß" title="Weiß"></button>
+          </div>
+          <button type="button" id="paint-clear" aria-label="Alles löschen" title="Alles löschen">🗑️</button>
+        </div>
+        <canvas id="paint-canvas" width="560" height="230" aria-label="Zeichenfläche"></canvas>
+        <p class="paint-hint">Wähle eine Farbe und male mit gedrückter Maustaste. Mit dem Radiergummi kannst du Striche entfernen.</p>
+      </div>
+
+      <div class="win-taskbar">
+        <div class="win-start" onclick="showInfo('Der Start-Knopf','Die Schaltzentrale! Hier findest du Programme und Einstellungen. Außerdem kann der Computer hier ausgeschaltet, in den Energiesparmodus versetzt oder neugestartet werden. Insbesondere das Neustarten hilft oft, um Probleme zu beheben.',{key:'start',task:'Wofür könnte der Energiesparmodus gut sein? Wähle die passende Antwort im Übungs-Kasten.',unlockArea:'monitor-exercise-area'})">⊞ Start</div>
+        <div class="win-clock" id="win-clock" onclick="showInfo('Uhrzeit & Datum','Die Anzeige zeigt die aktuelle Uhrzeit und das heutige Datum deines Computers.',{key:'clock',task:'Lies die aktuelle Uhrzeit ab. Wähle die passende Uhrzeit im Übungs-Kasten.',unlockArea:'monitor-exercise-area'})"><span id="clock-time">--:--:--</span><br><span id="clock-date">--.--.----</span></div>
+      </div>
+      <div id="monitor-off-overlay" aria-hidden="true" aria-label="Bildschirm ausgeschaltet"></div>
+    </div>
+    <div class="monitor-hardware-controls" aria-label="Ein- und Ausschalter des Monitors">
+      <span id="monitor-power-led" class="monitor-power-led is-on" role="img" aria-label="Bildschirm eingeschaltet" title="Bildschirm eingeschaltet"></span>
+      <button type="button" id="monitor-power-button" class="monitor-power-button" onclick="toggleMonitorPower()" aria-label="Bildschirm ausschalten" title="Bildschirm ausschalten">⏻</button>
+    </div>
+    </div>
+    <div id="desktop-context-menu">
+      <div class="desktop-menu-item" id="desktop-menu-new-folder" onclick="handleDesktopMenuAction('new-folder')">📁 Neuer Ordner</div>
+      <div class="desktop-menu-item" id="desktop-menu-delete" style="display:none;" onclick="handleDesktopMenuAction('delete')">🗑️ Löschen</div>
+    </div>
+
+    <div id="monitor-exercise-area" class="exercise-area">
+      <h3>Übungs-Kasten (Monitor)</h3>
+      <div id="monitor-task-files" class="monitor-task">
+        <p><span class="badge">Dateien</span> Ziehe 📁 in das Ziel-Feld oben rechts auf dem Bildschirm.</p>
+        <p class="status wait" id="files-status">Status: Noch nicht abgelegt.</p>
+      </div>
+      <div id="monitor-task-browser" class="monitor-task">
+        <p><span class="badge">Browser</span> Wofür kannst du einen Browser verwenden?</p>
+        <button class="game-choice" onclick="answerMonitorQuiz('browser','browser')">🔎 Suchmaschinen verwenden und Internetseiten aufrufen</button>
+        <button class="game-choice" onclick="answerMonitorQuiz('browser','calculator')">🧮 Texte und Rechnungen schreiben</button>
+        <button class="game-choice" onclick="answerMonitorQuiz('browser','trash')">🗑️ Dateien aus dem Papierkorb wiederherstellen</button>
+        <p id="browser-game-status" class="game-status wait">Wähle eine Antwort.</p>
+      </div>
+      <div id="monitor-task-trash" class="monitor-task">
+        <p><span class="badge">Papierkorb</span> Ziehe die Datei „Mathe-Hausaufgabe.docx“ aus dem geöffneten Papierkorb-Fenster auf den Desktop. Dort soll sie anschließend sichtbar bleiben.</p>
+        <p id="trash-game-status" class="game-status wait">Status: Die Datei liegt noch im Papierkorb.</p>
+      </div>
+      <div id="monitor-task-start" class="monitor-task">
+        <p><span class="badge">Start</span> Wofür könnte der Energiesparmodus gut sein?</p>
+        <button class="game-choice" onclick="answerMonitorQuiz('start','sleep')">Der Computer verbraucht weniger Strom, wenn ich gerade eine Pause mache.</button>
+        <button class="game-choice" onclick="answerMonitorQuiz('start','shutdown')">Alle Dateien auf dem Computer werden gelöscht.</button>
+        <button class="game-choice" onclick="answerMonitorQuiz('start','wallpaper')">Der Computer wird dadurch neu gestartet.</button>
+        <p id="start-game-status" class="game-status wait">Wähle die passende Möglichkeit.</p>
+      </div>
+      <div id="monitor-task-clock" class="monitor-task">
+        <p><span class="badge">Uhrzeit</span> Welche Anzeige zeigt die aktuelle Uhrzeit?</p>
+        <div id="clock-quiz-choices"></div>
+        <p id="clock-game-status" class="game-status wait">Wähle die passende Uhrzeit.</p>
+      </div>
+      <div id="monitor-task-newfolder" class="monitor-task">
+        <p><span class="badge">Neuer Ordner</span> Klicke mit der rechten Maustaste auf eine freie Stelle des Desktops und wähle „Neuer Ordner“.</p>
+        <p id="new-folder-status" class="game-status wait">Status: Erstelle einen neuen Ordner auf dem Desktop.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-keyboard" class="detail-screen">
+    <button class="back-btn" onclick="goBack()">⬅ Zurück zum Schreibtisch</button>
+    <h1>Die Tastatur <span class="progress-counter" id="prog-keyboard">0 / 18 Aufgaben</span></h1>
+    <p><b>Lege deine Maus über</b> die Tasten oder klicke die bunten Spezial-Tasten an, um Erklärungen und Aufgaben zu entdecken!</p>
+
+    <div class="keyboard-wrapper">
+      <div class="kb-main">
+        <div class="kb-function-row" aria-label="Escape- und Funktionstasten">
+          <div class="kb-function-packs">
+            <div class="k-key k-esc-key" onclick="showInfo('Esc (Escape)','Mit Esc kannst du eine Aktion abbrechen oder ein geöffnetes Menü schließen.')">ESC</div>
+            <div class="kb-function-pack">
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F1</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F2</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F3</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F4</div>
+            </div>
+            <div class="kb-function-pack">
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F5</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F6</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F7</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F8</div>
+            </div>
+            <div class="kb-function-pack">
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F9</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F10</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F11</div>
+              <div class="k-key k-function-key" onclick="showInfo('Funktionstasten F1 bis F12','Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.')">F12</div>
+            </div>
+          </div>
+        </div>
+        <div class="k-key s-4" onclick="showInfo('Zirkumflex (^)','Dieses Zeichen heißt Zirkumflex. Du findest es links neben der Zahlenreihe.')">^</div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: !" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">!</span><span class="key-number-main">1</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: &quot;" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">&quot;</span><span class="key-number-main">2</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: §" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">§</span><span class="key-number-main">3</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: $" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">$</span><span class="key-number-main">4</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: %" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">%</span><span class="key-number-main">5</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: &amp;" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">&amp;</span><span class="key-number-main">6</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: /" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">/</span><span class="key-number-main">7</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: (" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">(</span><span class="key-number-main">8</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: )" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">)</span><span class="key-number-main">9</span></div>
+        <div class="k-key s-4 k-number k-num-task" title="Mit Shift: =" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">=</span><span class="key-number-main">0</span></div>
+        
+        <div class="k-key s-4 k-umlaut k-sharp-s" title="Mit Shift: ?" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß). Mit Shift erreichst du auf dieser Taste auch das Fragezeichen (?).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">?</span><span class="key-number-main">ß</span></div>
+        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">´</div>
+        <div class="k-key k-backspace s-8" onclick="showInfo('Backspace (Löschen)','Tippfehler? Diese Taste löscht den Buchstaben LINKS vom blinkenden Strich (Cursor).', {key:'backspace', task:'Lösche die falschen Buchstaben und mache aus „Haaallo“ das Wort „Hallo“.', unlockArea:'keyboard-exercise-area'})">⌫</div>
+
+        <div class="k-key s-6 k-tab" onclick="showInfo('Tabulator (Tab)','Damit kannst du in einem Formular schnell zum nächsten Feld springen.', {key:'tab', task:'Klicke in das erste Feld und drücke die Tab-Taste auf deiner Tastatur.', unlockArea:'keyboard-exercise-area'})">⇥ Tab</div>
+        <div class="k-key k-letter s-4">Q</div>
+        <div class="k-key k-letter s-4">W</div>
+        <div class="k-key k-letter s-4">E</div>
+        <div class="k-key k-letter s-4">R</div>
+        <div class="k-key k-letter s-4">T</div>
+        <div class="k-key k-letter s-4">Z</div>
+        <div class="k-key k-letter s-4">U</div>
+        <div class="k-key k-letter s-4">I</div>
+        <div class="k-key k-letter s-4">O</div>
+        <div class="k-key k-letter s-4">P</div>
+        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ü</div>
+        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">+</div>
+        <div class="k-key k-enter k-enter-iso" onclick="showInfo('Enter (Bestätigen)','Hiermit springst du in die nächste Zeile oder bestätigst eine Eingabe.', {key:'enter', task:'Tippe „OK“ ein und drücke dann die Enter-Taste auf deiner Tastatur!', unlockArea:'keyboard-exercise-area'})">
+          <svg class="enter-key-outline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path d="M8 2 H92 Q98 2 98 8 V94 Q98 100 92 100 H24 Q18 100 18 94 V53 Q18 47 12 47 H8 Q2 47 2 41 V8 Q2 2 8 2 Z"/>
+          </svg>
+          <span class="enter-key-content">⏎<br><span style="font-size:11px;">Enter</span></span>
+        </div>
+
+        <div class="k-key k-caps s-7" onclick="showInfo('Feststelltaste (Caps Lock)','Vorsicht! Wenn du diese drückst, schreibst du plötzlich ALLES GROSS. Drücke sie nochmal, um das auszuschalten.', {key:'caps', task:'Tippe das Wort „HALLO“ (benutze dafür die Caps Lock Taste).', unlockArea:'keyboard-exercise-area'})">⇪ CapsLock</div>
+        <div class="k-key k-letter s-4">A</div>
+        <div class="k-key k-letter s-4">S</div>
+        <div class="k-key k-letter s-4">D</div>
+        <div class="k-key k-letter s-4">F</div>
+        <div class="k-key k-letter s-4">G</div>
+        <div class="k-key k-letter s-4">H</div>
+        <div class="k-key k-letter s-4">J</div>
+        <div class="k-key k-letter s-4">K</div>
+        <div class="k-key k-letter s-4">L</div>
+        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ö</div>
+        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ä</div>
+        <div class="k-key s-4 k-symbol-group k-hash-key" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">#</div>
+
+        <div class="k-key k-shift s-5" onclick="showInfo('Shift (links)','Halte diese Taste gedrückt, während du einen Buchstaben tippst, um ihn GROSS zu schreiben.', {key:'shift', task:'Schreibe das Wort „Haus“ mit einem großen Anfangsbuchstaben!', unlockArea:'keyboard-exercise-area'})">⇧</div>
+        <div class="k-key s-4 k-angle-key" onclick="showInfo('Kleiner- und Größerzeichen','Mit dieser Taste schreibst du das Kleinerzeichen. Halte Shift gedrückt und drücke dieselbe Taste, um das Größerzeichen zu schreiben.',{key:'otherSymbols',task:'Schreibe genau 3>2 in das Eingabefeld.',expected:'3>2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">&gt;</span><span class="key-number-main">&lt;</span></div>
+        <div class="k-key k-letter s-4">Y</div>
+        <div class="k-key k-letter s-4">X</div>
+        <div class="k-key k-letter s-4">C</div>
+        <div class="k-key k-letter s-4">V</div>
+        <div class="k-key k-letter s-4">B</div>
+        <div class="k-key k-letter s-4">N</div>
+        <div class="k-key k-letter s-4">M</div>
+        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">,</div>
+        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">.</div>
+        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">-</div>
+        <div class="k-key k-shift s-11" onclick="showInfo('Shift (rechts)','Genau das Gleiche wie links! Nimm einfach die, die deine Hand besser erreicht.', {key:'shift', task:'Schreibe das Wort „Haus“ in Großbuchstaben!', unlockArea:'keyboard-exercise-area'})">⇧ Shift</div>
+
+        <div class="k-key s-6" onclick="showInfo('Strg (Ctrl)','Mit Strg kannst du wichtige Tastenkombinationen verwenden: Strg + C kopiert, Strg + V fügt ein und Strg + X schneidet aus.', {key:'ctrl',task:'Welche Tastenkombination kopiert einen markierten Text?',unlockArea:'keyboard-exercise-area'})">Strg</div>
+        <div class="k-key s-5" onclick="showWindowsKeyInfo()">⊞</div>
+        <div class="k-key s-5" onclick="showInfo('Alt','Mit Alt kannst du zusammen mit anderen Tasten besondere Funktionen auslösen. Ein bekanntes Beispiel ist Alt + Tab: Damit wechselst du zwischen geöffneten Programmen.', {key:'alt',task:'Probiere im kleinen Fenstersprung-Spiel aus, welche Tastenkombination zwischen geöffneten Programmen wechselt.',unlockArea:'keyboard-exercise-area'})">Alt</div>
+        <div class="k-key k-space s-28" onclick="showInfo('Leertaste','Die größte Taste macht ein Leerzeichen zwischen zwei Wörtern.', {key:'space', task:'Tippe „Hallo Welt“ mit einem Leerzeichen dazwischen.', unlockArea:'keyboard-exercise-area'})">Leertaste</div>
+        <div class="k-key k-altgr s-5" onclick="showInfo('Alt Gr','Der Geheimschlüssel! Halte diese Taste gedrückt und drücke dann das Q, um ein @-Zeichen für E-Mails zu machen.', {key:'altgr', task:'Mache das Klammeraffe-Zeichen: @', unlockArea:'keyboard-exercise-area'})">Alt Gr</div>
+        <div class="k-key s-5 k-menu-key" aria-label="Menü-Taste" onclick="showInfo('Menü-Taste','Mit der Menü-Taste öffnest du ein kleines Menü mit passenden Möglichkeiten für das ausgewählte Element. Das ist eine Alternative zum Rechtsklick: Du bekommst dieselben passenden Auswahlmöglichkeiten, aber mit der Tastatur statt mit der Maus.')"><span class="k-menu-symbol" aria-hidden="true"><i></i><i></i><i></i></span></div>
+        <div class="k-key s-6" onclick="showInfo('Strg (Ctrl)','Mit Strg kannst du wichtige Tastenkombinationen verwenden: Strg + C kopiert, Strg + V fügt ein und Strg + X schneidet aus.', {key:'ctrl',task:'Welche Tastenkombination kopiert einen markierten Text?',unlockArea:'keyboard-exercise-area'})">Strg</div>
+      </div>
+
+      <div class="kb-right-side">
+        <div class="kb-extra-keys" aria-label="Weitere Tasten oberhalb des Navigationsblocks">
+          <div class="k-key k-print-group" onclick="showInfo('Druck, Rollen und Pause','Diese drei Tasten haben Sonderfunktionen. Druck kann einen Bildschirmausschnitt aufnehmen. Rollen und Pause werden heute nur noch selten verwendet.')">DRUCK</div>
+          <div class="k-key k-print-group" onclick="showInfo('Druck, Rollen und Pause','Diese drei Tasten haben Sonderfunktionen. Druck kann einen Bildschirmausschnitt aufnehmen. Rollen und Pause werden heute nur noch selten verwendet.')">ROLLEN</div>
+          <div class="k-key k-print-group" onclick="showInfo('Druck, Rollen und Pause','Diese drei Tasten haben Sonderfunktionen. Druck kann einen Bildschirmausschnitt aufnehmen. Rollen und Pause werden heute nur noch selten verwendet.')">PAUSE</div>
+        </div>
+        <div class="kb-navigation" aria-label="Navigationsblock">
+          <div class="k-key k-nav-key" onclick="showInfo('Einfg (Einfügen)','Mit Einfg kannst du zwischen dem Einfüge- und Überschreibmodus wechseln.')">EINFG</div>
+          <div class="k-key k-nav-key k-home-end" onclick="showInfo('Pos1 und Ende','Mit Pos1 springst du an den Anfang einer Zeile. Mit Ende springst du ans Ende der Zeile.',{key:'navigation',task:'Klicke in das Textfeld. Drücke zuerst POS1 für den Anfang und danach ENDE für das Ende der Zeile.',unlockArea:'keyboard-exercise-area'})">POS1</div>
+          <div class="k-key k-nav-key k-page-scroll" onclick="showInfo('Bild hoch und Bild runter','Mit BILD HOCH und BILD RUNTER bewegst du dich seitenweise durch ein Dokument oder eine Internetseite.')">BILD ↑</div>
+          <div class="k-key k-nav-key" onclick="showInfo('Entf (Entfernen)','ENTF löscht das Zeichen rechts vom Cursor oder ein ausgewähltes Objekt.')">ENTF</div>
+          <div class="k-key k-nav-key k-home-end" onclick="showInfo('Pos1 und Ende','Mit Pos1 springst du an den Anfang einer Zeile. Mit Ende springst du ans Ende der Zeile.',{key:'navigation',task:'Klicke in das Textfeld. Drücke zuerst POS1 für den Anfang und danach ENDE für das Ende der Zeile.',unlockArea:'keyboard-exercise-area'})">ENDE</div>
+          <div class="k-key k-nav-key k-page-scroll" onclick="showInfo('Bild hoch und Bild runter','Mit BILD HOCH und BILD RUNTER bewegst du dich seitenweise durch ein Dokument oder eine Internetseite.')">BILD ↓</div>
+        </div>
+        <div class="kb-arrows">
+          <div class="arrow-empty"></div>
+          <div class="k-key k-arrow-task" onclick="showInfo('Pfeiltasten','Mit den Pfeiltasten bewegst du den Cursor nach oben, unten, links oder rechts.', {key:'arrows', task:'Bewege unten den Punkt mit den Pfeiltasten auf deiner echten Tastatur ins Ziel.', unlockArea:'keyboard-exercise-area'})">↑</div>
+          <div class="arrow-empty"></div>
+          <div class="k-key k-arrow-task" onclick="showInfo('Pfeiltasten','Mit den Pfeiltasten bewegst du den Cursor nach oben, unten, links oder rechts.', {key:'arrows', task:'Bewege unten den Punkt mit den Pfeiltasten auf deiner echten Tastatur ins Ziel.', unlockArea:'keyboard-exercise-area'})">←</div>
+          <div class="k-key k-arrow-task" onclick="showInfo('Pfeiltasten','Mit den Pfeiltasten bewegst du den Cursor nach oben, unten, links oder rechts.', {key:'arrows', task:'Bewege unten den Punkt mit den Pfeiltasten auf deiner echten Tastatur ins Ziel.', unlockArea:'keyboard-exercise-area'})">↓</div>
+          <div class="k-key k-arrow-task" onclick="showInfo('Pfeiltasten','Mit den Pfeiltasten bewegst du den Cursor nach oben, unten, links oder rechts.', {key:'arrows', task:'Bewege unten den Punkt mit den Pfeiltasten auf deiner echten Tastatur ins Ziel.', unlockArea:'keyboard-exercise-area'})">→</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="keyboard-exercise-area" class="exercise-area">
+      <h3>Übungs-Kasten (Tastatur)</h3>
+      <p id="kb-instruction" style="font-weight: bold; color: #1565c0;">Klicke oben auf eine farbige Taste, um die passende Übung zu entdecken.</p>
+
+      <div id="kb-dynamic-task" style="display:none; margin-top: 15px;">
+        <div id="kb-input-container"></div>
+        <p class="status wait" id="kb-task-status">Status: Warte auf Eingabe...</p>
+        <div id="tab-advanced-task">
+          <h3>Fortgeschritten: Zurück mit Shift + Tab ⭐</h3>
+          <p>Das letzte Feld ist bereits ausgewählt. Drücke zweimal <b>Shift + Tab</b>, um erst zum zweiten und dann zum ersten Feld zurückzuspringen.</p>
+          <div class="tab-fields">
+            <input id="tab-adv-1" class="task-input" type="text" placeholder="Feld 1" readonly aria-label="Erstes Feld">
+            <input id="tab-adv-2" class="task-input" type="text" placeholder="Feld 2" readonly aria-label="Zweites Feld">
+            <input id="tab-adv-3" class="task-input" type="text" placeholder="Feld 3" readonly aria-label="Drittes Feld">
+          </div>
+          <p id="tab-advanced-status" class="wait">Status: Drücke zweimal Shift + Tab.</p>
+        </div>
+      </div>
+
+      <div id="arrow-trainer" style="display:none; margin-top: 15px;">
+        <div style="position:relative;width:320px;height:180px;border:2px solid #ffb74d;border-radius:10px;background:#fff;overflow:hidden;">
+          <div id="arrow-dot" style="position:absolute;left:20px;top:70px;width:18px;height:18px;background:#1976d2;border-radius:50%;"></div>
+          <div id="arrow-goal" style="position:absolute;right:20px;bottom:20px;width:44px;height:44px;border:3px solid #4caf50;border-radius:12px;"></div>
+        </div>
+        <p class="status wait" id="arrow-status">Status: Noch nicht am Ziel.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-mouse" class="detail-screen" oncontextmenu="return false;">
+    <button class="back-btn" onclick="goBack()">⬅ Zurück zum Schreibtisch</button>
+    <h1>Die Computer-Maus <span class="progress-counter" id="prog-mouse">0 / 3 Aufgaben</span></h1>
+
+    <div class="big-mouse">
+      <div class="mouse-part m-left"
+           onclick="showInfo('Die linke Maustaste','Mit dem Zeigefinger auf die linke Taste! Damit wählst du Dinge aus. Ein Doppelklick (2x schnell) öffnet Ordner.',
+           {key:'leftclick', task:'Mache unten einen <b>Doppelklick</b> auf „Ordner Öffnen“.', unlockArea:'mouse-exercise-area'})">Links</div>
+      <div class="mouse-part m-wheel"
+           onclick="showInfo('Das Scrollrad','Wenn Internetseiten sehr lang sind, drehst du an diesem Rad, um ganz bequem nach unten oder oben zu fahren.',
+           {key:'wheel', task:'Scrolle im Übungs-Kasten bis ganz nach unten.', unlockArea:'mouse-exercise-area'})"></div>
+      <div class="mouse-part m-right"
+           onclick="showInfo('Die rechte Maustaste','Der Mittelfinger bedient die rechte Taste. Sie öffnet ein Geheim-Menü (Kontextmenü) mit extra Möglichkeiten.',
+           {key:'rightclick', task:'Mache unten einen Rechtsklick in das gepunktete Feld und wähle „Übung abschließen“.', unlockArea:'mouse-exercise-area'})">Rechts</div>
+      <button type="button" class="mouse-part m-side-button m-side-back" aria-label="Seitentaste 1" title="Seitentaste" onclick="showInfo('Seitentasten der Maus','Manche Computermäuse haben an der Seite zusätzliche Tasten. Du kannst sie oft selbst einstellen: Zum Beispiel kann eine Taste im Browser eine Seite zurückgehen und eine andere wieder vorwärts. In Spielen können sie auch andere Aufgaben übernehmen. Nicht jede Maus hat solche Tasten.')"></button>
+      <button type="button" class="mouse-part m-side-button m-side-forward" aria-label="Seitentaste 2" title="Seitentaste" onclick="showInfo('Seitentasten der Maus','Manche Computermäuse haben an der Seite zusätzliche Tasten. Du kannst sie oft selbst einstellen: Zum Beispiel kann eine Taste im Browser eine Seite zurückgehen und eine andere wieder vorwärts. In Spielen können sie auch andere Aufgaben übernehmen. Nicht jede Maus hat solche Tasten.')"></button>
+    </div>
+
+    <div id="mouse-exercise-area" class="exercise-area" oncontextmenu="showContextMenu(event)">
+      <h3>Übungs-Kasten (Maus)</h3>
+      <p id="mouse-task-text">Klicke oben auf ein Maus-Teil, damit hier die passende Übung erscheint.</p>
+
+      <div id="mouse-task-leftclick" style="display:none;">
+        <p><span class="badge">Linke Taste</span> Doppelklick-Training:</p>
+        <div id="dblclick-target" style="display:inline-flex;align-items:center;justify-content:center;width:180px;height:70px;border:2px solid #90caf9;border-radius:12px;background:#fff;cursor:pointer;font-weight:900;">
+          Ordner Öffnen
+        </div>
+        <p class="status wait" id="dblclick-status">Status: Noch nicht doppelt geklickt.</p>
+      </div>
+
+      <div id="mouse-task-wheel" style="display:none;">
+        <p><span class="badge">Scrollrad</span> Scrolle in der Box bis ganz nach unten.</p>
+        <div id="scroll-box">
+          <div id="scroll-inner">
+            <p>Scroll nach unten …</p>
+            <p style="margin-top:145px;">… noch ein Stück …</p>
+            <p style="margin-top:150px;">… fast da …</p>
+            <div style="margin-top:145px;padding:12px;border-radius:12px;background:#e8f5e9;border:2px solid #66bb6a;">
+              Ziel erreicht! <button class="btn-close" style="width:auto;margin-top:10px;" onclick="finishTask('wheel')">Fertig</button>
+            </div>
+          </div>
+        </div>
+        <p class="status wait" id="scroll-status">Status: Noch nicht unten.</p>
+      </div>
+
+      <div id="mouse-task-rightclick" style="display:none;">
+        <p><span class="badge">Rechte Taste</span> Rechtsklick in diesem Bereich und „Übung abschließen“ wählen.</p>
+        <div id="mouse-rightclick-zone" style="margin-top:10px;border:2px dashed #ffb74d;border-radius:12px;padding:14px;background:#fff;min-height:90px;">
+          Rechtsklick hier drin.
+        </div>
+        <div id="custom-menu">
+          <div class="menu-item">Ansicht</div>
+          <div class="menu-item" onclick="createMouseExerciseFolder()">Neuer Ordner</div>
+          <div class="menu-item">Kopieren</div>
+          <div class="menu-item menu-goal" onclick="finishTask('rightclick')">⭐ Übung abschließen</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="info-overlay" onclick="closeInfo()"></div>
+  <div id="info-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h2 id="modal-title">Titel</h2>
+    <p id="modal-text">Text</p>
+    <div class="taskbox" id="modal-taskbox" style="display:none;">
+      <div><b>Aufgabe:</b></div>
+      <div id="modal-tasktext"></div>
+    </div>
+    <button class="btn-close" onclick="closeInfo()">Alles klar!</button>
+  </div>
+
+  <div id="hover-tip" class="hover-tip" role="tooltip" aria-hidden="true">
+    <h3>Buchstabentasten</h3>
+    <p>Mit diesen Tasten schreibst du ganz normale Wörter.</p>
+  </div>
+  
+  <div id="hover-tip-num" class="hover-tip" role="tooltip" aria-hidden="true" style="border-color:#00acc1;">
+    <h3 style="color:#00838f;">Zahlenreihe</h3>
+    <p>Mit diesen Tasten schreibst du Zahlen von 0 bis 9.</p>
+  </div>
+
+  <div id="hover-tip-umlaut" class="hover-tip" role="tooltip" aria-hidden="true" style="border-color:#fbc02d;">
+    <h3 style="color:#f57f17;">Umlaute & ß</h3>
+    <p>Besondere Buchstaben in der deutschen Sprache.</p>
+  </div>
+  <div id="hover-tip-groups" class="hover-tip hover-tip-group" role="tooltip" aria-hidden="true">
+    <h3 id="hover-tip-group-title">Tastengruppe</h3>
+    <p id="hover-tip-group-text">Erklärung der Tastengruppe.</p>
+  </div>
+
+  <script>
+    const done = new Set();
+    let currentTaskKey = null;
+    let lastInfoTask = null;
+    let lastSuccessfulTaskKey = null;
+
+    // --- Kategorien für Zähler ---
+    const catMonitor = ['files','browser','trash','start','clock','paint','newfolder','power'];
+    const catKeyboard = ['numbers','umlauts','backspace','tab','enter','caps','shift','space','altgr','arrows','tabBack','letters','symbols','ctrl','windows','alt','navigation','otherSymbols'];
+    const catMouse = ['leftclick','wheel','rightclick'];
+
+    window.addEventListener('DOMContentLoaded', updateProgress);
+
+    function setMouseSideGroupHighlight(on){
+      document.querySelectorAll('.m-side-button').forEach(button=>button.classList.toggle('m-side-group-hl',on));
+    }
+    document.querySelectorAll('.m-side-button').forEach(button=>{
+      button.addEventListener('mouseenter',()=>setMouseSideGroupHighlight(true));
+      button.addEventListener('mouseleave',()=>setMouseSideGroupHighlight(false));
+      button.addEventListener('focus',()=>setMouseSideGroupHighlight(true));
+      button.addEventListener('blur',()=>setMouseSideGroupHighlight(false));
+    });
+
+    function updateProgress() {
+      const monCount = catMonitor.filter(k => done.has(k)).length;
+      const kbCount = catKeyboard.filter(k => done.has(k)).length;
+      const mouseCount = catMouse.filter(k => done.has(k)).length;
+
+      const elMon = document.getElementById('prog-monitor');
+      const elKb = document.getElementById('prog-keyboard');
+      const elMouse = document.getElementById('prog-mouse');
+
+      if(elMon) {
+        elMon.innerText = `${monCount} / ${catMonitor.length} Aufgaben`;
+        elMon.classList.toggle('done', monCount === catMonitor.length);
+      }
+      if(elKb) {
+        elKb.innerText = `${kbCount} / ${catKeyboard.length} Aufgaben`;
+        elKb.classList.toggle('done', kbCount === catKeyboard.length);
+      }
+      if(elMouse) {
+        elMouse.innerText = `${mouseCount} / ${catMouse.length} Aufgaben`;
+        elMouse.classList.toggle('done', mouseCount === catMouse.length);
+      }
+
+      const startMon = document.getElementById('start-score-monitor');
+      const startKb = document.getElementById('start-score-keyboard');
+      const startMouse = document.getElementById('start-score-mouse');
+      if(startMon) startMon.textContent = `${monCount} / ${catMonitor.length} erledigt`;
+      if(startKb) startKb.textContent = `${kbCount} / ${catKeyboard.length} erledigt`;
+      if(startMouse) startMouse.textContent = `${mouseCount} / ${catMouse.length} erledigt`;
+
+      const allDone = monCount === catMonitor.length && kbCount === catKeyboard.length && mouseCount === catMouse.length;
+      const allDoneEl = document.getElementById('all-levels-done');
+      if(allDoneEl) allDoneEl.style.display = allDone ? 'block' : 'none';
+    }
+
+    // Navigation
+    function openDetail(id){
+      document.getElementById('screen-desk').style.display='none';
+      document.getElementById(id).classList.add('active');
+    }
+    function goBack(){
+      document.querySelectorAll('.detail-screen').forEach(s=>s.classList.remove('active'));
+      document.getElementById('screen-desk').style.display='flex';
+      document.getElementById('custom-menu').style.display='none';
+      const desktopMenu=document.getElementById('desktop-context-menu'); if(desktopMenu) desktopMenu.style.display='none';
+      const trashWindow=document.getElementById('trash-window'); if(trashWindow) trashWindow.style.display='none';
+      if(typeof closePaintProgram === 'function') closePaintProgram();
+      hideHoverTip();
+      hideHoverTipNum();
+      hideHoverTipUmlaut();
+      hideGroupTip();
+    }
+
+    let desktopWindowLayer = 240;
+    function bringDesktopWindowToFront(id){
+      const el=document.getElementById(id);
+      if(!el) return;
+      desktopWindowLayer=Math.max(desktopWindowLayer+1,(parseInt(el.style.zIndex,10)||0)+1);
+      el.style.zIndex=String(desktopWindowLayer);
+    }
+
+    let monitorIsOff = false;
+
+    function toggleMonitorPower(){
+      const overlay=document.getElementById('monitor-off-overlay');
+      const button=document.getElementById('monitor-power-button');
+      const led=document.getElementById('monitor-power-led');
+      if(!overlay || !button || !led) return;
+
+      monitorIsOff = !monitorIsOff;
+      overlay.setAttribute('aria-hidden', monitorIsOff ? 'false' : 'true');
+      button.setAttribute('aria-label', monitorIsOff ? 'Bildschirm einschalten' : 'Bildschirm ausschalten');
+      button.title = monitorIsOff ? 'Bildschirm einschalten' : 'Bildschirm ausschalten';
+      led.classList.toggle('is-off', monitorIsOff);
+      led.classList.toggle('is-on', !monitorIsOff);
+      led.setAttribute('aria-label', monitorIsOff ? 'Bildschirm ausgeschaltet' : 'Bildschirm eingeschaltet');
+      led.title = monitorIsOff ? 'Bildschirm ausgeschaltet' : 'Bildschirm eingeschaltet';
+
+      if(monitorIsOff && !done.has('power')) finishTask('power');
+    }
+
+    function openBrowserIcon(){
+      showInfo('Der Browser (Internet)','Mit einem Browser kannst du die Moodle-Kurse deiner Schule aufrufen oder im Internet surfen, zum Beispiel mit Brave. Außerdem kannst du Suchmaschinen wie Blinde Kuh oder Google verwenden.',{key:'browser',task:'Wofür kannst du einen Browser verwenden? Wähle im Übungs-Kasten die passende Antwort.',unlockArea:'monitor-exercise-area'});
+    }
+
+    function openFilesIcon(){
+      showInfo('Ordner / Dateien','Das ist dein digitaler Rucksack! In Ordnern sortierst du Bilder, Texte und Hausaufgaben, damit du sie schnell wiederfindest.',{key:'files',task:'Ziehe das Dateien-Symbol (📁) in das Ziel-Feld rechts oben auf dem Bildschirm.',unlockArea:'monitor-exercise-area'});
+    }
+
+    function showWindowsKeyInfo(){
+      if(done.has('windows')){
+        showInfo('Windows-Taste','Windows ist das englische Wort für „Fenster“. Das Symbol auf dieser Taste sieht aus wie ein Fenster. Deshalb heißt sie Windows-Taste. Mit ihr öffnest du das Startmenü und findest Programme und Einstellungen.');
+      }else{
+        showInfo('Geheimnisvolle Taste','Diese Taste trägt ein besonderes Symbol.',{key:'windows',task:'Wie sieht das Symbol dieser Taste aus? Wähle die passende Antwort im Übungs-Kasten.',unlockArea:'keyboard-exercise-area'});
+      }
+    }
+
+    function showInfo(title, text, taskObj=null){
+      document.getElementById('modal-title').innerText=title;
+      document.getElementById('modal-text').innerText=text;
+      // Bereits erledigte Aufgaben zeigen nur noch die Erklärung.
+      if(taskObj && taskObj.key && done.has(taskObj.key)) taskObj = null;
+      lastInfoTask = taskObj;
+
+      if(taskObj && taskObj.task){
+        document.getElementById('modal-taskbox').style.display='block';
+        document.getElementById('modal-tasktext').innerHTML=taskObj.task;
+      } else {
+        document.getElementById('modal-taskbox').style.display='none';
+        document.getElementById('modal-tasktext').innerHTML='';
+      }
+
+      const overlay=document.getElementById('info-overlay');
+      const modal=document.getElementById('info-modal');
+      overlay.classList.remove('info-overlay-pop-in');
+      modal.classList.remove('info-pop-in');
+      overlay.style.display='block';
+      modal.style.display='block';
+      // Reflow setzt die Animation auch bei mehrfach direkt nacheinander geöffneten Fenstern neu.
+      void modal.offsetWidth;
+      overlay.classList.add('info-overlay-pop-in');
+      modal.classList.add('info-pop-in');
+    }
+
+    function closeInfo(){
+      document.getElementById('info-overlay').style.display='none';
+      document.getElementById('info-modal').style.display='none';
+
+      if(lastInfoTask && lastInfoTask.unlockArea){
+        const area = document.getElementById(lastInfoTask.unlockArea);
+        if(area) area.style.display='block';
+
+        if(lastInfoTask.unlockArea === 'monitor-exercise-area') showMonitorTask(lastInfoTask.key);
+        if(lastInfoTask.unlockArea === 'keyboard-exercise-area') setupKeyboardTask(lastInfoTask.key, lastInfoTask.task, lastInfoTask.expected || null);
+        if(lastInfoTask.unlockArea === 'mouse-exercise-area') showMouseTask(lastInfoTask.key);
+
+        currentTaskKey = lastInfoTask.key;
+      }
+      lastInfoTask = null;
+    }
+
+    function finishTask(key){
+      if(done.has(key)) return; 
+      done.add(key);
+      lastSuccessfulTaskKey = key;
+
+      if(key === 'files'){
+        const el = document.getElementById('files-status');
+        if(el) { el.textContent='Status: Abgelegt!'; el.className='status good'; }
+      }
+      if(key === 'leftclick'){
+        const el = document.getElementById('dblclick-status');
+        if(el) { el.textContent='Status: Doppelklick erkannt!'; el.className='status good'; }
+      }
+      if(key === 'wheel'){
+        const el = document.getElementById('scroll-status');
+        if(el) { el.textContent='Status: Übung abgeschlossen!'; el.className='status good'; }
+      }
+      if(key === 'arrows'){
+        const el = document.getElementById('arrow-status');
+        if(el) { el.textContent='Status: Ziel erreicht!'; el.className='status good'; }
+      }
+      
+      const kbStatus = document.getElementById('kb-task-status');
+      if(kbStatus && document.getElementById('kb-dynamic-task').style.display === 'block') {
+         kbStatus.textContent = "Status: Super gemacht! Übung bestanden.";
+         kbStatus.className = "status good";
+      }
+
+      const monitorStatusIds = {browser:'browser-game-status',trash:'trash-game-status',start:'start-game-status',clock:'clock-game-status',newfolder:'new-folder-status'};
+      if(monitorStatusIds[key]){
+        const statusEl=document.getElementById(monitorStatusIds[key]);
+        if(statusEl){statusEl.textContent=(key==='trash')?'Datei erfolgreich wiederhergestellt und auf dem Desktop abgelegt!':(key==='newfolder'?'Prima! Dein neuer Ordner wurde auf dem Desktop erstellt.':'Richtig! Aufgabe geschafft.');statusEl.className='game-status good';}
+      }
+      if(key === 'tab'){
+        const advanced=document.getElementById('tab-advanced-task');
+        if(advanced) advanced.style.display='block';
+        startShiftTabGame();
+      }
+      if(key === 'tabBack'){
+        const advancedStatus=document.getElementById('tab-advanced-status');
+        if(advancedStatus){advancedStatus.textContent='Status: Prima! Du bist zweimal mit Shift + Tab zurückgesprungen.';advancedStatus.className='good';}
+      }
+
+      updateProgress();
+      document.getElementById('success-overlay').style.display='block';
+    }
+
+    function closeSuccessPopup(){
+      document.getElementById('success-overlay').style.display='none';
+      const key=lastSuccessfulTaskKey;
+      const keepForAdvancedTab=(key==='tab' && done.has('tab') && !done.has('tabBack'));
+      if(!keepForAdvancedTab && key){
+        const areaMap={
+          files:'monitor-exercise-area',browser:'monitor-exercise-area',trash:'monitor-exercise-area',start:'monitor-exercise-area',clock:'monitor-exercise-area',paint:'monitor-exercise-area',newfolder:'monitor-exercise-area',power:'monitor-exercise-area',
+          numbers:'keyboard-exercise-area',umlauts:'keyboard-exercise-area',backspace:'keyboard-exercise-area',tabBack:'keyboard-exercise-area',enter:'keyboard-exercise-area',caps:'keyboard-exercise-area',shift:'keyboard-exercise-area',space:'keyboard-exercise-area',altgr:'keyboard-exercise-area',arrows:'keyboard-exercise-area',letters:'keyboard-exercise-area',symbols:'keyboard-exercise-area',ctrl:'keyboard-exercise-area',windows:'keyboard-exercise-area',alt:'keyboard-exercise-area',navigation:'keyboard-exercise-area',otherSymbols:'keyboard-exercise-area',
+          leftclick:'mouse-exercise-area',wheel:'mouse-exercise-area',rightclick:'mouse-exercise-area'
+        };
+        const area=document.getElementById(areaMap[key] || '');
+        if(area) area.style.display='none';
+      }
+      const lastTabField=document.getElementById('tab-adv-3');
+      const advanced=document.getElementById('tab-advanced-task');
+      if(lastTabField && advanced && advanced.style.display==='block' && done.has('tab') && !done.has('tabBack')){
+        window.setTimeout(()=>lastTabField.focus(),0);
+      }
+      if(key==='windows'){
+        // Nach dem Erfolg erscheint die aufgelöste Erklärung automatisch, wie bei einem erneuten Klick auf die Taste.
+        window.setTimeout(showWindowsKeyInfo,0);
+      }
+      if(key==='power'){
+        window.setTimeout(()=>showInfo('Bildschirm ausgeschaltet','Du hast den Bildschirm ausgeschaltet! Damit du den Computer wieder benutzen kannst, musst du ihn zuerst wieder einschalten. Denke daran: Am Ende jeder Informatikstunde schaltest du auch den echten Bildschirm aus, so wie wir es besprochen haben.'),0);
+      }
+      lastSuccessfulTaskKey=null;
+    }
+
+    function openTrashFolder(){
+      const title='Papierkorb';
+      const explanation='Gelöschte Dateien landen zuerst hier. Du kannst sie aus dem Papierkorb wiederherstellen, indem du sie zurück auf den Desktop ziehst.';
+      if(done.has('trash')){
+        const trashWindow=document.getElementById('trash-window');
+        if(trashWindow){trashWindow.style.display='block';bringDesktopWindowToFront('trash-window');}
+        return;
+      }
+      showInfo(title,explanation,{key:'trash',task:'Öffne den Papierkorb und ziehe „Mathe-Hausaufgaben.docx“ aus dem Fenster auf den Desktop.',unlockArea:'monitor-exercise-area'});
+    }
+
+    /* === MONITOR TASKS === */
+    function showMonitorTask(key){
+      document.querySelectorAll('#monitor-exercise-area .monitor-task').forEach(el=>el.style.display='none');
+      const map={files:'monitor-task-files',browser:'monitor-task-browser',trash:'monitor-task-trash',start:'monitor-task-start',clock:'monitor-task-clock',newfolder:'monitor-task-newfolder'};
+      if(map[key]) document.getElementById(map[key]).style.display='block';
+      document.getElementById('file-drop-target').classList.toggle('show', key==='files');
+      const trashWindow=document.getElementById('trash-window');
+      // Ein Wechsel der Übung darf ein bereits geöffnetes Programmfenster nicht schließen.
+      // Nur die Papierkorb-Aufgabe öffnet den Papierkorb ausdrücklich bzw. holt ihn nach vorn.
+      if(trashWindow && key==='trash'){
+        trashWindow.style.display='block';
+        bringDesktopWindowToFront('trash-window');
+      }
+      if(key==='clock') renderClockQuiz();
+    }
+
+    let monitorClockAnswer = '';
+    function answerMonitorQuiz(key, answer){
+      const correct = {browser:'browser',trash:'math',start:'sleep',clock:monitorClockAnswer};
+      const statusIds = {browser:'browser-game-status',trash:'trash-game-status',start:'start-game-status',clock:'clock-game-status'};
+      const status = document.getElementById(statusIds[key]);
+      if(answer === correct[key]){
+        finishTask(key);
+      }else if(status){
+        status.textContent='Noch nicht richtig. Probiere es erneut!';
+        status.className='game-status wait';
+      }
+    }
+
+    function renderClockQuiz(){
+      const choices=document.getElementById('clock-quiz-choices');
+      if(!choices) return;
+      const now=new Date();
+      const fmt=d=>new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit'}).format(d);
+      monitorClockAnswer=fmt(now);
+      const wrong1=new Date(now.getTime()+5*60000);
+      const wrong2=new Date(now.getTime()-7*60000);
+      const options=[monitorClockAnswer,fmt(wrong1),fmt(wrong2)].sort(()=>Math.random()-.5);
+      choices.innerHTML='';
+      options.forEach(value=>{
+        const button=document.createElement('button');
+        button.className='game-choice';
+        button.textContent=value+' Uhr';
+        button.addEventListener('click',()=>answerMonitorQuiz('clock',value));
+        choices.appendChild(button);
+      });
+    }
+
+    /* === DESKTOP: präzises Ziehen ohne Layout-Verschiebungen === */
+    let desktopMenuPoint={x:80,y:80};
+
+    let desktopContextTargetObject=null;
+
+    function showDesktopContextMenu(e){
+      e.preventDefault();
+      if(monitorIsOff) return false;
+      // Rechtsklicks in geöffneten Fenstern und in der Taskleiste gehören nicht zum Desktop.
+      if(e.target.closest('#trash-window, #paint-window, .win-taskbar')) return;
+      const win=document.getElementById('win-screen');
+      const menu=document.getElementById('desktop-context-menu');
+      if(!win || !menu) return;
+
+      const object=e.target.closest('.desktop-object');
+      const newFolderItem=document.getElementById('desktop-menu-new-folder');
+      const deleteItem=document.getElementById('desktop-menu-delete');
+      desktopContextTargetObject=object && win.contains(object) ? object : null;
+
+      if(desktopContextTargetObject){
+        if(newFolderItem) newFolderItem.style.display='none';
+        if(deleteItem){
+          deleteItem.style.display='block';
+          // Auch beim Papierkorb heißt der Kontextmenüpunkt einheitlich „Löschen“.
+          // Die Schutz-Erklärung erscheint erst nach dem Anklicken der Auswahl.
+          deleteItem.textContent='🗑️ Löschen';
+          deleteItem.classList.remove('disabled');
+        }
+      }else{
+        if(deleteItem){deleteItem.style.display='none';deleteItem.classList.remove('disabled');}
+        if(newFolderItem) newFolderItem.style.display='block';
+        if(!done.has('newfolder')){
+          const exerciseArea=document.getElementById('monitor-exercise-area');
+          if(exerciseArea) exerciseArea.style.display='block';
+          showMonitorTask('newfolder');
+        }
+      }
+
+      const r=win.getBoundingClientRect();
+      const contentLeft=r.left+win.clientLeft;
+      const contentTop=r.top+win.clientTop;
+      desktopMenuPoint={
+        x:Math.max(6,Math.min(win.clientWidth-94,e.clientX-contentLeft)),
+        y:Math.max(6,Math.min(win.clientHeight-44-86,e.clientY-contentTop))
+      };
+      menu.style.display='block';
+      const menuRect=menu.getBoundingClientRect();
+      menu.style.left=Math.max(8,Math.min(window.innerWidth-menuRect.width-8,e.clientX))+'px';
+      menu.style.top=Math.max(8,Math.min(window.innerHeight-menuRect.height-8,e.clientY))+'px';
+    }
+
+    function handleDesktopMenuAction(action){
+      const menu=document.getElementById('desktop-context-menu');
+      if(menu) menu.style.display='none';
+      if(action==='new-folder'){
+        desktopContextTargetObject=null;
+        createDesktopFolder(desktopMenuPoint.x,desktopMenuPoint.y);
+        finishTask('newfolder');
+        return;
+      }
+      if(action==='delete'){
+        const object=desktopContextTargetObject;
+        desktopContextTargetObject=null;
+        if(!object || !object.isConnected) return;
+        if(object.id==='icon-trash'){
+          showInfo('Geschützter Systemordner','Der Papierkorb ist ein geschützter Systemordner. Er kann nicht gelöscht oder in sich selbst verschoben werden. Er bleibt lieber im Dienst und passt auf die gelöschten Dateien auf! 😄');
+          return;
+        }
+        const name=object.dataset.fileName || object.querySelector('span')?.textContent || 'Unbenanntes Objekt';
+        const icon=object.dataset.fileIcon || (object.dataset.desktopFolder==='true'?'📁':'📄');
+        const originalLocation=object.dataset.originalLocation || 'Desktop';
+        const filesArea=document.getElementById('trash-window-files');
+        if(!filesArea) return;
+        filesArea.querySelector('.trash-empty')?.remove();
+        filesArea.appendChild(createTrashFileRow({name,icon,originalLocation,deletedDate:formatTrashDate()}));
+        object.remove();
+        // Papierkorb-Fensterzustand nicht verändern: ein geschlossenes Fenster
+        // bleibt geschlossen, ein bereits geöffnetes bleibt sichtbar.
+        refreshTrashWindow();
+      }
+    }
+
+    let desktopFolderCount=0;
+    function createDesktopFolder(x,y){
+      const win=document.getElementById('win-screen');
+      desktopFolderCount += 1;
+      const folderName = desktopFolderCount===1 ? 'Neuer Ordner' : `Neuer Ordner (${desktopFolderCount})`;
+      const folder=document.createElement('div');
+      folder.className='win-icon desktop-object';
+      folder.dataset.desktopFile='true';
+      folder.dataset.fileName=folderName;
+      folder.dataset.fileIcon='📁';
+      folder.dataset.desktopFolder='true';
+      folder.dataset.originalLocation='Desktop';
+      folder.id='folder-'+Date.now()+'-'+Math.floor(Math.random()*10000);
+      folder.style.position='absolute';
+      folder.style.left=Math.max(4,Math.min(win.clientWidth-94,x))+'px';
+      folder.style.top=Math.max(4,Math.min(win.clientHeight-44-86,y))+'px';
+      folder.style.margin='0';
+      folder.innerHTML='📁<span></span>';
+      folder.querySelector('span').textContent=folderName;
+      folder.addEventListener('click',()=>showInfo(folderName,'Du hast einen neuen Ordner erstellt. Darin kannst du später Dateien sortieren.'));
+      win.appendChild(folder);
+    }
+
+
+    function formatTrashDate(date=new Date()){
+      return new Intl.DateTimeFormat('de-DE').format(date);
+    }
+
+    function refreshTrashWindow(){
+      const filesArea=document.getElementById('trash-window-files');
+      if(!filesArea) return;
+      const rows=filesArea.querySelectorAll('.trash-file');
+      const empty=filesArea.querySelector('.trash-empty');
+      if(rows.length===0){
+        if(!empty) filesArea.innerHTML='<div class="trash-empty">Der Papierkorb ist leer.</div>';
+      }else if(empty){
+        empty.remove();
+      }
+      // Bis einschließlich fünf Dateien wächst das Fenster mit; ab sechs bleibt
+      // die Liste auf fünf sichtbare Zeilen begrenzt und erhält eine Scrollleiste.
+      filesArea.classList.toggle('is-scrollable', rows.length>5);
+      const win=document.getElementById('trash-window');
+      if(win) win.style.height='auto';
+    }
+
+    function createTrashFileRow(file){
+      const row=document.createElement('div');
+      row.className='trash-file';
+      row.dataset.fileName=file.name || 'Unbenannte Datei';
+      row.dataset.fileIcon=file.icon || '📄';
+      row.dataset.originalLocation=file.originalLocation || 'Desktop';
+      row.dataset.deletedDate=file.deletedDate || formatTrashDate();
+      row.title='Datei mit der Maus auf den Desktop ziehen oder innerhalb des Papierkorbs verschieben';
+
+      const name=document.createElement('span');
+      name.className='trash-file-name';
+      const icon=document.createElement('span');
+      icon.className='trash-file-icon';
+      icon.textContent=row.dataset.fileIcon;
+      name.append(icon,document.createTextNode(row.dataset.fileName));
+      const location=document.createElement('span');
+      location.className='trash-file-meta';
+      location.textContent=row.dataset.originalLocation;
+      const deleted=document.createElement('span');
+      deleted.className='trash-file-meta';
+      deleted.textContent=row.dataset.deletedDate;
+      row.append(name,location,deleted);
+      return row;
+    }
+
+    function restoreTrashFileToDesktop(fileRow, dropX, dropY, offsetX, offsetY, win, origin){
+      const name=fileRow.dataset.fileName || 'Wiederhergestellte Datei';
+      const icon=fileRow.dataset.fileIcon || '📄';
+      const restored=document.createElement('div');
+      restored.className='win-icon desktop-object';
+      restored.dataset.desktopFile='true';
+      restored.dataset.fileName=name;
+      restored.dataset.fileIcon=icon;
+      restored.dataset.originalLocation=fileRow.dataset.originalLocation || 'Desktop';
+      restored.dataset.deletedDate=fileRow.dataset.deletedDate || '';
+      restored.style.left=Math.max(0,Math.min(win.clientWidth-88,dropX-origin.left-44))+'px';
+      restored.style.top=Math.max(0,Math.min(win.clientHeight-44-86,dropY-origin.top-43))+'px';
+      const iconLabel=document.createElement('span');
+      iconLabel.textContent=icon;
+      iconLabel.style.fontSize='38px';
+      const nameLabel=document.createElement('span');
+      nameLabel.textContent=name;
+      restored.append(iconLabel,nameLabel);
+      restored.title='Wiederhergestellte Datei. Du kannst sie auf dem Desktop verschieben.';
+      if(name==='Browser'){
+        restored.id='icon-browser';
+        restored.addEventListener('click',openBrowserIcon);
+      }else if(name==='Dateien'){
+        restored.id='icon-files';
+        restored.addEventListener('click',openFilesIcon);
+      }else if(name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.png')){
+        restored.title='Bilddatei. Anklicken, um sie im Malprogramm zu öffnen.';
+        restored.addEventListener('click',openPaintProgram);
+      }else{
+        restored.addEventListener('click',()=>showInfo(name,'Diese Datei wurde aus dem Papierkorb auf den Desktop zurückgelegt.'));
+      }
+      win.appendChild(restored);
+      fileRow.remove();
+      refreshTrashWindow();
+      return name;
+    }
+
+    function reorderTrashFile(row, clientX, clientY){
+      const filesArea=document.getElementById('trash-window-files');
+      if(!filesArea) return;
+      const target=document.elementFromPoint(clientX,clientY);
+      const targetRow=target && target.closest ? target.closest('.trash-file') : null;
+      if(targetRow && targetRow!==row && filesArea.contains(targetRow)){
+        const rect=targetRow.getBoundingClientRect();
+        if(clientY < rect.top + rect.height/2) filesArea.insertBefore(row,targetRow);
+        else filesArea.insertBefore(row,targetRow.nextSibling);
+      }else{
+        filesArea.appendChild(row);
+      }
+      row.style.visibility='visible';
+      refreshTrashWindow();
+    }
+
+    (function initDesktopInteractions(){
+      const win=document.getElementById('win-screen');
+      const target=document.getElementById('file-drop-target');
+      const trashWindow=document.getElementById('trash-window');
+      const filesArea=document.getElementById('trash-window-files');
+      let drag=null;
+      let suppressNextDesktopClick=false;
+      if(!win) return;
+
+      const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+      const contentOrigin=()=>{
+        const r=win.getBoundingClientRect();
+        return {left:r.left+win.clientLeft,top:r.top+win.clientTop};
+      };
+      const removeGhost=()=>{
+        if(drag && drag.ghost && drag.ghost.parentNode) drag.ghost.remove();
+      };
+      const pointInside=(rect,x,y)=>x>=rect.left && x<=rect.right && y>=rect.top && y<=rect.bottom;
+
+      const movePreview=(e)=>{
+        if(!drag) return;
+        const dx=e.clientX-drag.startX, dy=e.clientY-drag.startY;
+        if(!drag.moved && Math.hypot(dx,dy)<5) return;
+        drag.moved=true;
+        e.preventDefault();
+
+        if(drag.isTrashWindow || drag.isPaintWindow){
+          const origin=contentOrigin();
+          const movingWindow=drag.el;
+          const left=clamp(e.clientX-origin.left-drag.offsetX,0,Math.max(0,win.clientWidth-movingWindow.offsetWidth));
+          const top=clamp(e.clientY-origin.top-drag.offsetY,0,Math.max(0,win.clientHeight-movingWindow.offsetHeight));
+          movingWindow.style.left=left+'px';
+          movingWindow.style.top=top+'px';
+          return;
+        }
+
+        if(drag.isTrashFile){
+          if(!drag.ghost){
+            drag.ghost=drag.el.cloneNode(true);
+            drag.ghost.removeAttribute('id');
+            drag.ghost.classList.add('drag-ghost');
+            drag.ghost.style.position='fixed';
+            drag.ghost.style.margin='0';
+            drag.ghost.style.left=drag.startRect.left+'px';
+            drag.ghost.style.top=drag.startRect.top+'px';
+            drag.ghost.style.width=drag.startRect.width+'px';
+            drag.ghost.style.height=drag.startRect.height+'px';
+            drag.ghost.style.pointerEvents='none';
+            drag.ghost.style.willChange='transform';
+            drag.ghost.style.transform='translate3d(0,0,0)';
+            document.body.appendChild(drag.ghost);
+            drag.el.style.visibility='hidden';
+          }
+          drag.ghost.style.transform=`translate3d(${dx}px,${dy}px,0)`;
+          return;
+        }
+
+        const origin=contentOrigin();
+        const left=clamp(e.clientX-origin.left-drag.offsetX,0,win.clientWidth-drag.el.offsetWidth);
+        const top=clamp(e.clientY-origin.top-drag.offsetY,0,win.clientHeight-44-drag.el.offsetHeight);
+        drag.el.style.position='absolute';
+        drag.el.style.left=left+'px';
+        drag.el.style.top=top+'px';
+        drag.el.style.margin='0';
+        drag.el.classList.add('dragging');
+      };
+
+      win.addEventListener('pointerdown',e=>{
+        if(e.button!==0) return;
+
+        const paintWindow=document.getElementById('paint-window');
+        if(e.target.closest('#trash-window')) bringDesktopWindowToFront('trash-window');
+        if(e.target.closest('#paint-window')) bringDesktopWindowToFront('paint-window');
+
+        const paintTitlebar=e.target.closest('.paint-titlebar');
+        if(paintTitlebar && paintWindow && paintWindow.contains(paintTitlebar) && !e.target.closest('button')){
+          const rect=paintWindow.getBoundingClientRect();
+          drag={
+            el:paintWindow,isPaintWindow:true,pointerId:e.pointerId,
+            startX:e.clientX,startY:e.clientY,
+            offsetX:e.clientX-rect.left,
+            offsetY:e.clientY-rect.top,
+            startRect:rect,moved:false,ghost:null
+          };
+          e.preventDefault();
+          return;
+        }
+
+        const titlebar=e.target.closest('.trash-window-titlebar');
+        if(titlebar && trashWindow && trashWindow.contains(titlebar) && !e.target.closest('button')){
+          const rect=trashWindow.getBoundingClientRect();
+          const origin=contentOrigin();
+          drag={
+            el:trashWindow,isTrashWindow:true,pointerId:e.pointerId,
+            startX:e.clientX,startY:e.clientY,
+            offsetX:e.clientX-rect.left,
+            offsetY:e.clientY-rect.top,
+            startRect:rect,moved:false,ghost:null
+          };
+          e.preventDefault();
+          return;
+        }
+
+        const trashFile=e.target.closest('.trash-file');
+        const object=trashFile || e.target.closest('.desktop-object');
+        if(!object || !win.contains(object)) return;
+        const rect=object.getBoundingClientRect();
+        drag={
+          el:object,isTrashFile:!!trashFile,isTrashWindow:false,
+          pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,
+          offsetX:e.clientX-rect.left,offsetY:e.clientY-rect.top,
+          startRect:rect,moved:false,ghost:null
+        };
+      });
+
+      document.addEventListener('pointermove',movePreview,{passive:false});
+
+      document.addEventListener('pointerup',e=>{
+        if(!drag) return;
+        movePreview(e);
+        const current=drag;
+        if(current.moved){
+          e.preventDefault();
+          if(current.isTrashWindow || current.isPaintWindow){
+            // Die Fensterposition wurde während des Ziehens bereits begrenzt aktualisiert.
+          }else if(current.isTrashFile){
+            const trashRect=trashWindow.getBoundingClientRect();
+            const listRect=filesArea.getBoundingClientRect();
+            if(pointInside(listRect,e.clientX,e.clientY)){
+              reorderTrashFile(current.el,e.clientX,e.clientY);
+            }else if(pointInside(trashRect,e.clientX,e.clientY)){
+              current.el.style.visibility='visible';
+            }else{
+              const origin=contentOrigin();
+              const desktopRect={left:origin.left,top:origin.top,right:origin.left+win.clientWidth,bottom:origin.top+win.clientHeight-44};
+              if(pointInside(desktopRect,e.clientX,e.clientY)){
+                const fileName=restoreTrashFileToDesktop(current.el,e.clientX,e.clientY,current.offsetX,current.offsetY,win,origin);
+                const status=document.getElementById('trash-game-status');
+                if(fileName==='Mathe-Hausaufgaben.docx'){
+                  if(status){status.textContent='Status: Die Mathe-Hausaufgabe wurde wiederhergestellt und ist jetzt auf dem Desktop sichtbar!';status.className='game-status good';}
+                  finishTask('trash');
+                }else if(status){
+                  status.textContent='Das Bild wurde wiederhergestellt. Ziehe jetzt noch die Mathe-Hausaufgabe aus dem Papierkorb.';
+                  status.className='game-status wait';
+                }
+              }else{
+                current.el.style.visibility='visible';
+              }
+            }
+            removeGhost();
+          }else{
+            current.el.classList.remove('dragging');
+            const trashRect=trashWindow.getBoundingClientRect();
+            const droppedOnTrash=pointInside(trashRect,e.clientX,e.clientY);
+            if(droppedOnTrash && current.el.id==='icon-trash'){
+              const origin=contentOrigin();
+              current.el.style.position='absolute';
+              current.el.style.left=(current.startRect.left-origin.left)+'px';
+              current.el.style.top=(current.startRect.top-origin.top)+'px';
+              showInfo('Geschützter Systemordner','Der Papierkorb ist ein geschützter Systemordner und kein normales Objekt. Er kann deshalb nicht in den Papierkorb verschoben werden. Er bleibt lieber im Dienst, schließlich muss jemand auf die gelöschten Dateien aufpassen! 😄');
+            }else if(droppedOnTrash && current.el.dataset.desktopFile==='true'){
+              const name=current.el.dataset.fileName || current.el.querySelector('span')?.textContent || 'Datei';
+              const icon=current.el.dataset.fileIcon || '📄';
+              const originalLocation=current.el.dataset.originalLocation || 'Desktop';
+              const row=createTrashFileRow({name,icon,originalLocation,deletedDate:formatTrashDate()});
+              filesArea.querySelector('.trash-empty')?.remove();
+              filesArea.appendChild(row);
+              current.el.remove();
+              refreshTrashWindow();
+            }else if(current.el.id==='icon-files'){
+              const targetRect=target.getBoundingClientRect();
+              const hit=pointInside(targetRect,e.clientX,e.clientY);
+              const status=document.getElementById('files-status');
+              if(hit){
+                if(status){status.textContent='Status: Dateien-Symbol genau im Ziel-Feld abgelegt!';status.className='game-status good';}
+                target.style.border='3px solid rgba(76,175,80,.95)';
+                target.style.background='rgba(76,175,80,.22)';
+                target.textContent='Ziel erreicht!';
+                finishTask('files');
+              }else if(status){
+                status.textContent='Status: Verschieben hat geklappt. Für die Aufgabe lege das Symbol bitte im Ziel-Feld ab.';
+                status.className='game-status wait';
+              }
+            }
+          }
+          suppressNextDesktopClick=true;
+          window.setTimeout(()=>{suppressNextDesktopClick=false;},0);
+        }else if(current.isTrashFile){
+          current.el.style.visibility='visible';
+        }
+        removeGhost();
+        drag=null;
+      });
+
+      document.addEventListener('pointercancel',()=>{
+        if(!drag) return;
+        if(drag.isTrashFile) drag.el.style.visibility='visible';
+        if(drag.el && drag.el.classList) drag.el.classList.remove('dragging');
+        removeGhost();
+        drag=null;
+      });
+
+      document.addEventListener('click',e=>{
+        if(suppressNextDesktopClick){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          suppressNextDesktopClick=false;
+        }
+      },true);
+
+      document.addEventListener('click',e=>{
+        // Das Desktop-Menü schließt bei jedem Klick außerhalb des Menüs.
+        if(!e.target.closest('#desktop-context-menu')){
+          const menu=document.getElementById('desktop-context-menu');
+          if(menu) menu.style.display='none';
+          desktopContextTargetObject=null;
+        }
+      });
+    })();
+
+    /* === ZUSAMMENHÄNGENDE TASTENGRUPPEN: AUCH DIE KLEINEN ZWISCHENRÄUME ERKENNEN === */
+    const hoverGroups=[
+      {selector:'.k-letter',className:'k-group-hl',tip:'hover-tip',title:'Buchstabentasten',text:'Mit diesen Tasten schreibst du ganz normale Wörter.'},
+      {selector:'.k-number',className:'k-number-hl',tip:'hover-tip-num',title:'Zahlenreihe',text:'Mit diesen Tasten schreibst du Zahlen von 0 bis 9.'},
+      {selector:'.k-umlaut',className:'k-umlaut-hl',tip:'hover-tip-umlaut',title:'Umlaute & ß',text:'Besondere Buchstaben in der deutschen Sprache.'},
+      {selector:'.k-symbol-group',className:'k-symbol-group-hl',tip:'hover-tip-groups',title:'Satz- und Rechenzeichen',text:'Mit diesen Tasten schreibst du Satz und Rechenzeichen.'},
+      {selector:'.k-arrow-task',className:'k-arrow-group-hl',tip:'hover-tip-groups',title:'Pfeiltasten',text:'Mit den Pfeiltasten bewegst du den Cursor nach oben, unten, links oder rechts.'},
+      {selector:'.k-home-end',className:'k-home-end-hl',tip:'hover-tip-groups',title:'Pos1 und Ende',text:'Mit POS1 springst du an den Anfang einer Zeile. Mit ENDE springst du ans Ende der Zeile.'},
+      {selector:'.k-page-scroll',className:'k-page-scroll-hl',tip:'hover-tip-groups',title:'Bild hoch und Bild runter',text:'Mit BILD HOCH und BILD RUNTER bewegst du dich seitenweise durch ein Dokument oder eine Internetseite.'},
+      {selector:'.k-function-key',className:'k-function-group-hl',tip:'hover-tip-groups',title:'Funktionstasten F1 bis F12',text:'Die Funktionstasten haben je nach Programm unterschiedliche Aufgaben. F1 öffnet in vielen Programmen zum Beispiel die Hilfe.'},
+      {selector:'.k-print-group',className:'k-print-group-hl',tip:'hover-tip-groups',title:'Druck, Rollen und Pause',text:'Druck kann einen Bildschirmausschnitt aufnehmen. Rollen und Pause werden heute nur noch selten verwendet.'}
+    ].map(group=>({...group,keys:[...document.querySelectorAll(group.selector)]}));
+    let activeHoverGroup=null;
+    const keyboardWrapper=document.querySelector('.keyboard-wrapper');
+    function hideTipElement(id){
+      const tip=document.getElementById(id);
+      if(tip){tip.style.display='none';tip.setAttribute('aria-hidden','true');}
+    }
+    function hideHoverTip(){hideTipElement('hover-tip');}
+    function hideHoverTipNum(){hideTipElement('hover-tip-num');}
+    function hideHoverTipUmlaut(){hideTipElement('hover-tip-umlaut');}
+    function hideGroupTip(){hideTipElement('hover-tip-groups');}
+    function clearKeyboardHover(){
+      if(activeHoverGroup) activeHoverGroup.keys.forEach(key=>key.classList.remove(activeHoverGroup.className));
+      activeHoverGroup=null;
+      ['hover-tip','hover-tip-num','hover-tip-umlaut','hover-tip-groups'].forEach(hideTipElement);
+    }
+    function showKeyboardTipAt(group,x,y){
+      const tip=document.getElementById(group.tip);
+      if(!tip) return;
+      if(group.tip==='hover-tip-groups'){
+        const heading=document.getElementById('hover-tip-group-title');
+        const paragraph=document.getElementById('hover-tip-group-text');
+        if(heading) heading.textContent=group.title;
+        if(paragraph) paragraph.textContent=group.text;
+      }
+      tip.style.display='block';
+      tip.setAttribute('aria-hidden','false');
+      tip.style.left='0px';
+      tip.style.top='0px';
+      const w=tip.offsetWidth,h=tip.offsetHeight;
+      const left=Math.max(10,Math.min(window.innerWidth-w-10,x+16));
+      let top=y-h-16;
+      if(top<10) top=Math.min(window.innerHeight-h-10,y+18);
+      tip.style.left=left+'px';
+      tip.style.top=Math.max(10,top)+'px';
+    }
+    function keyboardGroupHit(group,x,y){
+      const pad=3.3; // halbiert den 6px-Tastenabstand: auch die Mitte der Lücke gehört zur Gruppe
+      return group.keys.some(key=>{
+        const r=key.getBoundingClientRect();
+        return x>=r.left-pad && x<=r.right+pad && y>=r.top-pad && y<=r.bottom+pad;
+      });
+    }
+    document.addEventListener('pointermove',e=>{
+      if(!keyboardWrapper || !document.getElementById('screen-keyboard').classList.contains('active')){
+        if(activeHoverGroup) clearKeyboardHover();
+        return;
+      }
+      const bounds=keyboardWrapper.getBoundingClientRect();
+      const inside=e.clientX>=bounds.left && e.clientX<=bounds.right && e.clientY>=bounds.top && e.clientY<=bounds.bottom;
+      if(!inside){if(activeHoverGroup) clearKeyboardHover();return;}
+      const next=hoverGroups.find(group=>keyboardGroupHit(group,e.clientX,e.clientY)) || null;
+      if(next!==activeHoverGroup){
+        clearKeyboardHover();
+        if(next){activeHoverGroup=next;next.keys.forEach(key=>key.classList.add(next.className));}
+      }
+      if(activeHoverGroup) showKeyboardTipAt(activeHoverGroup,e.clientX,e.clientY);
+    },{passive:true});
+    document.addEventListener('mouseleave',clearKeyboardHover);
+
+    /* === TASTATUR INTERAKTIVE TASKS === */
+    function setupKeyboardTask(key, taskText, expectedValue=null) {
+      document.getElementById('keyboard-exercise-area').style.display = 'block';
+      document.getElementById('kb-instruction').innerHTML = "Aufgabe: " + taskText;
+
+      const dynamicArea = document.getElementById('kb-dynamic-task');
+      const arrowTrainer = document.getElementById('arrow-trainer');
+      const container = document.getElementById('kb-input-container');
+      const status = document.getElementById('kb-task-status');
+      const advancedTab = document.getElementById('tab-advanced-task');
+
+      dynamicArea.style.display = 'none';
+      arrowTrainer.style.display = 'none';
+      container.innerHTML = '';
+      status.textContent = "Status: Warte auf Eingabe...";
+      status.className = "status wait";
+      if(advancedTab) advancedTab.style.display = 'none';
+
+      if(key === 'arrows') {
+        arrowTrainer.style.display = 'block';
+        return;
+      }
+
+      dynamicArea.style.display = 'block';
+      status.style.display = 'block';
+
+      if(key === 'backspace') {
+        const input = document.createElement('input');
+        input.type = 'text'; input.className = 'task-input'; input.value = 'Haaallo';
+        input.addEventListener('input', (e) => { if(e.target.value === 'Hallo') finishTask(key); });
+        container.appendChild(input);
+      }
+      else if(key === 'enter') {
+        const input = document.createElement('input');
+        input.type = 'text'; input.className = 'task-input'; input.placeholder = 'Tippe OK und drücke Enter';
+        input.addEventListener('keydown', (e) => { if(e.key === 'Enter' && e.target.value.toUpperCase() === 'OK') finishTask(key); });
+        container.appendChild(input);
+        input.focus();
+      }
+      else if(key === 'tab') {
+        const in1 = document.createElement('input'); in1.type = 'text'; in1.className = 'task-input'; in1.placeholder = 'Feld 1: Starte hier';
+        const in2 = document.createElement('input'); in2.type = 'text'; in2.className = 'task-input'; in2.placeholder = 'Feld 2: Ziel mit Tab';
+        in1.addEventListener('keydown', (e) => {
+          if(e.key === 'Tab' && !e.shiftKey){
+            window.setTimeout(()=>{ if(document.activeElement===in2) finishTask(key); },0);
+          }
+        });
+        container.appendChild(in1);
+        container.appendChild(document.createElement('br'));
+        container.appendChild(in2);
+        if(done.has('tab')){
+          if(advancedTab) advancedTab.style.display='block';
+          if(!done.has('tabBack')) startShiftTabGame();
+        }else{
+          in1.focus();
+        }
+      }
+      else if(key === 'navigation') {
+        const input=document.createElement('input');
+        input.type='text';
+        input.className='task-input';
+        input.value='Computer erkunden';
+        input.setAttribute('aria-label','Übungszeile für Pos1 und Ende');
+        let pressedHome=false;
+        input.addEventListener('keydown',e=>{
+          if(e.key==='Home'){
+            pressedHome=true;
+            status.textContent='Status: Pos1 hat den Cursor an den Zeilenanfang gesetzt. Jetzt Ende drücken.';
+            status.className='status good';
+          }else if(e.key==='End' && pressedHome){
+            finishTask('navigation');
+          }
+        });
+        container.appendChild(input);
+        input.focus();
+        input.setSelectionRange(input.value.length,input.value.length);
+      }
+      else if(key === 'alt') {
+        const game=document.createElement('div');
+        game.className='alt-switch-game';
+        const intro=document.createElement('p');
+        intro.innerHTML='<b>Fensterwechsel-Spiel:</b> Auf einem Computer sind oft mehrere Programme geöffnet. Mit <b>Alt + Tab</b> kannst du zwischen ihnen wechseln. Welche Kombination passt?';
+        const windows=document.createElement('div');
+        windows.className='alt-switch-windows';
+        windows.innerHTML='<div class="alt-switch-window active"><strong>🌐 Browser</strong><span>Schul-Webseite</span></div><div class="alt-switch-window"><strong>📝 Textdokument</strong><span>Hausaufgaben</span></div>';
+        const options=document.createElement('div');
+        options.style.display='flex';
+        options.style.gap='8px';
+        options.style.flexWrap='wrap';
+        options.style.justifyContent='center';
+        [['Alt + Tab','correct'],['Alt + Leertaste','wrong'],['Alt + Pfeil nach oben','wrong']].forEach(([label,value])=>{
+          const button=document.createElement('button');
+          button.className='game-choice';
+          button.textContent=label;
+          button.addEventListener('click',()=>{
+            if(value==='correct'){
+              const cards=windows.querySelectorAll('.alt-switch-window');
+              cards[0].classList.toggle('active');
+              cards[1].classList.toggle('active');
+              status.textContent='Richtig! Du wechselst vom Browser zum Textdokument. Genau dafür ist Alt + Tab da.';
+              status.className='status good';
+              finishTask(key);
+            }else{
+              status.textContent='Das passt noch nicht. Überlege: Welche Kombination wechselt zwischen geöffneten Programmen?';
+              status.className='status wait';
+            }
+          });
+          options.appendChild(button);
+        });
+        const hint=document.createElement('p');
+        hint.className='alt-switch-hint';
+        hint.textContent='Tipp: Alt gedrückt halten und mit Tab zum nächsten geöffneten Programm wechseln.';
+        game.append(intro,windows,options,hint);
+        container.appendChild(game);
+      }
+      else if(key === 'windows') {
+        const hint=document.createElement('p');
+        hint.textContent='Das Symbol auf der Taste erinnert an einen Gegenstand. Was passt am besten?';
+        const choices=document.createElement('div');
+        choices.style.display='flex';
+        choices.style.flexWrap='wrap';
+        choices.style.gap='10px';
+        choices.style.justifyContent='center';
+        [['🪟 Fenster','window'],['🪑 Stuhl','chair'],['🚪 Tür','door']].forEach(([label,value])=>{
+          const button=document.createElement('button');
+          button.className='game-choice';
+          button.textContent=label;
+          button.addEventListener('click',()=>{
+            if(value==='window'){
+              status.textContent='Genau! Das Zeichen sieht aus wie ein Fenster. „Windows“ ist das englische Wort für „Fenster“.';
+              status.className='status good';
+              finishTask(key);
+            }else{
+              status.textContent='Schau noch einmal auf das Symbol: Welche Form erkennst du darin?';
+              status.className='status wait';
+            }
+          });
+          choices.appendChild(button);
+        });
+        container.append(hint,choices);
+      }
+      else if(key === 'ctrl') {
+        const choices=[['Strg + C: Kopieren','copy'],['Strg + V: Einfügen','paste'],['Strg + X: Ausschneiden','cut'],['Alt + F4','close']];
+        choices.forEach(([label,value])=>{
+          const button=document.createElement('button');
+          button.className='game-choice';
+          button.textContent=label;
+          button.addEventListener('click',()=>{
+            if(value==='copy') finishTask(key);
+            else {status.textContent='Noch nicht richtig. Welche Kombination kopiert den markierten Text?';status.className='status wait';}
+          });
+          container.appendChild(button);
+        });
+      }
+      else {
+        const input = document.createElement('input');
+        input.type = 'text'; input.className = 'task-input'; input.placeholder = 'Hier tippen...';
+        input.addEventListener('input', (e) => {
+          const val = e.target.value;
+          if(key === 'letters' && expectedValue && val.toUpperCase() === expectedValue.toUpperCase()) finishTask(key);
+          if(key === 'symbols' && val.replace(/\s/g,'') === '3+2') finishTask(key);
+          if(key === 'otherSymbols' && val.replace(/\s/g,'') === '3>2') finishTask(key);
+          if(key === 'altgr' && val.includes('@')) finishTask(key);
+          if(key === 'caps' && val === 'HALLO') finishTask(key);
+          if(key === 'shift' && (val === 'Haus' || (val.length > 3 && val[0] === val[0].toUpperCase()))) finishTask(key);
+          if(key === 'numbers' && val.includes(String(new Date().getFullYear()))) finishTask(key);
+          if(key === 'umlauts' && ['spaß','tür','öl','bär'].includes(val.toLowerCase())) finishTask(key);
+          if(key === 'space' && val.includes('Hallo Welt')) finishTask(key);
+        });
+        container.appendChild(input);
+        input.focus();
+      }
+    }
+
+    /* Nicht belegte Tastenkappen erhalten ebenfalls eine passende Mini-Aufgabe. */
+    document.querySelectorAll('.k-letter').forEach(key=>{
+      key.addEventListener('click',()=>{
+        const letter=key.textContent.trim();
+        showInfo('Buchstabentaste '+letter,'Mit dieser Taste schreibst du den Buchstaben '+letter+'.',{key:'letters',task:'Tippe den Buchstaben '+letter+' in das Eingabefeld.',expected:letter,unlockArea:'keyboard-exercise-area'});
+      });
+    });
+    document.querySelectorAll('.kb-main .k-key:not([onclick]):not(.k-letter):not(.k-symbol-group)').forEach(key=>{
+      key.addEventListener('click',()=>{
+        const symbol=key.textContent.trim();
+        showInfo('Weitere Taste','Diese Taste gehört zu den weiteren Zeichen auf der Tastatur.',{key:'otherSymbols',task:'Tippe das Zeichen < in das Eingabefeld.',expected:'<',unlockArea:'keyboard-exercise-area'});
+      });
+    });
+
+    /* Pfeiltasten Trainer */
+    (function initArrowTrainer(){
+      const dot=document.getElementById('arrow-dot');
+      const goal=document.getElementById('arrow-goal');
+      const status=document.getElementById('arrow-status');
+      const box=dot.parentElement;
+      const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+
+      window.addEventListener('keydown', (e)=>{
+        if(!document.getElementById('screen-keyboard').classList.contains('active')) return;
+        if(document.getElementById('arrow-trainer').style.display!=='block') return;
+
+        const step=10;
+        let x=parseInt(dot.style.left||20,10), y=parseInt(dot.style.top||70,10);
+        let moved=false;
+        if(e.key==='ArrowLeft'){x-=step;moved=true;}
+        if(e.key==='ArrowRight'){x+=step;moved=true;}
+        if(e.key==='ArrowUp'){y-=step;moved=true;}
+        if(e.key==='ArrowDown'){y+=step;moved=true;}
+        if(!moved) return;
+        e.preventDefault();
+
+        x=clamp(x,0,box.clientWidth-dot.offsetWidth);
+        y=clamp(y,0,box.clientHeight-dot.offsetHeight);
+        dot.style.left=x+'px'; dot.style.top=y+'px';
+
+        const d=dot.getBoundingClientRect(), g=goal.getBoundingClientRect();
+        const hit=!(d.right<g.left || d.left>g.right || d.bottom<g.top || d.top>g.bottom);
+        if(hit){
+          finishTask('arrows');
+        }else{
+          status.textContent='Status: Noch nicht am Ziel.';
+          status.className='status wait';
+        }
+      });
+    })();
+
+    function startShiftTabGame(){
+      const ids=['tab-adv-1','tab-adv-2','tab-adv-3'];
+      const fields=ids.map(id=>document.getElementById(id));
+      if(fields.some(field=>!field)) return;
+      fields.forEach(field=>field.value='');
+      const status=document.getElementById('tab-advanced-status');
+      status.textContent='Status: Das letzte Feld ist ausgewählt. Drücke zweimal Shift + Tab.';
+      status.className='wait';
+      fields[2].onkeydown=(e)=>{
+        if(e.key==='Tab' && e.shiftKey){
+          window.setTimeout(()=>{
+            if(document.activeElement===fields[1]){
+              status.textContent='Gut! Du bist im zweiten Feld. Noch einmal Shift + Tab.';
+              status.className='wait';
+            }
+          },0);
+        }
+      };
+      fields[1].onkeydown=(e)=>{
+        if(e.key==='Tab' && e.shiftKey){
+          window.setTimeout(()=>{
+            if(document.activeElement===fields[0]) finishTask('tabBack');
+          },0);
+        }
+      };
+      window.setTimeout(()=>fields[2].focus(),40);
+    }
+
+    /* === MAUS TASKS === */
+    function showMouseTask(key){
+      document.getElementById('mouse-exercise-area').style.display='block';
+      document.getElementById('mouse-task-leftclick').style.display = (key==='leftclick')?'block':'none';
+      document.getElementById('mouse-task-wheel').style.display = (key==='wheel')?'block':'none';
+      document.getElementById('mouse-task-rightclick').style.display = (key==='rightclick')?'block':'none';
+      const map={leftclick:'Aufgabe: Doppelklick auf „Ordner Öffnen“.',wheel:'Aufgabe: Scrolle bis ganz nach unten.',rightclick:'Aufgabe: Rechtsklick und „Übung abschließen“.'};
+      document.getElementById('mouse-task-text').innerHTML= `<b>${map[key]||'Wähle oben ein Maus-Teil.'}</b>`;
+    }
+
+    document.getElementById('dblclick-target').addEventListener('dblclick', ()=>{
+      finishTask('leftclick');
+    });
+
+    (function initScrollTask(){
+      const box=document.getElementById('scroll-box');
+      const status=document.getElementById('scroll-status');
+      box.addEventListener('scroll', ()=>{
+        const nearBottom=box.scrollTop+box.clientHeight>=box.scrollHeight-6;
+        if(nearBottom) {
+          finishTask('wheel');
+        } else {
+          status.textContent = 'Status: Noch nicht unten.';
+          status.className = 'status wait';
+        }
+      });
+    })();
+
+    function createMouseExerciseFolder(){
+      const zone=document.getElementById('mouse-rightclick-zone');
+      if(!zone) return;
+      const folder=document.createElement('span');
+      folder.style.cssText='display:inline-flex;align-items:center;gap:6px;margin:8px;padding:8px 12px;border:1px solid #90caf9;border-radius:8px;background:#e3f2fd;font-weight:800;';
+      folder.textContent='📁 Neuer Ordner';
+      zone.appendChild(folder);
+      const menu=document.getElementById('custom-menu');
+      if(menu) menu.style.display='none';
+    }
+
+    function showContextMenu(e){
+      if(document.getElementById('mouse-task-rightclick').style.display!=='block') return;
+      e.preventDefault();
+      const menu=document.getElementById('custom-menu');
+      menu.style.display='block';
+      menu.style.left=(e.clientX+10)+'px';
+      menu.style.top=(e.clientY+10)+'px';
+    }
+
+    window.addEventListener('click', (e)=>{
+      if(!e.target.matches('.menu-item')){
+        const menu=document.getElementById('custom-menu');
+        if(menu) menu.style.display='none';
+      }
+    });
+
+
+
+    /* === EINFACHES MALPROGRAMM === */
+    let paintProgramInitialized=false;
+    function openPaintProgram(){
+      const paintWindow=document.getElementById('paint-window');
+      if(!paintWindow) return;
+      paintWindow.style.display='block';
+      bringDesktopWindowToFront('paint-window');
+      initPaintProgram();
+      // Versteckte sechste Bildschirm-Aufgabe: das wiederhergestellte Bild öffnen.
+      finishTask('paint');
+    }
+    function closePaintProgram(){
+      const paintWindow=document.getElementById('paint-window');
+      if(paintWindow) paintWindow.style.display='none';
+      const preview=document.getElementById('paint-eraser-preview');
+      if(preview) preview.style.display='none';
+    }
+    function initPaintProgram(){
+      if(paintProgramInitialized) return;
+      const canvas=document.getElementById('paint-canvas');
+      const toolbar=document.querySelector('#paint-window .paint-toolbar');
+      if(!canvas || !toolbar) return;
+      const ctx=canvas.getContext('2d');
+      if(!ctx) return;
+
+      let activeColor='#202124';
+      let activeTool='pen';
+      let drawing=false;
+      let previousPoint=null;
+      let preview=document.getElementById('paint-eraser-preview');
+      if(!preview){
+        preview=document.createElement('div');
+        preview.id='paint-eraser-preview';
+        preview.setAttribute('aria-hidden','true');
+        document.body.appendChild(preview);
+      }
+
+      const colorButtons=toolbar.querySelectorAll('[data-paint-color]');
+      const toolButtons=toolbar.querySelectorAll('[data-paint-tool]');
+      const updateActive=()=>{
+        // Die Farbauswahl ändert die Farbe, aber nicht das aktuell gewählte Werkzeug (z. B. den Fülleimer).
+        colorButtons.forEach(button=>button.classList.toggle('active',button.dataset.paintColor===activeColor));
+        toolButtons.forEach(button=>button.classList.toggle('active',button.dataset.paintTool===activeTool));
+        if(activeTool!=='eraser') preview.style.display='none';
+        canvas.style.cursor=activeTool==='fill'?'cell':(activeTool==='eraser'?'none':'crosshair');
+      };
+      colorButtons.forEach(button=>button.addEventListener('click',()=>{
+        activeColor=button.dataset.paintColor;
+        updateActive();
+      }));
+      toolButtons.forEach(button=>button.addEventListener('click',()=>{
+        activeTool=button.dataset.paintTool;
+        updateActive();
+      }));
+      document.getElementById('paint-clear').addEventListener('click',()=>ctx.clearRect(0,0,canvas.width,canvas.height));
+
+      const canvasRect=()=>canvas.getBoundingClientRect();
+      const point=e=>{
+        const rect=canvasRect();
+        return {x:(e.clientX-rect.left)*(canvas.width/rect.width),y:(e.clientY-rect.top)*(canvas.height/rect.height)};
+      };
+      const updateEraserPreview=e=>{
+        if(activeTool!=='eraser') {preview.style.display='none';return;}
+        const rect=canvasRect();
+        const inside=e.clientX>=rect.left && e.clientX<=rect.right && e.clientY>=rect.top && e.clientY<=rect.bottom;
+        if(!inside){preview.style.display='none';return;}
+        const size=24*(rect.width/canvas.width);
+        preview.style.width=size+'px';
+        preview.style.height=size+'px';
+        preview.style.left=e.clientX+'px';
+        preview.style.top=e.clientY+'px';
+        preview.style.display='block';
+      };
+      const eraseSquare=p=>ctx.clearRect(p.x-12,p.y-12,24,24);
+      const eraseBetween=(from,to)=>{
+        const distance=Math.hypot(to.x-from.x,to.y-from.y);
+        const steps=Math.max(1,Math.ceil(distance/5));
+        for(let i=1;i<=steps;i++){
+          const t=i/steps;
+          eraseSquare({x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t});
+        }
+      };
+      const floodFill=(x,y)=>{
+        const sx=Math.max(0,Math.min(canvas.width-1,Math.floor(x)));
+        const sy=Math.max(0,Math.min(canvas.height-1,Math.floor(y)));
+        const image=ctx.getImageData(0,0,canvas.width,canvas.height);
+        const data=image.data;
+        const start=(sy*canvas.width+sx)*4;
+        const target=[data[start],data[start+1],data[start+2],data[start+3]];
+        const hex=activeColor.replace('#','');
+        const fill=[parseInt(hex.slice(0,2),16),parseInt(hex.slice(2,4),16),parseInt(hex.slice(4,6),16),255];
+        if(target[0]===fill[0] && target[1]===fill[1] && target[2]===fill[2] && target[3]===255) return;
+        const tolerance=24;
+        const matches=i=>data[i+3] <= 18
+          ? target[3] <= 18 && data[i+3] <= 18
+          : target[3] > 18 && Math.abs(data[i]-target[0])<=tolerance && Math.abs(data[i+1]-target[1])<=tolerance && Math.abs(data[i+2]-target[2])<=tolerance && Math.abs(data[i+3]-target[3])<=32;
+        const stack=[];
+        const paintPixel=i=>{
+          if(!matches(i)) return;
+          data[i]=fill[0];data[i+1]=fill[1];data[i+2]=fill[2];data[i+3]=fill[3];
+          stack.push(i>>2);
+        };
+        if(target[3] <= 18){
+          data[start]=fill[0];data[start+1]=fill[1];data[start+2]=fill[2];data[start+3]=fill[3];
+          stack.push(sy*canvas.width+sx);
+        }else{
+          data[start]=fill[0];data[start+1]=fill[1];data[start+2]=fill[2];data[start+3]=fill[3];
+          stack.push(sy*canvas.width+sx);
+        }
+        while(stack.length){
+          const index=stack.pop();
+          const px=index%canvas.width;
+          if(px>0) paintPixel((index-1)*4);
+          if(px<canvas.width-1) paintPixel((index+1)*4);
+          if(index>=canvas.width) paintPixel((index-canvas.width)*4);
+          if(index+canvas.width<canvas.width*canvas.height) paintPixel((index+canvas.width)*4);
+        }
+        ctx.putImageData(image,0,0);
+      };
+
+      canvas.addEventListener('pointerdown',e=>{
+        if(e.button!==0 && e.pointerType==='mouse') return;
+        const p=point(e);
+        if(activeTool==='fill'){
+          floodFill(p.x,p.y);
+          e.preventDefault();
+          return;
+        }
+        drawing=true;
+        canvas.setPointerCapture?.(e.pointerId);
+        previousPoint=p;
+        if(activeTool==='eraser'){
+          eraseSquare(p);
+          updateEraserPreview(e);
+        }else{
+          ctx.beginPath();
+          ctx.moveTo(p.x,p.y);
+          ctx.lineCap='round';
+          ctx.lineJoin='round';
+          ctx.lineWidth=5;
+          ctx.globalCompositeOperation='source-over';
+          ctx.strokeStyle=activeColor;
+          ctx.lineTo(p.x+0.01,p.y+0.01);
+          ctx.stroke();
+        }
+        e.preventDefault();
+      });
+      canvas.addEventListener('pointermove',e=>{
+        updateEraserPreview(e);
+        if(!drawing) return;
+        const p=point(e);
+        if(activeTool==='eraser'){
+          eraseBetween(previousPoint||p,p);
+        }else{
+          ctx.lineTo(p.x,p.y);
+          ctx.stroke();
+        }
+        previousPoint=p;
+        e.preventDefault();
+      });
+      canvas.addEventListener('pointerleave',()=>{if(!drawing) preview.style.display='none';});
+      const stop=()=>{drawing=false;previousPoint=null;ctx.beginPath();ctx.globalCompositeOperation='source-over';};
+      canvas.addEventListener('pointerup',stop);
+      canvas.addEventListener('pointercancel',stop);
+      canvas.addEventListener('lostpointercapture',stop);
+      paintProgramInitialized=true;
+    }
+
+    /* ESC schließt alle geöffneten Popup-Menüs, Hinweise und Fenster. */
+    window.addEventListener('keydown', (e)=>{
+      if(e.key !== 'Escape') return;
+      let closedSomething = false;
+      const infoModal=document.getElementById('info-modal');
+      const successOverlay=document.getElementById('success-overlay');
+      if(infoModal && getComputedStyle(infoModal).display !== 'none'){
+        closeInfo();
+        closedSomething=true;
+      }
+      if(successOverlay && getComputedStyle(successOverlay).display !== 'none'){
+        closeSuccessPopup();
+        closedSomething=true;
+      }
+      ['desktop-context-menu','custom-menu'].forEach(id=>{
+        const menu=document.getElementById(id);
+        if(menu && getComputedStyle(menu).display !== 'none'){
+          menu.style.display='none';
+          closedSomething=true;
+        }
+      });
+      const trashWindow=document.getElementById('trash-window');
+      if(trashWindow && getComputedStyle(trashWindow).display !== 'none'){
+        trashWindow.style.display='none';
+        closedSomething=true;
+      }
+      const paintWindow=document.getElementById('paint-window');
+      if(paintWindow && getComputedStyle(paintWindow).display !== 'none'){
+        closePaintProgram();
+        closedSomething=true;
+      }
+      hideHoverTip();
+      hideHoverTipNum();
+      hideHoverTipUmlaut();
+      hideGroupTip();
+      if(closedSomething){
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+
+
+    /* Echte lokale Uhrzeit und echtes lokales Datum des Geräts */
+    function updateLocalClock(){
+      const now=new Date();
+      const timeEl=document.getElementById('clock-time');
+      const dateEl=document.getElementById('clock-date');
+      if(timeEl) timeEl.textContent=new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(now);
+      if(dateEl) dateEl.textContent=new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}).format(now);
+    }
+    updateLocalClock();
+    setInterval(updateLocalClock,1000);
+  </script>
+</body>
+</html>
