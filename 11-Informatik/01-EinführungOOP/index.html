@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OOP-Einstiegsspiele</title>
+<style>
+:root{
+  --bg:#f4f7fb; --surface:#fff; --text:#172033; --muted:#64748b;
+  --primary:#3157d5; --primary2:#2444aa; --success:#168a5a; --danger:#c43d4b;
+  --border:#dce3ef; --shadow:0 10px 30px rgba(20,35,70,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+button,select,input{font:inherit}
+button{cursor:pointer}
+.app{max-width:1180px;margin:auto;padding:24px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}
+.brand{font-weight:800;font-size:1.15rem}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.screen{display:none}.screen.active{display:block}
+.hero,.panel,.card,.result-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow)}
+.hero{padding:42px;text-align:center}
+h1{font-size:clamp(2rem,5vw,3.4rem);margin:.1em 0 .25em}
+h2{margin-top:0}.subtitle{font-size:1.2rem;color:var(--muted);margin-bottom:25px}
+.actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.start-choice-actions .btn{min-width:180px}
+.btn{border:0;border-radius:11px;padding:11px 18px;font-weight:700;background:#e8edf8;color:var(--text)}
+.btn.primary{background:var(--primary);color:#fff}.btn.primary:hover{background:var(--primary2)}
+.btn.small{padding:8px 12px;font-size:.9rem}.code-action-btn{min-width:130px}
+.intro-grid,.definition-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.panel{padding:24px;margin-bottom:18px}
+.definition{padding:18px;border:1px solid var(--border);border-radius:14px}
+.definition strong{display:block;font-size:1.05rem;margin-bottom:5px}
+.example{background:#f7f9fd;border-radius:12px;padding:16px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
+.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}.pill{background:#eaf0ff;padding:8px 12px;border-radius:999px;font-weight:700}
+.task-title{margin:8px 0 16px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.sort-card{background:#fff;border:2px solid var(--border);border-radius:14px;padding:18px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;min-height:78px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.sort-card:hover,.sort-card.selected{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 7px 18px rgba(49,87,213,.12)}
+.sort-card[draggable="true"]{cursor:grab}.sort-card.dragging{opacity:.45}
+.categories{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.dropzone{min-height:145px;border:2px dashed #b8c5dc;border-radius:15px;padding:14px;background:#fafcff;transition:.15s}
+.dropzone.over{border-color:var(--primary);background:#edf2ff}
+.dropzone.wrong{border-color:#d94b5b;background:#fff0f1;opacity:.72}
+.dropzone.wrong .placed-list:after{content:"✗ Nicht richtig";display:block;color:#b22b3b;font-weight:700;margin-top:8px}
+.dropzone h3{margin:0 0 3px}.dropzone p{margin:0 0 10px;color:var(--muted);font-size:.9rem}
+.placed{background:#fff;border:1px solid var(--border);border-radius:9px;padding:7px;margin:6px 0;font-family:ui-monospace,monospace;font-size:.88rem}
+.feedback{min-height:54px;margin-top:16px;border-radius:12px;padding:12px 15px;display:none}
+.feedback.show{display:block}.feedback.good{background:#e8f7f0;color:#12623f}.feedback.bad{background:#fff0f1;color:#8c2633}
+.code-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:18px}
+.code-parts{display:grid;gap:10px}.code-part{border:1px solid var(--border);border-radius:11px;padding:12px;background:#fbfcff}
+pre{margin:0;background:#101827;color:#e8edf7;border-radius:14px;padding:20px;overflow:auto}
+.code-line{padding:2px 6px;border-radius:5px}.code-line.active{background:#31446b}
+table{width:100%;border-collapse:collapse}.result-box{padding:24px}.summary-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.progress{height:9px;background:#e5eaf3;border-radius:99px;overflow:hidden;margin:8px 0 18px}.progress span{display:block;height:100%;background:var(--primary);width:0}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.field label{display:block;font-weight:700;margin-bottom:5px}.field select,.field input{width:100%;padding:10px;border:1px solid var(--border);border-radius:9px;background:white}
+.hidden{display:none!important}.muted{color:var(--muted)}
+.code-stage{margin-top:24px;padding-top:22px;border-top:1px solid var(--border)}
+.code-stage-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:stretch}.code-stage-grid > .panel,.code-stage-grid > .code-puzzle-description{height:100%;box-sizing:border-box;padding:24px}.code-stage-grid h4{margin-top:0;margin-bottom:10px}.code-stage-grid > .panel:last-child{display:flex;flex-direction:column}.code-stage-grid > .panel:last-child .code-puzzle-options{flex:1;max-height:none;min-height:0;margin-top:0;padding-top:0}
+.definition-stage-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,.9fr);gap:18px;align-items:start}.definition-game-panel,.definition-items-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}.definition-reference .definition{margin-bottom:10px}.definition-reference .definition:last-of-type{margin-bottom:0}.definition-game-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.definition-dropzone{min-height:115px;border:2px dashed #b8c5dc;border-radius:13px;padding:12px;background:#fafcff;transition:.15s}.definition-dropzone.full{grid-column:1/-1;min-height:92px}.definition-dropzone.over{border-color:var(--primary);background:#edf2ff}.definition-dropzone.wrong{border-color:#d94b5b;background:#fff0f1}.definition-dropzone h3{margin:0 0 3px}.definition-dropzone p{margin:0 0 8px;color:var(--muted);font-size:.82rem}.definition-placed-list{min-height:42px}.definition-item{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px;margin:7px 0;cursor:grab;font-weight:600}.definition-item:hover{border-color:var(--primary)}.definition-item.dragging{opacity:.45}.definition-item.selected{outline:3px solid #8aa3ff}.definition-placed-item{background:#fff;border:1px solid var(--border);border-radius:9px;padding:9px;margin-top:6px;font-size:.9rem}.definition-game-feedback{min-height:54px}.definition-next{margin-top:12px}.definition-cheatsheet{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.definition-cheat-card{padding:18px;border:1px solid var(--border);border-radius:14px;background:#fbfcff;display:grid;grid-template-rows:30px minmax(92px,1fr) 28px 28px;align-items:start}.definition-cheat-card>strong{display:block;font-size:1.1rem;margin:0}.definition-cheat-card p{margin:0}.definition-cheat-card .example-label{font-size:.95rem}.definition-cheat-card .short-definition{font-size:.95rem}
+@media(max-width:900px){.definition-stage-grid{grid-template-columns:1fr}}
+@media(max-width:800px){.definition-game-grid,.definition-cheatsheet{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.definition-game-grid,.definition-cheatsheet{grid-template-columns:1fr}}.code-puzzle-description{background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:14px}.object-spec{margin:8px 0 0;padding-left:20px}.code-piece{font-size:.9rem;padding:7px 9px;margin:5px 0}.editor-slot{min-height:36px;padding:7px 9px;margin:5px 0}.code-editor{min-height:190px;padding:10px}.code-puzzle-options{max-height:230px;overflow:auto;padding-right:4px}
+.code-editor{background:#101827;color:#e8edf7;border-radius:14px;padding:14px;min-height:320px}
+.editor-slot{border:1px dashed #71809c;border-radius:8px;padding:10px;margin:6px 0;min-height:22px;color:#aebbd2;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.editor-slot.over{border-color:#8aa3ff;background:#1b2942}.editor-slot.filled{border-style:solid;color:#f3f6fb;background:#172235}
+.code-piece{display:block;width:100%;text-align:left;background:#24324a;border:1px solid #50617f;color:#f3f6fb;border-radius:8px;padding:10px;margin:0 0 7px;cursor:grab;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.code-piece:hover{background:#2d3d59}.code-piece.dragging{opacity:.45}
+@media(max-width:1200px){.code-stage-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.code-stage-grid{grid-template-columns:1fr}.code-layout{grid-template-columns:1fr}}
+@media(max-width:800px){
+ .cards,.categories{grid-template-columns:repeat(2,1fr)}
+ .intro-grid,.definition-grid,.code-layout,.form-grid{grid-template-columns:1fr}
+ .hero{padding:28px 18px}.app{padding:14px}
+}
+@media(max-width:520px){.cards,.categories{grid-template-columns:1fr}}
+:focus-visible{outline:3px solid #8aa3ff;outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">💡 OOP-Einstiegsspiele</div>
+  <div class="header-actions">
+    <button class="btn small" onclick="showScreen('start')">Startbildschirm</button>
+  </div>
+</header>
+
+<section id="start" class="screen active">
+  <div class="hero">
+    <div style="font-size:3rem">🧩</div>
+    <h1>OOP entdecken</h1>
+    <p class="subtitle">Klassen, Objekte, Attribute und Methoden kennenlernen</p>
+    <p>Wähle selbst, womit du starten möchtest.</p>
+    <div class="actions start-choice-actions">
+      <button class="btn" onclick="openDefinitions()">📖 Begriffe</button>
+      <button class="btn primary" onclick="startGame()">🧩 Puzzle</button>
+      <button class="btn" onclick="showScreen('code')">💻 Beispielcode</button>
+    </div>
+  </div>
+</section>
+
+
+
+<section id="definitions" class="screen">
+  <div class="panel">
+    <div class="topbar">
+      <div><h2 style="margin-bottom:4px">Die vier Begriffe</h2><p class="muted" style="margin:0">Erst zuordnen, dann als Merkhilfe nachschlagen.</p></div>
+    </div>
+
+    <div id="definitionGameStage">
+      <div class="definition-stage-grid">
+        <div class="definition-game-panel">
+          <h3>Begriffe</h3>
+          <p>Lege die möglichen Definitionen in den passenden Begriff ab. Du kannst die Karten jederzeit zwischen den Begriffen verschieben oder zurück in den rechten Bereich legen.</p>
+          <div id="definitionDropzones" class="definition-game-grid"></div>
+          <div id="definitionFeedback" class="feedback definition-game-feedback" aria-live="polite"></div>
+          <div class="actions" style="margin-top:10px;justify-content:flex-start"><button class="btn primary" onclick="checkDefinitions()">Zuordnung prüfen</button></div>
+          <div id="definitionNext" class="actions definition-next" style="display:none"><button class="btn primary" onclick="finishDefinitions()">Weiter</button></div>
+        </div>
+
+        <div class="definition-items-panel">
+          <h3>Mögliche Definitionen</h3>
+          <p class="muted" style="font-size:.9rem">Vier Definitionen passen, vier sind falsch. Ziehe sie nach links in einen Begriff.</p>
+          <div id="definitionItems"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="definitionCheatStage" class="hidden">
+      <div class="definition-cheatsheet">
+        <div class="definition-cheat-card"><strong>Klasse</strong><p>Ein Bauplan, der beschreibt, welche Eigenschaften und Aktionen Objekte dieser Klasse haben können.</p><p class="example-label"><strong>Beispiel:</strong> Auto</p><p class="short-definition"><strong>Kurzfassung:</strong> Bauplan</p></div>
+        <div class="definition-cheat-card"><strong>Objekt</strong><p>Ein konkretes Exemplar einer Klasse. Es besitzt eigene Werte für seine Attribute.</p><p class="example-label"><strong>Beispiel:</strong> meinAuto</p><p class="short-definition"><strong>Kurzfassung:</strong> konkretes Ding</p></div>
+        <div class="definition-cheat-card"><strong>Attribut</strong><p>Eine gespeicherte Eigenschaft oder ein Zustand eines Objekts.</p><p class="example-label"><strong>Beispiel:</strong> farbe = "rot"</p><p class="short-definition"><strong>Kurzfassung:</strong> Eigenschaft/Zustand</p></div>
+        <div class="definition-cheat-card"><strong>Methode</strong><p>Eine Aktion oder Fähigkeit, die ein Objekt ausführen kann.</p><p class="example-label"><strong>Beispiel:</strong> fahren()</p><p class="short-definition"><strong>Kurzfassung:</strong> Aktion</p></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="game" class="screen">
+  <div class="topbar">
+    <div class="stats"><span class="pill" id="score">Punkte: 0 / 10</span><span class="pill" id="round">Runde 1 von 10</span></div>
+  </div>
+  <div class="panel">
+    <div class="progress"><span id="progress"></span></div>
+    <h2 class="task-title" id="taskTitle">Ordne die Karte richtig zu.</h2>
+    <div id="cards" class="cards"></div>
+    <div class="categories">
+      <div class="dropzone" data-type="klasse" tabindex="0"><h3>KLASSE</h3><p>Bauplan für Objekte</p><div class="placed-list"></div></div>
+      <div class="dropzone" data-type="objekt" tabindex="0"><h3>OBJEKT</h3><p>Konkretes Exemplar</p><div class="placed-list"></div></div>
+      <div class="dropzone" data-type="attribut" tabindex="0"><h3>ATTRIBUT</h3><p>Eigenschaft / Zustand</p><div class="placed-list"></div></div>
+      <div class="dropzone" data-type="methode" tabindex="0"><h3>METHODE</h3><p>Aktion / Fähigkeit</p><div class="placed-list"></div></div>
+    </div>
+    <div id="feedback" class="feedback" aria-live="polite"></div>
+    <div id="nextAction" class="actions" style="display:none;margin-top:14px">
+      <button class="btn primary" onclick="nextQuestion()">Weiter</button>
+    </div>
+  </div>
+</section>
+
+<section id="related" class="screen">
+  <div class="panel">
+    <h2>Was gehört zusammen?</h2>
+    <p>Wähle alle Elemente aus, die zur Klasse <strong id="relatedClass">Auto</strong> gehören könnten.</p>
+    <div id="relatedCards" class="cards"></div>
+    <div id="relatedFeedback" class="feedback" aria-live="polite"></div>
+    <div class="actions"><button class="btn primary" onclick="checkRelated()">Auswahl prüfen</button><button class="btn" onclick="startGame()">Zurück zum Sortierspiel</button></div>
+  </div>
+</section>
+
+<section id="result" class="screen">
+  <div class="result-box">
+    <h2>Runde beendet!</h2>
+    <h3 id="finalScore"></h3>
+    <p id="finalText"></p>
+    <div id="categorySummary"></div>
+    <div class="actions" style="margin-top:20px">
+      <button class="btn primary" onclick="startGame()">Noch einmal spielen</button>
+      <button class="btn" onclick="showScreen('start')">Startbildschirm</button>
+    </div>
+  </div>
+</section>
+
+<section id="code" class="screen">
+  <div class="panel">
+    <h2>Vom Sortierspiel zum Programm</h2>
+    <p>Schau dir zuerst das Beispiel an. Klicke die Code-Bausteine links an und entdecke, wo Klasse, Attribute, Methode und Objekt im Java-Code vorkommen.</p>
+    <div id="codeHighlightStage"><div class="code-layout">
+      <div class="code-parts">
+        <button class="code-part" onclick="highlightCode('class')"><strong><code>class Auto</code></strong><br>→ Klasse</button>
+        <button class="code-part" onclick="highlightCode('attr1')"><strong><code>farbe</code></strong><br>→ Attribut</button>
+        <button class="code-part" onclick="highlightCode('attr2')"><strong><code>geschwindigkeit</code></strong><br>→ Attribut</button>
+        <button class="code-part" onclick="highlightCode('method')"><strong><code>fahren()</code></strong><br>→ Methode</button>
+        <button class="code-part" onclick="highlightCode('object')"><strong><code>Auto meinAuto = new Auto();</code></strong><br>→ Objekt</button>
+      </div>
+      <pre><code><span id="code-class" class="code-line">class Auto {</span>
+<span id="code-attr1" class="code-line">    String farbe;</span>
+<span id="code-attr2" class="code-line">    int geschwindigkeit;</span>
+<span id="code-method" class="code-line">    void fahren() {</span>
+<span id="code-method-body" class="code-line">        System.out.println("Das Auto fährt.");</span>
+<span id="code-method-end" class="code-line">    }</span>
+<span id="code-class-end" class="code-line">}</span>
+
+<span id="code-object" class="code-line">Auto meinAuto = <span id="code-new">new Auto()</span>;</span></code></pre>
+    </div><div class="actions" style="margin-top:12px"><button id="codeNextButton" class="btn primary" style="display:none" onclick="continueToCodePuzzle()">Weiter</button></div></div>
+    <div id="codeHighlightFeedback" class="feedback" aria-live="polite"></div>
+
+    <div id="codePuzzleStage" class="code-stage hidden">
+      <div class="code-puzzle-taskbar" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h3 style="margin:0">2. Baue dein Objekt zusammen</h3>
+        <div><span id="codeTaskProgress" class="code-task-pill">Aufgabe 1 von 3</span> <strong id="codeTaskPoints">0 / 3 Punkte</strong></div>
+      </div>
+      <p>Du bekommst eine Beschreibung und stellst daraus den passenden Code zusammen. Überflüssige Bausteine gehören nicht in den Editor.</p>
+      <div class="code-stage-grid">
+        <div class="code-puzzle-description">
+          <h4>So soll das Objekt beschaffen sein</h4>
+          <div id="codeTaskDescription"></div>
+          <div style="margin-top:14px"><strong>Dein Ziel:</strong> Wähle nur die passenden Code-Bausteine aus und bringe sie in die richtige Reihenfolge.</div>
+        </div>
+        <div class="panel">
+          <h4>Dein Editor</h4>
+          <div id="codeEditor" class="code-editor" aria-label="Code-Editor"></div>
+          <div id="codePuzzleFeedback" class="feedback" aria-live="polite"></div>
+          <div class="actions" style="margin-top:10px;justify-content:flex-start"><button id="codeCheckButton" class="btn primary code-action-btn" onclick="checkCodePuzzle()">Code prüfen</button><button id="codeResetButton" class="btn code-action-btn" onclick="resetCodePuzzle()">Zurücksetzen</button><button id="codeTaskNextButton" class="btn primary code-action-btn" style="display:none" onclick="continueCodeTask()">Weiter</button></div>
+        </div>
+        <div class="panel">
+          <h4>Code-Bausteine</h4>
+          <div id="codePieces" class="code-puzzle-options"></div>
+        </div>
+      </div>
+    </div>
+    <div id="codeFinalScore" class="hidden" style="text-align:center;padding:24px 10px"></div>
+  </div>
+</section>
+
+
+</div>
+
+<script>
+const DATA = {
+ auto:{name:"Auto", objects:["meinAuto","familienAuto"], items:[
+  ["Auto","klasse","Auto ist der Bauplan."],["meinAuto","objekt","meinAuto bezeichnet ein konkretes Auto."],
+  ['farbe = "rot"',"attribut","farbe beschreibt eine Eigenschaft."],["geschwindigkeit = 80","attribut","geschwindigkeit beschreibt einen Zustand."],
+  ["fahren()","methode","fahren() beschreibt eine Aktion."],["bremsen()","methode","bremsen() beschreibt eine Aktion."],["marke = \"VW\"","attribut","marke ist eine Eigenschaft."],["hupen()","methode","hupen() ist eine Fähigkeit des Autos."]
+ ]},
+ animals:{name:"Hund",objects:["bello","luna"],items:[
+  ["Hund","klasse","Hund ist der Bauplan für konkrete Hunde."],["bello","objekt","bello ist ein konkreter Hund."],
+  ['name = "Bello"',"attribut","name beschreibt eine Eigenschaft."],["alter = 4","attribut","alter ist ein Zustand."],
+  ["bellen()","methode","bellen() beschreibt eine Aktion."],["laufen()","methode","laufen() beschreibt eine Aktion."],["luna","objekt","luna ist ein konkreter Hund."],["gewicht = 18","attribut","gewicht ist eine Eigenschaft."]
+ ]},
+ smart:{name:"Lampe",objects:["schreibtischLampe","wohnzimmerLampe"],items:[
+  ["Lampe","klasse","Lampe ist der Bauplan."],["schreibtischLampe","objekt","Das ist eine konkrete Lampe."],
+  ['farbe = "weiß"',"attribut","farbe ist eine Eigenschaft."],["helligkeit = 80","attribut","helligkeit beschreibt einen Zustand."],
+  ["einschalten()","methode","einschalten() beschreibt eine Aktion."],["ausschalten()","methode","ausschalten() beschreibt eine Aktion."],
+  ["wohnzimmerLampe","objekt","Das ist eine konkrete Lampe."],["dimmen()","methode","dimmen() beschreibt eine Aktion."]
+ ]},
+ games:{name:"Spieler",objects:["hero","gegner"],items:[
+  ["Spieler","klasse","Spieler ist der Bauplan."],["hero","objekt","hero ist eine konkrete Spielfigur."],
+  ["leben = 100","attribut","leben beschreibt einen Zustand."],['name = "Alex"',"attribut","name ist eine Eigenschaft."],
+  ["angreifen()","methode","angreifen() beschreibt eine Aktion."],["heilen()","methode","heilen() beschreibt eine Aktion."],
+  ["gegner","objekt","gegner ist eine konkrete Spielfigur."],["level = 5","attribut","level ist ein Zustand."]
+ ]}
+};
+
+let questions=[],qIndex=0,score=0,selected=null,attempts=0,categoryStats={klasse:[0,0],objekt:[0,0],attribut:[0,0],methode:[0,0]};
+
+function showScreen(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function buildQuestions(){
+ let items=[];
+ Object.values(DATA).forEach(p=>p.items.forEach(x=>items.push({...x,theme:p.name})));
+ return shuffle(items).slice(0,10);
+}
+function startGame(){
+ questions=buildQuestions(); qIndex=0; score=0; selected=null; attempts=0;
+ categoryStats={klasse:[0,0],objekt:[0,0],attribut:[0,0],methode:[0,0]};
+ showScreen("game"); renderQuestion();
+}
+function renderQuestion(){
+ if(qIndex>=questions.length){showResult();return}
+ document.getElementById("score").textContent=`Punkte: ${score} / ${questions.length}`;
+ document.getElementById("round").textContent=`Runde ${qIndex+1} von ${questions.length}`;
+ document.getElementById("progress").style.width=(qIndex/questions.length*100)+"%";
+ const q=questions[qIndex];
+ attempts=0;
+ document.getElementById("taskTitle").textContent=`Ordne „${q[0]}“ richtig zu.`;
+ const cards=document.getElementById("cards"); cards.innerHTML="";
+ const card=document.createElement("div"); card.className="sort-card"; card.textContent=q[0]; card.draggable=true; card.tabIndex=0; card.dataset.type=q[1];
+ card.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain","card");card.classList.add("dragging");});
+ card.addEventListener("dragend",()=>card.classList.remove("dragging"));
+ card.addEventListener("click",()=>{selected=card;card.classList.toggle("selected");});
+ card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();selected=card;card.classList.add("selected");}});
+ cards.appendChild(card);
+ document.querySelectorAll(".dropzone").forEach(z=>{
+   z.querySelector(".placed-list").innerHTML="";
+   z.classList.remove("over","wrong");
+   z.removeAttribute("aria-disabled");
+   z.ondragover=e=>{e.preventDefault();z.classList.add("over")};
+   z.ondragleave=()=>z.classList.remove("over");
+   z.ondrop=e=>{e.preventDefault();z.classList.remove("over");answer(z.dataset.type)};
+   z.onclick=e=>{if(selected && !z.classList.contains("wrong") && e.target.closest(".dropzone")) answer(z.dataset.type)};
+ });
+ const f=document.getElementById("feedback");f.className="feedback";f.textContent="";
+ document.getElementById("nextAction").style.display="none";
+}
+function answer(type){
+ const q=questions[qIndex], correct=type===q[1];
+ attempts++;
+ if(attempts===1) categoryStats[q[1]][1]++;
+ const f=document.getElementById("feedback");
+ const card=document.querySelector(".sort-card");
+ card.classList.remove("selected");
+ selected=null;
+ if(correct){
+   const firstTry = attempts===1;
+   if(firstTry){ score++; categoryStats[q[1]][0]++; }
+   f.className="feedback show good";
+   f.innerHTML=firstTry ? `✓ <strong>Richtig!</strong> ${q[2]}` : `✓ <strong>Richtig zugeordnet!</strong> ${q[2]}<br><span>Die Aufgabe zählt trotzdem als Fehler, weil die erste Zuordnung nicht richtig war.</span>`;
+   card.draggable=false;
+   const z=document.querySelector(`.dropzone[data-type="${type}"] .placed-list`);
+   z.innerHTML=`<div class="placed">${escapeHtml(q[0])}</div>`;
+   document.getElementById("nextAction").style.display="flex";
+ }else{
+   f.className="feedback show bad";
+   f.innerHTML=`✗ <strong>Noch nicht.</strong> ${q[2]}<br><span>Versuche es noch einmal – die rot markierten Kästchen sind ausgeschlossen.</span>`;
+   const z=document.querySelector(`.dropzone[data-type="${type}"]`);
+   z.classList.add("wrong");
+   z.setAttribute("aria-disabled","true");
+   z.onclick=null;
+   z.ondrop=null;
+ }
+}
+function nextQuestion(){
+ qIndex++;
+ renderQuestion();
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function showResult(){
+ document.getElementById("progress").style.width="100%";
+ showScreen("result");
+ const pct=Math.round(score/questions.length*100);
+ document.getElementById("finalScore").textContent=`${score} / ${questions.length} richtig · ${pct} %`;
+ document.getElementById("finalText").textContent=pct>=80?"Du hast bereits ein gutes Grundverständnis der OOP-Begriffe.":"Schau dir die Begriffe noch einmal an und probiere es erneut.";
+ const labels={klasse:"Klasse",objekt:"Objekt",attribut:"Attribut",methode:"Methode"};
+ document.getElementById("categorySummary").innerHTML=Object.entries(categoryStats).map(([k,v])=>`<div class="summary-row"><span>${labels[k]}</span><strong>${v[0]} / ${v[1]}</strong></div>`).join("");
+}
+function setupRelated(){
+ const correct=["farbe = \"rot\"","fahren()","meinAuto","bremsen()"],wrong=["Lampe"];
+ const arr=shuffle([...correct.map(x=>({x,ok:true})),...wrong.map(x=>({x,ok:false}))]);
+ document.getElementById("relatedCards").innerHTML=arr.map((o,i)=>`<button class="sort-card related-card" data-ok="${o.ok}" data-i="${i}" onclick="this.classList.toggle('selected')">${escapeHtml(o.x)}</button>`).join("");
+}
+function checkRelated(){
+ const selected=[...document.querySelectorAll(".related-card.selected")];
+ const all=[...document.querySelectorAll(".related-card")];
+ const correct=all.filter(x=>x.dataset.ok==="true");
+ const good=selected.length===correct.length&&selected.every(x=>x.dataset.ok==="true");
+ const f=document.getElementById("relatedFeedback");f.className="feedback show "+(good?"good":"bad");
+ f.innerHTML=good?"✓ Richtig! Attribute und Methoden können zur Klasse Auto gehören; meinAuto ist ein Objekt der Klasse.":"✗ Prüfe noch einmal: Welche Elemente beschreiben Eigenschaften, Aktionen oder ein konkretes Objekt von Auto?";
+}
+const definitionData=[
+ {key:'klasse',title:'KLASSE',hint:'Hier gehört die Definition der Klasse hin.'},
+ {key:'objekt',title:'OBJEKT',hint:'Hier gehört die Definition des Objekts hin.'},
+ {key:'attribut',title:'ATTRIBUT',hint:'Hier gehört die Definition des Attributs hin.'},
+ {key:'methode',title:'METHODE',hint:'Hier gehört die Definition der Methode hin.'}
+];
+const definitionItems=[
+ ['Ein Bauplan, der festlegt, welche Eigenschaften und Aktionen Objekte haben können.','klasse'],
+ ['Ein konkretes Exemplar einer Klasse mit eigenen Werten.','objekt'],
+ ['Eine gespeicherte Eigenschaft oder ein Zustand eines Objekts.','attribut'],
+ ['Eine Aktion oder Fähigkeit, die ein Objekt ausführen kann.','methode'],
+ ['Ein besonderer Baustein, der beim Erzeugen eines Exemplars automatisch aufgerufen wird und dessen Anfangszustand festlegen kann.','wrong'],
+ ['Ein benannter Speicherplatz, in dem während eines Programms ein Wert gespeichert werden kann.','wrong'],
+ ['Ein Mechanismus, bei dem Eigenschaften und Funktionen von einer übergeordneten Struktur übernommen werden.','wrong'],
+ ['Ein Wert, der einer Funktion beim Aufruf als Eingabe übergeben werden kann.','wrong']
+];
+let definitionPlaced={},definitionSelected=null,definitionSolved=false;
+function setupDefinitions(){
+ definitionPlaced={};definitionSelected=null;definitionSolved=false;
+ const zones=document.getElementById('definitionDropzones'),items=document.getElementById('definitionItems');
+ zones.innerHTML=definitionData.map(d=>`<div class="definition-dropzone" data-type="${d.key}" tabindex="0"><h3>${d.title}</h3><p>Definition hier ablegen</p><div class="definition-placed-list"></div></div>`).join('');
+ const allDefinitionCards=definitionItems.map((x,i)=>({id:i,text:x[0],type:x[1]}));
+ // Eine richtige Definition steht immer ganz am Ende. Die übrigen sieben werden gemischt,
+ // wobei unter den ersten vier mindestens zwei falsche Definitionen liegen.
+ const correctCards=allDefinitionCards.filter(x=>x.type!=='wrong');
+ const lastCorrect=correctCards[Math.floor(Math.random()*correctCards.length)];
+ const remaining=allDefinitionCards.filter(x=>x.id!==lastCorrect.id);
+ let definitionOrder=shuffle(remaining);
+ let attempts=0;
+ while(attempts<50 && definitionOrder.slice(0,4).filter(x=>x.type==='wrong').length<2){
+   definitionOrder=shuffle(remaining);
+   attempts++;
+ }
+ definitionOrder.push(lastCorrect);
+ items.innerHTML=definitionOrder.map(x=>`<button type="button" class="definition-item" draggable="true" data-id="${x.id}">${escapeHtml(x.text)}</button>`).join('');
+ document.querySelectorAll('#definitionItems .definition-item').forEach(b=>{
+   const id=Number(b.dataset.id);
+   b.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',String(id));b.classList.add('dragging')});
+   b.addEventListener('dragend',()=>b.classList.remove('dragging'));
+   b.addEventListener('click',()=>{definitionSelected=id;document.querySelectorAll('.definition-item').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')});
+ });
+ document.querySelectorAll('#definitionDropzones .definition-dropzone').forEach(z=>{
+   z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('over')});
+   z.addEventListener('dragleave',()=>z.classList.remove('over'));
+   z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('over');placeDefinitionItem(Number(e.dataTransfer.getData('text/plain')),z.dataset.type)});
+   z.addEventListener('click',e=>{if(definitionSelected!==null&&e.target.closest('.definition-dropzone'))placeDefinitionItem(definitionSelected,z.dataset.type)});
+ });
+ // Der rechte Bereich dient auch als Ablage: Karten können per Drag-and-drop zurückgelegt werden.
+ items.addEventListener('dragover',e=>e.preventDefault());
+ items.addEventListener('drop',e=>{e.preventDefault();const id=Number(e.dataTransfer.getData('text/plain'));returnDefinitionCard(id)});
+ renderDefinitions();
+ document.getElementById('definitionFeedback').className='feedback definition-game-feedback';
+ document.getElementById('definitionNext').style.display='none';
+}
+function openDefinitions(){
+ showScreen('definitions');
+ if(definitionSolved){
+   document.getElementById('definitionGameStage').classList.add('hidden');
+   document.getElementById('definitionCheatStage').classList.remove('hidden');
+ }else{
+   document.getElementById('definitionGameStage').classList.remove('hidden');
+   document.getElementById('definitionCheatStage').classList.add('hidden');
+   setupDefinitions();
+ }
+}
+function placeDefinitionItem(id,type){
+ const item=definitionItems[id];
+ if(!item||definitionSolved)return;
+ // Remove this card from every current zone.
+ Object.keys(definitionPlaced).forEach(k=>{
+   if(definitionPlaced[k]===id)delete definitionPlaced[k];
+ });
+ // Replace the card currently in the target zone; the replaced card returns to the pool.
+ if(definitionPlaced[type]!==undefined)delete definitionPlaced[type];
+ definitionPlaced[type]=id;
+ definitionSelected=null;
+ renderDefinitions();
+}
+function returnDefinitionItem(type){delete definitionPlaced[type];definitionSelected=null;renderDefinitions()}
+function returnDefinitionCard(id){Object.keys(definitionPlaced).forEach(k=>{if(definitionPlaced[k]===id)delete definitionPlaced[k]});definitionSelected=null;renderDefinitions()}
+function renderDefinitions(){
+ document.querySelectorAll('#definitionDropzones .definition-dropzone').forEach(z=>{
+   const id=definitionPlaced[z.dataset.type],list=z.querySelector('.definition-placed-list');
+   list.innerHTML='';
+   if(id!==undefined){
+     const b=document.createElement('button');
+     b.type='button';b.className='definition-placed-item';b.textContent=definitionItems[id][0];b.draggable=true;
+     b.title='Klicken, um die Karte wieder zu den Definitionen zu legen';
+     b.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',String(id));b.classList.add('dragging')});
+     b.addEventListener('dragend',()=>b.classList.remove('dragging'));
+     b.addEventListener('click',()=>returnDefinitionItem(z.dataset.type));
+     list.appendChild(b);
+   }
+ });
+ document.querySelectorAll('#definitionItems .definition-item').forEach(b=>{
+   const id=Number(b.dataset.id);const used=Object.values(definitionPlaced).includes(id);
+   b.style.display=used?'none':'block';b.classList.remove('selected');
+ });
+}
+function checkDefinitions(){
+ const f=document.getElementById('definitionFeedback');
+ const required=['klasse','objekt','attribut','methode'];
+ const missing=required.filter(k=>definitionPlaced[k]===undefined);
+ if(missing.length){f.className='feedback show bad';f.innerHTML='✗ Noch nicht vollständig. Ordne jedem der <strong>vier Begriffe</strong> eine Definition zu.';return}
+ const wrongPlaced=required.some(k=>definitionItems[definitionPlaced[k]][1]!==k);
+ if(wrongPlaced){
+   f.className='feedback show bad';
+   f.innerHTML='✗ Noch nicht richtig. Eine oder mehrere Definitionen passen nicht zum Begriff. Verschiebe die Karten und prüfe erneut.';
+   return;
+ }
+ definitionSolved=true;
+ f.className='feedback show good';
+ f.innerHTML='✓ <strong>Alles richtig!</strong> Die vier Definitionen sind korrekt zugeordnet. Die übrigen Karten waren Ablenkungen.';
+ document.getElementById('definitionNext').style.display='flex';
+}
+function finishDefinitions(){
+ document.getElementById('definitionGameStage').classList.add('hidden');
+ document.getElementById('definitionCheatStage').classList.remove('hidden');
+ document.getElementById('definitionModePill').textContent='📖 Merkhilfe';
+}
+const highlightedCodeParts=new Set();
+const codePuzzleTasks=[
+ {desc:'Erzeuge ein Objekt <strong>meinAuto</strong> der Klasse <strong>Auto</strong>. Die Farbe soll <strong>rot</strong> sein, die Geschwindigkeit <strong>80</strong> betragen und anschließend soll <strong>fahren()</strong> ausgeführt werden.', lines:['Auto meinAuto = new Auto();','meinAuto.farbe = "rot";','meinAuto.geschwindigkeit = 80;','meinAuto.fahren();'], wrong:['Auto lampe = new Lampe();','meinAuto.farbe = "blau";','meinAuto.bremsen();','String farbe;']},
+ {desc:'Erzeuge ein Objekt <strong>lampe</strong> der Klasse <strong>Lampe</strong>. Setze die Helligkeit auf <strong>80</strong> und schalte die Lampe anschließend ein.', lines:['Lampe lampe = new Lampe();','lampe.helligkeit = 80;','lampe.einschalten();'], wrong:['Lampe lampe = new Lampe(80);','lampe.helligkeit = 20;','lampe.ausschalten();','String helligkeit;']},
+ {desc:'Erzeuge ein Objekt <strong>spieler</strong> der Klasse <strong>Spielfigur</strong>. Setze die Lebenspunkte auf <strong>100</strong> und lasse die Figur anschließend <strong>springen()</strong>.', lines:['Spielfigur spieler = new Spielfigur();','spieler.lebenspunkte = 100;','spieler.springen();'], wrong:['Spielfigur gegner = new Spielfigur();','spieler.lebenspunkte = 10;','spieler.angreifen();','int springen;']}
+];
+let codeTaskIndex=0,codeTaskScores=[false,false,false],codeTaskHadError=[false,false,false],codePuzzleItems=[],codePlaced={},selectedCodePiece=null,codePuzzleReady=false;
+function highlightCode(id){document.querySelectorAll('.code-line').forEach(x=>x.classList.remove('active'));if(id==='class'){['class','attr1','attr2','method','method-body','method-end','class-end'].forEach(part=>{const el=document.getElementById('code-'+part);if(el)el.classList.add('active')})}else if(id==='method'){['method','method-body','method-end'].forEach(part=>{const el=document.getElementById('code-'+part);if(el)el.classList.add('active')})}else{const el=document.getElementById('code-'+id);if(el)el.classList.add('active')}highlightedCodeParts.add(id);const f=document.getElementById('codeHighlightFeedback');if(highlightedCodeParts.size<5){f.className='feedback show good';f.innerHTML=`✓ Markiert. Noch <strong>${5-highlightedCodeParts.size}</strong> Baustein${5-highlightedCodeParts.size===1?'':'e'} entdecken.`}else{f.className='feedback show good';f.innerHTML='✓ Alle wichtigen Bausteine wurden einmal markiert. Klicke auf <strong>Weiter</strong>, wenn du bereit bist.';document.getElementById('codeNextButton').style.display='inline-flex'}}
+function continueToCodePuzzle(){document.getElementById('codeHighlightStage').classList.add('hidden');document.getElementById('codePuzzleStage').classList.remove('hidden');document.getElementById('codeFinalScore').classList.add('hidden');codeTaskIndex=0;codeTaskScores=[false,false,false];codeTaskHadError=[false,false,false];codePuzzleReady=true;loadCodeTask();window.scrollTo({top:0,behavior:'smooth'})}
+function loadCodeTask(){const t=codePuzzleTasks[codeTaskIndex];document.getElementById('codeTaskProgress').textContent=`Aufgabe ${codeTaskIndex+1} von 3`;document.getElementById('codeTaskPoints').textContent=`${codeTaskScores.filter(Boolean).length} / 3 Punkte`;document.getElementById('codeTaskDescription').innerHTML='<p>'+t.desc+'</p>';resetCodePuzzle()}
+function resetCodePuzzle(){const t=codePuzzleTasks[codeTaskIndex];codePlaced={};selectedCodePiece=null;codePuzzleItems=t.lines.map((text,id)=>({id,text,correct:true})).concat(t.wrong.map((text,i)=>({id:t.lines.length+i,text,correct:false}))).sort(()=>Math.random()-0.5);const editor=document.getElementById('codeEditor'),pieces=document.getElementById('codePieces');editor.innerHTML='';pieces.innerHTML='';for(let i=0;i<t.lines.length;i++){const slot=document.createElement('div');slot.className='editor-slot';slot.dataset.slot=i;slot.textContent=`${i+1}. Code-Baustein hier ablegen`;slot.addEventListener('dragover',e=>{e.preventDefault();slot.classList.add('over')});slot.addEventListener('dragleave',()=>slot.classList.remove('over'));slot.addEventListener('drop',e=>{e.preventDefault();slot.classList.remove('over');placeCodePiece(Number(e.dataTransfer.getData('text/plain')),i)});slot.addEventListener('click',()=>{if(selectedCodePiece!==null)placeCodePiece(selectedCodePiece,i)});editor.appendChild(slot)}codePuzzleItems.forEach(item=>{const b=document.createElement('button');b.type='button';b.className='code-piece';b.draggable=true;b.dataset.id=item.id;b.textContent=item.text;b.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',String(item.id));b.classList.add('dragging')});b.addEventListener('dragend',()=>b.classList.remove('dragging'));b.addEventListener('click',()=>{selectedCodePiece=item.id;document.querySelectorAll('#codePieces .code-piece').forEach(x=>x.style.outline='');b.style.outline='3px solid #8aa3ff'});pieces.appendChild(b)});renderCodeEditor();document.getElementById('codePuzzleFeedback').className='feedback';document.getElementById('codeTaskNextButton').style.display='none';document.getElementById('codeCheckButton').style.display='inline-flex';const resetButton=document.getElementById('codeResetButton');if(resetButton){resetButton.style.display='inline-flex';resetButton.disabled=false}}
+function placeCodePiece(id,slotIndex){const item=codePuzzleItems.find(x=>x.id===id);if(!item)return;const old=Object.keys(codePlaced).find(k=>codePlaced[k]===id);if(old!==undefined){const oldIndex=Number(old);const target=codePlaced[slotIndex];if(target!==undefined)codePlaced[oldIndex]=target;else delete codePlaced[oldIndex]}else if(codePlaced[slotIndex]!==undefined){/* keep target available; selected new block replaces it */}codePlaced[slotIndex]=id;selectedCodePiece=null;renderCodeEditor()}
+function renderCodeEditor(){const editor=document.getElementById('codeEditor');[...editor.children].forEach((slot,i)=>{const id=codePlaced[i];slot.innerHTML='';if(id===undefined){slot.textContent=`${i+1}. Code-Baustein hier ablegen`;slot.classList.remove('filled');return}const item=codePuzzleItems.find(x=>x.id===id);const b=document.createElement('button');b.type='button';b.className='code-piece';b.draggable=true;b.textContent=item.text;b.title='Klicken und danach auf einen anderen Platz setzen';b.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',String(id));b.classList.add('dragging')});b.addEventListener('dragend',()=>b.classList.remove('dragging'));b.addEventListener('click',()=>{selectedCodePiece=id;document.querySelectorAll('#codeEditor .code-piece').forEach(x=>x.style.outline='');b.style.outline='3px solid #8aa3ff'});slot.appendChild(b);slot.classList.add('filled')});document.querySelectorAll('#codePieces .code-piece').forEach(b=>{const used=Object.values(codePlaced).includes(Number(b.dataset.id));b.style.display=used?'none':'block';b.style.outline=''});selectedCodePiece=null}
+function checkCodePuzzle(){const t=codePuzzleTasks[codeTaskIndex],f=document.getElementById('codePuzzleFeedback'),slots=t.lines.map((_,i)=>codePlaced[i]);if(slots.some(x=>x===undefined)){f.className='feedback show bad';f.innerHTML='✗ Noch nicht vollständig. Setze alle benötigten Bausteine in den Editor.';return}const ok=slots.every((id,i)=>{const item=codePuzzleItems.find(x=>x.id===id);return item&&item.correct&&item.text===t.lines[i]});if(!ok){codeTaskHadError[codeTaskIndex]=true;f.className='feedback show bad';f.innerHTML='✗ Noch nicht richtig. Die Aufgabe wird als Fehler gewertet, du darfst sie aber weiter verbessern.';return}if(codeTaskHadError[codeTaskIndex]){codeTaskScores[codeTaskIndex]=false;f.className='feedback show good';f.innerHTML='✓ Jetzt ist die Lösung richtig. <strong>Wegen des vorherigen Fehlversuchs gibt es für diese Aufgabe keinen Punkt.</strong>'}else{codeTaskScores[codeTaskIndex]=true;f.className='feedback show good';f.innerHTML='✓ <strong>Richtig beim ersten vollständigen Prüfen!</strong> Die Aufgabe bringt dir einen Punkt.'}document.getElementById('codeTaskPoints').textContent=`${codeTaskScores.filter(Boolean).length} / 3 Punkte`;document.getElementById('codeTaskNextButton').style.display='inline-flex';document.getElementById('codeCheckButton').style.display='none';const resetButton=document.getElementById('codeResetButton');if(resetButton){resetButton.style.display='none'}}
+function continueCodeTask(){if(codeTaskIndex<2){codeTaskIndex++;loadCodeTask()}else{showCodeFinalScore()}}
+function showCodeFinalScore(){document.getElementById('codePuzzleStage').classList.add('hidden');const score=codeTaskScores.filter(Boolean).length,box=document.getElementById('codeFinalScore');box.classList.remove('hidden');box.innerHTML=`<h3>Code-Puzzle abgeschlossen</h3><div style="font-size:2.2rem;font-weight:800;margin:12px 0">${score} / 3 Punkte</div><p>${score===3?'Alle drei Aufgaben beim ersten vollständigen Prüfen richtig gelöst!':'Du kannst die Code-Puzzles noch einmal ausprobieren. Wichtig: Ein vorheriger Fehlversuch bleibt bei der Bewertung bestehen, auch wenn du die Aufgabe anschließend richtig löst.'}</p><div class="actions" style="justify-content:center;margin-top:16px"><button class="btn primary" onclick="continueToCodePuzzle()">Noch einmal</button><button class="btn" onclick="showScreen('start')">Startbildschirm</button></div>`}
+document.querySelectorAll(".dropzone").forEach(z=>z.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&selected&&!z.classList.contains("wrong")){e.preventDefault();answer(z.dataset.type)}}));
+setupRelated();
+setupDefinitions();
+</script>
+</body>
+</html>
