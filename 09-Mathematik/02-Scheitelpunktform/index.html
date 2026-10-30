@@ -1,0 +1,3782 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scheitelpunktspiel</title>
+<style>
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: Arial,sans-serif;
+  background: #eef5ff;
+  color: #172033;
+}
+.app {
+  max-width: 1400px;
+  margin: auto;
+  padding: 18px;
+}
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.pageHeader h1 {
+  margin: 0 0 6px;
+}
+.sub {
+  color: #536078;
+  margin: 0 0 3px;
+  line-height: 1.35;
+}
+.headerActions {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+.headerActions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  height: auto;
+  align-self: flex-start;
+  line-height: 1.2;
+  margin: 0;
+  padding: 9px 12px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+.settingsButton {
+  background: #1d4ed8;
+}
+.helpButton {
+  flex-shrink: 0;
+  background: #64748b;
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0,1.7fr) minmax(320px,.8fr);
+  gap: 16px;
+}
+.card {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 5px 18px #1e325014;
+}
+/* Align the sidebar heading with the top edge of the game world. */
+.layout > aside.card > h2:first-child { margin-top: 0; }
+.formulaPanel {
+  display: block;
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+.formulaPanel h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #172033;
+}
+.formulaPanel h3 {
+  color: #7c3aed;
+}
+#secondFunctionArea h3 {
+  color: #0f766e;
+}
+.formulaPanel .curveLegend {
+  font-size: 12px;
+  color: #475569;
+  margin: 8px 0 0;
+}
+#helpDialog {
+  width: min(560px,calc(100vw - 32px));
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 20px 60px #0f172a40;
+  color: #172033;
+}
+#helpDialog::backdrop {
+  background: #0f172a80;
+}
+#settingsDialog {
+  width: min(560px,calc(100vw - 32px));
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 20px 60px #0f172a40;
+  color: #172033;
+}
+#settingsDialog::backdrop {
+  background: #0f172a80;
+}
+#deleteAllDialog {
+  width: min(500px,calc(100vw - 32px));
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 20px 60px #0f172a40;
+  color: #172033;
+}
+#deleteAllDialog::backdrop { background: #0f172a80; }
+#deleteAllDialog h2 { margin: 0 0 12px; }
+#deleteAllDialog p { line-height: 1.5; margin: 0 0 20px; }
+.deleteConfirmButton { background: #dc2626; color: white; }
+#settingsDialog h2 {
+  margin: 0 0 12px;
+}
+#settingsDialog p {
+  line-height: 1.5;
+}
+.modeOptions {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+.modeOption {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  text-align: left;
+  width: 100%;
+  margin: 0;
+  padding: 13px 14px;
+  background: #fff;
+  color: #172033;
+  border: 2px solid #cbd5e1;
+  border-radius: 11px;
+  font-weight: normal;
+  transition: border-color .15s,box-shadow .15s,background .15s;
+}
+.modeOption strong {
+  font-size: 15px;
+}
+.modeOption span {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #536078;
+}
+.modeOption.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px #bfdbfe;
+}
+.settingsHelp {
+  font-size: 13px;
+  color: #5b667a;
+  margin: 12px 0 18px;
+}
+#helpDialog h2 {
+  margin: 0 0 12px;
+}
+#helpDialog p {
+  line-height: 1.55;
+  margin: 0 0 18px;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+/* Dialogtexte im Blocksatz ohne automatische Silbentrennung. */
+#settingsDialog p,
+.modeOption span:not(.modeDifficulty),
+#helpDialog p {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+.modeOptionTopLine {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.modeOptionTopLine strong { flex: 1 1 auto; min-width: 0; }
+.modeOption .modeDifficulty {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  text-align: right;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: bold;
+}
+#settingsDialog p { line-height: 1.5; }
+#helpDialog h3 { margin: 12px 0 7px; font-size: 16px; }
+#helpDialog .helpIntro { margin-bottom: 10px; }
+.formulaDefinition { margin: 0 0 8px; }
+.prefixEquals { transform: translateX(2px); }
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.dialogActions button {
+  margin: 0;
+}
+#scene {
+  width: 100%;
+  display: block;
+  border-radius: 10px;
+  background: #bfe8ff;
+  touch-action: none;
+}
+.formulaArea {
+  display: inline-block;
+  text-align: left;
+}
+.formulaIntro {
+  margin: 0 0 3px;
+}
+.fieldHelp.examplesHelp {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+.curveLegend span {
+  font-weight: bold;
+}
+.freeModeFields,.parameterModeFields {
+  display: none;
+  min-height: 64px;
+}
+.freeModeFields.active,.parameterModeFields.active {
+  display: block;
+}
+.expressionRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 40px;
+}
+.expressionPrefix {
+  display: block;
+  flex: 0 0 49px;
+  width: 49px;
+  text-align: left;
+  font: normal 20px/1.2 Georgia,serif;
+  white-space: nowrap;
+  color: #172033;
+  padding-top: 9px;
+}
+/* The names share a fixed-width slot, so the equals signs align without moving input boxes. */
+.expressionPrefix { display: flex; align-items: baseline; gap: 0; }
+.formula-boxes > .formulaPrefix { display: inline-flex; align-items: baseline; gap: 0; padding-top: 9px; }
+.prefixFunction { display: inline-block; flex: 0 0 34px; width: 34px; white-space: nowrap; }
+.prefixEquals { display: inline-block; flex: 0 0 auto; }
+.functionInputWrap {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.functionInput {
+  display: block;
+  height: 45px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 81px 9px 10px;
+  border: 2px solid #94a3b8;
+  border-radius: 8px;
+  background: #fff;
+  color: #172033;
+  font: 17px/1.35 Arial,sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1,"tnum" 1;
+}
+.functionInput:focus {
+  border-color: #2563eb;
+  outline: 3px solid #bfdbfe;
+}
+.clearFunctionInput {
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  transform: none;
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #475569;
+  font: bold 16px/1 Arial,sans-serif;
+  border: 1px solid #cbd5e1;
+}
+.clearFunctionInput:hover {
+  background: #cbd5e1;
+  color: #172033;
+}
+
+.insertSquareInput {
+  position: absolute;
+  right: 45px;
+  top: 9px;
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #e2e8f0;
+  color: #334155;
+  font: bold 16px/1 Arial,sans-serif;
+  border: 1px solid #cbd5e1;
+}
+.insertSquareInput:hover { background: #cbd5e1; color: #172033; }
+.fieldHelp {
+  margin: 7px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #5b667a;
+}
+.fieldHelp code {
+  font-size: 12px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+#firstFormulaArea {
+  border-left: 4px solid #7c3aed;
+}
+#secondFunctionArea {
+  border-left: 4px solid #0f766e;
+}
+.formula-boxes {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+  flex-wrap: nowrap;
+  font: 20px Georgia,serif;
+  white-space: nowrap;
+}
+.formula-boxes > span:not(.paramBox) {
+  padding-top: 9px;
+}
+.formula-boxes > span:first-child {
+  display: inline-block;
+  flex: 0 0 49px;
+  width: 49px;
+  text-align: left;
+  padding-right: 0;
+}
+.parambox {
+  width: 62px;
+  padding: 7px 4px;
+  border: 2px solid #94a3b8;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 18px;
+  background: #fff;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.parambox.aBox {
+  width: 62px;
+}
+.parambox:focus {
+  border-color: #2563eb;
+  outline: 3px solid #bfdbfe;
+}
+.paramBox {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  vertical-align: top;
+}
+.paramInputGroup {
+  display: inline-flex;
+  align-items: center;
+}
+.paramLabel {
+  display: block;
+  width: 62px;
+  margin-top: 2px;
+  text-align: center;
+  font: 12px/14px Arial,sans-serif;
+  color: #64748b;
+}
+.paramBox.aGroup .paramLabel {
+  width: 62px;
+}
+.stepBtns {
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: 2px;
+}
+.stepBtn {
+  margin: 0 0 2px;
+  padding: 1px 4px;
+  min-width: 20px;
+  height: 17px;
+  line-height: 13px;
+  border-radius: 4px;
+  background: #475569;
+  font-size: 9px;
+}
+.stepBtn:last-child {
+  margin-bottom: 0;
+}
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 11px 13px;
+  margin: 5px 4px 0 0;
+  cursor: pointer;
+  font-weight: bold;
+  background: #1d4ed8;
+  color: #fff;
+}
+.mainControls {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 7px;
+  margin-top: 8px;
+}
+.mainControls button {
+  width: 100%;
+  margin: 0;
+}
+#start {
+  background: #16a34a;
+}
+#stop {
+  background: #f59e0b;
+  color: #422006;
+}
+#reset {
+  background: #dc2626;
+}
+.secondary {
+  background: #64748b;
+}
+.level {
+  background: #2563eb;
+}
+.level:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+.levels {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 7px;
+  margin-top: 8px;
+}
+.levels button {
+  margin: 0;
+}
+.status {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  min-height: 44px;
+}
+.small {
+  font-size: 13px;
+  color: #5b667a;
+  line-height: 1.4;
+}
+.coins {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+.ok {
+  color: #166534;
+  font-weight: bold;
+}
+.coinsDone {
+  color: #ca8a04;
+  font-weight: bold;
+}
+.coinsMissed {
+  color: #dc2626;
+  font-weight: bold;
+}
+.sandboxTools {
+  display: none;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #c4b5fd;
+  border-radius: 10px;
+  background: #faf5ff;
+}
+.sandboxTools.active {
+  display: block;
+}
+.sandboxTools h3 {
+  margin: 0 0 6px;
+}
+.sandboxTools p {
+  margin: 5px 0 10px;
+}
+.sandboxToolButtons {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 6px;
+}
+.sandboxToolButtons button {
+  margin: 0;
+  padding: 9px 6px;
+  white-space: nowrap;
+}
+.sandboxToolButtons button,
+.sandboxHistoryButtons button,
+.sandboxDeleteButtons button {
+  height: 42px;
+  min-height: 42px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sandboxHistoryButtons,
+.sandboxDeleteButtons {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 6px;
+  margin-top: 7px;
+}
+.sandboxHistoryButtons button,
+.sandboxDeleteButtons button {
+  margin: 0;
+  min-width: 0;
+  padding: 8px 5px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.sandboxHistoryButtons .historyButton {
+  background: #e2e8f0;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+.sandboxHistoryButtons .historyButton:not(:disabled):hover {
+  background: #cbd5e1;
+}
+.sandboxDeleteButtons .deleteAction {
+  background: #dc2626;
+  color: #fff;
+}
+.sandboxDeleteButtons .deleteAction:disabled {
+  background: #94a3b8;
+  color: #f8fafc;
+}
+.sandboxHistoryButtons .historyButton:disabled {
+  opacity: .72;
+  cursor: not-allowed;
+}
+.sandboxToolButtons .toolChoice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: #fff;
+  color: #172033;
+  border: 2px solid #cbd5e1;
+  min-height: 42px;
+  transition: border-color .15s,box-shadow .15s,background .15s;
+}
+.sandboxToolButtons .toolChoice.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px #bfdbfe;
+}
+.toolIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  min-width: 20px;
+}
+.pipeIcon {
+  color: #16a34a;
+}
+.starIcon {
+  color: #ca8a04;
+}
+.blockIcon {
+  color: #d99b18;
+}
+.sandboxSelection {
+  display: none !important;
+}
+.toolNote {
+  font-size: 12px;
+  color: #5b667a;
+  line-height: 1.4;
+}
+button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  opacity: .6;
+}
+.hint {
+  background: #fff6e0;
+  border: 1px solid #f2c572;
+  color: #7a4a00;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 13px;
+  margin: 8px 0;
+}
+#sandbox {
+  background: #6d28d9;
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+@media (max-width:900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .formula-boxes {
+    font-size: 18px;
+  }
+  .parambox {
+    width: 62px;
+    font-size: 16px;
+  }
+  .parambox.aBox {
+    width: 62px;
+  }
+  .paramLabel {
+    width: 62px;
+  }
+  .paramBox.aGroup .paramLabel {
+    width: 62px;
+  }
+  .expressionPrefix {
+    flex-basis: 44px;
+    width: 44px;
+    font-size: 18px;
+  }
+  .formula-boxes > span:first-child {
+    flex-basis: 44px;
+    width: 44px;
+  }
+  .formula-boxes > span:not(.paramBox) {
+    padding-top: 10px;
+  }
+  .mainControls {
+    grid-template-columns: 1fr;
+  }
+  .pageHeader {
+    gap: 8px;
+  }
+  .pageHeader h1 {
+    font-size: 24px;
+  }
+  .headerActions {
+    gap: 5px;
+  }
+  .helpButton,.settingsButton {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+}
+@media (max-width:520px) {
+  .sandboxToolButtons {
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+  .sandboxToolButtons button {
+    font-size: 13px;
+    padding: 8px 4px;
+  }
+  .sandboxHistoryButtons button,
+  .sandboxDeleteButtons button {
+    font-size: 12px;
+    padding: 8px 3px;
+  }
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .headerActions {
+    flex-direction: row;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+  .headerActions button {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    font-size: 14px;
+    padding: 9px 10px;
+  }
+  .expressionRow {
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .expressionPrefix {
+    flex-basis: 44px;
+    width: 44px;
+    font-size: 18px;
+    padding-top: 9px;
+  }
+  .functionInput {
+    font-size: 16px;
+  }
+}
+/*Kompakte Parameterfelder: -1,75 passt hinein und die Schrittknöpfe bleiben innerhalb des Panels.*/
+.parambox,.parambox.aBox {
+  width: 52px;
+  padding: 6px 2px;
+  font-size: 16px;
+}
+.paramLabel,.paramBox.aGroup .paramLabel {
+  width: 52px;
+}
+.stepBtns {
+  margin-left: 1px;
+}
+.stepBtn {
+  min-width: 16px;
+  padding: 1px 2px;
+  font-size: 8px;
+}
+@media (max-width:900px) {
+  .parambox,.parambox.aBox {
+    width: 52px;
+    font-size: 16px;
+  }
+  .paramLabel,.paramBox.aGroup .paramLabel {
+    width: 52px;
+  }
+}
+@media (max-width:520px) {
+  .formula-boxes {
+    gap: 2px;
+    font-size: 16px;
+  }
+  .formula-boxes > span:first-child {
+    flex-basis: 44px;
+    width: 44px;
+  }
+  .parambox,.parambox.aBox {
+    width: 48px;
+    padding: 5px 1px;
+    font-size: 14px;
+  }
+  .paramLabel,.paramBox.aGroup .paramLabel {
+    width: 48px;
+  }
+  .stepBtns {
+    margin-left: 0;
+  }
+  .stepBtn {
+    min-width: 14px;
+    padding: 0 1px;
+    height: 15px;
+    font-size: 8px;
+  }
+}
+/* Beide Eingabemodi erhalten exakt dieselbe Feldhöhe. */
+.functionInput { height: 45px; box-sizing: border-box; }
+.paramInputGroup { height: 45px; align-items: stretch; }
+.parambox,.parambox.aBox { height: 45px; box-sizing: border-box; padding: 0 2px; line-height: 1.2; }
+.stepBtns { height: 45px; justify-content: center; gap: 2px; margin-left: 1px; }
+.stepBtn { height: 17px; flex: 0 0 17px; margin: 0; line-height: 13px; }
+
+/* Schwierigkeitsgrade im Modusdialog: Farbe bleibt dezent, die Auswahlkontur zeigt den aktiven Modus. */
+.modeOption .difficulty-hard { background: #fee2e2; color: #991b1b; }
+.modeOption .difficulty-normal { background: #fef3c7; color: #92400e; }
+.modeOption .difficulty-easy,
+.modeOption .difficulty-easier { background: #dcfce7; color: #166534; }
+.formulaDefinition code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; background: #e2e8f0; border-radius: 3px; padding: 1px 3px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="pageHeader">
+    <div>
+      <h1>Übung zur Scheitelpunktform von Parabeln anhand von Sprungkurven</h1>
+
+    </div>
+    <div class="headerActions">
+      <button type="button" id="showSettings" class="settingsButton" aria-haspopup="dialog" aria-label="Einstellungen öffnen" title="Einstellungen">Einstellungen ⚙</button>
+      <button type="button" id="showHelp" class="helpButton" aria-haspopup="dialog">Hilfe ⓘ</button>
+    </div>
+  </header>
+  <div class="layout">
+    <section class="card"><svg id="scene" viewBox="0 0 1000 600" role="img" aria-label="Koordinatensystem mit Mario, Graphen, Sternen, Piranha-Pflanzen, Blöcken und Röhren"></svg></section>
+    <aside class="card">
+      <h2>Flugbahnen eingeben</h2>
+      <p class="small formulaIntro">Bis zu zwei Funktionen können gleichzeitig definiert werden.</p>
+      <p class="small formulaDefinition">Die allgemeine Scheitelpunktform lautet <code>f(x) = a · (x − d)² + e</code>.</p>
+      <p class="fieldHelp examplesHelp">Beispiele: <code>−(x−3)²+4</code> oder <code>-0,25(x-5,75)²+1</code>.</p>
+      <section id="firstFormulaArea" class="formulaPanel" aria-label="Erste Funktion">
+        <h3>Funktion 1</h3>
+        <div id="function1FreeFields" class="freeModeFields active">
+          <div class="expressionRow">
+            <label class="expressionPrefix" for="fExpression"><span class="prefixFunction">f(x)</span><span class="prefixEquals">=</span></label>
+            <div class="functionInputWrap"><input id="fExpression" class="functionInput" type="text" value="-0.5(x-7)²+4" spellcheck="false" autocomplete="off" aria-label="Funktionsgleichung f von x" placeholder="Funktion hier eingeben"><button type="button" class="insertSquareInput" data-exp-target="fExpression" data-insert="²" aria-label="Quadrat einfügen" title="Hochgestellte 2 einfügen">²</button><button type="button" class="clearFunctionInput" data-clear-target="fExpression" aria-label="Funktionsgleichung f löschen" title="Eingabe löschen">×</button></div>
+          </div>
+        </div>
+        <div id="function1ParameterFields" class="parameterModeFields">
+          <div class="formulaArea">
+            <div class="formula-boxes">
+              <span class="formulaPrefix"><span class="prefixFunction">f(x)</span><span class="prefixEquals">=</span></span>
+              <span class="paramBox aGroup"><span class="paramInputGroup"><input id="a" class="parambox aBox" aria-label="Parameter a" placeholder="a" value="0" inputmode="decimal"><span class="stepBtns"><button type="button" class="stepBtn" data-target="a" data-step="0.25" data-dir="1" aria-label="a erhöhen">▲</button><button type="button" class="stepBtn" data-target="a" data-step="0.25" data-dir="-1" aria-label="a verringern">▼</button></span></span><span class="paramLabel">a</span></span>
+              <span>·(x−</span>
+              <span class="paramBox"><span class="paramInputGroup"><input id="d" class="parambox" aria-label="Parameter d" placeholder="d" value="0" inputmode="decimal"><span class="stepBtns"><button type="button" class="stepBtn" data-target="d" data-step="1" data-dir="1" aria-label="d erhöhen">▲</button><button type="button" class="stepBtn" data-target="d" data-step="1" data-dir="-1" aria-label="d verringern">▼</button></span></span><span class="paramLabel">d</span></span>
+              <span>)²+</span>
+              <span class="paramBox"><span class="paramInputGroup"><input id="e" class="parambox" aria-label="Parameter e" placeholder="e" value="0" inputmode="decimal"><span class="stepBtns"><button type="button" class="stepBtn" data-target="e" data-step="1" data-dir="1" aria-label="e erhöhen">▲</button><button type="button" class="stepBtn" data-target="e" data-step="1" data-dir="-1" aria-label="e verringern">▼</button></span></span><span class="paramLabel">e</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="secondFunctionArea" class="formulaPanel" aria-label="Zweite Funktion">
+        <h3>Funktion 2</h3>
+        <div id="function2FreeFields" class="freeModeFields active">
+          <div class="expressionRow">
+            <label class="expressionPrefix" for="gExpression"><span class="prefixFunction">g(x)</span><span class="prefixEquals">=</span></label>
+            <div class="functionInputWrap"><input id="gExpression" class="functionInput" type="text" value="" spellcheck="false" autocomplete="off" aria-label="Funktionsgleichung g von x" placeholder="Funktion hier eingeben"><button type="button" class="insertSquareInput" data-exp-target="gExpression" data-insert="²" aria-label="Quadrat einfügen" title="Hochgestellte 2 einfügen">²</button><button type="button" class="clearFunctionInput" data-clear-target="gExpression" aria-label="Funktionsgleichung g löschen" title="Eingabe löschen">×</button></div>
+          </div>
+        </div>
+        <div id="function2ParameterFields" class="parameterModeFields">
+          <div class="formulaArea">
+            <div class="formula-boxes">
+              <span class="formulaPrefix"><span class="prefixFunction">g(x)</span><span class="prefixEquals">=</span></span>
+              <span class="paramBox aGroup"><span class="paramInputGroup"><input id="a2" class="parambox aBox" aria-label="Parameter a der zweiten Funktion" placeholder="a" value="0" inputmode="decimal"><span class="stepBtns"><button type="button" class="stepBtn" data-target="a2" data-step="0.25" data-dir="1" aria-label="a der zweiten Funktion erhöhen">▲</button><button type="button" class="stepBtn" data-target="a2" data-step="0.25" data-dir="-1" aria-label="a der zweiten Funktion verringern">▼</button></span></span><span class="paramLabel">a</span></span>
+              <span>·(x−</span>
+              <span class="paramBox"><span class="paramInputGroup"><input id="d2" class="parambox" aria-label="Parameter d der zweiten Funktion" placeholder="d" value="0" inputmode="decimal"><span class="stepBtns"><button type="button" class="stepBtn" data-target="d2" data-step="1" data-dir="1" aria-label="d der zweiten Funktion erhöhen">▲</button><button type="button" class="stepBtn" data-target="d2" data-step="1" data-dir="-1" aria-label="d der zweiten Funktion verringern">▼</button></span></span><span class="paramLabel">d</span></span>
+              <span>)²+</span>
+              <span class="paramBox"><span class="paramInputGroup"><input id="e2" class="parambox" aria-label="Parameter e der zweiten Funktion" placeholder="e" value="0" inputmode="decimal"><span class="stepBtns"><button type="button" class="stepBtn" data-target="e2" data-step="1" data-dir="1" aria-label="e der zweiten Funktion erhöhen">▲</button><button type="button" class="stepBtn" data-target="e2" data-step="1" data-dir="-1" aria-label="e der zweiten Funktion verringern">▼</button></span></span><span class="paramLabel">e</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <p id="parameterHint" class="hint">Hinweise:<br>a bestimmt Streckung oder Stauchung der Parabel.<br>d ist die x-Koordinate des Scheitels.<br>e ist die y-Koordinate des Scheitels.</p>
+      <div class="mainControls"><button id="start">Starten ▶</button><button id="stop" class="secondary">Pausieren ■</button><button id="reset" class="secondary">Reset ↺</button></div>
+      <div class="levels"><button class="level" data-n="1">Level 1</button><button class="level" data-n="2">Level 2</button><button class="level" data-n="3">Level 3</button></div>
+      <button id="sandbox" disabled>Sandbox-Modus</button>
+      <section id="sandboxTools" class="sandboxTools" aria-label="Sandbox-Editor">
+        <h3>Sandbox frei gestalten</h3>
+        <p class="toolNote">Wähle „Röhre“, „Sterne“ oder „Block“ um diese Objekte zu platzieren. Ziehe vorhandene Objekte um sie zu verschieben.</p>
+        <div class="sandboxToolButtons">
+          <button type="button" id="addPipe" class="toolChoice" aria-label="Röhren platzieren" title="Röhren platzieren">Röhren <svg class="toolIcon pipeIcon" aria-hidden="true" viewBox="0 0 22 22" width="22" height="22"><rect x="5" y="7" width="12" height="13" rx="1" fill="#16a34a" stroke="#14532d" stroke-width="1.5"/><rect x="2" y="4" width="18" height="5" rx="1" fill="#22c55e" stroke="#14532d" stroke-width="1.5"/><path d="M8 10v8" stroke="#bbf7d0" stroke-width="2"/></svg></button>
+          <button type="button" id="addStar" class="toolChoice" aria-label="Sterne platzieren" title="Sterne platzieren">Sterne <span class="toolIcon starIcon" aria-hidden="true">★</span></button>
+          <button type="button" id="addBlock" class="toolChoice" aria-label="Blöcke platzieren" title="Blöcke platzieren">Blöcke <span class="toolIcon blockIcon" aria-hidden="true">▦</span></button>
+        </div>
+        <div class="sandboxHistoryButtons" aria-label="Sandbox-Aktionen rückgängig machen oder wiederherstellen">
+          <button type="button" id="redoAction" class="historyButton" disabled>Wiederherstellen ↷</button>
+          <button type="button" id="undoAction" class="historyButton" disabled>Rückgängig ↶</button>
+        </div>
+        <div class="sandboxDeleteButtons">
+          <button type="button" id="deleteObject" class="deleteAction" disabled>Auswahl löschen</button>
+          <button type="button" id="deleteAllObjects" class="deleteAction" disabled>Alles löschen</button>
+        </div>
+        <p class="toolNote sandboxSelection" id="sandboxSelection" hidden aria-live="polite">Noch kein Objekt ausgewählt.</p>
+      </section>
+      <div id="coinCount" class="coins">Sterne: 0 / 0</div>
+      <div id="status" class="status">Wähle Level 1, um zu starten.</div>
+    </aside>
+  </div>
+</div>
+<dialog id="helpDialog" aria-labelledby="helpTitle" aria-describedby="helpDescription">
+  <h2 id="helpTitle">So funktioniert das Scheitelpunktspiel</h2>
+  <h3>Funktionen und Sprünge</h3>
+  <p id="helpDescription">Es können bis zu zwei Funktionen gleichzeitig im Koordinatensystem eingetragen werden. Die Spielfigur springt entlang der von dir definierten Funktionsgraphen. Berührt sie einen Stern, wird er eingesammelt. Stößt sie gegen eine Röhre oder einen Block, wird ihr Lauf unterbrochen. Mit einer passenden Flugbahn kann sie aber über ihre Hindernisse springen!</p>
+  <h3>Mögliche Eingabevarianten</h3>
+  <p>In den Einstellungen kannst du zwischen verschiedenen Eingabevarianten wählen. Sie unterscheiden sich in ihrer Schwierigkeit. Nutze grundsätzlich die im Vorfeld eingestellte freie Eingabe mit Graphenvorschau. Greife nur dann auf eine vereinfachte Eingabevariante zurück, wenn du mit der freien Eingabe nicht weiterkommst.</p>
+  <div class="dialogActions"><button type="button" id="confirmHelp">Bestätigen</button></div>
+</dialog>
+<dialog id="settingsDialog" aria-labelledby="settingsTitle">
+  <h2 id="settingsTitle">Einstellungen</h2>
+  <p>Wähle aus, wie du deine Funktionen eingeben möchtest.</p>
+  <div class="modeOptions" role="radiogroup" aria-label="Eingabemodus">
+    <button type="button" class="modeOption" data-mode-choice="free-hidden" role="radio" aria-checked="false">
+      <span class="modeOptionTopLine"><strong>Freie Eingabe ohne Vorschau</strong><span class="modeDifficulty difficulty-hard">Schwer</span></span>
+      <span>Definiere deine Funktionen selbst mithilfe von Addition, Multiplikation, Klammern und Potenzen. Die Vorschau der Funktionsgraphen ist deaktiviert.</span>
+    </button>
+    <button type="button" class="modeOption" data-mode-choice="free" role="radio" aria-checked="true">
+      <span class="modeOptionTopLine"><strong>Freie Eingabe</strong><span class="modeDifficulty difficulty-normal">Normal</span></span>
+      <span>Definiere deine Funktionen selbst mithilfe von Addition, Multiplikation, Klammern und Potenzen.</span>
+    </button>
+    <button type="button" class="modeOption" data-mode-choice="parameters-simple" role="radio" aria-checked="false">
+      <span class="modeOptionTopLine"><strong>Vereinfachte Eingabe</strong><span class="modeDifficulty difficulty-easy">Einfach</span></span>
+      <span>Definiere deine Funktionen innerhalb der vorgegebenen Scheitelpunktform durch Eingabe der Parameter a, d und e.</span>
+    </button>
+    <button type="button" class="modeOption" data-mode-choice="parameters" role="radio" aria-checked="false">
+      <span class="modeOptionTopLine"><strong>Vereinfachte Eingabe mit Hinweisen</strong><span class="modeDifficulty difficulty-easier">Einfacher</span></span>
+      <span>Definiere deine Funktionen innerhalb der vorgegebenen Scheitelpunktform durch Eingabe der durch Hinweise erläuterten Parameter a, d und e.</span>
+    </button>
+  </div>
+  <div class="dialogActions"><button type="button" id="cancelSettings" class="secondary">Abbrechen</button><button type="button" id="applySettings">Übernehmen</button></div>
+</dialog>
+<dialog id="deleteAllDialog" aria-labelledby="deleteAllTitle" aria-describedby="deleteAllDescription">
+  <h2 id="deleteAllTitle">Alles löschen?</h2>
+  <p id="deleteAllDescription">Möchtest du wirklich alle Röhren, Sterne und Blöcke aus dem Sandbox Level löschen?</p>
+  <div class="dialogActions"><button type="button" id="cancelDeleteAll" class="secondary">Abbrechen</button><button type="button" id="confirmDeleteAll" class="deleteConfirmButton">Alles löschen</button></div>
+</dialog>
+<script>
+'use strict';
+const svg = document.getElementById('scene');
+const status = document.getElementById('status');
+const coinCount = document.getElementById('coinCount');
+let functionMode = 'free';
+const VALID_FUNCTION_MODES = ['free-hidden', 'free', 'parameters-simple', 'parameters'];
+function isFreeInputMode(mode = functionMode) { return mode === 'free' || mode === 'free-hidden'; }
+function isHiddenPreviewMode(mode = functionMode) { return mode === 'free-hidden'; }
+let traversedCurveSegments = [];
+let activeCurveTrailSegment = null;
+let pathVisible = true;
+let sceneUniqueId = 0;
+let renderParent = svg;
+let staticSceneLayer = null;
+let dynamicSceneLayer = null;
+let staticSceneLevel = null;
+let despawnAnimations = [];
+let objectAppearances = [];
+const DESPAWN_DURATION = 460;
+const CONTEXT_STORAGE_KEY = 'marioParabelnV21Contexts';
+let savedContexts = (() => {
+    try {
+        return JSON.parse(localStorage.getItem(CONTEXT_STORAGE_KEY) || '{}') || {};
+    }
+    catch (_) {
+        return {};
+    }
+})();
+functionMode = VALID_FUNCTION_MODES.includes(savedContexts.__functionMode) ? savedContexts.__functionMode : 'free';
+let activeContextKey = null;
+let savedContextSchemaVersion = Number(savedContexts.__schemaVersion) || 0;
+let initialUiEdited = false;
+const W = 1000, H = 600, xMin = -1, xMax = 13, yMin = -1, yMax = 7;
+// Das Spielfeld erhält ein vollständiges Raster bis x=-2, x=14 und y=8.
+// Die spielinternen Grenzen (xMin/xMax/yMin/yMax) und die Zahlenbeschriftungen bleiben unverändert.
+const viewXMin = -2, viewXMax = 14, viewYMin = -2, viewYMax = 8;
+const sx = x => (x - viewXMin) / (viewXMax - viewXMin) * W;
+const sy = y => H - (y - viewYMin) / (viewYMax - viewYMin) * H;
+let p = { a: 0, d: 0, e: 0 }, p2 = { a: 0, d: 0, e: 0 }, marioX = .33, running = false, raf = 0, last = 0, coins = [], level = 0;
+let unlockedLevel = Math.max(1, Math.min(3, Number(savedContexts.__progress && savedContexts.__progress.unlockedLevel) || 1)), sandboxUnlocked = !!(savedContexts.__progress && savedContexts.__progress.sandboxUnlocked);
+// Pro Level eine eigene Röhre. Ihre Oberkante liegt bei der Musterparabel sicher unter der Flugbahn.
+const pipesByLevel = {
+    1: [{ x: 5.95, w: .60, height: 1.80 }],
+    2: [{ x: 9.50, w: .72, height: 4.12 }],
+    3: [
+        { x: 2.5, w: .72, height: 2 },
+        { x: 8, w: .72, height: 4 }
+    ]
+};
+let pipes = [];
+let blocks = []; // Sandbox-Plattformen mit einer Kantenlänge von genau einer Einheit.
+let destroyedBlockIds = new Set(); // Zerstörung gilt nur für den aktuellen Versuch; Reset belebt die Blöcke wieder.
+let marioSupportedBlockId = null;
+// Eine Kurve wird pro Sprungsegment festgehalten. Andere Kurven sind erst nach einer Landung verfügbar.
+let marioCurveIndex = null; // 1 = f(x), 2 = g(x), null = Boden/Plattform/Fall
+let marioLastFunctionProbeX = .4;
+let marioFallAltitude = null;
+let marioFallVelocity = 0;
+let blockDebris = [];
+const MARIO_FALL_GRAVITY = 0.000014; // Koordinateneinheiten pro ms²; sorgt für zunehmende Fallgeschwindigkeit.
+const MARIO_MAX_FALL_SPEED = 0.014;
+const BLOCK_TILE_COLORS = ['#e9b45d', '#d99b45', '#f0c475', '#dba04c', '#f4cb80', '#c98738', '#e5ad55', '#d69a43', '#edbd68'];
+// Die Kollisionsbreite ist bewusst etwas kleiner als die sichtbare Figur.
+const MARIO_HALF_WIDTH = .24;
+const MARIO_HEADROOM = 58 / (H / (viewYMax - viewYMin)); // Figurhöhe in Koordinateneinheiten
+const goalX = 12;
+// Die Flagge ist 0,4 Koordinateneinheiten hoch; ihr Mittelpunkt startet exakt bei y=6,5.
+const FLAG_TOP = 6.5, FLAG_HALF_HEIGHT = .2, FLAG_BOTTOM = FLAG_HALF_HEIGHT;
+let flagY = FLAG_TOP, flagLowering = false, flagElapsed = 0, flagDuration = 1600, attemptEnded = false, deathLocked = false;
+let marioArrivalAltitude = null, marioArrivalStartAltitude = 0;
+// Nach einem erfolgreichen Levelabschluss springt Mario einmal zum Zielpunkt und tanzt dort weiter.
+let celebrationMode = null; // null, 'jump' oder 'dance'
+let celebrationElapsed = 0, celebrationAltitude = 0;
+const CELEBRATION_JUMP_DURATION = 920;
+const CELEBRATION_JUMP_HEIGHT = 0.78;
+const CELEBRATION_END_X = 13;
+let marioMood = 'normal'; // normal, checking (am Ziel), hurt (Kollision)
+let appearanceAnimating = false, appearanceStartedAt = 0;
+const APPEAR_DURATION = 520, APPEAR_STAGGER = 95;
+let sandboxEditing = false, placementType = null, selectedSandboxObject = null, dragInfo = null, nextSandboxId = 1;
+const MAX_SANDBOX_HISTORY = 100;
+let sandboxUndoStack = [], sandboxRedoStack = [];
+const sandboxTools = document.getElementById('sandboxTools');
+const sandboxSelection = document.getElementById('sandboxSelection');
+// -----------------------------------------------------------------------------
+// SVG utilities and shared geometry
+// -----------------------------------------------------------------------------
+function el(tag, attrs = {}, parent = renderParent) {
+    const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+    parent.appendChild(node);
+    return node;
+}
+function evaluateFunction(params, x) {
+    if (!params)
+        return NaN;
+    if (typeof params.evaluate === 'function')
+        return params.evaluate(x);
+    return params.a * (x - params.d) ** 2 + params.e;
+}
+function activeBlocks() { return blocks.filter(block => !destroyedBlockIds.has(String(block.id))); }
+function blockOverlapsMarioX(block, x) {
+    return x + MARIO_HALF_WIDTH > block.x - .5 && x - MARIO_HALF_WIDTH < block.x + .5;
+}
+function blockOverlapsGreenPipe(candidate) {
+    const blockLeft = candidate.x - .5, blockRight = candidate.x + .5;
+    const blockBottom = candidate.y - .5, blockTop = candidate.y + .5;
+    return pipes.some(pipe => {
+        // Maßgeblich ist nur die grüne Röhre einschließlich ihrer Lippe, nicht die Pflanze.
+        const pipeHalfWidth = pipe.w / 2;
+        const horizontalOverlap = blockRight > pipe.x - pipeHalfWidth + 1e-8 && blockLeft < pipe.x + pipeHalfWidth - 1e-8;
+        const verticalOverlap = blockTop > 0 + 1e-8 && blockBottom < pipe.height - 1e-8;
+        return horizontalOverlap && verticalOverlap;
+    });
+}
+function blockOverlapsAnotherBlock(candidate, ignoreId = candidate.id) {
+    const overlapsBlock = blocks.some(other => String(other.id) !== String(ignoreId) &&
+        Math.abs(other.x - candidate.x) < 1 - 1e-8 &&
+        Math.abs(other.y - candidate.y) < 1 - 1e-8);
+    return overlapsBlock || blockOverlapsGreenPipe(candidate);
+}
+function pipeOverlapsOtherPipe(candidate, ignoreId = candidate.id) {
+    const candidateLeft = candidate.x - candidate.w / 2;
+    const candidateRight = candidate.x + candidate.w / 2;
+    return pipes.some(other => {
+        if (String(other.id) === String(ignoreId))
+            return false;
+        const otherLeft = other.x - other.w / 2;
+        const otherRight = other.x + other.w / 2;
+        const horizontalOverlap = candidateRight > otherLeft + 1e-8 && candidateLeft < otherRight - 1e-8;
+        // Alle grünen Röhren stehen auf y=0; jede positive Höhe teilt deshalb einen vertikalen Bereich.
+        return horizontalOverlap && Math.min(candidate.height, other.height) > 1e-8;
+    });
+}
+function pipeOverlapsBlock(candidate) {
+    const pipeLeft = candidate.x - candidate.w / 2;
+    const pipeRight = candidate.x + candidate.w / 2;
+    return activeBlocks().some(block => {
+        const blockLeft = block.x - .5, blockRight = block.x + .5;
+        const blockBottom = block.y - .5, blockTop = block.y + .5;
+        const horizontalOverlap = pipeRight > blockLeft + 1e-8 && pipeLeft < blockRight - 1e-8;
+        const verticalOverlap = blockTop > 1e-8 && blockBottom < candidate.height - 1e-8;
+        return horizontalOverlap && verticalOverlap;
+    });
+}
+function pipeOverlapsOtherObjects(candidate, ignoreId = candidate.id) {
+    return pipeOverlapsOtherPipe(candidate, ignoreId) || pipeOverlapsBlock(candidate);
+}
+function deterministicShuffle(values, seed) {
+    const out = values.slice();
+    let state = seed >>> 0;
+    for (let i = out.length - 1; i > 0; i--) {
+        state = (Math.imul(state ^ (state >>> 15), 1 | state) + 0x6d2b79f5) >>> 0;
+        let t = state;
+        t = Math.imul(t ^ (t >>> 7), t | 61);
+        const random32 = (t ^ (t >>> 14)) >>> 0;
+        const j = random32 % (i + 1);
+        [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+}
+function sameShadeOrder(a, b) {
+    return Array.isArray(a) && Array.isArray(b) && a.length === 9 && b.length === 9 && a.every((value, index) => value === b[index]);
+}
+function createBlockShadeOrder(existingBlocks = []) {
+    const used = existingBlocks.map(block => block.shadeOrder).filter(order => Array.isArray(order) && order.length === 9);
+    let order = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    // Faires Fisher–Yates: jede Anordnung ist eine zufällige Permutation der neun Helligkeitswerte.
+    for (let attempt = 0; attempt < 120; attempt++) {
+        order = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+        }
+        if (!used.some(usedOrder => sameShadeOrder(usedOrder, order)))
+            return order;
+    }
+    // Extrem unwahrscheinlicher Fallback, falls die Zufallsfunktion viele Wiederholungen liefert.
+    order.push(order.shift());
+    return order;
+}
+function ensureBlockShadeOrders(blockList) {
+    const prepared = [];
+    blockList.forEach(block => {
+        const valid = Array.isArray(block.shadeOrder) && block.shadeOrder.length === 9 &&
+            block.shadeOrder.every(value => Number.isInteger(value) && value >= 0 && value <= 8) &&
+            new Set(block.shadeOrder).size === 9;
+        if (!valid || prepared.some(prev => sameShadeOrder(prev.shadeOrder, block.shadeOrder))) {
+            block.shadeOrder = createBlockShadeOrder(prepared);
+        }
+        prepared.push(block);
+    });
+}
+function curveValue(index, x) {
+    return evaluateFunction(index === 1 ? p : p2, x);
+}
+function beginMarioFall(altitude) {
+    marioSupportedBlockId = null;
+    marioCurveIndex = null;
+    marioFallAltitude = Math.max(0, altitude);
+    marioFallVelocity = 0;
+    marioLastFunctionProbeX = marioX;
+}
+function updateCurveRideState(previousX, currentX) {
+    // Im freien Fall bleiben Kurven ignoriert, bis Mario wirklich auf einer Fläche landet.
+    if (marioFallAltitude !== null) {
+        marioCurveIndex = null;
+        marioLastFunctionProbeX = currentX;
+        return;
+    }
+    // Auf einer Blockoberseite darf Mario abspringen, sobald ein Graph die Höhe
+    // der Plattform beim Ansteigen kreuzt. Prüfe den vollständigen horizontalen
+    // Schritt und mehrere Zwischenpunkte, damit ein schmaler Schnittpunkt nicht
+    // von der Animationsschrittweite abhängt. Der Körper darf dabei noch teilweise
+    // über der Plattform liegen.
+    if (marioSupportedBlockId !== null) {
+        const support = activeBlocks().find(block => String(block.id) === String(marioSupportedBlockId));
+        const prevX = Number.isFinite(previousX) ? previousX : marioLastFunctionProbeX;
+        if (support) {
+            const intervalStart = Math.max(Math.min(prevX, currentX), support.x - .5 - MARIO_HALF_WIDTH);
+            const intervalEnd = Math.min(Math.max(prevX, currentX), support.x + .5 + MARIO_HALF_WIDTH);
+            if (intervalEnd >= intervalStart) {
+                const platformY = support.y + .5;
+                const candidates = [];
+                [[1, p], [2, p2]].forEach(([index, curve]) => {
+                    if (!curve) return;
+                    const span = intervalEnd - intervalStart;
+                    const steps = Math.max(8, Math.ceil(span / .01));
+                    let sampleX = intervalStart;
+                    let sampleY = evaluateFunction(curve, sampleX);
+                    for (let i = 1; i <= steps; i++) {
+                        const nextX = intervalStart + span * i / steps;
+                        const nextY = evaluateFunction(curve, nextX);
+                        if (Number.isFinite(sampleY) && Number.isFinite(nextY) &&
+                            sampleY <= platformY + 1e-8 && nextY >= platformY - 1e-8 &&
+                            nextY > sampleY + 1e-8) {
+                            candidates.push({ index, y: nextY, crossX: nextX });
+                            break;
+                        }
+                        sampleX = nextX;
+                        sampleY = nextY;
+                    }
+                });
+                if (candidates.length) {
+                    // Nimm den ersten tatsächlichen Schnittpunkt entlang der Laufrichtung.
+                    candidates.sort((a, b) => a.crossX - b.crossX || b.y - a.y);
+                    marioSupportedBlockId = null;
+                    marioFallAltitude = null;
+                    marioFallVelocity = 0;
+                    marioCurveIndex = candidates[0].index;
+                }
+            }
+        }
+        marioLastFunctionProbeX = currentX;
+        return;
+    }
+    if (marioCurveIndex !== null) {
+        const currentY = curveValue(marioCurveIndex, currentX);
+        marioLastFunctionProbeX = currentX;
+        // Das aktuelle Kurvensegment endet erst am Boden. Eine andere Kurve kann
+        // während desselben Sprungs nicht übernehmen, selbst wenn sie höher liegt.
+        if (Number.isFinite(currentY) && currentY > 0)
+            return;
+        marioCurveIndex = null;
+        return;
+    }
+    const firstY = p ? evaluateFunction(p, currentX) : NaN;
+    const secondY = p2 ? evaluateFunction(p2, currentX) : NaN;
+    const candidates = [];
+    // Ein Sprung beginnt ausschließlich beim tatsächlichen Übergang vom Boden
+    // auf eine Kurve (Funktionswert wechselt während des Laufes von <= 0 auf > 0).
+    // Ist die Kurve schon an der Startposition über dem Boden, hebt sie Mario nicht an.
+    const prevX = Number.isFinite(previousX) ? previousX : marioLastFunctionProbeX;
+    const firstPrev = p ? evaluateFunction(p, prevX) : NaN;
+    const secondPrev = p2 ? evaluateFunction(p2, prevX) : NaN;
+    if (Number.isFinite(firstPrev) && Number.isFinite(firstY) && firstPrev <= 0 && firstY > 0)
+        candidates.push({ index: 1, y: firstY });
+    if (Number.isFinite(secondPrev) && Number.isFinite(secondY) && secondPrev <= 0 && secondY > 0)
+        candidates.push({ index: 2, y: secondY });
+    marioLastFunctionProbeX = currentX;
+    if (candidates.length) {
+        candidates.sort((a, b) => b.y - a.y);
+        marioCurveIndex = candidates[0].index;
+    }
+}
+function updateMarioBlockSupport(x, dt = 0, previousBaseY = null) {
+    // Fallende Figuren ignorieren Kurven vollständig: nur eine echte Plattform oder
+    // der Boden kann den Fall beenden. Das verhindert Höhen-Teleportationen.
+    if (marioFallAltitude !== null) {
+        const previousAltitude = marioFallAltitude;
+        const stepTime = Math.max(0, dt);
+        marioFallVelocity = Math.min(MARIO_MAX_FALL_SPEED, marioFallVelocity + MARIO_FALL_GRAVITY * stepTime);
+        const nextAltitude = Math.max(0, previousAltitude - marioFallVelocity * stepTime);
+        const blockLanding = activeBlocks()
+            .filter(block => {
+            const top = block.y + .5;
+            return blockOverlapsMarioX(block, x) && previousAltitude >= top - .01 && nextAltitude <= top + .01;
+        })
+            .sort((a, b) => b.y - a.y)[0] || null;
+        if (blockLanding) {
+            marioSupportedBlockId = blockLanding.id;
+            marioFallAltitude = null;
+            marioFallVelocity = 0;
+            marioCurveIndex = null;
+            marioLastFunctionProbeX = x;
+            return;
+        }
+        if (nextAltitude <= 0) {
+            marioFallAltitude = null;
+            marioFallVelocity = 0;
+            marioSupportedBlockId = null;
+            marioCurveIndex = null;
+            marioLastFunctionProbeX = x;
+            return;
+        }
+        marioFallAltitude = nextAltitude;
+        return;
+    }
+    const active = activeBlocks().find(block => String(block.id) === String(marioSupportedBlockId));
+    if (active) {
+        // Eine Blockoberseite bleibt eine reale Plattform, selbst wenn eine Funktion
+        // darüber verläuft. Erst wenn Mario die Kante verlässt, beginnt der Fall.
+        if (blockOverlapsMarioX(active, x))
+            return;
+        beginMarioFall(active.y + .5);
+        updateMarioBlockSupport(x, dt, previousBaseY);
+        return;
+    }
+    const currentY = trajectoryY(x);
+    const previousY = Number.isFinite(previousBaseY) ? previousBaseY : 0;
+    // Eine Plattformlandung ist nur beim Abstieg möglich. Ohne diese Richtungsprüfung
+    // konnte Mario unmittelbar nach dem Absprung wegen einer kleinen Y-Toleranz
+    // wieder an derselben Blockoberkante festgesetzt werden.
+    const descending = currentY < previousY - 1e-5;
+    const candidates = descending ? activeBlocks().filter(block => {
+        const top = block.y + .5;
+        return blockOverlapsMarioX(block, x) && previousY >= top - .02 && currentY <= top + .02;
+    }).sort((a, b) => b.y - a.y) : [];
+    if (candidates.length) {
+        marioSupportedBlockId = candidates[0].id;
+        marioCurveIndex = null;
+        marioFallAltitude = null;
+        marioFallVelocity = 0;
+        marioLastFunctionProbeX = x;
+    }
+}
+function supportedBlockAt(x) {
+    const block = activeBlocks().find(item => String(item.id) === String(marioSupportedBlockId));
+    if (!block || !blockOverlapsMarioX(block, x))
+        return null;
+    return block;
+}
+function trajectoryY(x) {
+    if (marioArrivalAltitude !== null && Math.abs(x - marioX) < .001)
+        return Math.max(0, marioArrivalAltitude);
+    if (marioFallAltitude !== null)
+        return Math.max(0, marioFallAltitude);
+    const block = supportedBlockAt(x);
+    if (block)
+        return block.y + .5;
+    if (marioCurveIndex !== null)
+        return Math.max(0, curveValue(marioCurveIndex, x));
+    return 0;
+}
+function scaleAround(scale, cx, cy) {
+    return `translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`;
+}
+function popScaleFromElapsed(elapsed) {
+    if (elapsed <= 0)
+        return 0.001;
+    const t = Math.min(1, elapsed / APPEAR_DURATION);
+    if (t >= 1)
+        return 1;
+    // Ease-out-back: wächst ein wenig über die Zielgröße hinaus und pendelt sich ein.
+    const c1 = 1.70158, c3 = c1 + 1;
+    return Math.max(0.001, 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2));
+}
+function popScale(index) {
+    return appearanceAnimating
+        ? popScaleFromElapsed(performance.now() - appearanceStartedAt - index * APPEAR_STAGGER)
+        : 1;
+}
+function objectPopScale(type, object, fallbackIndex) {
+    const entry = objectAppearances.find(item => item.type === type && String(item.id) === String(object.id));
+    if (!entry)
+        return popScale(fallbackIndex);
+    return popScaleFromElapsed(performance.now() - entry.startedAt - entry.index * APPEAR_STAGGER);
+}
+function beginObjectAppearance() {
+    appearanceStartedAt = performance.now();
+    appearanceAnimating = true;
+    last = 0;
+    scene();
+    if (raf)
+        cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(animate);
+}
+function addText(attrs, text, parent = renderParent) {
+    el('text', attrs, parent).textContent = text;
+}
+function drawCurve(params, fromX, toX, color) {
+    let d = '', on = false;
+    const steps = Math.max(1, Math.ceil((toX - fromX) * 55));
+    for (let i = 0; i <= steps; i++) {
+        const x = fromX + (toX - fromX) * i / steps;
+        const y = evaluateFunction(params, x);
+        if (!Number.isFinite(y) || y < yMin - .2 || y > yMax + .2) {
+            on = false;
+            continue;
+        }
+        d += (on ? 'L' : 'M') + sx(x).toFixed(2) + ' ' + sy(y).toFixed(2) + ' ';
+        on = true;
+    }
+    if (d)
+        el('path', { d, fill: 'none', stroke: color, 'stroke-width': 5, 'stroke-linecap': 'round' });
+}
+function findGroundCrossingX(curveIndex, fromX, toX) {
+    let low = fromX, high = toX;
+    let lowY = curveValue(curveIndex, low), highY = curveValue(curveIndex, high);
+    if (!Number.isFinite(lowY) || !Number.isFinite(highY) || !(lowY <= 0 && highY > 0)) return fromX;
+    for (let i = 0; i < 24; i++) {
+        const mid = (low + high) / 2;
+        const midY = curveValue(curveIndex, mid);
+        if (!Number.isFinite(midY) || midY > 0) high = mid;
+        else low = mid;
+    }
+    return high;
+}
+function recordTraversedCurve(previousX, currentX, previousCurveIndex) {
+    if (!isHiddenPreviewMode()) {
+        activeCurveTrailSegment = null;
+        return;
+    }
+    if (previousCurveIndex !== null) {
+        let segment = activeCurveTrailSegment;
+        if (!segment || segment.index !== previousCurveIndex || Math.abs(segment.toX - previousX) > .02) {
+            segment = { index: previousCurveIndex, fromX: previousX, toX: currentX };
+            traversedCurveSegments.push(segment);
+            activeCurveTrailSegment = segment;
+        } else {
+            segment.toX = currentX;
+        }
+        if (marioCurveIndex !== previousCurveIndex) activeCurveTrailSegment = null;
+        return;
+    }
+    if (marioCurveIndex !== null) {
+        const startX = findGroundCrossingX(marioCurveIndex, previousX, currentX);
+        const segment = { index: marioCurveIndex, fromX: startX, toX: currentX };
+        traversedCurveSegments.push(segment);
+        activeCurveTrailSegment = segment;
+    } else {
+        activeCurveTrailSegment = null;
+    }
+}
+function drawCoin(c, scale = 1) {
+    if (c.hit)
+        return;
+    const isSandboxStar = c.sandbox === true;
+    const isSelected = isSandboxStar && selectedSandboxObject && selectedSandboxObject.type === 'star' && String(selectedSandboxObject.id) === String(c.id);
+    const starTransform = scaleAround(scale, sx(c.x), sy(c.y));
+    const g = el('g', { transform: starTransform, ...(isSandboxStar ? { 'data-object-type': 'star', 'data-object-id': c.id, 'style': 'cursor:grab' } : {}) });
+    if (isSelected)
+        el('circle', { cx: sx(c.x), cy: sy(c.y), r: 19, fill: 'none', stroke: '#facc15', 'stroke-width': 5 }, g);
+    el('circle', { cx: sx(c.x), cy: sy(c.y), r: 14, fill: '#ffd84d', stroke: isSelected ? '#facc15' : '#b98200', 'stroke-width': isSelected ? 4 : 3 }, g);
+    addText({ x: sx(c.x), y: sy(c.y) + 6, 'text-anchor': 'middle', 'font-size': 18, 'font-weight': 'bold', fill: '#8a5a00' }, '★', g);
+}
+// -----------------------------------------------------------------------------
+// Scene rendering: background, grid, terrain, objects and character
+// -----------------------------------------------------------------------------
+// Baue Himmel, Raster, Achsen und Terrain nur beim Levelwechsel neu auf.
+// Die beweglichen Elemente werden davon getrennt pro Animationsframe gezeichnet.
+function sceneBackgroundKey() {
+    if (level === 0)
+        return sandboxEditing ? 'sandbox' : 'start';
+    return `level-${level}`;
+}
+function hashStringSeed(value) {
+    let hash = 2166136261;
+    for (let i = 0; i < value.length; i++) {
+        hash ^= value.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+}
+function makeSeededRandom(seed) {
+    let state = seed >>> 0;
+    return () => {
+        state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+        return state / 4294967296;
+    };
+}
+function drawPixelClouds(sceneKey, defs) {
+    // Die drei einfachen, runden Wolken aus V36 bleiben erhalten. Nur ihre Positionen
+    // werden pro Spielwelt deterministisch variiert und liegen stets im oberen Himmel.
+    const rand = makeSeededRandom(hashStringSeed(`cloud-layout:${sceneKey}`));
+    const slotWidth = W / 3;
+    for (let slot = 0; slot < 3; slot++) {
+        const cx = slotWidth * (slot + .5) + (rand() - .5) * 42;
+        const cy = 48 + rand() * 82;
+        const cloud = el('g', { opacity: .85, 'data-cloud-index': slot, 'data-cloud-scene': sceneKey }, renderParent);
+        el('circle', { cx: cx - 30, cy: cy + 8, r: 25, fill: '#fff' }, cloud);
+        el('circle', { cx, cy: cy - 8, r: 34, fill: '#fff' }, cloud);
+        el('circle', { cx: cx + 35, cy: cy + 8, r: 24, fill: '#fff' }, cloud);
+        el('rect', { x: cx - 50, y: cy + 8, width: 105, height: 25, rx: 12, fill: '#fff' }, cloud);
+    }
+}
+
+function drawDecorativeMountains(sceneKey, defs) {
+    const rand = makeSeededRandom(hashStringSeed(`mountains:${sceneKey}`));
+    // Pro Spielwelt ein großer und ein kleiner Hügel. Positionen sind reproduzierbar,
+    // vollständig dekorativ und haben keinerlei Einfluss auf Spielphysik oder Kollisionen.
+    const largeStart = -2 + rand() * 8; // 7 Einheiten breit, endet spätestens bei x=13.
+    let smallStart = -2 + rand() * 10; // 5 Einheiten breit, endet spätestens bei x=13.
+    if (smallStart + 2.5 > largeStart + 1.8 && smallStart < largeStart + 5.2)
+        smallStart = smallStart + 5.5 <= 8 ? smallStart + 5.5 : Math.max(-2, smallStart - 5.5);
+    // Der kleine Berg liegt hinter dem großen. Da beide halbtransparent sind,
+    // reicht reine Zeichenreihenfolge nicht: Ein SVG-Maskenbereich entfernt den
+    // kleinen Berg vollständig innerhalb der Silhouette des großen Berges.
+    const hills = [
+        { start: smallStart, width: 5, height: 2, fill: '#c6dfbb', outline: '#b1cda7', opacity: .85, kind: 'small' },
+        { start: largeStart, width: 7, height: 3, fill: '#b8d5ad', outline: '#a3c09a', opacity: .90, kind: 'large' }
+    ];
+    const largeHill = hills.find(hill => hill.kind === 'large');
+    const largePeakStart = largeHill.start + largeHill.height;
+    const largePeakEnd = largePeakStart + 1;
+    const largePath = `M${sx(largeHill.start)} ${sy(0)} L${sx(largePeakStart - .22)} ${sy(largeHill.height - .22)} Q${sx(largePeakStart)} ${sy(largeHill.height)} ${sx(largePeakStart + .28)} ${sy(largeHill.height)} L${sx(largePeakEnd - .28)} ${sy(largeHill.height)} Q${sx(largePeakEnd)} ${sy(largeHill.height)} ${sx(largePeakEnd + .22)} ${sy(largeHill.height - .22)} L${sx(largeHill.start + largeHill.width)} ${sy(0)} Z`;
+    const overlapMaskId = `mountain-overlap-mask-${sceneKey.replace(/[^a-z0-9]/gi, '-')}`;
+    const overlapMask = el('mask', { id: overlapMaskId, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: W, height: H }, defs);
+    el('rect', { x: 0, y: 0, width: W, height: H, fill: '#fff' }, overlapMask);
+    // Mit einer leicht verbreiterten Maske wird auch ein Antialiasing-Saum vermieden.
+    el('path', { d: largePath, fill: '#000', stroke: '#000', 'stroke-width': 3, 'stroke-linejoin': 'round' }, overlapMask);
+    for (let i = 0; i < hills.length; i++) {
+        const hill = hills[i];
+        const end = hill.start + hill.width;
+        const peakStart = hill.start + hill.height;
+        const peakEnd = peakStart + 1;
+        const path = `M${sx(hill.start)} ${sy(0)} L${sx(peakStart - .22)} ${sy(hill.height - .22)} Q${sx(peakStart)} ${sy(hill.height)} ${sx(peakStart + .28)} ${sy(hill.height)} L${sx(peakEnd - .28)} ${sy(hill.height)} Q${sx(peakEnd)} ${sy(hill.height)} ${sx(peakEnd + .22)} ${sy(hill.height - .22)} L${sx(end)} ${sy(0)} Z`;
+        // Große Berge sind mit 90 %, kleine mit 85 % Deckkraft gezeichnet.
+        const groupAttrs = { 'pointer-events': 'none', 'aria-hidden': 'true', opacity: hill.opacity };
+        if (hill.kind === 'small') groupAttrs.mask = `url(#${overlapMaskId})`;
+        const group = el('g', groupAttrs, renderParent);
+        el('path', { d: path, fill: hill.fill, stroke: hill.outline, 'stroke-width': 2.4, 'stroke-linejoin': 'round' }, group);
+        const clipId = `mountain-clip-${sceneKey.replace(/[^a-z0-9]/gi, '-')}-${i}`;
+        const clip = el('clipPath', { id: clipId }, defs);
+        el('path', { d: path }, clip);
+        const spots = el('g', { 'clip-path': `url(#${clipId})` }, group);
+        const spotY = sy(.65);
+        const spotXs = [hill.start + hill.width * .34, hill.start + hill.width * .66];
+        spotXs.forEach((x, j) => {
+            el('ellipse', { cx: sx(x), cy: spotY + (j ? 7 : 0), rx: Math.max(6, sx(0.13) - sx(0)), ry: 5, fill: '#e0eed6', opacity: .62 }, spots);
+        });
+    }
+}
+
+function buildStaticScene() {
+    const sceneKey = sceneBackgroundKey();
+    svg.replaceChildren();
+    sceneUniqueId = 0;
+    renderParent = svg;
+    const defs = el('defs', {}, svg);
+    const sky = el('linearGradient', { id: 'sky', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+    el('stop', { offset: '0%', 'stop-color': '#8ed8ff' }, sky);
+    el('stop', { offset: '100%', 'stop-color': '#e6f7ff' }, sky);
+    const grass = el('linearGradient', { id: 'grass', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+    el('stop', { offset: '0%', 'stop-color': '#58c45b' }, grass);
+    el('stop', { offset: '100%', 'stop-color': '#2e8b3c' }, grass);
+    const pipeBody = el('linearGradient', { id: 'pipeBody', x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
+    el('stop', { offset: '0%', 'stop-color': '#15803d' }, pipeBody);
+    el('stop', { offset: '45%', 'stop-color': '#4ade80' }, pipeBody);
+    el('stop', { offset: '100%', 'stop-color': '#166534' }, pipeBody);
+    const flagPoleMetal = el('linearGradient', { id: 'flagPoleMetal', x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
+    el('stop', { offset: '0%', 'stop-color': '#626c76' }, flagPoleMetal);
+    el('stop', { offset: '28%', 'stop-color': '#d9e0e5' }, flagPoleMetal);
+    el('stop', { offset: '52%', 'stop-color': '#9aa5af' }, flagPoleMetal);
+    el('stop', { offset: '74%', 'stop-color': '#eef2f5' }, flagPoleMetal);
+    el('stop', { offset: '100%', 'stop-color': '#58626c' }, flagPoleMetal);
+    staticSceneLayer = el('g', { 'data-scene-layer': 'background' }, svg);
+    dynamicSceneLayer = el('g', { 'data-scene-layer': 'objects' }, svg);
+    renderParent = staticSceneLayer;
+    el('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#sky)' });
+    renderParent = staticSceneLayer;
+    drawPixelClouds(sceneKey, defs);
+    drawDecorativeMountains(sceneKey, defs);
+    // Ein neutrales, gut lesbares 1×1-Raster reicht bis zu allen sichtbaren Rändern.
+    // Anders als in der vorigen Version werden die Rasterfelder selbst nicht abwechselnd eingefärbt.
+    // Numerische Beschriftungen weiter unten bleiben absichtlich auf dem bisherigen Wertebereich.
+    for (let x = viewXMin; x <= viewXMax; x++) {
+        el('line', { x1: sx(x), y1: sy(viewYMin), x2: sx(x), y2: sy(viewYMax), stroke: '#a9c3d5' });
+    }
+    for (let y = viewYMin; y <= viewYMax; y++) {
+        el('line', { x1: sx(viewXMin), y1: sy(y), x2: sx(viewXMax), y2: sy(y), stroke: '#a9c3d5' });
+    }
+    const groundY = sy(0);
+    // Boden aus klaren 1×1-Gras-/Erdblöcken. Die Farben variieren deterministisch je Level und Kachel.
+    el('rect', { x: 0, y: groundY, width: W, height: H - groundY, fill: '#d6a06a' });
+    const soilColors = ['#d6a06a', '#e2b17b', '#ca925e', '#e9bd8e', '#dca875'];
+    const borderBrown = '#76513a';
+    const firstSoilX = Math.floor(viewXMin);
+    const lastSoilX = Math.ceil(viewXMax);
+    const lowestSoilRow = -3;
+    const soilColorFor = (base, row, col, layer) => {
+        let h = (base ^ Math.imul(row + 1, 0x45d9f3b) ^ Math.imul(col + 1, 0x27d4eb2d) ^ Math.imul(layer + 7, 0x165667b1)) >>> 0;
+        h ^= h >>> 16;
+        h = Math.imul(h, 0x7feb352d) >>> 0;
+        h ^= h >>> 15;
+        return soilColors[(h >>> 0) % soilColors.length];
+    };
+    for (let cellY = 0; cellY >= lowestSoilRow; cellY--) {
+        const top = sy(cellY), bottom = sy(cellY - 1), rowHeight = bottom - top;
+        for (let cellX = firstSoilX; cellX < lastSoilX; cellX++) {
+            const left = Math.max(0, sx(cellX)), right = Math.min(W, sx(cellX + 1));
+            if (right <= left)
+                continue;
+            const terrainSeed = (level === 0 ? 7919 : level * 104729);
+            let terrainHash = (Math.imul(cellX + 0x9e37, 0x45d9f3b) ^ Math.imul(cellY + 0x85eb, 0x27d4eb2d) ^ Math.imul(terrainSeed + 1, 0x165667b1)) >>> 0;
+            terrainHash ^= terrainHash >>> 16;
+            terrainHash = Math.imul(terrainHash, 0x7feb352d) >>> 0;
+            terrainHash ^= terrainHash >>> 15;
+            const inner = 0.65;
+            const innerLeft = left + inner, innerRight = right - inner;
+            const innerTop = top + inner, innerBottom = bottom - inner;
+            if (cellY === 0) {
+                    // Oberste Bodenkachel: tiefgrüne Graszacken, drei unterschiedlich grüne Teilflächen und sechs Erdquadrate (3×2).
+                    const grassHeight = Math.min(18,rowHeight*.31);
+                    const grassLeft = left+1, grassRight = right-1;
+                    const grassTop = top+1;
+                    const grassBase = top+grassHeight+1;
+                    // Flache Grasoberkante: die früheren Dreiecks-/Zackenfüllungen unter y=0 wurden entfernt.
+                    // Die drei deterministisch angeordneten grünen Teilflächen bleiben klar sichtbar.
+                    const lowerGrassPalette = ['#63bd5d', '#73c969', '#83d575'];
+                    const lowerGrassColors = deterministicShuffle(lowerGrassPalette, terrainHash ^ Math.imul(cellX+31,0x45d9f3b));
+                    const grassSegW = (innerRight-innerLeft)/3;
+                    for (let col=0; col<3; col++) {
+                      el('rect',{x:innerLeft+col*grassSegW,y:grassTop,width:grassSegW,height:Math.max(1,grassBase-grassTop),fill:lowerGrassColors[col],stroke:'#1d682a','stroke-width':.55});
+                    }
+                    for (let col=1; col<3; col++) {
+                      const gx=innerLeft+col*grassSegW;
+                      el('line',{x1:gx,y1:grassTop,x2:gx,y2:grassBase,stroke:'#1d682a','stroke-width':.55});
+                    }
+                    const dirtTop = top+grassHeight+1;
+                    const dirtH = Math.max(1,bottom-dirtTop-inner);
+                    // Zwei Erdzeilen × drei Spalten, annähernd quadratisch und je Teilstück deterministisch gefärbt.
+                    const subW=(innerRight-innerLeft)/3, subH=dirtH/2;
+                    for (let row=0; row<2; row++) for (let col=0; col<3; col++) {
+                      const x=innerLeft+col*subW, y=dirtTop+row*subH;
+                      el('rect',{x,y,width:subW,height:subH,fill:soilColorFor(terrainHash,row,col,0),stroke:borderBrown,'stroke-width':.55,'stroke-linejoin':'miter'});
+                    }
+                    // Dezente Außenkanten der 1×1-Kachel; kein dicker brauner Querstrich über dem Gras.
+                    el('path',{d:`M${left+0.6} ${grassTop} L${left+0.6} ${bottom-0.6} M${left+0.6} ${bottom-0.6} L${right-0.6} ${bottom-0.6} M${right-0.6} ${bottom-0.6} L${right-0.6} ${grassTop}`,fill:'none',stroke:borderBrown,'stroke-width':.65});
+                  }
+            else {
+                // Reiner Erdteil: jede 1×1-Kachel wird in ein gut erkennbares 3×3-Muster aus kleinen Erdquadraten zerlegt.
+                const cols = 3, rows = 3, subW = (innerRight - innerLeft) / cols, subH = (innerBottom - innerTop) / rows;
+                for (let row = 0; row < rows; row++)
+                    for (let col = 0; col < cols; col++) {
+                        const x = innerLeft + col * subW, y = innerTop + row * subH;
+                        const color = soilColorFor(terrainHash, row, col, cellY);
+                        el('rect', { x, y, width: subW, height: subH, fill: color, stroke: borderBrown, 'stroke-width': .55, 'stroke-linejoin': 'miter' });
+                        // Kleine, sehr dezente Oberlichtkante verleiht dem Erdquadrat Tiefe, ohne Zahlen zu überdecken.
+                        el('path', { d: `M${x + 1.4} ${y + 1.4} H${x + subW - 1.4} M${x + 1.4} ${y + 1.4} V${y + subH - 1.4}`, fill: 'none', stroke: '#f1c99b', 'stroke-width': .45, opacity: .7 });
+                    }
+                el('rect', { x: innerLeft, y: innerTop, width: innerRight - innerLeft, height: innerBottom - innerTop, fill: 'none', stroke: borderBrown, 'stroke-width': .65 });
+            }
+        }
+    }
+    el('line', { x1: sx(viewXMin), y1: groundY, x2: sx(viewXMax) - 15, y2: groundY, stroke: '#243447', 'stroke-width': 3 });
+    el('line', { x1: sx(0), y1: sy(viewYMin), x2: sx(0), y2: sy(viewYMax) + 15, stroke: '#243447', 'stroke-width': 3 });
+    // Pfeilspitzen markieren die positiven Richtungen der Koordinatenachsen.
+    el('polygon', { points: `${sx(viewXMax) - 1},${groundY} ${sx(viewXMax) - 15},${groundY - 7} ${sx(viewXMax) - 15},${groundY + 7}`, fill: '#243447' });
+    el('polygon', { points: `${sx(0)},${sy(viewYMax) + 1} ${sx(0) - 7},${sy(viewYMax) + 15} ${sx(0) + 7},${sy(viewYMax) + 15}`, fill: '#243447' });
+    // x-Beschriftungen liegen direkt unterhalb der Achse im grünen Wiesenstreifen.
+    for (let x = Math.ceil(xMin); x <= xMax; x++) {
+        addText({ x: sx(x), y: groundY + 17, 'text-anchor': 'middle', 'font-size': 14, fill: '#173b20', 'font-weight': 'bold', stroke: '#e4f1c9', 'stroke-width': 2.4, 'paint-order': 'stroke' }, String(x));
+    }
+    // y-Zahlen stehen links der Achse. Die Achsenbuchstaben liegen jeweils eine halbe Einheit hinter der letzten Zahl.
+    for (let y = Math.ceil(yMin); y <= yMax; y++) {
+        const labelStyle = { x: sx(0) - 10, y: sy(y) + 5, 'text-anchor': 'end', 'font-size': 14, fill: '#243447', 'font-weight': 'bold' };
+        // Negative y labels get the same light outline as the x labels, including future negative ticks.
+        if (y < 0)
+            Object.assign(labelStyle, { stroke: '#e4f1c9', 'stroke-width': 2.4, 'paint-order': 'stroke' });
+        addText(labelStyle, String(y));
+    }
+    addText({ x: sx(viewXMax) - 7, y: groundY + 17, 'text-anchor': 'end', 'font-size': 18, 'font-weight': 'bold', fill: '#172033' }, 'x');
+    addText({ x: sx(0) - 8, y: sy(viewYMax) + 19, 'text-anchor': 'end', 'font-size': 18, 'font-weight': 'bold', fill: '#172033' }, 'y');
+    staticSceneLevel = sceneKey;
+    renderParent = dynamicSceneLayer;
+}
+function scene() {
+    if (!dynamicSceneLayer || staticSceneLevel !== sceneBackgroundKey())
+        buildStaticScene();
+    dynamicSceneLayer.replaceChildren();
+    sceneUniqueId = 0;
+    // Diese Masken und ClipPaths gehören zur dynamischen Pflanze bzw. Auswahl.
+    // Statische Gradienten bleiben erhalten und werden nicht pro Frame neu erzeugt.
+    const defs = svg.querySelector('defs');
+    if (defs)
+        defs.querySelectorAll('[id^="plant-mouth-mask-"], [id^="selected-"]').forEach(node => node.remove());
+    renderParent = dynamicSceneLayer;
+    if (pathVisible && !isHiddenPreviewMode()) {
+        // In den drei regulären Modi werden beide vollständigen Funktionsgraphen angezeigt.
+        if (p) {
+            drawCurve(p, xMin, xMax, '#7c3aed');
+            if (typeof p.evaluate !== 'function' && p.a !== 0 && p.d >= xMin && p.d <= xMax)
+                el('circle', { cx: sx(p.d), cy: sy(p.e), r: 5, fill: '#7c3aed' });
+        }
+        if (p2) {
+            drawCurve(p2, xMin, xMax, '#0f766e');
+            if (typeof p2.evaluate !== 'function' && p2.a !== 0 && p2.d >= xMin && p2.d <= xMax)
+                el('circle', { cx: sx(p2.d), cy: sy(p2.e), r: 5, fill: '#0f766e' });
+        }
+    } else if (pathVisible && isHiddenPreviewMode()) {
+        // Ohne Vorschau ist nur der bereits von Mario zurückgelegte Abschnitt sichtbar.
+        traversedCurveSegments.forEach(segment => {
+            const curve = segment.index === 1 ? p : p2;
+            if (curve && segment.toX > segment.fromX + .001)
+                drawCurve(curve, segment.fromX, segment.toX, segment.index === 1 ? '#7c3aed' : '#0f766e');
+        });
+    }
+    pipes.forEach((pipe, index) => drawPipe(pipe, objectPopScale('pipe', pipe, index)));
+    activeBlocks().forEach((block, index) => drawBlock(block, objectPopScale('block', block, pipes.length + index)));
+    blockDebris.forEach(drawBlockDebris);
+    drawGoal(popScale(pipes.length + activeBlocks().length));
+    coins.forEach((c, index) => drawCoin(c, objectPopScale('star', c, pipes.length + activeBlocks().length + 1 + index)));
+    drawDespawnAnimations();
+    mario();
+    // Die Auswahlkontur wird als oberste SVG-Ebene gezeichnet, auch wenn Mario davorsteht.
+    drawSelectionOverlay();
+}
+function drawPipe(pipe, scale = 1) {
+    const cx = sx(pipe.x), groundY = sy(0);
+    const plantHeight = Math.min(.84, pipe.height * .47);
+    const topY = sy(pipe.height);
+    const rimY = sy(Math.max(0, pipe.height - plantHeight));
+    const plantHeightPx = Math.max(1, rimY - topY);
+    const bodyW = sx(pipe.x + pipe.w * .39) - sx(pipe.x - pipe.w * .39);
+    const rimW = sx(pipe.x + pipe.w / 2) - sx(pipe.x - pipe.w / 2);
+    const isSandboxObject = pipe.sandbox === true;
+    const g = el('g', { transform: scaleAround(scale, cx, groundY), 'aria-label': 'Röhre mit Piranha-Pflanze in transparenter 2D-Seitenansicht', ...(isSandboxObject ? { 'data-object-type': 'pipe', 'data-object-id': pipe.id, 'style': 'cursor:grab' } : {}) });
+    // Pro Szene eindeutige IDs verhindern, dass SVG-Masken benachbarter Röhren kollidieren.
+    const headRy = Math.min(24, Math.max(10, plantHeightPx * .36));
+    const headRx = Math.min(40, Math.max(22, headRy * 1.34, rimW * .72));
+    const headCy = topY + headRy * 1.02;
+    const hingeY = headCy + headRy * .48;
+    // Die Blätter sitzen hoch an der Röhrenlippe und sind vertikal flach;
+    // ihre unteren Ansätze liegen hinter der Lippe statt aus dem Rohrkörper auszutreten.
+    const leafY = rimY - 7;
+    const leafSpan = Math.min(31, Math.max(23, rimW * .70));
+    const leftLeaf = `M${cx - 3} ${leafY + 4} C${cx - leafSpan * .28} ${leafY + 1} ${cx - leafSpan * .54} ${leafY - 5} ${cx - leafSpan * .77} ${leafY - 3} L${cx - leafSpan} ${leafY - 2} L${cx - leafSpan * .94} ${leafY + 2} C${cx - leafSpan * .86} ${leafY + 7} ${cx - leafSpan * .60} ${leafY + 9} ${cx - leafSpan * .38} ${leafY + 7} C${cx - leafSpan * .20} ${leafY + 7} ${cx - 8} ${leafY + 6} ${cx - 3} ${leafY + 4} Z`;
+    const rightLeaf = `M${cx + 3} ${leafY + 4} C${cx + leafSpan * .28} ${leafY + 1} ${cx + leafSpan * .54} ${leafY - 5} ${cx + leafSpan * .77} ${leafY - 3} L${cx + leafSpan} ${leafY - 2} L${cx + leafSpan * .94} ${leafY + 2} C${cx + leafSpan * .86} ${leafY + 7} ${cx + leafSpan * .60} ${leafY + 9} ${cx + leafSpan * .38} ${leafY + 7} C${cx + leafSpan * .20} ${leafY + 7} ${cx + 8} ${leafY + 6} ${cx + 3} ${leafY + 4} Z`;
+    // Stängel zuerst hinter dem Rohr zeichnen.
+    el('path', { d: `M${cx - 5} ${headCy + headRy * .65} Q${cx - 4} ${headCy + headRy + 8} ${cx - 5} ${rimY + 8} L${cx + 5} ${rimY + 8} Q${cx + 4} ${headCy + headRy + 8} ${cx + 5} ${headCy + headRy * .65} Z`, fill: '#55b83f', stroke: '#101010', 'stroke-width': 2.4 }, g);
+    // Blätter liegen hinter Rohrkörper und Röhrenlippe. Ihre Ansätze werden verdeckt,
+    // die oberen, schmaleren Teile wachsen sichtbar aus der Röhrenöffnung heraus.
+    el('path', { d: leftLeaf, fill: '#65bf4b', stroke: '#101010', 'stroke-width': 2.8, 'stroke-linejoin': 'round' }, g);
+    el('path', { d: rightLeaf, fill: '#65bf4b', stroke: '#101010', 'stroke-width': 2.8, 'stroke-linejoin': 'round' }, g);
+    el('path', { d: `M${cx - 4} ${leafY + 5} Q${cx - leafSpan * .30} ${leafY + 1} ${cx - leafSpan * .70} ${leafY + 1}`, fill: 'none', stroke: '#17391a', 'stroke-width': 2.1, 'stroke-linecap': 'round' }, g);
+    el('path', { d: `M${cx + 4} ${leafY + 5} Q${cx + leafSpan * .30} ${leafY + 1} ${cx + leafSpan * .70} ${leafY + 1}`, fill: 'none', stroke: '#17391a', 'stroke-width': 2.1, 'stroke-linecap': 'round' }, g);
+    // Rohrkörper und obere Lippe kommen danach und verdecken die Blattansätze.
+    el('rect', { x: cx - bodyW / 2, y: rimY + 8, width: bodyW, height: Math.max(0, groundY - rimY - 8), rx: 2, fill: 'url(#pipeBody)', stroke: '#071e12', 'stroke-width': 3 }, g);
+    el('rect', { x: cx - bodyW * .29, y: rimY + 11, width: Math.max(2, bodyW * .13), height: Math.max(0, groundY - rimY - 16), fill: '#f0fdf4', opacity: .95 }, g);
+    el('rect', { x: cx - rimW / 2, y: rimY - 2, width: rimW, height: 15, rx: 1, fill: '#008f4c', stroke: '#071e12', 'stroke-width': 3 }, g);
+    el('rect', { x: cx - rimW * .31, y: rimY + 1, width: Math.max(2, rimW * .12), height: 9, fill: '#f0fdf4' }, g);
+    el('rect', { x: cx - rimW * .18, y: rimY + 1, width: Math.max(2, rimW * .035), height: 9, fill: '#d1fae5', opacity: .8 }, g);
+    // Rote, seitlich geöffnete Kopf-Silhouette. Die Maulspalte wird ausmaskiert,
+    // sodass der Hintergrund beim Öffnen tatsächlich transparent bleibt (kein schwarzer Fleck).
+    const maskId = `plant-mouth-mask-${sceneUniqueId++}`;
+    const mouthCut = (open) => {
+        const spread = headRx * (.10 + .82 * open);
+        const upperY = headCy - headRy * .80;
+        return `M${cx - spread} ${upperY} C${cx - spread * .78} ${headCy - headRy * .40} ${cx - headRx * .12} ${hingeY - headRy * .10} ${cx} ${hingeY} C${cx + headRx * .12} ${hingeY - headRy * .10} ${cx + spread * .78} ${headCy - headRy * .40} ${cx + spread} ${upperY} L${cx + headRx * 1.35} ${headCy - headRy * 1.45} L${cx - headRx * 1.35} ${headCy - headRy * 1.45} Z`;
+    };
+    const mask = el('mask', { id: maskId, maskUnits: 'userSpaceOnUse', x: cx - headRx - 4, y: headCy - headRy - 4, width: headRx * 2 + 8, height: headRy * 2 + 8 }, svg.querySelector('defs'));
+    el('ellipse', { cx, cy: headCy, rx: headRx + 3, ry: headRy + 3, fill: '#fff' }, mask);
+    const animationDuration = 1.45;
+    const rootTime = typeof svg.getCurrentTime === 'function' ? svg.getCurrentTime() : performance.now() / 1000;
+    const phase = ((rootTime % animationDuration) + animationDuration) % animationDuration / animationDuration;
+    const chompOpen = .5 - .5 * Math.cos(phase * 2 * Math.PI);
+    // Begin-Zeit liegt auf dem aktuellen globalen SVG-Zyklus. Beim Neuzeichnen während
+    // der Einblendung startet das Maul deshalb nicht wieder sichtbar bei geschlossen.
+    const chompCycleStart = Math.floor(rootTime / animationDuration) * animationDuration;
+    const hole = el('path', { d: mouthCut(chompOpen), fill: '#000' }, mask);
+    el('ellipse', { cx, cy: headCy, rx: headRx, ry: headRy, fill: '#f01624', stroke: '#101010', 'stroke-width': 3.5, mask: `url(#${maskId})` }, g);
+    // Weiße Flecken bleiben auf dem roten Teil der Pflanze.
+    el('ellipse', { cx: cx - headRx * .60, cy: headCy + headRy * .28, rx: Math.max(3, headRy * .24), ry: Math.max(4, headRy * .34), fill: '#fff' }, g);
+    el('ellipse', { cx: cx + headRx * .10, cy: headCy + headRy * .64, rx: Math.max(3.2, headRy * .28), ry: Math.max(2.5, headRy * .19), fill: '#fff', transform: `rotate(-25 ${cx + headRx * .10} ${headCy + headRy * .64})` }, g);
+    el('ellipse', { cx: cx + headRx * .68, cy: headCy + headRy * .27, rx: Math.max(2.5, headRy * .20), ry: Math.max(4, headRy * .31), fill: '#fff' }, g);
+    const jawPath = (open) => {
+        const spread = headRx * (.10 + .82 * open);
+        const upperY = headCy - headRy * .80;
+        return `M${cx - spread} ${upperY} C${cx - spread * .78} ${headCy - headRy * .40} ${cx - headRx * .12} ${hingeY - headRy * .10} ${cx} ${hingeY} C${cx + headRx * .12} ${hingeY - headRy * .10} ${cx + spread * .78} ${headCy - headRy * .40} ${cx + spread} ${upperY}`;
+    };
+    const jawWidth = Math.max(7, headRy * .70);
+    const jawOutline = el('path', { d: jawPath(chompOpen), fill: 'none', stroke: '#101010', 'stroke-width': jawWidth + 4.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+    const jawWhite = el('path', { d: jawPath(chompOpen), fill: 'none', stroke: '#fff', 'stroke-width': jawWidth, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+    // Kleine gelbe Zähne zeigen in die nach oben offene Maulspalte und bewegen sich mit den Kiefern.
+    function toothPoints(side, open, t) {
+        const spread = headRx * (.10 + .82 * open);
+        const upperY = headCy - headRy * .80;
+        const tx = cx + side * spread * t;
+        const ty = hingeY + (upperY - hingeY) * t;
+        const size = Math.max(2, headRy * (.14 + .06 * open));
+        return side < 0
+            ? `${tx - size} ${ty - size} ${tx + size * .15} ${ty - size * .82} ${tx + size * 1.25} ${ty + size * 1.15}`
+            : `${tx + size} ${ty - size} ${tx - size * .15} ${ty - size * .82} ${tx - size * 1.25} ${ty + size * 1.15}`;
+    }
+    const teeth = [];
+    [-1, 1].forEach(side => [.28, .52, .75].forEach(t => {
+        const pts = toothPoints(side, chompOpen, t).split(' ').reduce((acc, val, i) => {
+            if (i % 2 === 0)
+                acc.push(`${val},`);
+            else
+                acc[acc.length - 1] += val;
+            return acc;
+        }, []).join(' ');
+        teeth.push({ side, t, node: el('polygon', { points: pts, fill: '#ffd63e', stroke: '#101010', 'stroke-width': 1.2, 'stroke-linejoin': 'round' }, g) });
+    }));
+    {
+        const values = [0, .5, 1, .5, 0];
+        const times = '0;0.25;0.5;0.75;1';
+        const splines = '0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1';
+        const addMorph = (node, attributeName, getValue, convert = value => value) => el('animate', {
+            attributeName, values: values.map(value => convert(getValue(value))).join(';'), dur: `${animationDuration}s`,
+            begin: `${chompCycleStart}s`, repeatCount: 'indefinite', fill: 'freeze',
+            calcMode: 'spline', keyTimes: times, keySplines: splines
+        }, node);
+        addMorph(hole, 'd', mouthCut);
+        addMorph(jawOutline, 'd', jawPath);
+        addMorph(jawWhite, 'd', jawPath);
+        teeth.forEach(({ side, t, node }) => addMorph(node, 'points', open => toothPoints(side, open, t), raw => {
+            const vals = raw.trim().split(/\s+/);
+            const pairs = [];
+            for (let i = 0; i < vals.length; i += 2)
+                pairs.push(`${vals[i]},${vals[i + 1]}`);
+            return pairs.join(' ');
+        }));
+    }
+}
+function drawSelectionOverlay() {
+    if (!sandboxEditing || !selectedSandboxObject)
+        return;
+    const { type, id } = selectedSandboxObject;
+    if (type === 'pipe') {
+        const pipe = pipes.find(item => String(item.id) === String(id));
+        if (!pipe)
+            return;
+        const cx = sx(pipe.x), groundY = sy(0);
+        const plantHeight = Math.min(.84, pipe.height * .47);
+        const topY = sy(pipe.height), rimY = sy(Math.max(0, pipe.height - plantHeight));
+        const plantHeightPx = Math.max(1, rimY - topY);
+        const bodyW = sx(pipe.x + pipe.w * .39) - sx(pipe.x - pipe.w * .39);
+        const rimW = sx(pipe.x + pipe.w / 2) - sx(pipe.x - pipe.w / 2);
+        const headRy = Math.min(24, Math.max(10, plantHeightPx * .36));
+        const headRx = Math.min(40, Math.max(22, headRy * 1.34, rimW * .72));
+        const headCy = topY + headRy * 1.02;
+        const hingeY = headCy + headRy * .48;
+        const leafY = rimY - 7;
+        const leafSpan = Math.min(31, Math.max(23, rimW * .70));
+        const selectionColor = pipe.dragInvalid ? '#dc2626' : '#facc15';
+        const overlay = el('g', { 'pointer-events': 'none', 'aria-label': 'Auswahlkontur entlang der sichtbaren Außenkontur von Pflanze und Röhre' });
+        // Exakt dieselben Blattformen wie in drawPipe(). Ein Clip an der oberen Röhrenlippe
+        // verhindert, dass verdeckte Unterkanten oder innere Blattbereiche gelb hervortreten.
+        // Die Auswahl zeichnet nur die tatsächlich äußeren oberen Blattkanten und Spitzen.
+        // Die untere/innere Blattkante wird nicht als Auswahlkontur nachgezogen.
+        const leftLeaf = `M${cx - 3} ${leafY + 4} C${cx - leafSpan * .28} ${leafY + 1} ${cx - leafSpan * .54} ${leafY - 5} ${cx - leafSpan * .77} ${leafY - 3} L${cx - leafSpan} ${leafY - 2} L${cx - leafSpan * .94} ${leafY + 2}`;
+        const rightLeaf = `M${cx + 3} ${leafY + 4} C${cx + leafSpan * .28} ${leafY + 1} ${cx + leafSpan * .54} ${leafY - 5} ${cx + leafSpan * .77} ${leafY - 3} L${cx + leafSpan} ${leafY - 2} L${cx + leafSpan * .94} ${leafY + 2}`;
+        const leafClipId = `selected-leaf-clip-${sceneUniqueId++}`;
+        const leafClip = el('clipPath', { id: leafClipId, clipPathUnits: 'userSpaceOnUse' }, svg.querySelector('defs'));
+        el('rect', { x: cx - leafSpan - 8, y: 0, width: leafSpan * 2 + 16, height: Math.max(1, rimY - 3) }, leafClip);
+        el('path', { d: leftLeaf, fill: 'none', stroke: selectionColor, 'stroke-width': 4.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'clip-path': `url(#${leafClipId})` }, overlay);
+        el('path', { d: rightLeaf, fill: 'none', stroke: selectionColor, 'stroke-width': 4.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'clip-path': `url(#${leafClipId})` }, overlay);
+        // Halskontur: nur der sichtbare Abschnitt zwischen Kopf und Blattansatz wird markiert.
+        // Die Linie endet vor der Röhrenlippe und zeichnet sich daher nicht über die Blätter.
+        const stemBottom = Math.max(headCy + headRy + 1, leafY + 1);
+        const stemClipId = `selected-stem-clip-${sceneUniqueId++}`;
+        const stemClip = el('clipPath', { id: stemClipId, clipPathUnits: 'userSpaceOnUse' }, svg.querySelector('defs'));
+        el('rect', { x: cx - 12, y: headCy + headRy + 0.5, width: 24, height: Math.max(1, stemBottom - (headCy + headRy)) }, stemClip);
+        el('path', { d: `M${cx - 5} ${headCy + headRy * .65} Q${cx - 4} ${headCy + headRy + 8} ${cx - 5} ${rimY + 8} L${cx + 5} ${rimY + 8} Q${cx + 4} ${headCy + headRy + 8} ${cx + 5} ${headCy + headRy * .65} Z`, fill: 'none', stroke: selectionColor, 'stroke-width': 4, 'stroke-linejoin': 'round', 'clip-path': `url(#${stemClipId})` }, overlay);
+        // Die Rohroberkante bleibt waagerecht; beide Seiten gehen in eine gerade Unterkante über.
+        const pipeLeft = cx - bodyW / 2, pipeRight = cx + bodyW / 2;
+        const rimLeft = cx - rimW / 2, rimRight = cx + rimW / 2;
+        const pipeOutline = `M${rimLeft} ${rimY - 2} L${rimRight} ${rimY - 2} L${rimRight} ${rimY + 12} L${pipeRight} ${rimY + 12} L${pipeRight} ${groundY - 1} L${pipeLeft} ${groundY - 1} L${pipeLeft} ${rimY + 12} L${rimLeft} ${rimY + 12} Z`;
+        el('path', { d: pipeOutline, fill: 'none', stroke: selectionColor, 'stroke-width': 4, 'stroke-linejoin': 'miter' }, overlay);
+        // Die Animation und die Kontur nutzen dieselbe Mundgeometrie wie die Pflanze selbst.
+        const animationDuration = 1.45;
+        const rootTime = typeof svg.getCurrentTime === 'function' ? svg.getCurrentTime() : performance.now() / 1000;
+        const phase = ((rootTime % animationDuration) + animationDuration) % animationDuration / animationDuration;
+        const open = .5 - .5 * Math.cos(phase * 2 * Math.PI);
+        const cycleStart = Math.floor(rootTime / animationDuration) * animationDuration;
+        const mouthCut = value => {
+            const spread = headRx * (.10 + .82 * value);
+            const upperY = headCy - headRy * .80;
+            return `M${cx - spread} ${upperY} C${cx - spread * .78} ${headCy - headRy * .40} ${cx - headRx * .12} ${hingeY - headRy * .10} ${cx} ${hingeY} C${cx + headRx * .12} ${hingeY - headRy * .10} ${cx + spread * .78} ${headCy - headRy * .40} ${cx + spread} ${upperY} L${cx + headRx * 1.35} ${headCy - headRy * 1.45} L${cx - headRx * 1.35} ${headCy - headRy * 1.45} Z`;
+        };
+        const jawPath = value => {
+            const spread = headRx * (.10 + .82 * value);
+            const upperY = headCy - headRy * .80;
+            return `M${cx - spread} ${upperY} C${cx - spread * .78} ${headCy - headRy * .40} ${cx - headRx * .12} ${hingeY - headRy * .10} ${cx} ${hingeY} C${cx + headRx * .12} ${hingeY - headRy * .10} ${cx + spread * .78} ${headCy - headRy * .40} ${cx + spread} ${upperY}`;
+        };
+        const maskId = `selected-mouth-mask-${sceneUniqueId++}`;
+        const mask = el('mask', { id: maskId, maskUnits: 'userSpaceOnUse', x: cx - headRx - 4, y: headCy - headRy - 4, width: headRx * 2 + 8, height: headRy * 2 + 8 }, svg.querySelector('defs'));
+        el('ellipse', { cx, cy: headCy, rx: headRx + 4, ry: headRy + 4, fill: '#fff' }, mask);
+        const hole = el('path', { d: mouthCut(open), fill: '#000' }, mask);
+        const morphValues = [0, .5, 1, .5, 0];
+        const timing = { dur: `${animationDuration}s`, begin: `${cycleStart}s`, repeatCount: 'indefinite', fill: 'freeze', calcMode: 'spline', keyTimes: '0;0.25;0.5;0.75;1', keySplines: '0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1' };
+        el('ellipse', { cx, cy: headCy, rx: headRx + 1.75, ry: headRy + 1.75, fill: 'none', stroke: selectionColor, 'stroke-width': 4.5, mask: `url(#${maskId})` }, overlay);
+        el('animate', { attributeName: 'd', values: morphValues.map(mouthCut).join(';'), ...timing }, hole);
+        // Schmale goldene Kante außen am weißen Kiefer, mit schwarzer Kontur und weißer Innenfläche.
+        // So wird die tatsächlich öffnende Mundlinie markiert, ohne gelb quer durch das Maul zu zeichnen.
+        const jawGold = el('path', { d: jawPath(open), fill: 'none', stroke: selectionColor, 'stroke-width': Math.max(9, headRy * .70 + 9), 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, overlay);
+        const jawBlack = el('path', { d: jawPath(open), fill: 'none', stroke: '#101010', 'stroke-width': Math.max(7, headRy * .70 + 4.5), 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, overlay);
+        const jawWhite = el('path', { d: jawPath(open), fill: 'none', stroke: '#fff', 'stroke-width': Math.max(5, headRy * .70), 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, overlay);
+        [jawGold, jawBlack, jawWhite].forEach(node => el('animate', { attributeName: 'd', values: morphValues.map(jawPath).join(';'), ...timing }, node));
+        return;
+    }
+    if (type === 'block') {
+        const block = activeBlocks().find(item => String(item.id) === String(id));
+        if (!block)
+            return;
+        el('rect', { x: sx(block.x - .5) - 2, y: sy(block.y + .5) - 2, width: sx(block.x + .5) - sx(block.x - .5) + 4, height: sy(block.y - .5) - sy(block.y + .5) + 4, fill: 'none', stroke: block.dragInvalid ? '#dc2626' : '#facc15', 'stroke-width': 5, 'pointer-events': 'none' });
+    }
+    else if (type === 'star') {
+        const star = coins.find(item => item.sandbox && String(item.id) === String(id) && !item.hit);
+        if (!star)
+            return;
+        el('circle', { cx: sx(star.x), cy: sy(star.y), r: 20, fill: 'none', stroke: '#facc15', 'stroke-width': 5, 'pointer-events': 'none' });
+    }
+}
+function drawBlock(block, scale = 1) {
+    const left = sx(block.x - .5), right = sx(block.x + .5);
+    const top = sy(block.y + .5), bottom = sy(block.y - .5);
+    const width = right - left, height = bottom - top;
+    const cx = sx(block.x), cy = sy(block.y);
+    const isSelected = !!(selectedSandboxObject && selectedSandboxObject.type === 'block' && String(selectedSandboxObject.id) === String(block.id));
+    const invalid = block.dragInvalid === true;
+    if (!Array.isArray(block.shadeOrder) || block.shadeOrder.length !== 9)
+        block.shadeOrder = createBlockShadeOrder(blocks.filter(other => String(other.id) !== String(block.id)));
+    const g = el('g', { transform: scaleAround(scale, cx, cy), 'aria-label': 'Block, eine Einheit breit und hoch, mit neun quadratischen Mustern', 'data-object-type': 'block', 'data-object-id': block.id, style: 'cursor:grab' });
+    // Die Kontur wird nach innen versetzt, sodass alle vier Außenkanten inklusive der Unterkante vollständig sichtbar bleiben.
+    const border = 3;
+    el('rect', { x: left + border / 2, y: top + border / 2, width: Math.max(1, width - border), height: Math.max(1, height - border), fill: invalid ? '#fecaca' : '#b77932', stroke: invalid ? '#dc2626' : (isSelected ? '#facc15' : '#45250f'), 'stroke-width': border, 'stroke-linejoin': 'miter' }, g);
+    // Die neun Kacheln sind quadratisch und symmetrisch innerhalb des Blocks angeordnet.
+    const gap = Math.max(1.8, Math.min(width, height) * .035);
+    const inset = Math.max(5, Math.min(width, height) * .09);
+    const tile = Math.min((width - 2 * inset - 2 * gap) / 3, (height - 2 * inset - 2 * gap) / 3);
+    const patternWidth = tile * 3 + gap * 2;
+    const patternHeight = patternWidth;
+    const patternLeft = cx - patternWidth / 2;
+    const patternTop = cy - patternHeight / 2;
+    for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+            const slot = row * 3 + col;
+            const shadeIndex = block.shadeOrder[slot] ?? slot;
+            const tx = patternLeft + col * (tile + gap), ty = patternTop + row * (tile + gap);
+            el('rect', { x: tx, y: ty, width: tile, height: tile, fill: invalid ? '#fca5a5' : BLOCK_TILE_COLORS[shadeIndex], stroke: invalid ? '#b91c1c' : '#754318', 'stroke-width': 1.15, 'stroke-linejoin': 'miter' }, g);
+            el('path', { d: `M${tx + 2} ${ty + 2} H${tx + tile - 2} M${tx + 2} ${ty + 2} V${ty + tile - 2}`, fill: 'none', stroke: invalid ? '#fee2e2' : '#ffdfa0', 'stroke-width': 1, opacity: .85 }, g);
+        }
+    }
+    if (invalid) {
+        el('rect', { x: left + border / 2, y: top + border / 2, width: Math.max(1, width - border), height: Math.max(1, height - border), fill: '#ef4444', opacity: .20, 'pointer-events': 'none' }, g);
+    }
+}
+function startDespawn(type, object) {
+    if (!object) return;
+    const snapshot = { ...object };
+    delete snapshot.dragInvalid;
+    if (type === 'star') snapshot.hit = false;
+    despawnAnimations.push({ type, object: snapshot, startedAt: performance.now() });
+    if (!raf) {
+        last = 0;
+        raf = requestAnimationFrame(animate);
+    }
+}
+function drawDespawnAnimations(now = performance.now()) {
+    const previousParent = renderParent;
+    despawnAnimations = despawnAnimations.filter(item => now - item.startedAt < DESPAWN_DURATION);
+    for (const item of despawnAnimations) {
+        const progress = clamp((now - item.startedAt) / DESPAWN_DURATION, 0, 1);
+        const obj = item.object;
+        const worldX = obj.x;
+        const worldY = item.type === 'pipe' ? obj.height * .5 : (item.type === 'block' ? obj.y : obj.y);
+        const cx = sx(worldX), cy = sy(worldY);
+        const scale = 1 - .94 * progress;
+        const wrapper = el('g', {
+            opacity: 1 - progress,
+            transform: scaleAround(scale, cx, cy),
+            'pointer-events': 'none',
+            'aria-hidden': 'true'
+        }, dynamicSceneLayer);
+        renderParent = wrapper;
+        if (item.type === 'pipe') drawPipe(obj, 1);
+        else if (item.type === 'block') drawBlock(obj, 1);
+        else if (item.type === 'star') drawCoin(obj, 1);
+    }
+    renderParent = previousParent;
+}
+function drawBlockDebris(piece) {
+    const half = piece.size / 2;
+    const left = sx(piece.x - half), right = sx(piece.x + half);
+    const top = sy(piece.y + half), bottom = sy(piece.y - half);
+    const cx = (left + right) / 2, cy = (top + bottom) / 2;
+    const opacity = Math.max(0, 1 - piece.age / piece.life);
+    const g = el('g', { opacity, transform: `rotate(${piece.angle} ${cx} ${cy})`, 'pointer-events': 'none' });
+    el('rect', { x: left, y: top, width: right - left, height: bottom - top, fill: piece.color, stroke: '#754318', 'stroke-width': 1.1 }, g);
+    el('path', { d: `M${left + 2} ${top + 2} H${right - 2} M${left + 2} ${top + 2} V${bottom - 2}`, fill: 'none', stroke: '#ffdfa0', 'stroke-width': 1, opacity: .85 }, g);
+}
+function updateBlockDebris(dt) {
+    if (!blockDebris.length)
+        return;
+    blockDebris.forEach(piece => {
+        piece.age += dt;
+        piece.x += piece.vx * dt;
+        piece.y += piece.vy * dt;
+        piece.vy -= .000018 * dt;
+        piece.angle += piece.spin * dt;
+    });
+    blockDebris = blockDebris.filter(piece => piece.age < piece.life);
+}
+function shatterBlock(block, impactY) {
+    const exists = blocks.find(item => String(item.id) === String(block.id));
+    if (!exists || destroyedBlockIds.has(String(block.id)))
+        return false;
+    destroyedBlockIds.add(String(block.id));
+    const order = Array.isArray(block.shadeOrder) ? block.shadeOrder : [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    const size = 1 / 3;
+    for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+            const slot = row * 3 + col;
+            blockDebris.push({
+                x: block.x - .5 + (col + .5) * size,
+                y: block.y + .5 - (row + .5) * size,
+                size, color: BLOCK_TILE_COLORS[order[slot] ?? slot],
+                vx: (col - 1) * .0026 + (Math.random() - .5) * .0015,
+                vy: .0028 + Math.random() * .0042 + row * .0004,
+                angle: 0, spin: (Math.random() - .5) * .8, age: 0, life: 820 + Math.random() * 260
+            });
+        }
+    }
+    if (String(marioSupportedBlockId) === String(block.id))
+        marioSupportedBlockId = null;
+    if (selectedSandboxObject && selectedSandboxObject.type === 'block' && String(selectedSandboxObject.id) === String(block.id)) {
+        selectedSandboxObject = null;
+        updateSandboxTools();
+    }
+    beginMarioFall(impactY);
+    status.textContent = 'Block zerbricht! Mario fällt weiter … 💥';
+    persistActiveContext();
+    return true;
+}
+function drawGoal(scale = 1) {
+    const x = sx(12), groundY = sy(0), topY = sy(yMax);
+    const g = el('g', { transform: scaleAround(scale, x, groundY), 'aria-label': 'Ziel mit Zielflagge' });
+    // Der Mast verläuft exakt im sichtbaren Koordinatensystem von y=7 bis y=0.
+    el('rect', { x: x - 3, y: topY, width: 6, height: groundY - topY, fill: 'url(#flagPoleMetal)', stroke: '#56616b', 'stroke-width': 1.5 }, g);
+    el('circle', { cx: x, cy: topY, r: 5, fill: '#facc15', stroke: '#854d0e', 'stroke-width': 2 }, g);
+    // Kleiner Sockel endet exakt auf der Erdlinie.
+    el('rect', { x: x - 12, y: groundY - 5, width: 24, height: 5, rx: 2, fill: '#64748b', stroke: '#334155', 'stroke-width': 1.5 }, g);
+    // flagY bezeichnet den Mittelpunkt. Beim Start liegt er exakt bei y=6,5.
+    const centerY = sy(flagY);
+    const halfHeightPx = (H / (viewYMax - viewYMin)) * FLAG_HALF_HEIGHT;
+    const upperY = centerY - halfHeightPx, lowerY = centerY + halfHeightPx;
+    const flagPath = (wave) => `M${x + 4} ${upperY} C${x + 15} ${upperY - 1 + wave * .12} ${x + 27} ${centerY - halfHeightPx * .44 + wave} ${x + 43} ${centerY + wave * .75} C${x + 32} ${centerY + halfHeightPx * .52 + wave * 1.15} ${x + 18} ${lowerY + wave * .18} ${x + 4} ${lowerY} Z`;
+    const worldIsAnimating = running || flagLowering || appearanceAnimating;
+    const wave = Math.sin(performance.now() / 240) * 3;
+    const flag = el('path', { d: flagPath(worldIsAnimating ? wave : 0), fill: '#22c55e', stroke: '#166534', 'stroke-width': 2, 'stroke-linejoin': 'round' }, g);
+    if (!worldIsAnimating) {
+        el('animate', { attributeName: 'd', values: [-3, 0, 3, 0, -3].map(flagPath).join(';'), dur: '1.9s', repeatCount: 'indefinite', calcMode: 'spline', keyTimes: '0;0.25;0.5;0.75;1', keySplines: '0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1' }, flag);
+    }
+    const flagStar = el('text', { x: x + 13 + wave * .35, y: centerY + 4 + wave * .20, 'font-size': 12, 'font-weight': 'bold', fill: '#fff', stroke: '#166534', 'stroke-width': 1.5, 'paint-order': 'stroke' }, g);
+    flagStar.textContent = '★';
+    if (!worldIsAnimating)
+        el('animateTransform', { attributeName: 'transform', type: 'translate', values: '0 0;2 0;0 0;-1.5 0;0 0', dur: '1.9s', repeatCount: 'indefinite' }, flagStar);
+    // Die weiße Zielbeschriftung liegt oberhalb des Masts auf gleicher Höhe wie das y an der Achse.
+    const axisLetterY = sy(yMax) + 5 - (H / (viewYMax - viewYMin)) * .5;
+    addText({ x: x - 9, y: axisLetterY, 'font-size': 11, 'font-weight': 'bold', fill: '#fff', stroke: '#166534', 'stroke-width': 2, 'paint-order': 'stroke' }, 'Ziel', g);
+}
+function mario() {
+    // Ein einheitliches Ruhebild gilt in allen Modi und unabhängig von der Auswahl.
+    // Nur ein tatsächlich aktiver Lauf, eine Flug-/Fallphase oder eine Abschluss-/Todespose
+    // verändert Marios Darstellung; Sandbox-Auswahl und Neuzeichnen haben keinen Einfluss.
+    const celebratoryJump = celebrationMode === 'jump';
+    const dancing = celebrationMode === 'dance';
+    const dancePhase = performance.now() / 185;
+    const hipSway = dancing ? Math.sin(dancePhase) * 2.3 : 0;
+    const danceTilt = dancing ? Math.sin(dancePhase) * 3.2 : 0;
+    const stationaryGroundPose = !running && !flagLowering && !celebratoryJump && !dancing && marioMood === 'normal' &&
+        marioFallAltitude === null && marioArrivalAltitude === null && marioCurveIndex === null && !marioSupportedBlockId;
+    const displayMood = dancing ? 'dancing' : marioMood;
+    const renderedMarioX = marioX;
+    const support = stationaryGroundPose || celebratoryJump || dancing ? null : supportedBlockAt(marioX);
+    const standingOnBlock = !!support;
+    const altitude = celebratoryJump ? celebrationAltitude : (dancing ? 0 : (stationaryGroundPose ? 0 : (marioArrivalAltitude !== null ? Math.max(0, marioArrivalAltitude) : (pathVisible ? Math.max(0, trajectoryY(marioX)) : 0))));
+    const airborne = celebratoryJump || (!stationaryGroundPose && !dancing && !standingOnBlock && altitude > .18);
+    const walking = (running && marioMood === 'normal' && !airborne) || dancing;
+    const step = dancing ? Math.sin(dancePhase * 1.65) : (walking ? Math.sin(marioX * 8) : 0);
+    const leftLift = Math.max(0, step) * 3.2;
+    const rightLift = Math.max(0, -step) * 3.2;
+    const baseY = sy(stationaryGroundPose || dancing ? 0 : altitude);
+    const x = Math.round(sx(renderedMarioX) - 18 + hipSway);
+    const y = Math.round(baseY - 56);
+    if (airborne) {
+        const shadowWidth = Math.max(9, 28 - altitude * 4);
+        el('ellipse', { cx: sx(renderedMarioX), cy: sy(0) + 7, rx: shadowWidth, ry: 4, fill: '#172033', opacity: .18 });
+    }
+    const g = el('g', { transform: `translate(${x},${y})${dancing ? ` rotate(${danceTilt} 19 40)` : ''}`, 'shape-rendering': 'crispEdges', 'aria-label': dancing ? 'Mario tanzt zum Levelabschluss' : (airborne ? 'Mario springt mit erhobenen Armen' : 'Mario blickt nach rechts') });
+    // Beine und Schuhe: in der Luft angewinkelt, am Boden ausgestreckt.
+    if (airborne) {
+        el('rect', { x: 3, y: 46, width: 13, height: 6, fill: '#5b341c', transform: 'rotate(13 9 49)' }, g);
+        el('rect', { x: 21, y: 43, width: 13, height: 6, fill: '#5b341c', transform: 'rotate(-15 27 46)' }, g);
+        el('rect', { x: 7, y: 39, width: 10, height: 11, fill: '#1d4ed8', transform: 'rotate(12 12 44)' }, g);
+        el('rect', { x: 20, y: 37, width: 10, height: 11, fill: '#1d4ed8', transform: 'rotate(-15 25 42)' }, g);
+    }
+    else {
+        // Ein sehr einfacher Schrittzyklus: linker und rechter Schuh heben sich abwechselnd.
+        el('rect', { x: 4, y: 50 - leftLift, width: 13, height: 6, fill: '#5b341c' }, g);
+        el('rect', { x: 19, y: 50 - rightLift, width: 13, height: 6, fill: '#5b341c' }, g);
+        el('rect', { x: 7, y: 41 - leftLift, width: 10, height: 11, fill: '#1d4ed8' }, g);
+        el('rect', { x: 20, y: 41 - rightLift, width: 10, height: 11, fill: '#1d4ed8' }, g);
+    }
+    // Blaue Latzhose mit gelben Knöpfen
+    el('rect', { x: 8, y: 30, width: 22, height: 17, fill: '#2563eb' }, g);
+    el('rect', { x: 10, y: 27, width: 5, height: 13, fill: '#1d4ed8' }, g);
+    el('rect', { x: 23, y: 27, width: 5, height: 13, fill: '#1d4ed8' }, g);
+    el('rect', { x: 12, y: 32, width: 3, height: 3, fill: '#facc15' }, g);
+    el('rect', { x: 23, y: 32, width: 3, height: 3, fill: '#facc15' }, g);
+    // Rotes Hemd. Am Ziel hebt Mario eine Hand, als würde er nach den Sternen Ausschau halten.
+    el('rect', { x: 9, y: 24, width: 20, height: 10, fill: '#dc2626' }, g);
+    if (displayMood === 'checking') {
+        el('rect', { x: 5, y: 25, width: 5, height: 8, fill: '#dc2626' }, g);
+        el('rect', { x: 4, y: 31, width: 5, height: 4, fill: '#f3b28c' }, g);
+        el('rect', { x: 29, y: 9, width: 6, height: 18, fill: '#dc2626' }, g);
+        el('rect', { x: 29, y: 2, width: 7, height: 8, fill: '#f3b28c' }, g);
+        el('line', { x1: 31, y1: 3, x2: 31, y2: 0, stroke: '#c08457', 'stroke-width': 1.5 }, g);
+    }
+    else if (airborne) {
+        // Die Arme heben sich stufenlos mit der Höhe: knapp über dem Boden hängen sie
+        // fast nach unten, am höchsten Punkt sind sie deutlich nach oben gestreckt.
+        const armRaise = clamp(altitude / 4.2, 0, 1);
+        const handY = 31 - armRaise * 20;
+        const leftHandX = 5 - armRaise * 3;
+        const rightHandX = 30 + armRaise * 3;
+        el('path', { d: `M9 26 Q${7 - armRaise * 2} ${29 - armRaise * 9} ${leftHandX} ${handY}`, fill: 'none', stroke: '#dc2626', 'stroke-width': 6, 'stroke-linecap': 'square' }, g);
+        el('path', { d: `M29 26 Q${31 + armRaise * 2} ${29 - armRaise * 9} ${rightHandX} ${handY}`, fill: 'none', stroke: '#dc2626', 'stroke-width': 6, 'stroke-linecap': 'square' }, g);
+        el('rect', { x: leftHandX - 2, y: handY - 2, width: 6, height: 5, fill: '#f3b28c' }, g);
+        el('rect', { x: rightHandX - 2, y: handY - 2, width: 6, height: 5, fill: '#f3b28c' }, g);
+    }
+    else if (dancing) {
+        // Dezenter Feier-Tanz: Arme bleiben nah am Körper und schwingen klein,
+        // aber gegenläufig. Die Hüfte übernimmt die deutlichere Links-rechts-Bewegung.
+        const armWave = Math.sin(dancePhase * 1.15);
+        const leftHandX = 4.5 + armWave * .8;
+        const rightHandX = 34.5 - armWave * .8;
+        const leftHandY = 24 + armWave * 1.8;
+        const rightHandY = 24 - armWave * 1.8;
+        el('path', { d: `M9 26 Q${6.8 + armWave * .25} 24.5 ${leftHandX} ${leftHandY}`, fill: 'none', stroke: '#dc2626', 'stroke-width': 6, 'stroke-linecap': 'square' }, g);
+        el('path', { d: `M29 26 Q${31.2 - armWave * .25} 24.5 ${rightHandX} ${rightHandY}`, fill: 'none', stroke: '#dc2626', 'stroke-width': 6, 'stroke-linecap': 'square' }, g);
+        el('rect', { x: leftHandX - 2, y: leftHandY - 2, width: 6, height: 5, fill: '#f3b28c' }, g);
+        el('rect', { x: rightHandX - 2, y: rightHandY - 2, width: 6, height: 5, fill: '#f3b28c' }, g);
+    }
+    else {
+        el('rect', { x: 5, y: 25, width: 5, height: 8, fill: '#dc2626' }, g);
+        el('rect', { x: 28, y: 25, width: 5, height: 8, fill: '#dc2626' }, g);
+        el('rect', { x: 4, y: 31, width: 5, height: 4, fill: '#f3b28c' }, g);
+        el('rect', { x: 29, y: 31, width: 5, height: 4, fill: '#f3b28c' }, g);
+    }
+    // Gesicht im Profil: ein Auge und Nase auf der rechten Seite
+    el('rect', { x: 12, y: 10, width: 16, height: 17, fill: '#f3b28c' }, g);
+    el('rect', { x: 9, y: 15, width: 4, height: 6, fill: '#f3b28c' }, g);
+    el('rect', { x: 26, y: 17, width: 6, height: 5, fill: '#f3b28c' }, g);
+    if (displayMood === 'hurt') {
+        // Zusammengezogene Augenbraue, schmerzhaftes Auge und ein enttäuschter Mund.
+        el('path', { d: 'M23 11 L28 14 M24 13 L28 17 M28 13 L24 17', stroke: '#111827', 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'square' }, g);
+        el('path', { d: 'M16 25 Q22 19 28 25', stroke: '#7f1d1d', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round' }, g);
+        el('path', { d: 'M34 10 C38 15 38 17 35 18 C32 17 32 14 34 10 Z', fill: '#38bdf8', stroke: '#0284c7', 'stroke-width': 1 }, g);
+    }
+    else {
+        el('rect', { x: 24, y: 12, width: 3, height: 5, fill: '#111827' }, g);
+        el('rect', { x: 16, y: 22, width: 12, height: 4, fill: '#5b341c' }, g);
+        el('rect', { x: 20, y: 20, width: 9, height: 3, fill: '#5b341c' }, g);
+    }
+    // Rote Mütze mit Schirm
+    el('rect', { x: 10, y: 5, width: 18, height: 6, fill: '#b91c1c' }, g);
+    el('rect', { x: 14, y: 1, width: 14, height: 5, fill: '#ef4444' }, g);
+    el('rect', { x: 7, y: 9, width: 24, height: 4, fill: '#dc2626' }, g);
+    el('rect', { x: 17, y: 2, width: 7, height: 3, fill: '#fff' }, g);
+}
+// Akzeptiert sowohl 1,25 als auch 1.25. Ungültige oder gemischte Schreibweisen werden abgewiesen.
+// -----------------------------------------------------------------------------
+// Function parsing, validation and representation conversion
+// -----------------------------------------------------------------------------
+function parseUserNumber(raw) {
+    const text = String(raw).trim().replace(/\s/g, '');
+    if (!text || (text.includes(',') && text.includes('.')))
+        return NaN;
+    return Number(text.replace(',', '.'));
+}
+function formatGermanNumber(value) {
+    const rounded = Math.abs(value) < 1e-10 ? 0 : Number(value.toFixed(2));
+    return String(rounded).replace('.', ',');
+}
+// Kleiner mathematischer Parser: unterstützt x, Klammern, Grundrechenarten, Potenzen,
+// implizite Multiplikation (z. B. 2x) und einige gebräuchliche Funktionen.
+const mathFunctions = {
+    abs: Math.abs, sqrt: Math.sqrt, sin: Math.sin, cos: Math.cos, tan: Math.tan,
+    exp: Math.exp, ln: Math.log, log: value => Math.log10(value)
+};
+const superscriptDigits = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9', '⁻': '-', '⁺': '+' };
+function normalizeExpression(raw) {
+    let text = String(raw).trim();
+    text = text.replace(/^(?:[fg]\s*\(\s*x\s*\)|y)\s*=/i, '');
+    text = text.replace(/[−–]/g, '-').replace(/[×·]/g, '*').replace(/π/g, 'pi');
+    text = text.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺]+/g, run => '^' + Array.from(run, char => superscriptDigits[char]).join(''));
+    return text.trim();
+}
+function parseExpression(raw, label) {
+    const text = normalizeExpression(raw);
+    if (!text)
+        throw new Error(`Gib eine Funktionsgleichung für ${label} ein.`);
+    const tokens = [];
+    let index = 0;
+    while (index < text.length) {
+        const rest = text.slice(index);
+        if (/^\s+/.test(rest)) {
+            index += rest.match(/^\s+/)[0].length;
+            continue;
+        }
+        const number = rest.match(/^(?:(?:\d+(?:[.,]\d+)?)|(?:[.,]\d+))/);
+        if (number) {
+            tokens.push({ type: 'number', value: Number(number[0].replace(',', '.')) });
+            index += number[0].length;
+            continue;
+        }
+        const identifier = rest.match(/^[a-zA-Z]+/);
+        if (identifier) {
+            tokens.push({ type: 'identifier', value: identifier[0].toLowerCase() });
+            index += identifier[0].length;
+            continue;
+        }
+        const char = text[index];
+        if ('+-*/^()'.includes(char)) {
+            tokens.push({ type: 'operator', value: char });
+            index++;
+            continue;
+        }
+        throw new Error(`Zeichen „${char}“ ist in ${label} nicht erlaubt.`);
+    }
+    if (!tokens.length)
+        throw new Error(`Gib eine Funktionsgleichung für ${label} ein.`);
+    // Multiplikation darf wie im Schulbuch ohne Punkt geschrieben werden: 2x, 3(x+1), (x+1)(x-1).
+    const functionNames = new Set(Object.keys(mathFunctions));
+    const canEnd = token => token.type === 'number' || token.value === ')' || (token.type === 'identifier' && !functionNames.has(token.value));
+    const canStart = token => token.type === 'number' || token.type === 'identifier' || token.value === '(';
+    const expanded = [];
+    for (let i = 0; i < tokens.length; i++) {
+        const current = tokens[i];
+        const previous = expanded.length ? expanded[expanded.length - 1] : null;
+        if (previous && canEnd(previous) && canStart(current))
+            expanded.push({ type: 'operator', value: '*' });
+        expanded.push(current);
+    }
+    let pos = 0;
+    const peek = value => expanded[pos] && (value === undefined || expanded[pos].value === value);
+    const take = value => {
+        if (!peek(value))
+            return null;
+        return expanded[pos++];
+    };
+    function primary() {
+        const number = take();
+        if (!number)
+            throw new Error(`Unvollständige Funktionsgleichung für ${label}.`);
+        if (number.type === 'number')
+            return { type: 'number', value: number.value };
+        if (number.value === '(') {
+            const node = addition();
+            if (!take(')'))
+                throw new Error(`In ${label} fehlt eine schließende Klammer.`);
+            return node;
+        }
+        if (number.type === 'identifier') {
+            if (number.value === 'x')
+                return { type: 'x' };
+            if (number.value === 'pi')
+                return { type: 'number', value: Math.PI };
+            if (number.value === 'e')
+                return { type: 'number', value: Math.E };
+            if (Object.prototype.hasOwnProperty.call(mathFunctions, number.value)) {
+                if (!take('('))
+                    throw new Error(`Schreibe ${number.value} mit Klammern, zum Beispiel ${number.value}(x).`);
+                const argument = addition();
+                if (!take(')'))
+                    throw new Error(`In ${label} fehlt eine schließende Klammer bei ${number.value}.`);
+                return { type: 'function', name: number.value, argument };
+            }
+            throw new Error(`Unbekannte Variable oder Funktion „${number.value}“ in ${label}. Verwende x als Variable.`);
+        }
+        throw new Error(`Unerwartetes Zeichen „${number.value}“ in ${label}.`);
+    }
+    function power() {
+        const base = primary();
+        if (take('^'))
+            return { type: 'binary', op: '^', left: base, right: unary() };
+        return base;
+    }
+    function unary() {
+        if (take('+'))
+            return { type: 'unary', op: '+', value: unary() };
+        if (take('-'))
+            return { type: 'unary', op: '-', value: unary() };
+        return power();
+    }
+    function multiplication() {
+        let node = unary();
+        while (peek('*') || peek('/')) {
+            const op = expanded[pos++].value;
+            node = { type: 'binary', op, left: node, right: unary() };
+        }
+        return node;
+    }
+    function addition() {
+        let node = multiplication();
+        while (peek('+') || peek('-')) {
+            const op = expanded[pos++].value;
+            node = { type: 'binary', op, left: node, right: multiplication() };
+        }
+        return node;
+    }
+    const ast = addition();
+    if (pos !== expanded.length) {
+        const token = expanded[pos];
+        if (token && token.value === ')')
+            throw new Error(`Es gibt eine überzählige schließende Klammer in ${label}.`);
+        throw new Error(`Die Funktionsgleichung für ${label} konnte nicht vollständig gelesen werden.`);
+    }
+    function evaluate(node, x) {
+        if (node.type === 'number')
+            return node.value;
+        if (node.type === 'x')
+            return x;
+        if (node.type === 'unary')
+            return node.op === '-' ? -evaluate(node.value, x) : evaluate(node.value, x);
+        if (node.type === 'function')
+            return mathFunctions[node.name](evaluate(node.argument, x));
+        const left = evaluate(node.left, x), right = evaluate(node.right, x);
+        if (node.op === '+')
+            return left + right;
+        if (node.op === '-')
+            return left - right;
+        if (node.op === '*')
+            return left * right;
+        if (node.op === '/')
+            return left / right;
+        if (node.op === '^')
+            return left ** right;
+        return NaN;
+    }
+    return { evaluate: (x) => evaluate(ast, x), expression: text, ast };
+}
+function readFreeFunction(inputId, label) {
+    const raw = document.getElementById(inputId).value;
+    if (!raw.trim())
+        return null;
+    return parseExpression(raw, label);
+}
+function readFunctionInputs(aId, dId, eId, label) {
+    const av = document.getElementById(aId).value, dv = document.getElementById(dId).value, ev = document.getElementById(eId).value;
+    const values = [av, dv, ev];
+    if (values.every(value => value.trim() === ''))
+        return null;
+    if (values.some(value => value.trim() === ''))
+        throw Error(`Fülle für ${label} entweder alle drei Parameter aus oder lasse alle drei Felder leer.`);
+    const a = parseUserNumber(av), d = parseUserNumber(dv), e = parseUserNumber(ev);
+    if (!Number.isFinite(a) || !Number.isFinite(d) || !Number.isFinite(e))
+        throw Error(`Bitte a, d und e für ${label} als Zahlen eingeben (z. B. 0,25 oder 0.25).`);
+    return { a, d, e };
+}
+function read() { return isFreeInputMode() ? readFreeFunction('fExpression', 'Funktion 1') : readFunctionInputs('a', 'd', 'e', 'die erste Funktion'); }
+function readSecond() { return isFreeInputMode() ? readFreeFunction('gExpression', 'Funktion 2') : readFunctionInputs('a2', 'd2', 'e2', 'die zweite Funktion'); }
+function readFunctionPair() {
+    const first = read();
+    const second = readSecond();
+    if (!first && !second)
+        return { first: null, second: null, empty: true };
+    return { first, second, empty: false };
+}
+function polynomialFromAst(node) {
+    const clean = poly => poly.map(value => Math.abs(value) < 1e-10 ? 0 : value);
+    const add = (a, b, sign = 1) => clean([a[0] + sign * b[0], a[1] + sign * b[1], a[2] + sign * b[2]]);
+    const multiply = (a, b) => {
+        const out = [0, 0, 0];
+        for (let i = 0; i < 3; i++)
+            for (let j = 0; j < 3; j++) {
+                const term = a[i] * b[j];
+                if (Math.abs(term) < 1e-12)
+                    continue;
+                if (i + j > 2)
+                    return null;
+                out[i + j] += term;
+            }
+        return clean(out);
+    };
+    if (!node)
+        return null;
+    if (node.type === 'number')
+        return [node.value, 0, 0];
+    if (node.type === 'x')
+        return [0, 1, 0];
+    if (node.type === 'unary') {
+        const inner = polynomialFromAst(node.value);
+        if (!inner)
+            return null;
+        return node.op === '-' ? inner.map(value => -value) : inner;
+    }
+    if (node.type === 'function')
+        return null;
+    if (node.type === 'binary') {
+        const left = polynomialFromAst(node.left);
+        const right = polynomialFromAst(node.right);
+        if (!left || !right)
+            return null;
+        if (node.op === '+')
+            return add(left, right);
+        if (node.op === '-')
+            return add(left, right, -1);
+        if (node.op === '*')
+            return multiply(left, right);
+        if (node.op === '/')
+            return Math.abs(right[1]) < 1e-10 && Math.abs(right[2]) < 1e-10 && Math.abs(right[0]) > 1e-10
+                ? clean(left.map(value => value / right[0])) : null;
+        if (node.op === '^') {
+            if (Math.abs(right[1]) > 1e-10 || Math.abs(right[2]) > 1e-10)
+                return null;
+            const exponent = right[0];
+            if (!Number.isInteger(exponent) || exponent < 0 || exponent > 2) {
+                if (Math.abs(left[1]) < 1e-10 && Math.abs(left[2]) < 1e-10 && Number.isFinite(left[0] ** exponent))
+                    return [left[0] ** exponent, 0, 0];
+                return null;
+            }
+            if (exponent === 0)
+                return [1, 0, 0];
+            if (exponent === 1)
+                return left;
+            return multiply(left, left);
+        }
+    }
+    return null;
+}
+function parameterFunctionToExpression(params) {
+    if (!params)
+        return '';
+    const fmt = value => {
+        const rounded = Math.abs(value) < 1e-10 ? 0 : Number(value.toPrecision(9));
+        return String(rounded).replace('.', ',');
+    };
+    if (Math.abs(params.a) < 1e-10)
+        return fmt(params.e);
+    const dTerm = Math.abs(params.d) < 1e-10 ? 'x' : `x${params.d > 0 ? '-' : '+'}${fmt(Math.abs(params.d))}`;
+    const eTerm = Math.abs(params.e) < 1e-10 ? '' : (params.e > 0 ? '+' : '') + fmt(params.e);
+    return `${fmt(params.a)}(${dTerm})²${eTerm}`;
+}
+function freeFunctionToParameters(inputId, label) {
+    const raw = document.getElementById(inputId).value.trim();
+    if (!raw)
+        return null;
+    const parsed = parseExpression(raw, label);
+    const poly = polynomialFromAst(parsed.ast);
+    if (!poly || !poly.every(Number.isFinite))
+        throw Error(`${label} lässt sich nicht exakt in die vereinfachte Scheitelpunktform umwandeln. Verwende eine quadratische Funktion oder bleibe bei der freien Eingabe.`);
+    const [c, b, a] = poly;
+    if (Math.abs(a) < 1e-10) {
+        if (Math.abs(b) > 1e-10)
+            throw Error(`${label} ist linear und lässt sich nicht mit den Parametern a, d und e darstellen. Bleibe dafür bei der freien Eingabe.`);
+        return { a: 0, d: 0, e: c };
+    }
+    return { a, d: -b / (2 * a), e: c - (b * b) / (4 * a) };
+}
+function formatParameterValues(params, ids) {
+    const [aId, dId, eId] = ids;
+    if (!params) {
+        // Ein leeres freies Funktionsfeld wird in der vereinfachten Ansicht neutral als 0,0,0 dargestellt.
+        [aId, dId, eId].forEach(id => document.getElementById(id).value = '0');
+        return;
+    }
+    document.getElementById(aId).value = formatGermanNumber(params.a);
+    document.getElementById(dId).value = formatGermanNumber(params.d);
+    document.getElementById(eId).value = formatGermanNumber(params.e);
+}
+function setFreeExpressions(first = '0', second = '0') {
+    document.getElementById('fExpression').value = first;
+    document.getElementById('gExpression').value = second;
+}
+function syncFunctionEntryWidths() {
+    document.querySelectorAll('.formulaPanel').forEach(panel => {
+        const entryRow = panel.querySelector('.expressionRow');
+        const parameterFormula = panel.querySelector('.formula-boxes');
+        if (!entryRow || !parameterFormula)
+            return;
+        // Measure a detached-looking clone, even while the parameter mode is hidden.
+        const measurement = parameterFormula.cloneNode(true);
+        measurement.style.cssText = 'position:absolute;left:-10000px;top:0;width:max-content;max-width:none;visibility:hidden;display:flex;';
+        measurement.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+        document.body.appendChild(measurement);
+        const width = measurement.getBoundingClientRect().width;
+        measurement.remove();
+        if (width > 0) {
+            entryRow.style.width = `${width}px`;
+            entryRow.style.maxWidth = '100%';
+        }
+    });
+}
+let entryWidthSyncFrame = 0;
+window.addEventListener('resize', () => {
+    if (entryWidthSyncFrame)
+        cancelAnimationFrame(entryWidthSyncFrame);
+    entryWidthSyncFrame = requestAnimationFrame(() => {
+        entryWidthSyncFrame = 0;
+        syncFunctionEntryWidths();
+    });
+}, { passive: true });
+function updateFunctionPanels() {
+    // Beide Funktionen bleiben in jedem Level und in der Sandbox verfügbar; nur der Eingabemodus wechselt.
+    document.getElementById('firstFormulaArea').hidden = false;
+    document.getElementById('secondFunctionArea').hidden = false;
+    document.getElementById('function1FreeFields').classList.toggle('active', isFreeInputMode());
+    document.getElementById('function2FreeFields').classList.toggle('active', isFreeInputMode());
+    document.getElementById('function1ParameterFields').classList.toggle('active', !isFreeInputMode());
+    document.getElementById('function2ParameterFields').classList.toggle('active', !isFreeInputMode());
+    document.getElementById('parameterHint').style.display = functionMode === 'parameters' ? 'block' : 'none';
+}
+function updateLevelLocks() {
+    document.querySelectorAll('.level').forEach(b => { b.disabled = +b.dataset.n > unlockedLevel; });
+    document.getElementById('sandbox').disabled = !sandboxUnlocked;
+}
+function allCoinsCollected() {
+    return coins.length > 0 && coins.every(c => c.hit);
+}
+function updateCoins() {
+    let newlyCollected = false;
+    coins.forEach(c => {
+        if (!c.hit && Math.hypot(marioX - c.x, Math.max(0, trajectoryY(marioX)) - c.y) < .38) {
+            c.hit = true;
+            newlyCollected = true;
+        }
+    });
+    coinCount.textContent = `Sterne: ${coins.filter(c => c.hit).length} / ${coins.length}`;
+    if (newlyCollected && sandboxEditing)
+        persistActiveContext();
+    if (allCoinsCollected())
+        status.innerHTML = `<span class="coinsDone">${level ? 'Alle Sterne gesammelt! Laufe weiter bis zur Zielflagge. ⭐' : 'Alle Sterne eingesammelt! ⭐'}</span>`;
+}
+function collidedWithPipe() {
+    const marioHeight = Math.max(0, trajectoryY(marioX));
+    return pipes.find(pipe => Math.abs(marioX - pipe.x) < pipe.w / 2 + MARIO_HALF_WIDTH && marioHeight <= pipe.height);
+}
+function collidedWithBlockUnderside(previousBaseY, currentBaseY, currentX) {
+    if (marioFallAltitude !== null || !Number.isFinite(previousBaseY) || !Number.isFinite(currentBaseY))
+        return null;
+    if (currentBaseY <= previousBaseY + .00001)
+        return null; // Kein Aufwärtskontakt.
+    return activeBlocks().find(block => {
+        if (String(block.id) === String(marioSupportedBlockId))
+            return false;
+        const bottom = block.y - .5;
+        const previousHead = previousBaseY + MARIO_HEADROOM;
+        const currentHead = currentBaseY + MARIO_HEADROOM;
+        return blockOverlapsMarioX(block, currentX) &&
+            previousHead < bottom - .015 && currentHead >= bottom - .015;
+    }) || null;
+}
+function collidedWithBlockSide() {
+    const baseY = trajectoryY(marioX);
+    const headY = baseY + MARIO_HEADROOM;
+    const supported = supportedBlockAt(marioX);
+    return activeBlocks().find(block => {
+        if (supported && String(supported.id) === String(block.id))
+            return false;
+        const overlapsX = marioX + MARIO_HALF_WIDTH > block.x - .5 && marioX - MARIO_HALF_WIDTH < block.x + .5;
+        const overlapsY = baseY < block.y + .5 - .02 && headY > block.y - .5 + .02;
+        return overlapsX && overlapsY;
+    });
+}
+function finishFlagAnimation() {
+    flagLowering = false;
+    attemptEnded = true;
+    const success = allCoinsCollected();
+    const got = coins.filter(c => c.hit).length;
+    if (level === 0) {
+        if (coins.length === 0) {
+            status.textContent = 'Zielflagge erreicht.';
+        }
+        else if (allCoinsCollected()) {
+            status.innerHTML = '<span class="ok">Sandbox geschafft! Alle Sterne wurden eingesammelt und die Zielflagge erreicht. 🎉</span>';
+        }
+        else {
+            status.innerHTML = `<span class="coinsMissed">Zielflagge erreicht, aber nicht alle Sterne wurden eingesammelt (${got} von ${coins.length}). Drücke Reset und versuche es erneut. 🚩</span>`;
+        }
+    }
+    else if (allCoinsCollected()) {
+        if (level < 3)
+            unlockedLevel = Math.max(unlockedLevel, level + 1);
+        else
+            sandboxUnlocked = true;
+        updateLevelLocks();
+        persistSavedContexts();
+        if (level === 3) {
+            status.innerHTML = '<span class="ok">Level 3 geschafft! Die Sandbox ist jetzt freigeschaltet. 🎉</span>';
+        }
+        else {
+            status.innerHTML = `<span class="ok">Level ${level} geschafft! Level ${level + 1} ist jetzt freigeschaltet. 🎉</span>`;
+        }
+    }
+    else {
+        status.innerHTML = `<span class="coinsMissed">Nicht alle Sterne wurden eingesammelt (${got} von ${coins.length}). Level ${level} ist noch nicht geschafft. Drücke „Reset“ und versuche es erneut. ❌</span>`;
+    }
+    if (success) {
+        celebrationMode = 'jump';
+        celebrationElapsed = 0;
+        celebrationAltitude = 0;
+        marioX = goalX;
+        marioMood = 'normal';
+        marioArrivalAltitude = 0;
+        marioFallAltitude = null;
+        marioFallVelocity = 0;
+        marioSupportedBlockId = null;
+    }
+}
+function animate(t) {
+    if (!running && !flagLowering && !celebrationMode && !appearanceAnimating && !blockDebris.length && !despawnAnimations.length && !objectAppearances.length) {
+        raf = 0;
+        return;
+    }
+    if (!last)
+        last = t;
+    const dt = Math.min(40, t - last);
+    last = t;
+    updateBlockDebris(dt);
+    despawnAnimations = despawnAnimations.filter(item => t - item.startedAt < DESPAWN_DURATION);
+    objectAppearances = objectAppearances.filter(item => t - item.startedAt < APPEAR_DURATION + item.index * APPEAR_STAGGER);
+    if (celebrationMode === 'jump') {
+        celebrationElapsed += dt;
+        const progress = Math.min(1, celebrationElapsed / CELEBRATION_JUMP_DURATION);
+        marioX = goalX + (CELEBRATION_END_X - goalX) * progress;
+        celebrationAltitude = CELEBRATION_JUMP_HEIGHT * 4 * progress * (1 - progress);
+        marioArrivalAltitude = celebrationAltitude;
+        if (progress >= 1) {
+            celebrationMode = 'dance';
+            celebrationElapsed = 0;
+            celebrationAltitude = 0;
+            marioX = CELEBRATION_END_X;
+            marioArrivalAltitude = 0;
+            marioMood = 'normal';
+        }
+    }
+    else if (celebrationMode === 'dance') {
+        celebrationElapsed += dt;
+        marioX = CELEBRATION_END_X;
+        celebrationAltitude = 0;
+        marioArrivalAltitude = 0;
+    }
+    if (running) {
+        const previousX = marioX;
+        const previousBaseY = trajectoryY(previousX);
+        const previousCurveIndex = marioCurveIndex;
+        marioX += dt * .0025;
+        updateCurveRideState(previousX, marioX);
+        recordTraversedCurve(previousX, marioX, previousCurveIndex);
+        const pathY = trajectoryY(marioX);
+        const undersideHit = collidedWithBlockUnderside(previousBaseY, pathY, marioX);
+        if (undersideHit) {
+            // Starte den Fall an der tatsächlichen Kontaktposition, auch wenn ein steiler Graph
+            // die Blockunterkante innerhalb eines Animationsschritts deutlich überschritten hätte.
+            shatterBlock(undersideHit, Math.min(pathY, undersideHit.y - .5 - MARIO_HEADROOM));
+        }
+        else {
+            updateMarioBlockSupport(marioX, dt, previousBaseY);
+        }
+        const rawY = trajectoryY(marioX);
+        const shownY = Math.max(0, rawY);
+        // Die Figur hat eine sichtbare Höhe. Stoppe vor dem oberen Rand, statt sie aus dem Bild fliegen zu lassen.
+        if (shownY + MARIO_HEADROOM >= yMax || marioX - MARIO_HALF_WIDTH < xMin) {
+            running = false;
+            marioMood = 'hurt';
+            deathLocked = true;
+            status.innerHTML = '<strong style="color:#b91c1c">Mario ist gestorben, weil er den Rand des Spielfelds berührt hat. Drücke Reset für einen neuen Versuch. ⚠️</strong>';
+            scene();
+            if (appearanceAnimating || blockDebris.length || despawnAnimations.length || objectAppearances.length)
+                raf = requestAnimationFrame(animate);
+            else
+                raf = 0;
+            return;
+        }
+        const blockHit = collidedWithBlockSide();
+        if (blockHit) {
+            running = false;
+            marioMood = 'hurt';
+            deathLocked = true;
+            status.innerHTML = '<strong style="color:#b91c1c">Mario ist gegen die Seite eines Blocks gestoßen. Drücke Reset für einen neuen Versuch. 💥</strong>';
+            scene();
+            if (appearanceAnimating || blockDebris.length || despawnAnimations.length || objectAppearances.length)
+                raf = requestAnimationFrame(animate);
+            else
+                raf = 0;
+            return;
+        }
+        const pipe = collidedWithPipe();
+        if (pipe) {
+            running = false;
+            marioMood = 'hurt';
+            deathLocked = true;
+            status.innerHTML = '<strong style="color:#b91c1c">Mario ist gegen die Röhre gestoßen. Drücke Reset für einen neuen Versuch. 💥</strong>';
+            scene();
+            if (appearanceAnimating || blockDebris.length || despawnAnimations.length || objectAppearances.length)
+                raf = requestAnimationFrame(animate);
+            else
+                raf = 0;
+            return;
+        }
+        updateCoins();
+        if (marioX >= goalX) {
+            marioX = goalX;
+            running = false;
+            flagLowering = true;
+            flagElapsed = 0;
+            flagY = FLAG_TOP;
+            marioArrivalStartAltitude = Math.max(0, trajectoryY(marioX));
+            marioArrivalAltitude = marioArrivalStartAltitude;
+            flagDuration = Math.max(1600, marioArrivalStartAltitude * 520);
+            marioMood = 'checking';
+            status.innerHTML = coins.length > 0 && !allCoinsCollected()
+                ? '<span class="coinsDone">Flagge erreicht, aber es fehlen noch Sterne. Die Fahne senkt sich … 🚩</span>'
+                : '<span class="ok">Zielflagge erreicht! Die Fahne senkt sich … 🚩</span>';
+        }
+        else if (level === 0 && marioX >= xMax - .35) {
+            marioX = xMax - .35;
+            running = false;
+            status.textContent = 'Zielflagge nicht erreicht. Drücke Reset für einen neuen Lauf.';
+            scene();
+            raf = 0;
+            return;
+        }
+    }
+    if (flagLowering) {
+        flagElapsed += dt;
+        const progress = Math.min(1, flagElapsed / flagDuration);
+        flagY = FLAG_TOP + (FLAG_BOTTOM - FLAG_TOP) * progress;
+        marioArrivalAltitude = marioArrivalStartAltitude * (1 - progress);
+        if (progress >= 1) {
+            marioArrivalAltitude = 0;
+            finishFlagAnimation();
+        }
+    }
+    if (appearanceAnimating) {
+        const lastAppearanceIndex = pipes.length + activeBlocks().length + coins.length;
+        if (t - appearanceStartedAt >= APPEAR_DURATION + lastAppearanceIndex * APPEAR_STAGGER)
+            appearanceAnimating = false;
+    }
+    scene();
+    if (running || flagLowering || celebrationMode || appearanceAnimating || blockDebris.length || despawnAnimations.length || objectAppearances.length)
+        raf = requestAnimationFrame(animate);
+    else
+        raf = 0;
+}
+function start() {
+    if (deathLocked) {
+        status.textContent = 'Mario ist gestorben. Drücke zuerst „Reset“, um einen neuen Lauf zu starten.';
+        return;
+    }
+    if (attemptEnded) {
+        status.textContent = 'Dieser Lauf ist beendet. Wähle das freigeschaltete nächste Level oder drücke Reset für einen neuen Versuch.';
+        return;
+    }
+    if (flagLowering) {
+        if (!raf) {
+            last = 0;
+            raf = requestAnimationFrame(animate);
+        }
+        return;
+    }
+    if (!pathVisible) {
+        status.textContent = 'Gib zuerst eine gültige Funktionsgleichung ein.';
+        return;
+    }
+    try {
+        const pair = readFunctionPair();
+        if (pair.empty)
+            throw Error('Gib mindestens eine gültige Funktionsgleichung ein.');
+        p = pair.first;
+        p2 = pair.second;
+        pathVisible = true;
+    }
+    catch (e) {
+        status.textContent = e.message;
+        return;
+    }
+    if (!running) {
+        running = true;
+        last = 0;
+        status.textContent = level ? 'Mario springt los, sammelt Sterne und läuft zur Zielflagge!' : 'Mario bewegt sich in der Sandbox.';
+        raf = requestAnimationFrame(animate);
+    }
+}
+function stop() {
+    running = false;
+    if (raf)
+        cancelAnimationFrame(raf);
+    raf = 0;
+    last = 0;
+}
+function resetRunState() {
+    stop();
+    celebrationMode = null;
+    celebrationElapsed = 0;
+    celebrationAltitude = 0;
+    traversedCurveSegments = [];
+    activeCurveTrailSegment = null;
+    blockDebris = [];
+    destroyedBlockIds.clear();
+    marioX = .33;
+    marioSupportedBlockId = null;
+    marioCurveIndex = null;
+    marioLastFunctionProbeX = marioX;
+    marioFallAltitude = null;
+    marioFallVelocity = 0;
+    marioArrivalAltitude = null;
+    marioArrivalStartAltitude = 0;
+    coins.forEach(c => c.hit = false);
+    resetFlagState();
+    coinCount.textContent = `Sterne: 0 / ${coins.length}`;
+}
+function tryLiveUpdate() {
+    // Jede Funktionsänderung verhält sich wie ein Reset: Mario wird angehalten und an den Start gesetzt.
+    resetRunState();
+    try {
+        const pair = readFunctionPair();
+        p = pair.first;
+        p2 = pair.second;
+        marioCurveIndex = null;
+        marioLastFunctionProbeX = marioX;
+        pathVisible = !pair.empty;
+        if (!pair.empty)
+            updateCurveRideState(marioX, marioX);
+        if (pair.empty) {
+            scene();
+            status.textContent = 'Gib mindestens eine gültige Funktionsgleichung ein. Beide Funktionsfelder sind derzeit leer. Der Lauf wurde zurückgesetzt.';
+        }
+        else {
+            updateMarioBlockSupport(marioX);
+            scene();
+            status.textContent = level ? `Level ${level}: Funktion aktualisiert; der Lauf wurde zurückgesetzt.` : 'Funktion aktualisiert; der Lauf wurde zurückgesetzt.';
+        }
+    }
+    catch (e) {
+        // Der vorherige gültige Graph bleibt sichtbar, aber Mario bleibt sicher am Start stehen.
+        scene();
+        status.textContent = `${e.message} Der Lauf wurde zurückgesetzt.`;
+    }
+    if (activeContextKey)
+        persistActiveContext();
+    else
+        initialUiEdited = true;
+}
+// -----------------------------------------------------------------------------
+// Level definitions, reset logic and saved contexts
+// -----------------------------------------------------------------------------
+const levels = {
+    1: { a: -1, d: 5, e: 5, x: [3.0, 3.8, 4.6, 5.4, 6.2, 7.0] },
+    2: {
+        a: -1, d: 3.5, e: 2, x: [2.45, 2.75, 3.0, 3.25],
+        second: { a: -0.25, d: 10, e: 5, x: [6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5] }
+    },
+    3: {
+        a: -0.83, d: 2.1, e: 2.4, x: [],
+        // Level 3 has exactly one star at the requested coordinate (x=10.5, y=3.25).
+        stars: [{ x: 10.5, y: 3.25 }]
+    }
+};
+// Fest platzierte Level-Blöcke; Koordinaten in der Anforderung bezeichnen die linke untere Ecke.
+const levelBlocksByLevel = {
+    1: [
+        { id: 'L1-block-1', x: 9.5, y: 2.5 }, // linke untere Ecke (9, 2)
+        { id: 'L1-block-2', x: 10.5, y: 2.5 } // linke untere Ecke (10, 2)
+    ],
+    2: [
+        { id: 'L2-block-1', x: 3.5, y: 3.5 }, // beibehalten: linke untere Ecke (3, 3)
+        { id: 'L2-block-2', x: 3.5, y: 0.5 }, // linke untere Ecke (3, 0)
+        { id: 'L2-block-3', x: 4.5, y: 3.5 }, // linke untere Ecke (4, 3)
+        { id: 'L2-block-4', x: 5.5, y: 3.5 } // linke untere Ecke (5, 3)
+    ],
+    3: [
+        // Angegebene Koordinaten bezeichnen jeweils die untere linke Ecke.
+        { id: 'L3-block-01', x: .5, y: 5.5 },
+        { id: 'L3-block-02', x: .5, y: 6.5 },
+        { id: 'L3-block-03', x: 1.5, y: 6.5 },
+        { id: 'L3-block-04', x: 2.5, y: 6.5 },
+        { id: 'L3-block-05', x: 3.5, y: 6.5 },
+        { id: 'L3-block-06', x: 4.5, y: 6.5 },
+        { id: 'L3-block-07', x: 4.5, y: 3.5 },
+        { id: 'L3-block-08', x: 5.5, y: 3.5 },
+        { id: 'L3-block-09', x: 5.5, y: 2.5 },
+        { id: 'L3-block-10', x: 5.5, y: 1.5 },
+        { id: 'L3-block-11', x: 9.5, y: 6.5 },
+        { id: 'L3-block-12', x: 10.5, y: 6.5 },
+        { id: 'L3-block-13', x: 10.5, y: 5.5 },
+        { id: 'L3-block-14', x: 11.5, y: 6.5 },
+        { id: 'L3-block-15', x: 9.5, y: 1.5 },
+        { id: 'L3-block-16', x: 9.5, y: .5 },
+        { id: 'L3-block-17', x: 10.5, y: 2.5 },
+        { id: 'L3-block-18', x: 10.5, y: 1.5 },
+        { id: 'L3-block-19', x: 10.5, y: .5 },
+        { id: 'L3-block-20', x: 11.5, y: .5 }
+    ]
+};
+function createLevelBlocks(n) {
+    const preset = (levelBlocksByLevel[n] || []).map(block => ({ ...block, sandbox: false, shadeOrder: createBlockShadeOrder() }));
+    ensureBlockShadeOrders(preset);
+    return preset;
+}
+function resetFlagState() {
+    celebrationMode = null;
+    celebrationElapsed = 0;
+    celebrationAltitude = 0;
+    deathLocked = false;
+    flagY = FLAG_TOP;
+    flagLowering = false;
+    flagElapsed = 0;
+    flagDuration = 1600;
+    marioArrivalAltitude = null;
+    marioArrivalStartAltitude = 0;
+    marioCurveIndex = null;
+    marioLastFunctionProbeX = marioX;
+    marioFallAltitude = null;
+    marioFallVelocity = 0;
+    marioSupportedBlockId = null;
+    attemptEnded = false;
+    appearanceAnimating = false;
+    marioMood = 'normal';
+}
+function readUiFunctionState() {
+    const value = id => document.getElementById(id).value;
+    return {
+        mode: functionMode,
+        fExpression: value('fExpression'),
+        gExpression: value('gExpression'),
+        parameters: { a: value('a'), d: value('d'), e: value('e'), a2: value('a2'), d2: value('d2'), e2: value('e2') }
+    };
+}
+function cloneSandboxWorld() {
+    return {
+        pipes: pipes.map(item => ({ ...item })),
+        blocks: blocks.map(item => ({ ...item })),
+        coins: coins.map(item => ({ ...item })),
+        nextSandboxId
+    };
+}
+function captureSandboxHistoryState() {
+    const state = cloneSandboxWorld();
+    state.destroyedBlockIds = [...destroyedBlockIds];
+    // Transiente Vorschauzustände gehören nicht in die Historie.
+    state.pipes.forEach(item => delete item.dragInvalid);
+    state.blocks.forEach(item => delete item.dragInvalid);
+    return JSON.parse(JSON.stringify(state));
+}
+function sandboxHistoryStateKey(state) {
+    return JSON.stringify(state);
+}
+function updateSandboxHistoryButtons() {
+    const active = sandboxEditing && level === 0 && sandboxUnlocked;
+    const undo = document.getElementById('undoAction');
+    const redo = document.getElementById('redoAction');
+    if (undo) undo.disabled = !active || sandboxUndoStack.length === 0;
+    if (redo) redo.disabled = !active || sandboxRedoStack.length === 0;
+}
+function recordSandboxAction(beforeState) {
+    if (!beforeState || !sandboxEditing || level !== 0 || !sandboxUnlocked) return;
+    const afterState = captureSandboxHistoryState();
+    if (sandboxHistoryStateKey(beforeState) === sandboxHistoryStateKey(afterState)) return;
+    sandboxUndoStack.push(beforeState);
+    if (sandboxUndoStack.length > MAX_SANDBOX_HISTORY) sandboxUndoStack.shift();
+    sandboxRedoStack = [];
+    updateSandboxHistoryButtons();
+}
+function restoreSandboxHistoryState(state) {
+    if (!state) return;
+    const before = captureSandboxHistoryState();
+    const nextState = JSON.parse(JSON.stringify(state));
+    const getObjects = world => [
+        ...(world.pipes || []).map(object => ({ type: 'pipe', object })),
+        ...(world.blocks || []).filter(object => !(world.destroyedBlockIds || []).some(id => String(id) === String(object.id))).map(object => ({ type: 'block', object })),
+        ...(world.coins || []).filter(object => !object.hit).map(object => ({ type: 'star', object }))
+    ];
+    const keyOf = item => `${item.type}:${item.object.id}`;
+    const beforeObjects = getObjects(before);
+    const nextObjects = getObjects(nextState);
+    const beforeMap = new Map(beforeObjects.map(item => [keyOf(item), item.object]));
+    const nextMap = new Map(nextObjects.map(item => [keyOf(item), item.object]));
+    const restoredKeys = new Set(nextObjects.map(keyOf));
+    // Alte Animationen der wiederhergestellten IDs ersetzen; neue Ausblendungen kommen danach hinzu.
+    despawnAnimations = despawnAnimations.filter(item => !restoredKeys.has(`${item.type}:${item.object.id}`));
+    const changedKeys = new Set();
+    for (const [key, oldObject] of beforeMap) {
+        const newObject = nextMap.get(key);
+        if (!newObject || JSON.stringify(oldObject) !== JSON.stringify(newObject)) {
+            changedKeys.add(key);
+            // Rückgängig/Wiederherstellen entfernt oder versetzt das alte Objekt mit derselben
+            // zentrierten Schrumpf-/Verblassanimation wie beim normalen Löschen.
+            startDespawn(key.split(':')[0], oldObject);
+        }
+    }
+    stop();
+    appearanceAnimating = false;
+    pipes = (nextState.pipes || []).map(item => ({ ...item }));
+    blocks = (nextState.blocks || []).map(item => ({ ...item }));
+    coins = (nextState.coins || []).map(item => ({ ...item }));
+    nextSandboxId = Number(nextState.nextSandboxId) || 1;
+    destroyedBlockIds.clear();
+    (nextState.destroyedBlockIds || []).forEach(id => destroyedBlockIds.add(String(id)));
+    // Geänderte oder wiederhergestellte Zielobjekte erscheinen wie beim Level-Laden.
+    objectAppearances = objectAppearances.filter(item => !changedKeys.has(`${item.type}:${item.id}`));
+    let appearanceIndex = 0;
+    for (const item of nextObjects) {
+        const key = keyOf(item);
+        const oldObject = beforeMap.get(key);
+        if (!oldObject || JSON.stringify(oldObject) !== JSON.stringify(item.object)) {
+            objectAppearances.push({ type: item.type, id: item.object.id, startedAt: performance.now(), index: appearanceIndex++ });
+        }
+    }
+    blockDebris = [];
+    placementType = null;
+    selectedSandboxObject = null;
+    dragInfo = null;
+    marioSupportedBlockId = null;
+    updateCoinsCountForHistory();
+    updateSandboxTools();
+    updateSandboxHistoryButtons();
+    scene();
+    if ((despawnAnimations.length || objectAppearances.length) && !raf) { last = 0; raf = requestAnimationFrame(animate); }
+    persistActiveContext();
+}
+function updateCoinsCountForHistory() {
+    coinCount.textContent = `Sterne: ${coins.filter(c => c.hit).length} / ${coins.length}`;
+}
+function undoSandboxAction() {
+    if (!sandboxEditing || level !== 0 || !sandboxUnlocked || !sandboxUndoStack.length) return;
+    sandboxRedoStack.push(captureSandboxHistoryState());
+    const previous = sandboxUndoStack.pop();
+    restoreSandboxHistoryState(previous);
+    status.textContent = 'Letzte Sandbox-Aktion rückgängig gemacht.';
+}
+function redoSandboxAction() {
+    if (!sandboxEditing || level !== 0 || !sandboxUnlocked || !sandboxRedoStack.length) return;
+    sandboxUndoStack.push(captureSandboxHistoryState());
+    if (sandboxUndoStack.length > MAX_SANDBOX_HISTORY) sandboxUndoStack.shift();
+    const next = sandboxRedoStack.pop();
+    restoreSandboxHistoryState(next);
+    status.textContent = 'Sandbox-Aktion wiederhergestellt.';
+}
+function persistSavedContexts() {
+    savedContexts.__progress = { unlockedLevel, sandboxUnlocked };
+    savedContexts.__functionMode = functionMode;
+    try {
+        localStorage.setItem(CONTEXT_STORAGE_KEY, JSON.stringify(savedContexts));
+    }
+    catch (_) { /* Speicherung ist optional, z. B. bei blockiertem localStorage. */ }
+}
+function persistActiveContext() {
+    if (!activeContextKey) {
+        initialUiEdited = true;
+        return;
+    }
+    const state = savedContexts[activeContextKey] && typeof savedContexts[activeContextKey] === 'object' ? savedContexts[activeContextKey] : {};
+    state.functions = readUiFunctionState();
+    if (activeContextKey === 'sandbox' && level === 0 && sandboxEditing)
+        state.world = cloneSandboxWorld();
+    savedContexts[activeContextKey] = state;
+    persistSavedContexts();
+}
+function restoreFunctionState(state, preferredMode = null) {
+    if (!state)
+        return;
+    const sourceMode = VALID_FUNCTION_MODES.includes(state.mode) ? state.mode : 'free';
+    const desiredMode = VALID_FUNCTION_MODES.includes(preferredMode) ? preferredMode : sourceMode;
+    setFreeExpressions(typeof state.fExpression === 'string' ? state.fExpression : '-0.5(x-7)²+4', typeof state.gExpression === 'string' ? state.gExpression : '');
+    const values = state.parameters || {};
+    ['a', 'd', 'e', 'a2', 'd2', 'e2'].forEach(id => {
+        const input = document.getElementById(id);
+        input.value = typeof values[id] === 'string' ? values[id] : '0';
+    });
+    // Die Eingabevariante ist global für alle Level. Beim Laden eines anderen
+    // Level-Kontexts wird dessen gespeicherter Inhalt in die aktuelle Ansicht übertragen.
+    if (isFreeInputMode(sourceMode) && !isFreeInputMode(desiredMode)) {
+        for (const [inputId, label, ids] of [
+            ['fExpression', 'Funktion 1', ['a', 'd', 'e']],
+            ['gExpression', 'Funktion 2', ['a2', 'd2', 'e2']]
+        ]) {
+            let params = null;
+            try {
+                params = freeFunctionToParameters(inputId, label);
+            }
+            catch (_) {
+                params = null;
+            }
+            formatParameterValues(params, ids);
+        }
+    }
+    else if (!isFreeInputMode(sourceMode) && isFreeInputMode(desiredMode)) {
+        const convert = (ids, label) => {
+            try {
+                const params = readFunctionInputs(ids[0], ids[1], ids[2], label);
+                return params ? parameterFunctionToExpression(params) : '';
+            }
+            catch (_) {
+                return '';
+            }
+        };
+        setFreeExpressions(convert(['a', 'd', 'e'], 'Funktion 1'), convert(['a2', 'd2', 'e2'], 'Funktion 2'));
+    }
+    functionMode = desiredMode;
+    updateFunctionPanels();
+    syncModeOptionCards(functionMode);
+    p = null;
+    p2 = null;
+    const errors = [];
+    try {
+        p = read();
+    }
+    catch (error) {
+        errors.push(error.message);
+    }
+    try {
+        p2 = readSecond();
+    }
+    catch (error) {
+        errors.push(error.message);
+    }
+    pathVisible = !!(p || p2);
+    if (errors.length)
+        status.textContent = errors[0];
+    else if (!pathVisible)
+        status.textContent = 'Gib mindestens eine gültige Funktionsgleichung ein.';
+}
+function defaultFunctionsForContext(key, fallback) {
+    const state = {
+        mode: 'free',
+        fExpression: '-0.5(x-7)²+4',
+        gExpression: '',
+        parameters: { a: '0', d: '0', e: '0', a2: '0', d2: '0', e2: '0' }
+    };
+    if (key === 'level2' || key === 'level3' || key === 'sandbox') {
+        // Level 2/3 und eine erstmalig betretene Sandbox starten ohne vorgegebene Funktionen.
+        state.fExpression = '';
+        state.gExpression = '';
+    }
+    else if (fallback) {
+        return fallback;
+    }
+    return state;
+}
+function isLegacyLevel2Starter(functions) {
+    if (!functions || typeof functions !== 'object')
+        return false;
+    const normalize = value => String(value || '').replace(/\s+/g, '').replace(/−/g, '-').replace(/²/g, '^2').replace(/\*/g, '');
+    if (isFreeInputMode(functions.mode)) {
+        const f = normalize(functions.fExpression), g = normalize(functions.gExpression);
+        const initialDefaults = f === '-0.5(x-7)^2+4' && g === '';
+        const oldLevelTwo = (f === '-2(x-4)^2+3' || f === '-2*(x-4)^2+3') && (g === '-0.5(x-8.5)^2+4.5' || g === '-0.5*(x-8.5)^2+4.5');
+        const priorV26LevelTwo = f === '-0.5(x-5)^2+3.5' && g === '-0.25(x-10)^2+5';
+        return initialDefaults || oldLevelTwo || priorV26LevelTwo;
+    }
+    const values = functions.parameters || {};
+    return ['a', 'd', 'e', 'a2', 'd2', 'e2'].every(id => {
+        const raw = String(values[id] ?? '0').trim().replace(',', '.');
+        return raw === '' || Number(raw) === 0;
+    });
+}
+function isLegacyLevel3Starter(functions) {
+    if (!functions || typeof functions !== 'object')
+        return false;
+    const normalize = value => String(value || '').replace(/\s+/g, '').replace(/−/g, '-').replace(/²/g, '^2').replace(/\*/g, '');
+    if (isFreeInputMode(functions.mode)) {
+        const f = normalize(functions.fExpression), g = normalize(functions.gExpression);
+        return f === '-0.83(x-2.1)^2+2.4' && (g === '-0.5(x-8.5)^2+3.125' || g === '-0.5(x-8.5)^2+3.5');
+    }
+    const values = functions.parameters || {};
+    return ['a', 'd', 'e', 'a2', 'd2', 'e2'].every(id => {
+        const raw = String(values[id] ?? '0').trim().replace(',', '.');
+        return raw === '' || Number(raw) === 0;
+    });
+}
+function migrateLegacyPresetContexts() {
+    if (savedContextSchemaVersion < 28) {
+        const level2 = savedContexts.level2;
+        if (level2 && level2.functions && isLegacyLevel2Starter(level2.functions))
+            level2.functions = defaultFunctionsForContext('level2');
+        const level3 = savedContexts.level3;
+        if (level3 && level3.functions && isLegacyLevel3Starter(level3.functions))
+            level3.functions = defaultFunctionsForContext('level3');
+        savedContextSchemaVersion = 28;
+        savedContexts.__schemaVersion = savedContextSchemaVersion;
+    }
+    if (savedContextSchemaVersion < 33) {
+        const sandbox = savedContexts.sandbox;
+        if (sandbox && sandbox.functions) {
+            const f = String(sandbox.functions.fExpression || '').replace(/\s+/g, '').replace(/−/g, '-').replace(/²/g, '^2');
+            const g = String(sandbox.functions.gExpression || '').trim();
+            const world = sandbox.world || {};
+            const worldIsEmpty = !((world.pipes || []).length || (world.blocks || []).length || (world.coins || []).length);
+            const params = sandbox.functions.parameters || {};
+            const oldFreeStarter = !['parameters', 'parameters-simple'].includes(sandbox.functions.mode) && f === '-0.5(x-7)^2+4' && !g;
+            const oldParameterStarter = ['parameters', 'parameters-simple'].includes(sandbox.functions.mode) &&
+                Math.abs(Number(String(params.a ?? 0).replace(',', '.')) + .5) < 1e-9 &&
+                Math.abs(Number(String(params.d ?? 0).replace(',', '.')) - 7) < 1e-9 &&
+                Math.abs(Number(String(params.e ?? 0).replace(',', '.')) - 4) < 1e-9 &&
+                ['a2', 'd2', 'e2'].every(id => Math.abs(Number(String(params[id] ?? 0).replace(',', '.'))) < 1e-9);
+            if (worldIsEmpty && (oldFreeStarter || oldParameterStarter)) {
+                sandbox.functions = defaultFunctionsForContext('sandbox');
+            }
+        }
+        savedContextSchemaVersion = 33;
+        savedContexts.__schemaVersion = savedContextSchemaVersion;
+    }
+}
+function switchFunctionContext(key) {
+    migrateLegacyPresetContexts();
+    const currentFunctions = readUiFunctionState();
+    if (activeContextKey) {
+        const current = savedContexts[activeContextKey] && typeof savedContexts[activeContextKey] === 'object' ? savedContexts[activeContextKey] : {};
+        current.functions = currentFunctions;
+        if (activeContextKey === 'sandbox' && level === 0 && sandboxEditing)
+            current.world = cloneSandboxWorld();
+        savedContexts[activeContextKey] = current;
+    }
+    let target = savedContexts[key] && typeof savedContexts[key] === 'object' ? savedContexts[key] : null;
+    // Wenn in der ersten Ansicht bereits getippt wurde, ist diese neue Eingabe
+    // wichtiger als ein eventuell älterer gespeicherter Stand.
+    if (!target || !target.functions) {
+        target = target || {};
+        target.functions = defaultFunctionsForContext(key, (!activeContextKey && initialUiEdited && key === 'level1') ? currentFunctions : null);
+    }
+    if (key === 'sandbox' && !target.world)
+        target.world = { pipes: [], blocks: [], coins: [], nextSandboxId: 1 };
+    savedContexts[key] = target;
+    activeContextKey = key;
+    initialUiEdited = false;
+    // Die gewählte Darstellungsvariante bleibt auch beim erstmaligen Betreten eines anderen Levels gleich.
+    const preferredMode = functionMode;
+    restoreFunctionState(target.functions, preferredMode);
+    target.functions = readUiFunctionState();
+    persistSavedContexts();
+    return target;
+}
+function restoreSandboxWorld(world) {
+    destroyedBlockIds.clear();
+    const saved = world && typeof world === 'object' ? world : { pipes: [], blocks: [], coins: [], nextSandboxId: 1 };
+    pipes = Array.isArray(saved.pipes) ? saved.pipes.map(item => ({ ...item })) : [];
+    blocks = Array.isArray(saved.blocks) ? saved.blocks.map(item => ({ ...item })) : [];
+    ensureBlockShadeOrders(blocks);
+    coins = Array.isArray(saved.coins) ? saved.coins.map(item => ({ ...item })) : [];
+    const maxId = [...pipes, ...blocks, ...coins].reduce((max, item) => Math.max(max, Number(item.id) || 0), 0);
+    nextSandboxId = Math.max(Number(saved.nextSandboxId) || 1, maxId + 1);
+    marioSupportedBlockId = null;
+    marioFallAltitude = null;
+    marioFallVelocity = 0;
+    selectedSandboxObject = null;
+    dragInfo = null;
+    coinCount.textContent = `Sterne: ${coins.filter(c => c.hit).length} / ${coins.length}`;
+}
+function load(n) {
+    if (n > unlockedLevel)
+        return;
+    traversedCurveSegments = [];
+    activeCurveTrailSegment = null;
+    despawnAnimations = [];
+    objectAppearances = [];
+    switchFunctionContext(`level${n}`);
+    stop();
+    blockDebris = [];
+    destroyedBlockIds.clear();
+    level = n;
+    marioSupportedBlockId = null;
+    marioFallAltitude = null;
+    marioFallVelocity = 0;
+    marioArrivalAltitude = null;
+    sandboxEditing = false;
+    placementType = null;
+    selectedSandboxObject = null;
+    dragInfo = null;
+    updateSandboxTools();
+    const q = levels[n];
+    pathVisible = !!(p || p2);
+    blocks = createLevelBlocks(n);
+    pipes = (pipesByLevel[n] || []).map(pipe => ({ ...pipe }));
+    coins = Array.isArray(q.stars)
+        ? q.stars.map(star => ({ x: star.x, y: star.y, hit: false, jump: 1 }))
+        : q.x.map(x => ({ x, y: q.a * (x - q.d) ** 2 + q.e, hit: false, jump: 1 }));
+    if (!Array.isArray(q.stars) && q.second) {
+        coins.push(...q.second.x.map(x => ({ x, y: q.second.a * (x - q.second.d) ** 2 + q.second.e, hit: false, jump: 2 })));
+    }
+    coinCount.textContent = `Sterne: 0 / ${coins.length}`;
+    resetFlagState();
+    status.textContent = 'Stelle die passenden Flugbahnen ein, sammle alle Sterne und erreiche die Zielflagge.';
+    marioX = .33;
+    marioCurveIndex = null;
+    marioLastFunctionProbeX = marioX;
+    updateCurveRideState(marioX, marioX);
+    beginObjectAppearance();
+}
+function loadSandbox() {
+    if (!sandboxUnlocked)
+        return;
+    traversedCurveSegments = [];
+    activeCurveTrailSegment = null;
+    despawnAnimations = [];
+    objectAppearances = [];
+    const context = switchFunctionContext('sandbox');
+    stop();
+    blockDebris = [];
+    level = 0;
+    marioSupportedBlockId = null;
+    marioFallAltitude = null;
+    marioFallVelocity = 0;
+    marioArrivalAltitude = null;
+    restoreSandboxWorld(context.world);
+    resetFlagState();
+    sandboxEditing = true;
+    placementType = null;
+    selectedSandboxObject = null;
+    dragInfo = null;
+    updateSandboxTools();
+    status.textContent = 'Sandbox bereit.';
+    marioX = .33;
+    marioCurveIndex = null;
+    marioLastFunctionProbeX = marioX;
+    updateCurveRideState(marioX, marioX);
+    // Sandbox erneut laden wie ein Level: gespeicherte Objekte erscheinen der Reihe nach.
+    beginObjectAppearance();
+    persistActiveContext();
+}
+function updateSandboxTools() {
+    const active = sandboxEditing && level === 0 && sandboxUnlocked;
+    sandboxTools.classList.toggle('active', active);
+    if (!active) {
+        placementType = null;
+        selectedSandboxObject = null;
+        document.getElementById('deleteObject').disabled = true;
+        document.getElementById('deleteAllObjects').disabled = true;
+        updateSandboxHistoryButtons();
+        return;
+    }
+    const selected = selectedSandboxObject;
+    document.getElementById('addPipe').classList.toggle('active', placementType === 'pipe');
+    document.getElementById('addStar').classList.toggle('active', placementType === 'star');
+    document.getElementById('addBlock').classList.toggle('active', placementType === 'block');
+    const pipe = selected && selected.type === 'pipe' ? pipes.find(q => q.id === selected.id) : null;
+    const block = selected && selected.type === 'block' ? blocks.find(q => q.id === selected.id) : null;
+    document.getElementById('deleteObject').disabled = !selected;
+    document.getElementById('deleteAllObjects').disabled = !(pipes.length || blocks.length || coins.length);
+    updateSandboxHistoryButtons();
+    if (pipe) {
+        sandboxSelection.textContent = 'Röhre mit Piranha-Pflanze ausgewählt. Ziehe sie, um Position und Höhe einzustellen.';
+    }
+    else if (block) {
+        sandboxSelection.textContent = 'Block ausgewählt (1 × 1). Ziehe ihn auf ein freies Rasterfeld oder lösche ihn.';
+    }
+    else if (selected && selected.type === 'star') {
+        sandboxSelection.textContent = 'Stern ausgewählt. Ziehe ihn an die gewünschte Stelle oder lösche ihn.';
+    }
+    else {
+        sandboxSelection.textContent = placementType ? 'Platziermodus aktiv.' : 'Noch kein Objekt ausgewählt.';
+    }
+}
+function getSvgPoint(event) {
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+    const matrix = svg.getScreenCTM();
+    return matrix ? point.matrixTransform(matrix.inverse()) : { x: 0, y: 0 };
+}
+function graphPointFromEvent(event) {
+    const pt = getSvgPoint(event);
+    return {
+        x: viewXMin + (pt.x / W) * (viewXMax - viewXMin),
+        y: viewYMax - (pt.y / H) * (viewYMax - viewYMin)
+    };
+}
+function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+function findSandboxObject(type, id) {
+    if (type === 'pipe')
+        return pipes.find(q => String(q.id) === String(id));
+    if (type === 'star')
+        return coins.find(q => q.sandbox && String(q.id) === String(id));
+    if (type === 'block')
+        return blocks.find(q => String(q.id) === String(id));
+    return null;
+}
+function chooseSandboxObject(type, object) {
+    selectedSandboxObject = object ? { type, id: object.id } : null;
+    updateSandboxTools();
+}
+// -----------------------------------------------------------------------------
+// Sandbox pointer, drag and keyboard interactions
+// -----------------------------------------------------------------------------
+svg.addEventListener('pointerdown', event => {
+    if (!sandboxEditing || level !== 0 || !sandboxUnlocked)
+        return;
+    const point = graphPointFromEvent(event);
+    const element = event.target.closest ? event.target.closest('[data-object-type][data-object-id]') : null;
+    // Ein bereits vorhandenes Objekt hat immer Vorrang vor dem Platzierwerkzeug:
+    // anklicken wählt es aus und beginnt eine normale Drag-Bewegung.
+    if (element) {
+        const type = element.getAttribute('data-object-type');
+        const object = findSandboxObject(type, element.getAttribute('data-object-id'));
+        if (!object)
+            return;
+        event.preventDefault();
+        placementType = null;
+        chooseSandboxObject(type, object);
+        dragInfo = { type, id: object.id, pointerId: event.pointerId, moved: false, startX: point.x, startY: point.y, startObjectX: object.x, startObjectY: object.y, startHeight: object.height, lastValidX: object.x, lastValidY: object.y, lastValidHeight: object.height, beforeState: captureSandboxHistoryState() };
+        try {
+            svg.setPointerCapture(event.pointerId);
+        }
+        catch (_) { }
+        scene();
+        return;
+    }
+    // Platzieren ist ein wiederholbarer Modus: jeder freie Klick setzt ein weiteres Objekt.
+    if (placementType) {
+        event.preventDefault();
+        // Nur innerhalb des dargestellten Koordinatensystems platzieren.
+        const svgPoint = getSvgPoint(event);
+        if (svgPoint.x < 0 || svgPoint.x > W || svgPoint.y < 0 || svgPoint.y > H)
+            return;
+        let newObject = null;
+        const beforeState = captureSandboxHistoryState();
+        if (placementType === 'pipe') {
+            // Auch eine zunächst ungültige Position wird als rote Vorschau gezeigt.
+            // Durch Ziehen bei gedrückter Maustaste kann eine gültige Position gefunden werden.
+            const pipe = { id: nextSandboxId++, x: clamp(point.x, xMin + .35, goalX - .5), w: .8, height: clamp(point.y, .6, 6.5), sandbox: true };
+            pipe.dragInvalid = pipeOverlapsOtherObjects(pipe, pipe.id);
+            pipes.push(pipe);
+            newObject = pipe;
+            chooseSandboxObject('pipe', pipe);
+        }
+        else if (placementType === 'star') {
+            const star = { id: nextSandboxId++, x: clamp(point.x, xMin + .15, goalX - .25), y: clamp(point.y, yMin + .2, yMax - .2), hit: false, sandbox: true };
+            coins.push(star);
+            newObject = star;
+            coinCount.textContent = `Sterne: ${coins.filter(c => c.hit).length} / ${coins.length}`;
+            chooseSandboxObject('star', star);
+        }
+        else if (placementType === 'block') {
+            // Auch bei einer ungültigen Startposition zunächst eine rote Blockvorschau
+            // anlegen. Solange die Maustaste gedrückt bleibt, kann sie weggezogen werden.
+            const block = { id: nextSandboxId++, x: clamp(Math.floor(point.x) + .5, xMin + .5, goalX - .5), y: clamp(Math.floor(point.y) + .5, .5, yMax - .5), sandbox: true, shadeOrder: createBlockShadeOrder(blocks) };
+            block.dragInvalid = blockOverlapsAnotherBlock(block, block.id);
+            blocks.push(block);
+            newObject = block;
+            chooseSandboxObject('block', block);
+        }
+        // Nach dem Setzen kann das Objekt bei gehaltener Maustaste / gehaltenem Finger direkt positioniert werden.
+        if (newObject) {
+            const candidateIsValid = newObject.dragInvalid !== true;
+            dragInfo = {
+                type: placementType, id: newObject.id, pointerId: event.pointerId, moved: false,
+                startX: point.x, startY: point.y, startObjectX: newObject.x, startObjectY: newObject.y, startHeight: newObject.height,
+                lastValidX: candidateIsValid ? newObject.x : null,
+                lastValidY: candidateIsValid ? newObject.y : null,
+                lastValidHeight: candidateIsValid ? newObject.height : null,
+                isNew: true,
+                beforeState
+            };
+            try {
+                svg.setPointerCapture(event.pointerId);
+            }
+            catch (_) { }
+        }
+        // placementType bleibt aktiv, bis ESC oder ein vorhandenes Objekt angeklickt wird.
+        updateSandboxTools();
+        scene();
+        persistActiveContext();
+        return;
+    }
+    // Freie Fläche ohne aktiven Platziermodus: bestehende Auswahl beenden.
+    chooseSandboxObject(null, null);
+    scene();
+});
+svg.addEventListener('pointermove', event => {
+    if (!dragInfo || dragInfo.pointerId !== event.pointerId || !sandboxEditing)
+        return;
+    const object = findSandboxObject(dragInfo.type, dragInfo.id);
+    if (!object)
+        return;
+    const point = graphPointFromEvent(event);
+    if (dragInfo.type === 'pipe') {
+        object.x = clamp(dragInfo.startObjectX + (point.x - dragInfo.startX), xMin + object.w / 2, goalX - object.w / 2);
+        object.height = clamp(dragInfo.startHeight + (point.y - dragInfo.startY), .6, 6.5);
+        object.dragInvalid = pipeOverlapsOtherObjects(object, object.id);
+        if (!object.dragInvalid) {
+            dragInfo.lastValidX = object.x;
+            dragInfo.lastValidHeight = object.height;
+        }
+    }
+    else if (dragInfo.type === 'block') {
+        object.x = clamp(Math.floor(point.x) + .5, xMin + .5, goalX - .5);
+        object.y = clamp(Math.floor(point.y) + .5, .5, yMax - .5);
+        object.dragInvalid = blockOverlapsAnotherBlock(object, object.id);
+        if (!object.dragInvalid) {
+            dragInfo.lastValidX = object.x;
+            dragInfo.lastValidY = object.y;
+        }
+    }
+    else {
+        object.x = clamp(point.x, xMin + .15, goalX - .25);
+        object.y = clamp(point.y, yMin + .2, yMax - .2);
+    }
+    dragInfo.moved = true;
+    scene();
+});
+function endSandboxDrag(event) {
+    if (dragInfo && (event.pointerId === undefined || dragInfo.pointerId === event.pointerId)) {
+        const completedDrag = dragInfo;
+        const object = findSandboxObject(completedDrag.type, completedDrag.id);
+        let committed = !!object;
+        if (object && (completedDrag.type === 'block' || completedDrag.type === 'pipe')) {
+            if (object.dragInvalid && completedDrag.isNew) {
+                // Ein neu angelegter ungültiger Kandidat wird nur behalten, wenn er vor dem Loslassen gültig wurde.
+                if (completedDrag.type === 'pipe')
+                    pipes = pipes.filter(item => String(item.id) !== String(object.id));
+                else
+                    blocks = blocks.filter(item => String(item.id) !== String(object.id));
+                if (selectedSandboxObject && String(selectedSandboxObject.id) === String(object.id))
+                    selectedSandboxObject = null;
+                committed = false;
+            }
+            else if (object.dragInvalid) {
+                object.x = Number.isFinite(completedDrag.lastValidX) ? completedDrag.lastValidX : completedDrag.startObjectX;
+                if (completedDrag.type === 'block') {
+                    object.y = Number.isFinite(completedDrag.lastValidY) ? completedDrag.lastValidY : completedDrag.startObjectY;
+                }
+                else {
+                    object.height = Number.isFinite(completedDrag.lastValidHeight) ? completedDrag.lastValidHeight : completedDrag.startHeight;
+                }
+            }
+            delete object.dragInvalid;
+        }
+        dragInfo = null;
+        if (committed && completedDrag.beforeState)
+            recordSandboxAction(completedDrag.beforeState);
+        updateSandboxTools();
+        scene();
+        persistActiveContext();
+    }
+}
+svg.addEventListener('pointerup', endSandboxDrag);
+svg.addEventListener('pointercancel', endSandboxDrag);
+document.getElementById('addPipe').onclick = () => {
+    if (!sandboxEditing)
+        return;
+    placementType = 'pipe';
+    selectedSandboxObject = null;
+    updateSandboxTools();
+    scene();
+    status.textContent = 'Röhren-Platziermodus aktiviert.';
+    persistActiveContext();
+};
+document.getElementById('addStar').onclick = () => {
+    if (!sandboxEditing)
+        return;
+    placementType = 'star';
+    selectedSandboxObject = null;
+    updateSandboxTools();
+    scene();
+    status.textContent = 'Stern-Platziermodus aktiviert.';
+    persistActiveContext();
+};
+document.getElementById('addBlock').onclick = () => {
+    if (!sandboxEditing)
+        return;
+    placementType = 'block';
+    selectedSandboxObject = null;
+    updateSandboxTools();
+    scene();
+    status.textContent = 'Block-Platziermodus aktiviert.';
+    persistActiveContext();
+};
+function deleteSelectedSandboxObject() {
+    if (!sandboxEditing || !selectedSandboxObject)
+        return;
+    const beforeState = captureSandboxHistoryState();
+    placementType = null;
+    dragInfo = null;
+    const { type, id } = selectedSandboxObject;
+    const selectedObject = findSandboxObject(type, id);
+    if (selectedObject)
+        startDespawn(type, selectedObject);
+    if (type === 'pipe')
+        pipes = pipes.filter(q => q.id !== id);
+    if (type === 'star')
+        coins = coins.filter(q => q.id !== id);
+    if (type === 'block') {
+        blocks = blocks.filter(q => q.id !== id);
+        if (String(marioSupportedBlockId) === String(id))
+            marioSupportedBlockId = null;
+    }
+    coinCount.textContent = `Sterne: ${coins.filter(c => c.hit).length} / ${coins.length}`;
+    selectedSandboxObject = null;
+    recordSandboxAction(beforeState);
+    updateSandboxTools();
+    scene();
+    if (despawnAnimations.length && !raf) { last = 0; raf = requestAnimationFrame(animate); }
+    persistActiveContext();
+}
+document.getElementById('deleteObject').onclick = deleteSelectedSandboxObject;
+function deleteAllSandboxObjects() {
+    if (!sandboxEditing || level !== 0 || !sandboxUnlocked)
+        return;
+    if (!(pipes.length || blocks.length || coins.length))
+        return;
+    const beforeState = captureSandboxHistoryState();
+    const visiblePipes = pipes.filter(item => item.sandbox === true);
+    const visibleBlocks = activeBlocks().filter(item => item.sandbox === true);
+    const visibleStars = coins.filter(item => item.sandbox === true && !item.hit);
+    stop();
+    visiblePipes.forEach(item => startDespawn('pipe', item));
+    visibleBlocks.forEach(item => startDespawn('block', item));
+    visibleStars.forEach(item => startDespawn('star', item));
+    pipes = [];
+    blocks = [];
+    coins = [];
+    destroyedBlockIds.clear();
+    blockDebris = [];
+    nextSandboxId = 1;
+    placementType = null;
+    selectedSandboxObject = null;
+    dragInfo = null;
+    marioSupportedBlockId = null;
+    marioFallAltitude = null;
+    marioFallVelocity = 0;
+    marioArrivalAltitude = null;
+    marioX = .33;
+    resetFlagState();
+    coinCount.textContent = 'Sterne: 0 / 0';
+    status.textContent = 'Alle Sandbox-Objekte wurden gelöscht.';
+    recordSandboxAction(beforeState);
+    updateSandboxTools();
+    scene();
+    if (despawnAnimations.length && !raf) { last = 0; raf = requestAnimationFrame(animate); }
+    persistActiveContext();
+}
+const deleteAllDialog = document.getElementById('deleteAllDialog');
+document.getElementById('deleteAllObjects').onclick = () => {
+    if (!sandboxEditing || level !== 0 || !sandboxUnlocked || !(pipes.length || blocks.length || coins.length)) return;
+    if (!deleteAllDialog.open) deleteAllDialog.showModal();
+};
+document.getElementById('cancelDeleteAll').onclick = () => deleteAllDialog.close();
+document.getElementById('confirmDeleteAll').onclick = () => {
+    deleteAllDialog.close();
+    deleteAllSandboxObjects();
+};
+document.getElementById('undoAction').onclick = undoSandboxAction;
+document.getElementById('redoAction').onclick = redoSandboxAction;
+// Ein gewöhnlicher UI-Knopf beendet im Sandboxmodus den aktuellen Platziermodus und die Auswahl.
+// Die drei Platzierknöpfe starten anschließend bewusst ihren jeweils neuen Modus.
+document.addEventListener('click', event => {
+    if (!sandboxEditing || level !== 0 || !sandboxUnlocked)
+        return;
+    const button = event.target && event.target.closest ? event.target.closest('button') : null;
+    if (!button)
+        return;
+    if (['addPipe', 'addStar', 'addBlock', 'deleteObject', 'deleteAllObjects', 'undoAction', 'redoAction', 'cancelDeleteAll', 'confirmDeleteAll'].includes(button.id))
+        return;
+    if (!placementType && !selectedSandboxObject && !dragInfo)
+        return;
+    placementType = null;
+    dragInfo = null;
+    selectedSandboxObject = null;
+    updateSandboxTools();
+    scene();
+}, true);
+document.addEventListener('keydown', event => {
+    if (!sandboxEditing || level !== 0 || !sandboxUnlocked)
+        return;
+    if (event.key === 'Escape') {
+        placementType = null;
+        dragInfo = null;
+        chooseSandboxObject(null, null);
+        scene();
+        status.textContent = 'Platziermodus und Objektauswahl beendet.';
+        return;
+    }
+    if (event.key === 'Delete' || event.key === 'Backspace' || event.key === 'Del') {
+        const target = event.target;
+        const tag = target && target.tagName ? target.tagName.toLowerCase() : '';
+        if (['input', 'textarea', 'select'].includes(tag) || (target && target.isContentEditable))
+            return;
+        if (selectedSandboxObject) {
+            event.preventDefault();
+            deleteSelectedSandboxObject();
+            status.textContent = 'Ausgewähltes Objekt gelöscht.';
+        }
+    }
+});
+// -----------------------------------------------------------------------------
+// Dialogs and UI event wiring
+// -----------------------------------------------------------------------------
+let pendingFunctionMode = functionMode;
+function syncModeOptionCards(selectedMode = functionMode) {
+    document.querySelectorAll('.modeOption').forEach(card => {
+        const selected = card.dataset.modeChoice === selectedMode;
+        card.classList.toggle('selected', selected);
+        card.setAttribute('aria-checked', String(selected));
+    });
+}
+function applyFunctionMode(nextMode) {
+    const desired = VALID_FUNCTION_MODES.includes(nextMode) ? nextMode : 'free';
+    if (desired === functionMode) {
+        syncModeOptionCards(functionMode);
+        return true;
+    }
+    // Jede Funktion wird unabhängig konvertiert. Nicht umwandelbare freie Funktionen werden neutral auf 0,0,0 gesetzt.
+    if (isFreeInputMode(functionMode) && !isFreeInputMode(desired)) {
+        const convertOne = (id, label) => {
+            try { return freeFunctionToParameters(id, label); }
+            catch (_) { return null; }
+        };
+        formatParameterValues(convertOne('fExpression', 'Funktion 1'), ['a', 'd', 'e']);
+        formatParameterValues(convertOne('gExpression', 'Funktion 2'), ['a2', 'd2', 'e2']);
+    } else if (!isFreeInputMode(functionMode) && isFreeInputMode(desired)) {
+        const convertOne = (ids, label) => {
+            try {
+                const params = readFunctionInputs(ids[0], ids[1], ids[2], label);
+                return params ? parameterFunctionToExpression(params) : '';
+            } catch (_) { return ''; }
+        };
+        setFreeExpressions(convertOne(['a', 'd', 'e'], 'Funktion 1'), convertOne(['a2', 'd2', 'e2'], 'Funktion 2'));
+    }
+    // Zwischen den beiden vereinfachten Varianten werden nur die Hinweise ein- oder ausgeblendet.
+    functionMode = desired;
+    pendingFunctionMode = desired;
+    updateFunctionPanels();
+    syncModeOptionCards(functionMode);
+    tryLiveUpdate();
+    persistActiveContext();
+    return true;
+}
+const helpDialog = document.getElementById('helpDialog');
+const settingsDialog = document.getElementById('settingsDialog');
+document.querySelectorAll('.modeOption').forEach(card => card.addEventListener('click', () => {
+    pendingFunctionMode = VALID_FUNCTION_MODES.includes(card.dataset.modeChoice) ? card.dataset.modeChoice : 'free';
+    syncModeOptionCards(pendingFunctionMode);
+}));
+document.getElementById('showHelp').onclick = () => {
+    if (!helpDialog.open)
+        helpDialog.showModal();
+};
+document.getElementById('confirmHelp').onclick = () => helpDialog.close();
+document.getElementById('showSettings').onclick = () => {
+    pendingFunctionMode = functionMode;
+    syncModeOptionCards(functionMode);
+    if (!settingsDialog.open)
+        settingsDialog.showModal();
+};
+document.getElementById('cancelSettings').onclick = () => {
+    pendingFunctionMode = functionMode;
+    syncModeOptionCards(functionMode);
+    settingsDialog.close();
+};
+document.getElementById('applySettings').onclick = () => {
+    if (applyFunctionMode(pendingFunctionMode))
+        settingsDialog.close();
+};
+// Die Hilfe wird beim ersten Öffnen der Lernumgebung automatisch eingeblendet.
+if (!helpDialog.open)
+    helpDialog.showModal();
+document.getElementById('start').onclick = start;
+document.getElementById('stop').onclick = () => {
+    // Nach dem erfolgreichen Levelabschluss läuft der kleine Feier-Tanz absichtlich weiter.
+    if (celebrationMode) {
+        if (!raf) { last = 0; raf = requestAnimationFrame(animate); }
+        status.textContent = 'Mario feiert den Levelabschluss. Wähle ein Level oder drücke Reset, um fortzufahren.';
+        return;
+    }
+    stop();
+    appearanceAnimating = false;
+    scene();
+    status.textContent = 'Animation pausiert.';
+};
+document.getElementById('reset').onclick = () => {
+    resetRunState();
+    status.textContent = 'Lauf zurückgesetzt.';
+    scene();
+    persistActiveContext();
+};
+document.querySelectorAll('.level').forEach(b => b.onclick = () => load(+b.dataset.n));
+document.getElementById('sandbox').onclick = loadSandbox;
+document.querySelectorAll('.stepBtn').forEach(btn => btn.onclick = () => {
+    const input = document.getElementById(btn.dataset.target);
+    let value = parseUserNumber(input.value);
+    if (!Number.isFinite(value))
+        value = 0;
+    value += Number(btn.dataset.step) * Number(btn.dataset.dir);
+    value = btn.dataset.target.startsWith('a') ? Math.round(value * 100) / 100 : Math.round(value);
+    input.value = formatGermanNumber(value);
+    tryLiveUpdate();
+});
+['a', 'd', 'e', 'a2', 'd2', 'e2'].forEach(id => document.getElementById(id).oninput = tryLiveUpdate);
+['fExpression', 'gExpression'].forEach(id => document.getElementById(id).addEventListener('input', tryLiveUpdate));
+document.querySelectorAll('.clearFunctionInput').forEach(button => button.addEventListener('click', () => {
+    const input = document.getElementById(button.dataset.clearTarget);
+    if (!input)
+        return;
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+}));
+document.querySelectorAll('.insertSquareInput').forEach(button => button.addEventListener('click', () => {
+    const input = document.getElementById(button.dataset.expTarget);
+    const insertion = button.dataset.insert;
+    const start = Number.isInteger(input.selectionStart) ? input.selectionStart : input.value.length;
+    const end = Number.isInteger(input.selectionEnd) ? input.selectionEnd : start;
+    input.value = input.value.slice(0, start) + insertion + input.value.slice(end);
+    const offset = Number(button.dataset.caretOffset || 0);
+    const caret = start + insertion.length + offset;
+    input.focus();
+    input.setSelectionRange(caret, caret);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+}));
+updateLevelLocks();
+updateFunctionPanels();
+syncModeOptionCards(functionMode);
+syncFunctionEntryWidths();
+pathVisible = true;
+try {
+    const pair = readFunctionPair();
+    p = pair.first;
+    p2 = pair.second;
+}
+catch (_) {
+    p = null;
+    p2 = null;
+}
+scene();
+</script>
+</body>
+</html>
