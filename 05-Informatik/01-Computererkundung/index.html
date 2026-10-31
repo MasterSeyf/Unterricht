@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Informatik-Abenteuer: Der PC-Führerschein: V19</title>
+  <title>Informatik-Abenteuer: Der PC-Führerschein: V24</title>
   <style>
+    /* V25: Mausrad und Seitentasten folgen dem tatsaechlichen Drehwinkel. Login.exe steht rechts neben dem Browser. */
     :root{
       --desk-color:#a1887f;
       --highlight:#ffeb3b;
@@ -79,14 +80,14 @@
     .m-side-button:focus-visible{outline:3px solid var(--info);outline-offset:2px;}
 
     /* INFO MODAL */
-    #info-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;}
+    #info-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:6500;}
     #info-modal{
       display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
       background:#fff;padding:26px;border-radius:15px;box-shadow:0 15px 50px rgba(0,0,0,0.5);
-      z-index:1000;max-width:560px;border:5px solid var(--info);text-align:left;
+      z-index:6501;max-width:560px;border:5px solid var(--info);text-align:left;
     }
     #info-modal h2{margin-top:0;color:#1976d2;}
-    #info-modal p{font-size:18px;line-height:1.5;margin-bottom:10px;}
+    #info-modal p{font-size:18px;line-height:1.5;margin-bottom:10px;white-space:pre-line;}
     #info-modal .taskbox{border:2px dashed var(--warn);background:#fff3e0;border-radius:12px;padding:12px 14px;margin-top:12px;}
     #info-modal .taskbox b{color:#e65100;}
     .btn-close{padding:10px 20px;background:var(--good);color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;margin-top:15px;width:100%;font-weight:800;}
@@ -95,7 +96,7 @@
     /* ERFOLGS-POP-UP */
     #success-overlay{
       display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.6);z-index:3000;
+      background:rgba(0,0,0,0.6);z-index:7000;
     }
     .success-box{
       position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -185,7 +186,7 @@
 
     /* Hover-Tips */
     .hover-tip {
-      display:none; position:fixed; z-index:1500;
+      display:none; position:fixed; z-index:800;
       background:#fff; border:3px solid var(--info); border-radius:12px; padding:12px 14px;
       box-shadow:0 12px 35px rgba(0,0,0,0.35); max-width:min(520px,92vw); text-align:left;
     }
@@ -202,10 +203,13 @@
     .preview-monitor-screen:before{content:"";position:absolute;left:12px;top:12px;width:22px;height:17px;border:2px solid rgba(255,255,255,.8);border-radius:2px;box-shadow:30px 0 0 -2px rgba(255,255,255,.22),0 24px 0 -2px rgba(255,255,255,.22);}
     .preview-monitor-neck{width:18px;height:13px;background:#555;}
     .preview-monitor-base{width:58px;height:7px;background:#333;border-radius:5px;}
-    .preview-keyboard{width:150px;height:75px;padding:8px;background:#cfd8dc;border:4px solid #90a4ae;border-radius:9px;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(3,1fr);gap:4px;box-sizing:border-box;transform:perspective(160px) rotateX(9deg);filter:drop-shadow(0 8px 5px rgba(0,0,0,.3));}
-    .preview-keyboard span{background:#fff;border:1px solid #90a4ae;border-radius:3px;box-shadow:0 2px 0 #90a4ae;}
-    .preview-keyboard span:nth-child(4n){background:#d1e8f8;}
-    .preview-keyboard span:last-child{grid-column:span 4;}
+    .preview-keyboard{width:150px;height:75px;padding:7px 8px;background:#cfd8dc;border:4px solid #90a4ae;border-radius:9px;display:flex;flex-direction:column;gap:4px;box-sizing:border-box;transform:perspective(160px) rotateX(9deg);filter:drop-shadow(0 8px 5px rgba(0,0,0,.3));}
+    .preview-key-row{display:flex;gap:3px;flex:1;min-height:0;}
+    .preview-keyboard span{display:block;flex:1;min-width:0;background:#fff;border:1px solid #90a4ae;border-radius:3px;box-shadow:0 2px 0 #90a4ae;}
+    .preview-key-row:nth-child(2) span:nth-child(4n){background:#d1e8f8;}
+    .preview-key-row-bottom{align-items:stretch;}
+    .preview-key-row-bottom .preview-side-key{flex:1;}
+    .preview-key-row-bottom .preview-space-key{flex:4;background:#d1e8f8;}
     .preview-mouse{width:66px;height:100px;border:5px solid #333;border-radius:34px;background:#eceff1;position:relative;box-sizing:border-box;filter:drop-shadow(0 8px 5px rgba(0,0,0,.3));}
     .preview-mouse:before{content:"";position:absolute;left:50%;top:0;height:36px;border-left:2px solid #333;}
     .preview-mouse:after{content:"";position:absolute;left:50%;top:13px;transform:translateX(-50%);width:9px;height:19px;border-radius:8px;background:#90a4ae;border:1px solid #333;}
@@ -237,7 +241,7 @@
     @media(max-width:850px){
       .desk-surface{width:96vw;height:500px;margin-top:28px;}
       .instruction-banner{margin:15px 10px 0;padding:12px 18px;}
-      #start-monitor{left:calc(50% - 95px);}
+      #start-monitor{left:calc(50% - 80px);}
       #start-keyboard{left:4%;top:270px;}
       #start-mouse{left:auto;right:4%;top:285px;}
       .start-choice{width:160px;}
@@ -246,14 +250,14 @@
 
     /* Überschreibt die früheren Emoji-Schriftgrößen der Startsymbole. */
     #start-monitor,#start-keyboard,#start-mouse{font-size:19px;transform:none;}
-    #start-monitor{top:20px;left:305px;}
-    #start-keyboard{top:270px;left:165px;}
-    #start-mouse{top:278px;left:510px;right:auto;}
+    #start-monitor{top:20px;left:calc(50% - 95px);}
+    #start-keyboard{top:270px;left:185px;}
+    #start-mouse{top:257.5px;left:425px;right:auto;}
     #start-monitor:hover,#start-keyboard:hover,#start-mouse:hover{transform:scale(1.06);}
     @media(max-width:850px){
-      #start-monitor{top:8px;left:calc(50% - 95px);}
+      #start-monitor{top:8px;left:calc(50% - 80px);}
       #start-keyboard{top:270px;left:4%;}
-      #start-mouse{top:278px;left:auto;right:4%;}
+      #start-mouse{top:257.5px;left:auto;right:4%;}
     }
 
 
@@ -295,14 +299,28 @@
     .trash-window-titlebar{height:36px;padding:0 10px;background:linear-gradient(180deg,#f9fbfd,#dce5ec);display:flex;align-items:center;justify-content:space-between;font-weight:800;border-bottom:1px solid #aab7c4;}
     .trash-window-titlebar button{border:0;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:#37474f;padding:0 5px;}
     .trash-window-toolbar,.trash-file{display:grid;grid-template-columns:minmax(180px,1.35fr) minmax(105px,1fr) minmax(90px,.8fr);gap:10px;align-items:center;}
-    .trash-window-toolbar{min-height:32px;padding:0 12px;border-bottom:1px solid #d1d9df;background:#edf2f6;font-size:12px;color:#52616b;}
-    .trash-window-files{min-height:112px;padding:8px 10px;display:flex;flex-direction:column;align-items:stretch;gap:4px;background:#fff;}
-    .trash-file{width:100%;min-height:44px;margin:0;padding:5px 8px;box-sizing:border-box;color:#263238;font-size:13px;text-shadow:none;cursor:grab;touch-action:none;border:1px solid transparent;border-radius:5px;user-select:none;background:#fff;}
-    .trash-file:hover{background:#eaf4ff;border-color:#8bbbe8;}
+    .trash-window-toolbar{min-height:32px;padding:0 10px;border-bottom:1px solid #d1d9df;background:#edf2f6;font-size:12px;color:#52616b;overflow-y:hidden;scrollbar-gutter:stable;}
+    .trash-window-files{min-height:112px;padding:8px 10px;display:flex;flex-direction:column;align-items:stretch;gap:4px;background:#fff;overflow-y:auto;scrollbar-gutter:stable;}
+    .trash-file{width:100%;min-height:44px;margin:0;padding:5px 0;box-sizing:border-box;color:#263238;font-size:13px;text-shadow:none;cursor:grab;touch-action:none;border:0;outline:1px solid transparent;outline-offset:-1px;border-radius:5px;user-select:none;background:#fff;}
+    .trash-file:hover{background:#eaf4ff;outline-color:#8bbbe8;}
     .trash-file-name{display:flex;align-items:center;gap:9px;min-width:0;font-size:13px;font-weight:700;}
     .trash-file-icon{font-size:23px;line-height:1;flex:0 0 25px;text-align:center;}
-    .trash-file-meta{font-size:12px;color:#52616b;overflow-wrap:anywhere;}
+    .trash-file-meta{font-size:12px;color:#52616b;overflow-wrap:anywhere;text-align:left;}
     .trash-empty{padding:18px 10px;color:#607d8b;font-size:14px;}
+
+    /* Erkennbares Symbol einer ausführbaren Datei mit kleinem Terminalfenster. */
+    .exe-file-icon{display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:0 0 44px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.28));}
+    .exe-file-icon svg{display:block;width:43px;height:43px;}
+    .win-icon.desktop-object .exe-file-icon{display:flex;margin:0;padding:0;font-size:initial;line-height:1;width:44px;height:44px;}
+
+    /* Kleines Login-Fenster für die Login.exe. Die Eingaben werden nicht übertragen. */
+    #login-window{display:none;position:absolute;z-index:195;left:250px;top:112px;width:min(310px,calc(100% - 140px));min-width:185px;height:158px;box-sizing:border-box;background:#f5f7fa;border:1px solid #718096;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.45);color:#263238;text-align:left;overflow:hidden;}
+    .login-titlebar{height:34px;padding:0 9px;background:linear-gradient(180deg,#f9fbfd,#dce5ec);display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:12px;border-bottom:1px solid #aab7c4;cursor:move;touch-action:none;user-select:none;}
+    .login-titlebar button{border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:#37474f;padding:0 4px;touch-action:auto;}
+    .login-form-area{padding:9px 12px;display:grid;grid-template-columns:1fr;gap:4px;font-size:12px;font-weight:800;}
+    .login-form-area input{width:100%;height:25px;box-sizing:border-box;border:1px solid #90a4ae;border-radius:5px;padding:3px 7px;background:#fff;color:#263238;font:13px 'Segoe UI',Tahoma,sans-serif;user-select:text;}
+    .login-form-area input:focus{outline:2px solid #90caf9;border-color:#1976d2;}
+    @media(max-width:580px){#login-window{left:92px;top:104px;width:calc(100% - 112px);min-width:175px;height:158px;}.login-titlebar{font-size:11px;}}
 
     /* Einfaches Malprogramm für das wiederhergestellte Klassenfahrt-Bild */
     #paint-window{display:none;position:absolute;z-index:180;left:80px;top:48px;width:min(640px,calc(100% - 100px));background:#f4f6f8;border:1px solid #637381;border-radius:9px;box-shadow:0 12px 32px rgba(0,0,0,.48);color:#263238;text-align:left;overflow:hidden;}
@@ -317,7 +335,7 @@
     .paint-fill-tool span{display:inline-block;transform:rotate(-28deg);font-size:18px;}
     #paint-canvas{display:block;width:calc(100% - 20px);height:230px;margin:10px;background:#fff;border:1px solid #b0bec5;border-radius:4px;touch-action:none;cursor:crosshair;}
     .paint-hint{margin:0;padding:0 10px 9px;font-size:11px;line-height:16px;color:#546e7a;white-space:nowrap;}
-    #paint-eraser-preview{position:fixed;display:none;z-index:9998;pointer-events:none;box-sizing:border-box;border:2px solid #263238;background:rgba(255,255,255,.18);outline:1px dashed rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(0,0,0,.22);transform:translate(-50%,-50%);}
+    #paint-eraser-preview{position:fixed;display:none;z-index:900;pointer-events:none;box-sizing:border-box;border:2px solid #263238;background:rgba(255,255,255,.18);outline:1px dashed rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(0,0,0,.22);transform:translate(-50%,-50%);}
     @media(max-width:740px){.paint-toolbar{flex-wrap:wrap;}.paint-palette{order:3;flex-basis:100%;}.paint-hint{white-space:normal;}}
     @media(max-width:580px){#paint-window{left:54px;top:60px;width:calc(100% - 66px);}#paint-canvas{height:180px;}}
 
@@ -357,11 +375,12 @@
       .win-screen{height:440px;border-width:12px;border-bottom-width:25px;}
       .win-icon.desktop-object{width:70px;min-height:68px;font-size:31px;}
       .win-icon.desktop-object span{font-size:10px;}
+      #icon-login{left:98px!important;top:16px!important;height:68px;}
       #trash-window{left:72px;top:46px;width:calc(100% - 82px);min-height:225px;}
       .trash-window-toolbar,.trash-file{grid-template-columns:minmax(120px,1.3fr) minmax(75px,.85fr) minmax(65px,.7fr);gap:5px;}
-      .trash-window-toolbar{font-size:10px;padding:0 7px;}
+      .trash-window-toolbar{font-size:10px;padding:0 7px;scrollbar-gutter:stable;}
       .trash-window-files{gap:5px;padding:7px;}
-      .trash-file{padding:5px 4px;}
+      .trash-file{padding:5px 0;}
       .trash-file-name,.trash-file-meta{font-size:10px;}
       .trash-file-icon{font-size:18px;flex-basis:20px;}
       .kb-function-row{grid-template-columns:repeat(60,min(1.3vw,13px));}
@@ -461,14 +480,14 @@
     .k-menu-symbol{width:19px;height:19px;box-sizing:border-box;border:2px solid #37474f;border-radius:2px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;}
     .k-menu-symbol i{display:block;width:8px;height:1.5px;background:#37474f;border-radius:2px;}
     .k-angle-key{flex-direction:column;gap:0;padding:2px;}
-    .k-angle-key .key-shift-symbol{font-size:12px;line-height:1;align-self:flex-end;margin-right:4px;}
+    .k-angle-key .key-shift-symbol{font-size:12px;line-height:1;align-self:flex-start;margin-left:3px;margin-right:0;}
     .k-angle-key .key-number-main{font-size:17px;line-height:1;}
     .alt-switch-game{margin:12px 0;padding:14px;border:2px solid #90caf9;border-radius:12px;background:linear-gradient(135deg,#e3f2fd,#f3e5f5);}
     .alt-switch-windows{display:flex;gap:14px;justify-content:center;align-items:stretch;margin:12px 0;flex-wrap:wrap;}
-    .alt-switch-window{width:180px;min-height:82px;padding:12px;border:3px solid #90a4ae;border-radius:10px;background:#fff;box-shadow:0 4px 0 #cfd8dc;transition:transform .2s,border-color .2s,box-shadow .2s;}
+    .alt-switch-window{width:150px;min-height:82px;padding:12px;border:3px solid #90a4ae;border-radius:10px;background:#fff;box-shadow:0 4px 0 #cfd8dc;transition:transform .2s,border-color .2s,box-shadow .2s;}
     .alt-switch-window.active{border-color:#2196f3;box-shadow:0 4px 0 #64b5f6;transform:translateY(-4px);}
     .alt-switch-window strong{display:block;font-size:17px;margin-bottom:6px;}
-    .alt-switch-hint{font-weight:700;color:#1565c0;}
+    
 
     /* === V07: Funktionstasten mit drei gleich breiten Zwischenräumen === */
     .kb-function-row{grid-column:1 / -1;display:flex;align-items:stretch;width:100%;min-width:0;}
@@ -524,6 +543,21 @@
     }
     .k-enter-iso .enter-key-content span{align-self:center;}
 
+    /* V22: Deutsche Tab-Taste mit zwei gegenläufigen Pfeilen und Shift links beschriftet. */
+    .k-tab{gap:5px;justify-content:center;}
+    .tab-arrow-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-size:16px;line-height:11px;font-weight:900;min-width:19px;}
+    .tab-arrow-stack span:first-child{transform:translateX(-1px);}
+    .tab-arrow-stack span:last-child{transform:translate(1px,-2px);}
+    .tab-key-label{font-size:14px;}
+    .k-left-shift{gap:5px;}
+    .k-left-shift span:first-child{font-size:20px;}
+    .k-left-shift span:last-child{font-size:13px;}
+    .k-symbol-key{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;padding:2px 3px;}
+    .k-windows-symbol{font-size:23px!important;}
+    .k-symbol-key .key-shift-symbol{font-size:11px;line-height:12px;color:#c62828;align-self:flex-start;margin:0 0 0 1px;font-weight:900;}
+    .k-symbol-key .key-number-main{font-size:16px;line-height:19px;align-self:center;}
+    @media(max-width:580px){.tab-arrow-stack{font-size:14px;min-width:16px;}.tab-key-label{font-size:12px;}}
+
     /* Infofenster erscheinen mit einem kurzen, gut sichtbaren Einplopp-Effekt. */
     @keyframes infoModalPopIn{
       0%{opacity:0;transform:translate(-50%,-50%) scale(.72);}
@@ -542,6 +576,63 @@
     .desktop-menu-item.disabled{opacity:.55;cursor:not-allowed;}
     .paint-fill-tool svg{display:block;width:24px;height:24px;overflow:visible;}
     @media(max-width:580px){.trash-window-files.is-scrollable{max-height:254px;}}
+
+
+
+    /* V20: Strg-Aufgabe mit zwei echten Textfeldern und Tastenkombinationen. */
+    .ctrl-transfer-game{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start;width:100%;}
+    .ctrl-transfer-panel{display:flex;flex-direction:column;gap:7px;min-width:0;}
+    .ctrl-transfer-panel label{font-weight:800;color:#37474f;}
+    .ctrl-transfer-panel textarea{width:100%;min-height:154px;box-sizing:border-box;resize:vertical;border:2px solid #90a4ae;border-radius:9px;padding:10px;background:#fff;color:#263238;font:15px/1.45 'Segoe UI',Tahoma,sans-serif;user-select:text;}
+    .ctrl-transfer-panel textarea:focus{outline:3px solid #90caf9;border-color:#1976d2;}
+    @media(max-width:650px){.ctrl-transfer-game{grid-template-columns:1fr;}}
+
+    /* V20: Sichtbares Üben von Alt + Tab innerhalb des Spiels. */
+    .alt-game-key-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 6px;}
+    .alt-game-key{min-width:76px;height:46px;padding:0 16px;border:2px solid #607d8b;border-radius:9px;background:linear-gradient(#fff,#dfe7eb);box-shadow:0 4px 0 #607d8b;font-size:16px;font-weight:900;color:#263238;cursor:pointer;}
+    .alt-game-key.pressed{background:#bbdefb;border-color:#1976d2;box-shadow:0 2px 0 #1565c0;transform:translateY(2px);}
+    .alt-game-tabkey{display:flex;align-items:center;justify-content:center;cursor:default;}
+    .alt-game-plus{font-size:24px;font-weight:900;color:#455a64;}
+
+    /* V20: Maus lässt sich animiert auf den Rücken drehen. */
+    .mouse-flip-scene{width:250px;height:400px;margin:40px auto 10px;perspective:1000px;}
+    .big-mouse{width:250px;height:400px;border:0;border-radius:120px;margin:0 auto;position:relative;background:transparent;box-shadow:none;transform-style:preserve-3d;transition:transform .72s cubic-bezier(.2,.75,.25,1);}
+    .big-mouse.is-flipped{transform:rotateY(180deg);}
+    /* Mausrad und Seitentasten folgen dem tatsaechlichen Drehwinkel.
+       Sie verschwinden bei genau 90 Grad und erscheinen beim Zurueckdrehen dort wieder. */
+    .mouse-front .m-wheel,.mouse-front .m-side-button{opacity:1;visibility:visible;pointer-events:auto;transition:none!important;}
+    .big-mouse.mouse-controls-hidden .mouse-front .m-wheel,
+    .big-mouse.mouse-controls-hidden .mouse-front .m-side-button{opacity:0;visibility:hidden;pointer-events:none;transition:none!important;}
+    .mouse-face{position:absolute;inset:0;box-sizing:border-box;border:8px solid #333;border-radius:120px;overflow:hidden;backface-visibility:hidden;box-shadow:0 15px 30px rgba(0,0,0,.2);}
+    .mouse-front{background:#eceff1;}
+    .mouse-back{transform:rotateY(180deg);background:linear-gradient(145deg,#e1e5e8,#b0bec5 65%,#90a4ae);display:flex;align-items:center;justify-content:center;}
+    .mouse-back-label{position:absolute;top:34px;left:0;right:0;text-align:center;font-size:14px;font-weight:900;color:#37474f;}
+    .mouse-glide{position:absolute;width:35px;height:14px;border-radius:10px;background:#eceff1;border:2px solid #78909c;box-shadow:inset 0 1px 3px rgba(0,0,0,.12);}
+    .mouse-glide-top-left{top:72px;left:28px;}
+    .mouse-glide-top-right{top:72px;right:28px;}
+    .mouse-glide-bottom-left{bottom:72px;left:28px;}
+    .mouse-glide-bottom-right{bottom:72px;right:28px;}
+    .mouse-sensor{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:94px;height:94px;border:4px solid #37474f;border-radius:22px;background:linear-gradient(145deg,#596a74,#263238);color:#fff;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;box-shadow:inset 0 3px 7px rgba(0,0,0,.45),0 4px 7px rgba(0,0,0,.25);}
+    .mouse-sensor:hover{filter:brightness(1.18);outline:3px solid rgba(33,150,243,.45);}
+    .mouse-sensor-lens{display:block;width:31px;height:31px;border-radius:50%;border:4px solid #111;background:radial-gradient(circle at 40% 35%,#ff8a80 0 14%,#e53935 25%,#7f0000 70%);box-shadow:0 0 9px rgba(229,57,53,.8),inset 0 0 4px #111;}
+    .mouse-bottom-detail{position:absolute;top:185px;width:16px;height:36px;border-radius:10px;background:rgba(55,71,79,.18);}
+    .mouse-bottom-detail-left{left:34px;}
+    .mouse-bottom-detail-right{right:34px;}
+    .mouse-flip-actions{margin:0 auto 18px;text-align:center;}
+    .mouse-flip-actions .game-choice{margin:0;}
+
+    /* V20: Labyrinth für den optischen Sensor. Der helle Weg ist frei, die dunklen Ränder sind Wände. */
+    .mouse-sensor-task{margin-top:12px;}
+    .mouse-maze-board{position:relative;width:min(600px,100%);aspect-ratio:2/1;margin:12px auto;border:3px solid #455a64;border-radius:14px;background:linear-gradient(135deg,#f4f7f8,#e8eef1);overflow:hidden;touch-action:none;box-shadow:inset 0 2px 8px rgba(0,0,0,.12);cursor:crosshair;}
+    .mouse-maze-path{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+    .maze-label{position:absolute;z-index:2;padding:4px 7px;border-radius:6px;font-size:11px;font-weight:900;letter-spacing:.04em;pointer-events:none;}
+    .maze-start-zone{position:absolute;left:1.5%;top:77%;width:5.7%;height:7.5%;z-index:2;box-sizing:border-box;border:2px dashed #1976d2;border-radius:7px;background:rgba(187,222,251,.3);display:flex;align-items:center;justify-content:center;padding:0;pointer-events:none;}
+    .maze-start-zone span{background:#bbdefb;color:#0d47a1;font-size:8px;font-weight:900;padding:1px 3px;letter-spacing:0;border-radius:4px;line-height:1;}
+    .maze-goal-label{left:93.2%;top:4.9%;width:5%;height:8%;box-sizing:border-box;border:2px dashed #2e7d32;border-radius:7px;background:rgba(200,230,201,.4);color:#1b5e20;display:flex;align-items:center;justify-content:center;padding:0;font-size:8px;line-height:1;}
+    .maze-cheese{position:absolute;z-index:3;font-size:22px;line-height:1;transform:translate(-50%,-50%);filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));pointer-events:none;transition:transform .18s,opacity .18s;}
+    .maze-cheese.collected{opacity:0;transform:translate(-50%,-50%) scale(.2);}
+    .mouse-maze-player{position:absolute;z-index:4;width:14px;height:14px;left:4.667%;top:81.667%;transform:translate(-50%,-50%);border-radius:50%;background:#1976d2;border:2px solid #fff;box-shadow:0 0 0 2px #0d47a1,0 2px 5px rgba(0,0,0,.35);pointer-events:none;}
+    .mouse-maze-board:focus-visible{outline:3px solid #2196f3;outline-offset:3px;}
 
   </style>
 </head>
@@ -567,7 +658,11 @@
         <span>Bildschirm</span><span class="start-progress" id="start-score-monitor">0 / 8 erledigt</span>
       </div>
       <div id="start-keyboard" class="item-click start-choice" onclick="openDetail('screen-keyboard')">
-        <div class="preview-keyboard"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="preview-keyboard" aria-hidden="true">
+          <div class="preview-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="preview-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="preview-key-row preview-key-row-bottom"><span class="preview-side-key"></span><span class="preview-side-key"></span><span class="preview-space-key"></span><span class="preview-side-key"></span><span class="preview-side-key"></span></div>
+        </div>
         <span>Tastatur</span><span class="start-progress" id="start-score-keyboard">0 / 18 erledigt</span>
       </div>
       <div id="start-mouse" class="item-click start-choice" onclick="openDetail('screen-mouse')">
@@ -587,6 +682,7 @@
       <div class="win-icon desktop-object" id="icon-browser" data-desktop-file="true" data-file-name="Browser" data-file-icon="🌐" data-original-location="Desktop" style="left:18px;top:16px;" onclick="openBrowserIcon()">🌐<span>Browser</span></div>
       <div class="win-icon desktop-object" id="icon-files" data-desktop-file="true" data-file-name="Dateien" data-file-icon="📁" data-original-location="Desktop" style="left:18px;top:112px;" onclick="openFilesIcon()">📁<span>Dateien</span></div>
       <div class="win-icon desktop-object" id="icon-trash" data-file-icon="🗑️" style="left:18px;top:208px;" onclick="openTrashFolder()">🗑️<span>Papierkorb</span></div>
+      <div class="win-icon desktop-object" id="icon-login" data-desktop-file="true" data-file-name="Login.exe" data-file-icon="📄" data-original-location="Desktop" style="left:114px;top:16px;" onclick="openLoginFileInfo()"><span class="exe-file-icon" aria-hidden="true"><svg viewBox="0 0 48 48" role="presentation"><path d="M9 3.5h19l11 11V44H9z" fill="#f8fafc" stroke="#607d8b" stroke-width="2"/><path d="M28 3.5v11h11" fill="#dbe4ec" stroke="#607d8b" stroke-width="1.6"/><rect x="13" y="20" width="22" height="16" rx="2.2" fill="#263238" stroke="#111827" stroke-width="1.2"/><path d="m17 24.5 3.2 2.8-3.2 2.8" fill="none" stroke="#a5f3fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23.5 30h5.5" fill="none" stroke="#a5f3fc" stroke-width="1.8" stroke-linecap="round"/><circle cx="32.5" cy="40" r="2" fill="#43a047" stroke="#1b5e20" stroke-width=".6"/></svg></span><span>Login.exe</span></div>
 
       <div id="file-drop-target">Ziel: Dateien hier ablegen</div>
       <div id="trash-window" role="group" aria-label="Geöffneter Papierkorb">
@@ -637,6 +733,16 @@
         <p class="paint-hint">Wähle eine Farbe und male mit gedrückter Maustaste. Mit dem Radiergummi kannst du Striche entfernen.</p>
       </div>
 
+      <div id="login-window" role="dialog" aria-label="Login zum persönlichen Speicherort" aria-modal="false">
+        <div class="login-titlebar" title="Fenster durch Ziehen verschieben"><span>🔐 Persönlicher Speicherort</span><button type="button" aria-label="Loginfenster schließen" onclick="closeLoginWindow()">×</button></div>
+        <div class="login-form-area">
+          <label for="login-name-input">Login:</label>
+          <input id="login-name-input" type="text" autocomplete="off" spellcheck="false" aria-label="Login">
+          <label for="login-password-input">Passwort:</label>
+          <input id="login-password-input" type="password" autocomplete="off" aria-label="Passwort">
+        </div>
+      </div>
+
       <div class="win-taskbar">
         <div class="win-start" onclick="showInfo('Der Start-Knopf','Die Schaltzentrale! Hier findest du Programme und Einstellungen. Außerdem kann der Computer hier ausgeschaltet, in den Energiesparmodus versetzt oder neugestartet werden. Insbesondere das Neustarten hilft oft, um Probleme zu beheben.',{key:'start',task:'Wofür könnte der Energiesparmodus gut sein? Wähle die passende Antwort im Übungs-Kasten.',unlockArea:'monitor-exercise-area'})">⊞ Start</div>
         <div class="win-clock" id="win-clock" onclick="showInfo('Uhrzeit & Datum','Die Anzeige zeigt die aktuelle Uhrzeit und das heutige Datum deines Computers.',{key:'clock',task:'Lies die aktuelle Uhrzeit ab. Wähle die passende Uhrzeit im Übungs-Kasten.',unlockArea:'monitor-exercise-area'})"><span id="clock-time">--:--:--</span><br><span id="clock-date">--.--.----</span></div>
@@ -681,10 +787,6 @@
         <p><span class="badge">Uhrzeit</span> Welche Anzeige zeigt die aktuelle Uhrzeit?</p>
         <div id="clock-quiz-choices"></div>
         <p id="clock-game-status" class="game-status wait">Wähle die passende Uhrzeit.</p>
-      </div>
-      <div id="monitor-task-newfolder" class="monitor-task">
-        <p><span class="badge">Neuer Ordner</span> Klicke mit der rechten Maustaste auf eine freie Stelle des Desktops und wähle „Neuer Ordner“.</p>
-        <p id="new-folder-status" class="game-status wait">Status: Erstelle einen neuen Ordner auf dem Desktop.</p>
       </div>
     </div>
   </div>
@@ -731,11 +833,11 @@
         <div class="k-key s-4 k-number k-num-task" title="Mit Shift: )" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">)</span><span class="key-number-main">9</span></div>
         <div class="k-key s-4 k-number k-num-task" title="Mit Shift: =" onclick="showInfo('Zahlenreihe','Hier tippst du Zahlen. Mit Shift erreichst du auch Sonderzeichen.', {key:'numbers', task:'Tippe das Jahr, in dem wir uns befinden.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">=</span><span class="key-number-main">0</span></div>
         
-        <div class="k-key s-4 k-umlaut k-sharp-s" title="Mit Shift: ?" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß). Mit Shift erreichst du auf dieser Taste auch das Fragezeichen (?).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">?</span><span class="key-number-main">ß</span></div>
-        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">´</div>
+        <div class="k-key s-4 k-umlaut k-sharp-s" title="Mit Shift: ?" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß). Mit Shift erreichst du bei der ß-Taste auch das Fragezeichen (?).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">?</span><span class="key-number-main">ß</span></div>
+        <div class="k-key s-4 k-symbol-group k-symbol-key" title="Mit Shift: Gravis" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">`</span><span class="key-number-main">´</span></div>
         <div class="k-key k-backspace s-8" onclick="showInfo('Backspace (Löschen)','Tippfehler? Diese Taste löscht den Buchstaben LINKS vom blinkenden Strich (Cursor).', {key:'backspace', task:'Lösche die falschen Buchstaben und mache aus „Haaallo“ das Wort „Hallo“.', unlockArea:'keyboard-exercise-area'})">⌫</div>
 
-        <div class="k-key s-6 k-tab" onclick="showInfo('Tabulator (Tab)','Damit kannst du in einem Formular schnell zum nächsten Feld springen.', {key:'tab', task:'Klicke in das erste Feld und drücke die Tab-Taste auf deiner Tastatur.', unlockArea:'keyboard-exercise-area'})">⇥ Tab</div>
+        <div class="k-key s-6 k-tab" onclick="showInfo('Tabulator (Tab)','Damit kannst du in einem Formular schnell zum nächsten Feld springen.', {key:'tab', task:'Klicke in das erste Feld und drücke die Tab-Taste auf deiner Tastatur.', unlockArea:'keyboard-exercise-area'})"><span class="tab-arrow-stack" aria-hidden="true"><span>⇤</span><span>⇥</span></span><span class="tab-key-label">Tab</span></div>
         <div class="k-key k-letter s-4">Q</div>
         <div class="k-key k-letter s-4">W</div>
         <div class="k-key k-letter s-4">E</div>
@@ -746,16 +848,16 @@
         <div class="k-key k-letter s-4">I</div>
         <div class="k-key k-letter s-4">O</div>
         <div class="k-key k-letter s-4">P</div>
-        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ü</div>
-        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">+</div>
-        <div class="k-key k-enter k-enter-iso" onclick="showInfo('Enter (Bestätigen)','Hiermit springst du in die nächste Zeile oder bestätigst eine Eingabe.', {key:'enter', task:'Tippe „OK“ ein und drücke dann die Enter-Taste auf deiner Tastatur!', unlockArea:'keyboard-exercise-area'})">
+        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß). Mit Shift erreichst du bei der ß-Taste auch das Fragezeichen (?).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ü</div>
+        <div class="k-key s-4 k-symbol-group k-symbol-key" title="Mit Shift: *" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">*</span><span class="key-number-main">+</span></div>
+        <div class="k-key k-enter k-enter-iso" onclick="showInfo('Enter (Bestätigen)','Mit der Entertaste kann man in Textfeldern in die nächste Zeile springen oder Eingaben bestätigen. Außerdem kannst du Hinweisfenster und Erfolgsmeldungen mit Enter bestätigen.', {key:'enter', task:'Tippe „OK“ ein und drücke dann die Enter-Taste auf deiner Tastatur!', unlockArea:'keyboard-exercise-area'})">
           <svg class="enter-key-outline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
             <path d="M8 2 H92 Q98 2 98 8 V94 Q98 100 92 100 H24 Q18 100 18 94 V53 Q18 47 12 47 H8 Q2 47 2 41 V8 Q2 2 8 2 Z"/>
           </svg>
           <span class="enter-key-content">⏎<br><span style="font-size:11px;">Enter</span></span>
         </div>
 
-        <div class="k-key k-caps s-7" onclick="showInfo('Feststelltaste (Caps Lock)','Vorsicht! Wenn du diese drückst, schreibst du plötzlich ALLES GROSS. Drücke sie nochmal, um das auszuschalten.', {key:'caps', task:'Tippe das Wort „HALLO“ (benutze dafür die Caps Lock Taste).', unlockArea:'keyboard-exercise-area'})">⇪ CapsLock</div>
+        <div class="k-key k-caps s-7" onclick="showInfo('Feststelltaste (Caps Lock)','Vorsicht! Wenn du diese Taste drückst, schreibst du plötzlich ALLES GROSS. Nach der Aufgabe drückst du die Caps-Lock-Taste bitte noch einmal, damit du wieder normal weiterschreibst.', {key:'caps', task:'Tippe das Wort „HALLO“ (benutze dafür die Caps-Lock-Taste).', unlockArea:'keyboard-exercise-area'})">⇩ CapsLock</div>
         <div class="k-key k-letter s-4">A</div>
         <div class="k-key k-letter s-4">S</div>
         <div class="k-key k-letter s-4">D</div>
@@ -765,11 +867,11 @@
         <div class="k-key k-letter s-4">J</div>
         <div class="k-key k-letter s-4">K</div>
         <div class="k-key k-letter s-4">L</div>
-        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ö</div>
-        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ä</div>
-        <div class="k-key s-4 k-symbol-group k-hash-key" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">#</div>
+        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß). Mit Shift erreichst du bei der ß-Taste auch das Fragezeichen (?).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ö</div>
+        <div class="k-key k-umlaut s-4" onclick="showInfo('Umlaute & ß','Diese Tasten brauchst du für besondere deutsche Buchstaben wie Ä, Ö, Ü und das scharfe S (ß). Mit Shift erreichst du bei der ß-Taste auch das Fragezeichen (?).', {key:'umlauts', task:'Tippe eines dieser Wörter: Bär, Tür, Öl oder Spaß.', unlockArea:'keyboard-exercise-area'})">Ä</div>
+        <div class="k-key s-4 k-symbol-group k-symbol-key k-hash-key" title="Mit Shift: '" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">'</span><span class="key-number-main">#</span></div>
 
-        <div class="k-key k-shift s-5" onclick="showInfo('Shift (links)','Halte diese Taste gedrückt, während du einen Buchstaben tippst, um ihn GROSS zu schreiben.', {key:'shift', task:'Schreibe das Wort „Haus“ mit einem großen Anfangsbuchstaben!', unlockArea:'keyboard-exercise-area'})">⇧</div>
+        <div class="k-key k-shift k-left-shift s-5" onclick="showInfo('Shift (links)','Halte diese Taste gedrückt, während du einen Buchstaben tippst, um ihn GROSS zu schreiben. In Kombination mit Shift kannst du außerdem sehr viele Sonderzeichen schreiben.', {key:'shift', task:'Schreibe das Wort „Haus“ mit einem großen Anfangsbuchstaben!', unlockArea:'keyboard-exercise-area'})"><span>⇧</span><span>Shift</span></div>
         <div class="k-key s-4 k-angle-key" onclick="showInfo('Kleiner- und Größerzeichen','Mit dieser Taste schreibst du das Kleinerzeichen. Halte Shift gedrückt und drücke dieselbe Taste, um das Größerzeichen zu schreiben.',{key:'otherSymbols',task:'Schreibe genau 3>2 in das Eingabefeld.',expected:'3>2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">&gt;</span><span class="key-number-main">&lt;</span></div>
         <div class="k-key k-letter s-4">Y</div>
         <div class="k-key k-letter s-4">X</div>
@@ -778,18 +880,18 @@
         <div class="k-key k-letter s-4">B</div>
         <div class="k-key k-letter s-4">N</div>
         <div class="k-key k-letter s-4">M</div>
-        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">,</div>
-        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">.</div>
-        <div class="k-key s-4 k-symbol-group" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})">-</div>
-        <div class="k-key k-shift s-11" onclick="showInfo('Shift (rechts)','Genau das Gleiche wie links! Nimm einfach die, die deine Hand besser erreicht.', {key:'shift', task:'Schreibe das Wort „Haus“ in Großbuchstaben!', unlockArea:'keyboard-exercise-area'})">⇧ Shift</div>
+        <div class="k-key s-4 k-symbol-group k-symbol-key" title="Mit Shift: ;" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">;</span><span class="key-number-main">,</span></div>
+        <div class="k-key s-4 k-symbol-group k-symbol-key" title="Mit Shift: :" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">:</span><span class="key-number-main">.</span></div>
+        <div class="k-key s-4 k-symbol-group k-symbol-key" title="Mit Shift: _" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">_</span><span class="key-number-main">-</span></div>
+        <div class="k-key k-shift s-11" onclick="showInfo('Shift (rechts)','Genau das Gleiche wie links! Nimm einfach die Taste, die deine Hand besser erreicht. In Kombination mit Shift kannst du außerdem sehr viele Sonderzeichen schreiben.', {key:'shift', task:'Schreibe das Wort „Haus“ in Großbuchstaben!', unlockArea:'keyboard-exercise-area'})">⇧ Shift</div>
 
-        <div class="k-key s-6" onclick="showInfo('Strg (Ctrl)','Mit Strg kannst du wichtige Tastenkombinationen verwenden: Strg + C kopiert, Strg + V fügt ein und Strg + X schneidet aus.', {key:'ctrl',task:'Welche Tastenkombination kopiert einen markierten Text?',unlockArea:'keyboard-exercise-area'})">Strg</div>
-        <div class="k-key s-5" onclick="showWindowsKeyInfo()">⊞</div>
+        <div class="k-key s-6" onclick="showInfo('Strg (Steuerung)','Mit Strg (kurz für Steuerung) kannst du wichtige Tastenkombinationen verwenden. Beispiele:\n• Strg + C: Kopieren\n• Strg + V: Einfügen\n• Strg + X: Ausschneiden\n• Strg + A: Alles auswählen',{key:'ctrl',task:'Markiere alles im linken Textfeld mit Strg + A. Schneide den Text mit Strg + X aus. Klicke in das rechte Feld und füge ihn mit Strg + V ein.',unlockArea:'keyboard-exercise-area'})">Strg</div>
+        <div class="k-key s-5 k-windows-symbol" onclick="showWindowsKeyInfo()">⊞</div>
         <div class="k-key s-5" onclick="showInfo('Alt','Mit Alt kannst du zusammen mit anderen Tasten besondere Funktionen auslösen. Ein bekanntes Beispiel ist Alt + Tab: Damit wechselst du zwischen geöffneten Programmen.', {key:'alt',task:'Probiere im kleinen Fenstersprung-Spiel aus, welche Tastenkombination zwischen geöffneten Programmen wechselt.',unlockArea:'keyboard-exercise-area'})">Alt</div>
         <div class="k-key k-space s-28" onclick="showInfo('Leertaste','Die größte Taste macht ein Leerzeichen zwischen zwei Wörtern.', {key:'space', task:'Tippe „Hallo Welt“ mit einem Leerzeichen dazwischen.', unlockArea:'keyboard-exercise-area'})">Leertaste</div>
         <div class="k-key k-altgr s-5" onclick="showInfo('Alt Gr','Der Geheimschlüssel! Halte diese Taste gedrückt und drücke dann das Q, um ein @-Zeichen für E-Mails zu machen.', {key:'altgr', task:'Mache das Klammeraffe-Zeichen: @', unlockArea:'keyboard-exercise-area'})">Alt Gr</div>
-        <div class="k-key s-5 k-menu-key" aria-label="Menü-Taste" onclick="showInfo('Menü-Taste','Mit der Menü-Taste öffnest du ein kleines Menü mit passenden Möglichkeiten für das ausgewählte Element. Das ist eine Alternative zum Rechtsklick: Du bekommst dieselben passenden Auswahlmöglichkeiten, aber mit der Tastatur statt mit der Maus.')"><span class="k-menu-symbol" aria-hidden="true"><i></i><i></i><i></i></span></div>
-        <div class="k-key s-6" onclick="showInfo('Strg (Ctrl)','Mit Strg kannst du wichtige Tastenkombinationen verwenden: Strg + C kopiert, Strg + V fügt ein und Strg + X schneidet aus.', {key:'ctrl',task:'Welche Tastenkombination kopiert einen markierten Text?',unlockArea:'keyboard-exercise-area'})">Strg</div>
+        <div class="k-key s-5 k-menu-key" aria-label="Menü-Taste" onclick="showInfo('Menü-Taste','Mit der Menü-Taste öffnest du ein kleines Menü mit Möglichkeiten für das ausgewählte Element. Das ist eine Alternative zum Rechtsklick. Du kannst die Auswahl mit der Tastatur öffnen, ohne die Maus zu benutzen.')"><span class="k-menu-symbol" aria-hidden="true"><i></i><i></i><i></i></span></div>
+        <div class="k-key s-6" onclick="showInfo('Strg (Steuerung)','Mit Strg (kurz für Steuerung) kannst du wichtige Tastenkombinationen verwenden. Beispiele:\n• Strg + C: Kopieren\n• Strg + V: Einfügen\n• Strg + X: Ausschneiden\n• Strg + A: Alles auswählen',{key:'ctrl',task:'Markiere alles im linken Textfeld mit Strg + A. Schneide den Text mit Strg + X aus. Klicke in das rechte Feld und füge ihn mit Strg + V ein.',unlockArea:'keyboard-exercise-area'})">Strg</div>
       </div>
 
       <div class="kb-right-side">
@@ -838,8 +940,8 @@
 
       <div id="arrow-trainer" style="display:none; margin-top: 15px;">
         <div style="position:relative;width:320px;height:180px;border:2px solid #ffb74d;border-radius:10px;background:#fff;overflow:hidden;">
-          <div id="arrow-dot" style="position:absolute;left:20px;top:70px;width:18px;height:18px;background:#1976d2;border-radius:50%;"></div>
-          <div id="arrow-goal" style="position:absolute;right:20px;bottom:20px;width:44px;height:44px;border:3px solid #4caf50;border-radius:12px;"></div>
+          <div id="arrow-dot" style="position:absolute;z-index:5;left:20px;top:70px;width:18px;height:18px;background:#1976d2;border-radius:50%;"></div>
+          <div id="arrow-goal" style="position:absolute;z-index:1;right:16px;bottom:16px;width:38px;height:38px;border:3px solid #4caf50;border-radius:12px;background:#e8f5e9;box-shadow:inset 0 0 0 4px rgba(76,175,80,.12);"></div>
         </div>
         <p class="status wait" id="arrow-status">Status: Noch nicht am Ziel.</p>
       </div>
@@ -848,20 +950,39 @@
 
   <div id="screen-mouse" class="detail-screen" oncontextmenu="return false;">
     <button class="back-btn" onclick="goBack()">⬅ Zurück zum Schreibtisch</button>
-    <h1>Die Computer-Maus <span class="progress-counter" id="prog-mouse">0 / 3 Aufgaben</span></h1>
+    <h1>Die Computer-Maus <span class="progress-counter" id="prog-mouse">0 / 4 Aufgaben</span></h1>
 
-    <div class="big-mouse">
-      <div class="mouse-part m-left"
-           onclick="showInfo('Die linke Maustaste','Mit dem Zeigefinger auf die linke Taste! Damit wählst du Dinge aus. Ein Doppelklick (2x schnell) öffnet Ordner.',
-           {key:'leftclick', task:'Mache unten einen <b>Doppelklick</b> auf „Ordner Öffnen“.', unlockArea:'mouse-exercise-area'})">Links</div>
-      <div class="mouse-part m-wheel"
-           onclick="showInfo('Das Scrollrad','Wenn Internetseiten sehr lang sind, drehst du an diesem Rad, um ganz bequem nach unten oder oben zu fahren.',
-           {key:'wheel', task:'Scrolle im Übungs-Kasten bis ganz nach unten.', unlockArea:'mouse-exercise-area'})"></div>
-      <div class="mouse-part m-right"
-           onclick="showInfo('Die rechte Maustaste','Der Mittelfinger bedient die rechte Taste. Sie öffnet ein Geheim-Menü (Kontextmenü) mit extra Möglichkeiten.',
-           {key:'rightclick', task:'Mache unten einen Rechtsklick in das gepunktete Feld und wähle „Übung abschließen“.', unlockArea:'mouse-exercise-area'})">Rechts</div>
-      <button type="button" class="mouse-part m-side-button m-side-back" aria-label="Seitentaste 1" title="Seitentaste" onclick="showInfo('Seitentasten der Maus','Manche Computermäuse haben an der Seite zusätzliche Tasten. Du kannst sie oft selbst einstellen: Zum Beispiel kann eine Taste im Browser eine Seite zurückgehen und eine andere wieder vorwärts. In Spielen können sie auch andere Aufgaben übernehmen. Nicht jede Maus hat solche Tasten.')"></button>
-      <button type="button" class="mouse-part m-side-button m-side-forward" aria-label="Seitentaste 2" title="Seitentaste" onclick="showInfo('Seitentasten der Maus','Manche Computermäuse haben an der Seite zusätzliche Tasten. Du kannst sie oft selbst einstellen: Zum Beispiel kann eine Taste im Browser eine Seite zurückgehen und eine andere wieder vorwärts. In Spielen können sie auch andere Aufgaben übernehmen. Nicht jede Maus hat solche Tasten.')"></button>
+    <div class="mouse-flip-scene">
+      <div class="big-mouse" id="mouse-device">
+        <div class="mouse-face mouse-front">
+          <div class="mouse-part m-left"
+               onclick="showInfo('Die linke Maustaste','Mit dem Zeigefinger auf die linke Taste! Damit wählst du Dinge aus. Ein Doppelklick (2x schnell) öffnet Ordner.',
+               {key:'leftclick', task:'Mache unten einen <b>Doppelklick</b> auf „Ordner Öffnen“.', unlockArea:'mouse-exercise-area'})">Links</div>
+          <div class="mouse-part m-wheel"
+               onclick="showInfo('Das Scrollrad','Wenn Internetseiten sehr lang sind, drehst du an diesem Rad, um ganz bequem nach unten oder oben zu fahren.',
+               {key:'wheel', task:'Scrolle im Übungs-Kasten bis ganz nach unten.', unlockArea:'mouse-exercise-area'})"></div>
+          <div class="mouse-part m-right"
+               onclick="showInfo('Die rechte Maustaste','Der Mittelfinger bedient die rechte Taste. Sie öffnet ein Geheim-Menü (Kontextmenü) mit extra Möglichkeiten.',
+               {key:'rightclick', task:'Mache unten einen Rechtsklick in das gepunktete Feld und wähle „Übung abschließen“.', unlockArea:'mouse-exercise-area'})">Rechts</div>
+          <button type="button" class="mouse-part m-side-button m-side-back" aria-label="Seitentaste 1" title="Seitentaste" onclick="showInfo('Seitentasten der Maus','Manche Computermäuse haben an der Seite zusätzliche Tasten. Du kannst sie oft selbst einstellen: Zum Beispiel kann eine Taste im Browser eine Seite zurückgehen und eine andere wieder vorwärts. In Spielen können sie auch andere Aufgaben übernehmen. Nicht jede Maus hat solche Tasten.')"></button>
+          <button type="button" class="mouse-part m-side-button m-side-forward" aria-label="Seitentaste 2" title="Seitentaste" onclick="showInfo('Seitentasten der Maus','Manche Computermäuse haben an der Seite zusätzliche Tasten. Du kannst sie oft selbst einstellen: Zum Beispiel kann eine Taste im Browser eine Seite zurückgehen und eine andere wieder vorwärts. In Spielen können sie auch andere Aufgaben übernehmen. Nicht jede Maus hat solche Tasten.')"></button>
+        </div>
+        <div class="mouse-face mouse-back">
+          <div class="mouse-back-label">Unterseite der Maus</div>
+          <span class="mouse-glide mouse-glide-top-left"></span>
+          <span class="mouse-glide mouse-glide-top-right"></span>
+          <span class="mouse-glide mouse-glide-bottom-left"></span>
+          <span class="mouse-glide mouse-glide-bottom-right"></span>
+          <button type="button" class="mouse-sensor" aria-label="Optischen Sensor erklären" title="Optischer Sensor" onclick="showInfo('Der optische Sensor','Der Sensor auf der Unterseite erkennt, wie sich die Maus über den Tisch bewegt. Er tastet die Oberfläche mit Licht ab und hilft dem Computer, die Bewegung des Mauszeigers zu erkennen.',{key:'sensorMaze',task:'Führe den Mauszeiger vom START bis zum ZIEL durch das Labyrinth. Berühre dabei keine Wand.',unlockArea:'mouse-exercise-area'})">
+            <span class="mouse-sensor-lens"></span><span>Sensor</span>
+          </button>
+          <span class="mouse-bottom-detail mouse-bottom-detail-left"></span>
+          <span class="mouse-bottom-detail mouse-bottom-detail-right"></span>
+        </div>
+      </div>
+    </div>
+    <div class="mouse-flip-actions">
+      <button type="button" id="mouse-flip-button" class="game-choice" onclick="toggleMouseFlip()" aria-pressed="false">↻ Maus umdrehen</button>
     </div>
 
     <div id="mouse-exercise-area" class="exercise-area" oncontextmenu="showContextMenu(event)">
@@ -889,6 +1010,24 @@
           </div>
         </div>
         <p class="status wait" id="scroll-status">Status: Noch nicht unten.</p>
+      </div>
+
+      <div id="mouse-task-sensor" class="mouse-sensor-task" style="display:none;">
+        <p><span class="badge">Maustraining</span> Der Sensor hilft der Maus, Bewegungen auf dem Tisch zu erkennen.</p>
+        <p><b>Labyrinth:</b> Bewege den Mauszeiger in das gestrichelte START-Feld. Sobald du dort bist, beginnt das Spiel. Folge dem Weg, sammle beide Käsestücke und erreiche das ZIEL. Berühre keine Wand.</p>
+        <div id="mouse-maze-board" class="mouse-maze-board" tabindex="0" role="application" aria-label="Mauslabyrinth. Vom Start zum Ziel fahren, ohne die Wände zu berühren.">
+          <svg class="mouse-maze-path" viewBox="0 0 600 300" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M10 245 H110 V185 H235 V245 H345 V165 H445 V85 H560 V30 H585 M110 185 V90 H190 M345 165 H260 V80 M445 85 H535 V180" fill="none" stroke="#455a64" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 245 H110 V185 H235 V245 H345 V165 H445 V85 H560 V30 H585 M110 185 V90 H190 M345 165 H260 V80 M445 85 H535 V180" fill="none" stroke="#e3f2fd" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 245 H110 V185 H235 V245 H345 V165 H445 V85 H560 V30 H585 M110 185 V90 H190 M345 165 H260 V80 M445 85 H535 V180" fill="none" stroke="#90caf9" stroke-width="2" stroke-dasharray="7 9" stroke-linecap="round"/>
+          </svg>
+          <div class="maze-start-zone"><span>START</span></div>
+          <div class="maze-label maze-goal-label">ZIEL</div>
+          <div id="maze-cheese-1" class="maze-cheese" style="left:25%;top:30%;" aria-label="Käsestück 1">🧀</div>
+          <div id="maze-cheese-2" class="maze-cheese" style="left:43.333%;top:41.667%;" aria-label="Käsestück 2">🧀</div>
+          <div id="mouse-maze-player" class="mouse-maze-player" aria-hidden="true"></div>
+        </div>
+        <p id="mouse-maze-status" class="status wait">Status: Bewege den Mauszeiger in das gestrichelte START-Feld.</p>
       </div>
 
       <div id="mouse-task-rightclick" style="display:none;">
@@ -941,11 +1080,12 @@
     let currentTaskKey = null;
     let lastInfoTask = null;
     let lastSuccessfulTaskKey = null;
+    let afterInfoCloseAction = null;
 
     // --- Kategorien für Zähler ---
     const catMonitor = ['files','browser','trash','start','clock','paint','newfolder','power'];
     const catKeyboard = ['numbers','umlauts','backspace','tab','enter','caps','shift','space','altgr','arrows','tabBack','letters','symbols','ctrl','windows','alt','navigation','otherSymbols'];
-    const catMouse = ['leftclick','wheel','rightclick'];
+    const catMouse = ['leftclick','wheel','rightclick','sensorMaze'];
 
     window.addEventListener('DOMContentLoaded', updateProgress);
 
@@ -1000,11 +1140,15 @@
     }
     function goBack(){
       document.querySelectorAll('.detail-screen').forEach(s=>s.classList.remove('active'));
+      document.querySelectorAll('.exercise-area').forEach(area=>area.style.display='none');
+      currentTaskKey=null;
+      lastInfoTask=null;
       document.getElementById('screen-desk').style.display='flex';
       document.getElementById('custom-menu').style.display='none';
       const desktopMenu=document.getElementById('desktop-context-menu'); if(desktopMenu) desktopMenu.style.display='none';
       const trashWindow=document.getElementById('trash-window'); if(trashWindow) trashWindow.style.display='none';
       if(typeof closePaintProgram === 'function') closePaintProgram();
+      if(typeof closeLoginWindow === 'function') closeLoginWindow();
       hideHoverTip();
       hideHoverTipNum();
       hideHoverTipUmlaut();
@@ -1047,6 +1191,23 @@
       showInfo('Ordner / Dateien','Das ist dein digitaler Rucksack! In Ordnern sortierst du Bilder, Texte und Hausaufgaben, damit du sie schnell wiederfindest.',{key:'files',task:'Ziehe das Dateien-Symbol (📁) in das Ziel-Feld rechts oben auf dem Bildschirm.',unlockArea:'monitor-exercise-area'});
     }
 
+    function openLoginFileInfo(){
+      showInfo('Login.exe','Das ist die Login-Datei. Wenn du dich hier anmeldest, kannst du auf deinen persönlichen Speicherort zugreifen. Die Anmeldedaten sind identisch mit den Anmeldedaten für Moodle.');
+      afterInfoCloseAction = openLoginWindow;
+    }
+
+    function openLoginWindow(){
+      const loginWindow=document.getElementById('login-window');
+      if(!loginWindow) return;
+      loginWindow.style.display='block';
+      bringDesktopWindowToFront('login-window');
+    }
+
+    function closeLoginWindow(){
+      const loginWindow=document.getElementById('login-window');
+      if(loginWindow) loginWindow.style.display='none';
+    }
+
     function showWindowsKeyInfo(){
       if(done.has('windows')){
         showInfo('Windows-Taste','Windows ist das englische Wort für „Fenster“. Das Symbol auf dieser Taste sieht aus wie ein Fenster. Deshalb heißt sie Windows-Taste. Mit ihr öffnest du das Startmenü und findest Programme und Einstellungen.');
@@ -1056,10 +1217,15 @@
     }
 
     function showInfo(title, text, taskObj=null){
+      afterInfoCloseAction = null;
       document.getElementById('modal-title').innerText=title;
       document.getElementById('modal-text').innerText=text;
       // Bereits erledigte Aufgaben zeigen nur noch die Erklärung.
-      if(taskObj && taskObj.key && done.has(taskObj.key)) taskObj = null;
+      const tabAdvancedPending = taskObj && taskObj.key === 'tab' && done.has('tab') && !done.has('tabBack');
+      if(taskObj && taskObj.key && done.has(taskObj.key) && !tabAdvancedPending) taskObj = null;
+      if(tabAdvancedPending){
+        taskObj = {...taskObj, task:'Fortgeschritten: Das letzte Feld ist ausgewählt. Drücke zweimal Shift + Tab, um zum ersten Feld zurückzuspringen.'};
+      }
       lastInfoTask = taskObj;
 
       if(taskObj && taskObj.task){
@@ -1097,6 +1263,9 @@
         currentTaskKey = lastInfoTask.key;
       }
       lastInfoTask = null;
+      const followUpAction = afterInfoCloseAction;
+      afterInfoCloseAction = null;
+      if(typeof followUpAction === 'function') followUpAction();
     }
 
     function finishTask(key){
@@ -1119,6 +1288,10 @@
       if(key === 'arrows'){
         const el = document.getElementById('arrow-status');
         if(el) { el.textContent='Status: Ziel erreicht!'; el.className='status good'; }
+      }
+      if(key === 'sensorMaze'){
+        const el=document.getElementById('mouse-maze-status');
+        if(el) el.className='status good';
       }
       
       const kbStatus = document.getElementById('kb-task-status');
@@ -1154,7 +1327,7 @@
         const areaMap={
           files:'monitor-exercise-area',browser:'monitor-exercise-area',trash:'monitor-exercise-area',start:'monitor-exercise-area',clock:'monitor-exercise-area',paint:'monitor-exercise-area',newfolder:'monitor-exercise-area',power:'monitor-exercise-area',
           numbers:'keyboard-exercise-area',umlauts:'keyboard-exercise-area',backspace:'keyboard-exercise-area',tabBack:'keyboard-exercise-area',enter:'keyboard-exercise-area',caps:'keyboard-exercise-area',shift:'keyboard-exercise-area',space:'keyboard-exercise-area',altgr:'keyboard-exercise-area',arrows:'keyboard-exercise-area',letters:'keyboard-exercise-area',symbols:'keyboard-exercise-area',ctrl:'keyboard-exercise-area',windows:'keyboard-exercise-area',alt:'keyboard-exercise-area',navigation:'keyboard-exercise-area',otherSymbols:'keyboard-exercise-area',
-          leftclick:'mouse-exercise-area',wheel:'mouse-exercise-area',rightclick:'mouse-exercise-area'
+          leftclick:'mouse-exercise-area',wheel:'mouse-exercise-area',rightclick:'mouse-exercise-area',sensorMaze:'mouse-exercise-area'
         };
         const area=document.getElementById(areaMap[key] || '');
         if(area) area.style.display='none';
@@ -1188,7 +1361,7 @@
     /* === MONITOR TASKS === */
     function showMonitorTask(key){
       document.querySelectorAll('#monitor-exercise-area .monitor-task').forEach(el=>el.style.display='none');
-      const map={files:'monitor-task-files',browser:'monitor-task-browser',trash:'monitor-task-trash',start:'monitor-task-start',clock:'monitor-task-clock',newfolder:'monitor-task-newfolder'};
+      const map={files:'monitor-task-files',browser:'monitor-task-browser',trash:'monitor-task-trash',start:'monitor-task-start',clock:'monitor-task-clock'};
       if(map[key]) document.getElementById(map[key]).style.display='block';
       document.getElementById('file-drop-target').classList.toggle('show', key==='files');
       const trashWindow=document.getElementById('trash-window');
@@ -1264,11 +1437,9 @@
       }else{
         if(deleteItem){deleteItem.style.display='none';deleteItem.classList.remove('disabled');}
         if(newFolderItem) newFolderItem.style.display='block';
-        if(!done.has('newfolder')){
-          const exerciseArea=document.getElementById('monitor-exercise-area');
-          if(exerciseArea) exerciseArea.style.display='block';
-          showMonitorTask('newfolder');
-        }
+        // Die Ordneraufgabe wird direkt über das Kontextmenü gelöst. Ein Übungskasten ist dafür nicht nötig.
+        const exerciseArea=document.getElementById('monitor-exercise-area');
+        if(exerciseArea) exerciseArea.style.display='none';
       }
 
       const r=win.getBoundingClientRect();
@@ -1398,8 +1569,14 @@
       restored.style.left=Math.max(0,Math.min(win.clientWidth-88,dropX-origin.left-44))+'px';
       restored.style.top=Math.max(0,Math.min(win.clientHeight-44-86,dropY-origin.top-43))+'px';
       const iconLabel=document.createElement('span');
-      iconLabel.textContent=icon;
-      iconLabel.style.fontSize='38px';
+      if(name==='Login.exe'){
+        iconLabel.className='exe-file-icon';
+        iconLabel.setAttribute('aria-hidden','true');
+        iconLabel.innerHTML='<svg viewBox="0 0 48 48" role="presentation"><path d="M9 3.5h19l11 11V44H9z" fill="#f8fafc" stroke="#607d8b" stroke-width="2"/><path d="M28 3.5v11h11" fill="#dbe4ec" stroke="#607d8b" stroke-width="1.6"/><rect x="13" y="20" width="22" height="16" rx="2.2" fill="#263238" stroke="#111827" stroke-width="1.2"/><path d="m17 24.5 3.2 2.8-3.2 2.8" fill="none" stroke="#a5f3fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M23.5 30h5.5" fill="none" stroke="#a5f3fc" stroke-width="1.8" stroke-linecap="round"/><circle cx="32.5" cy="40" r="2" fill="#43a047" stroke="#1b5e20" stroke-width=".6"/></svg>';
+      }else{
+        iconLabel.textContent=icon;
+        iconLabel.style.fontSize='38px';
+      }
       const nameLabel=document.createElement('span');
       nameLabel.textContent=name;
       restored.append(iconLabel,nameLabel);
@@ -1410,6 +1587,9 @@
       }else if(name==='Dateien'){
         restored.id='icon-files';
         restored.addEventListener('click',openFilesIcon);
+      }else if(name==='Login.exe'){
+        restored.id='icon-login';
+        restored.addEventListener('click',openLoginFileInfo);
       }else if(name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.png')){
         restored.title='Bilddatei. Anklicken, um sie im Malprogramm zu öffnen.';
         restored.addEventListener('click',openPaintProgram);
@@ -1464,7 +1644,7 @@
         drag.moved=true;
         e.preventDefault();
 
-        if(drag.isTrashWindow || drag.isPaintWindow){
+        if(drag.isTrashWindow || drag.isPaintWindow || drag.isLoginWindow){
           const origin=contentOrigin();
           const movingWindow=drag.el;
           const left=clamp(e.clientX-origin.left-drag.offsetX,0,Math.max(0,win.clientWidth-movingWindow.offsetWidth));
@@ -1509,14 +1689,30 @@
         if(e.button!==0) return;
 
         const paintWindow=document.getElementById('paint-window');
+        const loginWindow=document.getElementById('login-window');
         if(e.target.closest('#trash-window')) bringDesktopWindowToFront('trash-window');
         if(e.target.closest('#paint-window')) bringDesktopWindowToFront('paint-window');
+        if(e.target.closest('#login-window')) bringDesktopWindowToFront('login-window');
 
         const paintTitlebar=e.target.closest('.paint-titlebar');
         if(paintTitlebar && paintWindow && paintWindow.contains(paintTitlebar) && !e.target.closest('button')){
           const rect=paintWindow.getBoundingClientRect();
           drag={
             el:paintWindow,isPaintWindow:true,pointerId:e.pointerId,
+            startX:e.clientX,startY:e.clientY,
+            offsetX:e.clientX-rect.left,
+            offsetY:e.clientY-rect.top,
+            startRect:rect,moved:false,ghost:null
+          };
+          e.preventDefault();
+          return;
+        }
+
+        const loginTitlebar=e.target.closest('.login-titlebar');
+        if(loginTitlebar && loginWindow && loginWindow.contains(loginTitlebar) && !e.target.closest('button')){
+          const rect=loginWindow.getBoundingClientRect();
+          drag={
+            el:loginWindow,isLoginWindow:true,pointerId:e.pointerId,
             startX:e.clientX,startY:e.clientY,
             offsetX:e.clientX-rect.left,
             offsetY:e.clientY-rect.top,
@@ -1561,7 +1757,7 @@
         const current=drag;
         if(current.moved){
           e.preventDefault();
-          if(current.isTrashWindow || current.isPaintWindow){
+          if(current.isTrashWindow || current.isPaintWindow || current.isLoginWindow){
             // Die Fensterposition wurde während des Ziehens bereits begrenzt aktualisiert.
           }else if(current.isTrashFile){
             const trashRect=trashWindow.getBoundingClientRect();
@@ -1809,39 +2005,65 @@
       else if(key === 'alt') {
         const game=document.createElement('div');
         game.className='alt-switch-game';
+        game.tabIndex=0;
         const intro=document.createElement('p');
-        intro.innerHTML='<b>Fensterwechsel-Spiel:</b> Auf einem Computer sind oft mehrere Programme geöffnet. Mit <b>Alt + Tab</b> kannst du zwischen ihnen wechseln. Welche Kombination passt?';
+        intro.innerHTML='<b>Fensterwechsel-Spiel:</b> Halte die ALT-Taste im Spiel mit der Maus gedrückt. Drücke dann zweimal die TAB-Taste auf deiner echten Tastatur, bis das dritte Fenster ganz rechts markiert ist.';
         const windows=document.createElement('div');
         windows.className='alt-switch-windows';
-        windows.innerHTML='<div class="alt-switch-window active"><strong>🌐 Browser</strong><span>Schul-Webseite</span></div><div class="alt-switch-window"><strong>📝 Textdokument</strong><span>Hausaufgaben</span></div>';
-        const options=document.createElement('div');
-        options.style.display='flex';
-        options.style.gap='8px';
-        options.style.flexWrap='wrap';
-        options.style.justifyContent='center';
-        [['Alt + Tab','correct'],['Alt + Leertaste','wrong'],['Alt + Pfeil nach oben','wrong']].forEach(([label,value])=>{
-          const button=document.createElement('button');
-          button.className='game-choice';
-          button.textContent=label;
-          button.addEventListener('click',()=>{
-            if(value==='correct'){
-              const cards=windows.querySelectorAll('.alt-switch-window');
-              cards[0].classList.toggle('active');
-              cards[1].classList.toggle('active');
-              status.textContent='Richtig! Du wechselst vom Browser zum Textdokument. Genau dafür ist Alt + Tab da.';
+        windows.innerHTML='<div class="alt-switch-window active"><strong>🌐 Browser</strong><span>Schul-Webseite</span></div><div class="alt-switch-window"><strong>📝 Textdokument</strong><span>Hausaufgaben</span></div><div class="alt-switch-window"><strong>📊 Präsentation</strong><span>Referat</span></div>';
+        const keyRow=document.createElement('div');
+        keyRow.className='alt-game-key-row';
+        const altButton=document.createElement('button');
+        altButton.type='button';
+        altButton.className='alt-game-key';
+        altButton.textContent='ALT';
+        altButton.setAttribute('aria-pressed','false');
+        let altHeld=false;
+        let activeWindow=0;
+        const cards=()=>Array.from(windows.querySelectorAll('.alt-switch-window'));
+        const releaseAlt=()=>{
+          altHeld=false;
+          altButton.classList.remove('pressed');
+          altButton.setAttribute('aria-pressed','false');
+        };
+        altButton.addEventListener('pointerdown',e=>{
+          e.preventDefault();
+          altHeld=true;
+          altButton.classList.add('pressed');
+          altButton.setAttribute('aria-pressed','true');
+          try{altButton.setPointerCapture(e.pointerId);}catch(_){}
+          game.focus({preventScroll:true});
+          status.textContent='ALT wird festgehalten. Drücke jetzt TAB, um zum nächsten Fenster zu springen.';
+          status.className='status wait';
+        });
+        altButton.addEventListener('pointerup',releaseAlt);
+        altButton.addEventListener('pointercancel',releaseAlt);
+        altButton.addEventListener('lostpointercapture',releaseAlt);
+        const plus=document.createElement('span');
+        plus.className='alt-game-plus';
+        plus.textContent='+';
+        const tabKey=document.createElement('div');
+        tabKey.className='alt-game-key alt-game-tabkey';
+        tabKey.textContent='TAB';
+        keyRow.append(altButton,plus,tabKey);
+        game.addEventListener('keydown',e=>{
+          if(e.key==='Tab' && altHeld){
+            e.preventDefault();
+            e.stopPropagation();
+            activeWindow=Math.min(activeWindow+1,2);
+            cards().forEach((card,index)=>card.classList.toggle('active',index===activeWindow));
+            if(activeWindow===2){
+              status.textContent='Geschafft! Du bist vom Browser über das Textdokument zur Präsentation ganz rechts gesprungen.';
               status.className='status good';
               finishTask(key);
             }else{
-              status.textContent='Das passt noch nicht. Überlege: Welche Kombination wechselt zwischen geöffneten Programmen?';
+              status.textContent='Guter Sprung! Halte ALT weiter gedrückt und drücke TAB noch einmal.';
               status.className='status wait';
             }
-          });
-          options.appendChild(button);
+          }
         });
-        const hint=document.createElement('p');
-        hint.className='alt-switch-hint';
-        hint.textContent='Tipp: Alt gedrückt halten und mit Tab zum nächsten geöffneten Programm wechseln.';
-        game.append(intro,windows,options,hint);
+        game.addEventListener('pointerdown',()=>game.focus({preventScroll:true}));
+        game.append(intro,windows,keyRow);
         container.appendChild(game);
       }
       else if(key === 'windows') {
@@ -1871,17 +2093,114 @@
         container.append(hint,choices);
       }
       else if(key === 'ctrl') {
-        const choices=[['Strg + C: Kopieren','copy'],['Strg + V: Einfügen','paste'],['Strg + X: Ausschneiden','cut'],['Alt + F4','close']];
-        choices.forEach(([label,value])=>{
-          const button=document.createElement('button');
-          button.className='game-choice';
-          button.textContent=label;
-          button.addEventListener('click',()=>{
-            if(value==='copy') finishTask(key);
-            else {status.textContent='Noch nicht richtig. Welche Kombination kopiert den markierten Text?';status.className='status wait';}
-          });
-          container.appendChild(button);
+        const transfer=document.createElement('div');
+        transfer.className='ctrl-transfer-game';
+        const leftBox=document.createElement('div');
+        const rightBox=document.createElement('div');
+        leftBox.className='ctrl-transfer-panel';
+        rightBox.className='ctrl-transfer-panel';
+        const leftLabel=document.createElement('label');
+        leftLabel.textContent='Text zum Ausschneiden';
+        const rightLabel=document.createElement('label');
+        rightLabel.textContent='Hier einfügen';
+        const source=document.createElement('textarea');
+        source.id='ctrl-source-text';
+        source.spellcheck=false;
+        source.value='Heute entdecken wir den Computer.\nAuf dem Bildschirm sehen wir viele Symbole.\nMit der Tastatur können wir Wörter und Zahlen schreiben.\nIm Informatikunterricht lernen wir, wie Dateien und Ordner funktionieren.';
+        const target=document.createElement('textarea');
+        target.id='ctrl-target-text';
+        target.placeholder='Hier kommt der ausgeschnittene Text hinein.';
+        target.spellcheck=false;
+        leftLabel.htmlFor=source.id;
+        rightLabel.htmlFor=target.id;
+        leftBox.append(leftLabel,source);
+        rightBox.append(rightLabel,target);
+        transfer.append(leftBox,rightBox);
+        container.appendChild(transfer);
+
+        const originalText=source.value;
+        let ctrlClipboard='';
+        let selectedByCtrlA=false;
+        let cutByCtrlX=false;
+        const setCtrlStatus=(message,good=false)=>{
+          status.textContent=message;
+          status.className=good?'status good':'status wait';
+        };
+
+        // Mouse selection, context-menu selection, or manual editing must never
+        // count as the required keyboard shortcut.
+        source.addEventListener('pointerdown',()=>{selectedByCtrlA=false;});
+        source.addEventListener('mousedown',()=>{selectedByCtrlA=false;});
+        source.addEventListener('input',()=>{selectedByCtrlA=false;cutByCtrlX=false;ctrlClipboard='';});
+        source.addEventListener('contextmenu',e=>{
+          e.preventDefault();
+          selectedByCtrlA=false;
+          setCtrlStatus('Nutze Strg + A auf der Tastatur, um den ganzen Text zu markieren.');
         });
+        source.addEventListener('copy',e=>e.preventDefault());
+        source.addEventListener('cut',e=>e.preventDefault());
+        target.addEventListener('paste',e=>{
+          e.preventDefault();
+          setCtrlStatus('Zum Einfügen musst du Strg + V auf der Tastatur drücken.');
+        });
+        target.addEventListener('contextmenu',e=>{
+          e.preventDefault();
+          setCtrlStatus('Zum Einfügen musst du Strg + V auf der Tastatur drücken.');
+        });
+
+        source.addEventListener('keydown',e=>{
+          const mod=e.ctrlKey || e.metaKey;
+          const keyName=e.key.toLowerCase();
+          if(mod && keyName==='a'){
+            e.preventDefault();
+            e.stopPropagation();
+            source.setSelectionRange(0,source.value.length);
+            selectedByCtrlA=true;
+            setCtrlStatus('Prima! Du hast mit Strg + A alles markiert. Drücke jetzt Strg + X.');
+            return;
+          }
+          if(mod && keyName==='x'){
+            e.preventDefault();
+            e.stopPropagation();
+            const reallyAllSelected=source.selectionStart===0 && source.selectionEnd===originalText.length && source.value===originalText;
+            if(selectedByCtrlA && reallyAllSelected){
+              ctrlClipboard=source.value;
+              source.value='';
+              source.setSelectionRange(0,0);
+              selectedByCtrlA=false;
+              cutByCtrlX=true;
+              setCtrlStatus('Der Text ist ausgeschnitten. Klicke rechts in das leere Feld und drücke Strg + V.');
+              target.focus();
+            }else{
+              selectedByCtrlA=false;
+              setCtrlStatus('Markiere zuerst den ganzen Text mit Strg + A. Eine Mausauswahl reicht hier nicht.');
+            }
+            return;
+          }
+          // Any other key action after Ctrl+A cancels the shortcut confirmation.
+          if(selectedByCtrlA && !mod){selectedByCtrlA=false;}
+        });
+
+        target.addEventListener('keydown',e=>{
+          const mod=e.ctrlKey || e.metaKey;
+          if(mod && e.key.toLowerCase()==='v'){
+            e.preventDefault();
+            e.stopPropagation();
+            if(!cutByCtrlX || !ctrlClipboard || source.value!=='' || target.value!==''){
+              setCtrlStatus('Schneide zuerst den gesamten Text links mit Strg + A und Strg + X aus.');
+              return;
+            }
+            target.value=ctrlClipboard;
+            target.setSelectionRange(target.value.length,target.value.length);
+            const completed=target.value===originalText && source.value==='' && cutByCtrlX;
+            if(completed){
+              setCtrlStatus('Super! Du hast den ganzen Text mit den Tastenkombinationen verschoben.',true);
+              finishTask(key);
+            }
+            return;
+          }
+        });
+        source.focus();
       }
       else {
         const input = document.createElement('input');
@@ -1944,39 +2263,44 @@
         dot.style.left=x+'px'; dot.style.top=y+'px';
 
         const d=dot.getBoundingClientRect(), g=goal.getBoundingClientRect();
-        const hit=!(d.right<g.left || d.left>g.right || d.bottom<g.top || d.top>g.bottom);
-        if(hit){
+        const fullyInside=d.left>=g.left && d.right<=g.right && d.top>=g.top && d.bottom<=g.bottom;
+        const overlaps=!(d.right<g.left || d.left>g.right || d.bottom<g.top || d.top>g.bottom);
+        if(fullyInside){
           finishTask('arrows');
         }else{
-          status.textContent='Status: Noch nicht am Ziel.';
+          status.textContent=overlaps?'Fast geschafft! Schiebe den ganzen Punkt in das grüne Zielfeld.':'Status: Noch nicht am Ziel.';
           status.className='status wait';
         }
       });
     })();
 
+    let tabBackStep=0;
     function startShiftTabGame(){
       const ids=['tab-adv-1','tab-adv-2','tab-adv-3'];
       const fields=ids.map(id=>document.getElementById(id));
       if(fields.some(field=>!field)) return;
-      fields.forEach(field=>field.value='');
+      fields.forEach(field=>{field.value='';field.onkeydown=null;});
       const status=document.getElementById('tab-advanced-status');
+      tabBackStep=0;
       status.textContent='Status: Das letzte Feld ist ausgewählt. Drücke zweimal Shift + Tab.';
       status.className='wait';
-      fields[2].onkeydown=(e)=>{
-        if(e.key==='Tab' && e.shiftKey){
-          window.setTimeout(()=>{
-            if(document.activeElement===fields[1]){
-              status.textContent='Gut! Du bist im zweiten Feld. Noch einmal Shift + Tab.';
-              status.className='wait';
-            }
-          },0);
+      fields[2].onkeydown=e=>{
+        if(e.key==='Tab' && e.shiftKey && tabBackStep===0){
+          e.preventDefault();
+          tabBackStep=1;
+          fields[1].focus();
+          status.textContent='Gut! Du bist im zweiten Feld. Noch einmal Shift + Tab.';
+          status.className='wait';
         }
       };
-      fields[1].onkeydown=(e)=>{
-        if(e.key==='Tab' && e.shiftKey){
-          window.setTimeout(()=>{
-            if(document.activeElement===fields[0]) finishTask('tabBack');
-          },0);
+      fields[1].onkeydown=e=>{
+        if(e.key==='Tab' && e.shiftKey && tabBackStep===1){
+          e.preventDefault();
+          tabBackStep=2;
+          fields[0].focus();
+          status.textContent='Prima! Du bist wieder im ersten Feld.';
+          status.className='good';
+          finishTask('tabBack');
         }
       };
       window.setTimeout(()=>fields[2].focus(),40);
@@ -1988,9 +2312,213 @@
       document.getElementById('mouse-task-leftclick').style.display = (key==='leftclick')?'block':'none';
       document.getElementById('mouse-task-wheel').style.display = (key==='wheel')?'block':'none';
       document.getElementById('mouse-task-rightclick').style.display = (key==='rightclick')?'block':'none';
-      const map={leftclick:'Aufgabe: Doppelklick auf „Ordner Öffnen“.',wheel:'Aufgabe: Scrolle bis ganz nach unten.',rightclick:'Aufgabe: Rechtsklick und „Übung abschließen“.'};
+      document.getElementById('mouse-task-sensor').style.display = (key==='sensorMaze')?'block':'none';
+      const map={
+        leftclick:'Aufgabe: Doppelklick auf „Ordner Öffnen“.',
+        wheel:'Aufgabe: Scrolle bis ganz nach unten.',
+        rightclick:'Aufgabe: Rechtsklick und „Übung abschließen“.',
+        sensorMaze:'Aufgabe: Fahre mit dem Mauszeiger durch das Labyrinth, ohne die Wände zu berühren.'
+      };
       document.getElementById('mouse-task-text').innerHTML= `<b>${map[key]||'Wähle oben ein Maus-Teil.'}</b>`;
+      if(key==='sensorMaze') resetMouseMaze();
     }
+
+    let mouseRotationFrame = null;
+
+    function getMouseRotationAngle(mouse){
+      const transform = getComputedStyle(mouse).transform;
+      if(!transform || transform === 'none') return 0;
+      try{
+        const matrix = new DOMMatrixReadOnly(transform);
+        return Math.acos(Math.max(-1,Math.min(1,matrix.m11))) * 180 / Math.PI;
+      }catch(error){
+        const match = transform.match(/^matrix3d\(([^)]+)\)$/);
+        if(match){
+          const values = match[1].split(',').map(Number);
+          if(values.length === 16 && Number.isFinite(values[0])){
+            return Math.acos(Math.max(-1,Math.min(1,values[0]))) * 180 / Math.PI;
+          }
+        }
+        return mouse.classList.contains('is-flipped') ? 180 : 0;
+      }
+    }
+
+    function updateMouseFrontControls(mouse){
+      const angle = getMouseRotationAngle(mouse);
+      mouse.classList.toggle('mouse-controls-hidden', angle >= 90);
+      return angle;
+    }
+
+    function trackMouseRotation(mouse){
+      if(mouseRotationFrame !== null) cancelAnimationFrame(mouseRotationFrame);
+      const stopAt = performance.now() + 900;
+      const step = () => {
+        if(!mouse.isConnected){ mouseRotationFrame=null; return; }
+        updateMouseFrontControls(mouse);
+        if(performance.now() < stopAt){
+          mouseRotationFrame = requestAnimationFrame(step);
+        }else{
+          updateMouseFrontControls(mouse);
+          mouseRotationFrame = null;
+        }
+      };
+      step();
+    }
+
+    function toggleMouseFlip(){
+      const mouse=document.getElementById('mouse-device');
+      const button=document.getElementById('mouse-flip-button');
+      if(!mouse || !button) return;
+      const flipped=mouse.classList.toggle('is-flipped');
+      button.setAttribute('aria-pressed',String(flipped));
+      button.textContent=flipped?'↻ Maus zurückdrehen':'↻ Maus umdrehen';
+      trackMouseRotation(mouse);
+    }
+
+    /* Das Maustraining startet automatisch, sobald der Mauszeiger das START-Feld erreicht. */
+    (function initMouseMaze(){
+      const board=document.getElementById('mouse-maze-board');
+      const player=document.getElementById('mouse-maze-player');
+      const status=document.getElementById('mouse-maze-status');
+      const cheeseEls=[document.getElementById('maze-cheese-1'),document.getElementById('maze-cheese-2')];
+      if(!board || !player || !status || cheeseEls.some(el=>!el)) return;
+
+      const route=[
+        {x:10,y:245},{x:110,y:245},{x:110,y:185},{x:235,y:185},
+        {x:235,y:245},{x:345,y:245},{x:345,y:165},{x:445,y:165},
+        {x:445,y:85},{x:560,y:85},{x:560,y:30},{x:585,y:30}
+      ];
+      const branches=[
+        [{x:110,y:185},{x:110,y:90},{x:190,y:90}],
+        [{x:345,y:165},{x:260,y:165},{x:260,y:80}],
+        [{x:445,y:85},{x:535,y:85},{x:535,y:180}]
+      ];
+      const walkableSegments=[];
+      for(let i=0;i<route.length-1;i++) walkableSegments.push([route[i],route[i+1]]);
+      branches.forEach(branch=>{for(let i=0;i<branch.length-1;i++) walkableSegments.push([branch[i],branch[i+1]]);});
+      const start=route[0];
+      const goal=route[route.length-1];
+      const cheeses=[{x:150,y:90},{x:260,y:125}];
+      let collected=[false,false];
+      let active=false;
+      let complete=false;
+      let previous=null;
+      const playerRadius=7;
+      const corridorRadius=19;
+
+      const distanceToSegment=(p,a,b)=>{
+        const dx=b.x-a.x,dy=b.y-a.y;
+        const length2=dx*dx+dy*dy;
+        const t=length2?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/length2)):0;
+        const x=a.x+t*dx,y=a.y+t*dy;
+        return Math.hypot(p.x-x,p.y-y);
+      };
+      const routeDistance=p=>{
+        let best=Infinity;
+        for(const segment of walkableSegments) best=Math.min(best,distanceToSegment(p,segment[0],segment[1]));
+        return best;
+      };
+      const localPoint=e=>{
+        const rect=board.getBoundingClientRect();
+        return {x:(e.clientX-rect.left)*600/rect.width,y:(e.clientY-rect.top)*300/rect.height};
+      };
+      const placePlayer=p=>{
+        player.style.left=(p.x/600*100)+'%';
+        player.style.top=(p.y/300*100)+'%';
+      };
+      const placeCheeses=()=>{
+        cheeseEls.forEach((el,i)=>el.classList.toggle('collected',collected[i]));
+      };
+      const reset=(message='Status: Bewege den Mauszeiger in das gestrichelte START-Feld.')=>{
+        active=false;complete=false;previous=null;collected=[false,false];
+        placePlayer(start);placeCheeses();
+        status.textContent=message;
+        status.className='status wait';
+      };
+      window.resetMouseMaze=()=>reset();
+      const fail=()=>reset('Oh, die Maus hat eine Wand berührt. Versuche es noch einmal ab START!');
+      const startIfInside=(p)=>{
+        if(active || complete) return false;
+        const boardRect=board.getBoundingClientRect();
+        const zoneRect=board.querySelector('.maze-start-zone').getBoundingClientRect();
+        const zone={
+          left:(zoneRect.left-boardRect.left)*600/boardRect.width,
+          right:(zoneRect.right-boardRect.left)*600/boardRect.width,
+          top:(zoneRect.top-boardRect.top)*300/boardRect.height,
+          bottom:(zoneRect.bottom-boardRect.top)*300/boardRect.height
+        };
+        if(p.x>=zone.left && p.x<=zone.right && p.y>=zone.top && p.y<=zone.bottom){
+          active=true;previous=p;placePlayer(p);
+          status.textContent='Los geht’s! Folge den Wegen, sammle beide Käsestücke und erreiche das Ziel.';
+          status.className='status wait';
+          board.focus({preventScroll:true});
+          return true;
+        }
+        return false;
+      };
+      const checkCheeses=p=>{
+        cheeses.forEach((cheese,index)=>{
+          if(!collected[index] && Math.hypot(p.x-cheese.x,p.y-cheese.y)<=24){
+            collected[index]=true;
+            placeCheeses();
+            const count=collected.filter(Boolean).length;
+            status.textContent=count===1?'Klasse! Das erste Käsestück ist eingesammelt. Hol dir noch das zweite.':'Super! Beide Käsestücke sind eingesammelt. Jetzt geht es zum Ziel!';
+            status.className='status good';
+          }
+        });
+      };
+      const checkSample=p=>{
+        if(routeDistance(p)>corridorRadius-playerRadius*.35){fail();return false;}
+        placePlayer(p);
+        checkCheeses(p);
+        const goalRect=board.querySelector('.maze-goal-label').getBoundingClientRect();
+        const boardRect=board.getBoundingClientRect();
+        const goalZone={
+          left:(goalRect.left-boardRect.left)*600/boardRect.width,
+          right:(goalRect.right-boardRect.left)*600/boardRect.width,
+          top:(goalRect.top-boardRect.top)*300/boardRect.height,
+          bottom:(goalRect.bottom-boardRect.top)*300/boardRect.height
+        };
+        const insideGoal=p.x>=goalZone.left && p.x<=goalZone.right && p.y>=goalZone.top && p.y<=goalZone.bottom;
+        if(insideGoal){
+          if(!collected.every(Boolean)){
+            status.textContent='Fast geschafft! Sammle zuerst beide Käsestücke und fahre dann ins Ziel.';
+            status.className='status wait';
+            return true;
+          }
+          active=false;complete=true;placePlayer(p);
+          status.textContent='Ziel erreicht! Beide Käsestücke sind gesammelt und die Maus ist sicher angekommen.';
+          status.className='status good';
+          finishTask('sensorMaze');
+          return false;
+        }
+        return true;
+      };
+      board.addEventListener('pointermove',e=>{
+        if(complete) return;
+        const p=localPoint(e);
+        if(!active){
+          if(!startIfInside(p)) return;
+          previous=p;
+          e.preventDefault();
+          return;
+        }
+        const from=previous||p;
+        const distance=Math.hypot(p.x-from.x,p.y-from.y);
+        const steps=Math.max(1,Math.ceil(distance/5));
+        for(let i=1;i<=steps;i++){
+          const t=i/steps;
+          const sample={x:from.x+(p.x-from.x)*t,y:from.y+(p.y-from.y)*t};
+          if(!checkSample(sample)) return;
+        }
+        previous=p;
+        e.preventDefault();
+      },{passive:false});
+      board.addEventListener('pointerleave',()=>{if(active && !complete) fail();});
+      board.addEventListener('pointerdown',e=>{if(active && !complete) board.focus({preventScroll:true});e.preventDefault();});
+      placePlayer(start);
+      placeCheeses();
+    })();
 
     document.getElementById('dblclick-target').addEventListener('dblclick', ()=>{
       finishTask('leftclick');
@@ -2207,6 +2735,19 @@
       paintProgramInitialized=true;
     }
 
+    /* Enter bestätigt geöffnete Hinweis- und Erfolgsfenster. */
+    window.addEventListener('keydown',e=>{
+      if(e.key!=='Enter') return;
+      const success=document.getElementById('success-overlay');
+      const info=document.getElementById('info-modal');
+      if(success && getComputedStyle(success).display!=='none'){
+        e.preventDefault();e.stopImmediatePropagation();closeSuccessPopup();return;
+      }
+      if(info && getComputedStyle(info).display!=='none'){
+        e.preventDefault();e.stopImmediatePropagation();closeInfo();
+      }
+    },true);
+
     /* ESC schließt alle geöffneten Popup-Menüs, Hinweise und Fenster. */
     window.addEventListener('keydown', (e)=>{
       if(e.key !== 'Escape') return;
@@ -2236,6 +2777,11 @@
       const paintWindow=document.getElementById('paint-window');
       if(paintWindow && getComputedStyle(paintWindow).display !== 'none'){
         closePaintProgram();
+        closedSomething=true;
+      }
+      const loginWindow=document.getElementById('login-window');
+      if(loginWindow && getComputedStyle(loginWindow).display !== 'none'){
+        closeLoginWindow();
         closedSomething=true;
       }
       hideHoverTip();
