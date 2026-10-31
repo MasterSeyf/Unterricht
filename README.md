@@ -10,8 +10,8 @@ Willkommen in diesem Repository! Hier findest du verschiedene interaktive und we
 ## Verwendung Intern
 - Alternativ kann auch dieses Repository verwendet werden
 - Gewünschte HTML-Datei auswählen
-- Pfad kopieren
-- Den Link https://masterseyf.github.io/Unterricht/<Pfad> den Schülern bereitstellen
+- Den `Pfad` kopieren
+- Den Link `https://masterseyf.github.io/Unterricht/<Pfad>` den Schülern bereitstellen
 - Mit einem beliebigen Browser öffnen
 
 ## Lizenz
