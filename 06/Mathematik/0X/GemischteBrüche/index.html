@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Interaktive Bruchwerkstatt für die 6. Klasse: Brüche addieren und subtrahieren mit Streifenmodell, Kreismodell und gemischten Zahlen.">
-<title>Bruchwerkstatt V07 – Brüche entdecken</title>
+<title>Bruchwerkstatt V10 – Brüche entdecken</title>
 <style>
   :root {
     --ink: #18243a;
@@ -75,29 +75,29 @@
   .world-step.done { color:var(--teal-dark); }
   .world-step.done .world-number { background:#dff8ef; color:var(--teal-dark); }
   .workspace { display:block; }
-  .mission-question { text-align:center; padding:14px 20px 15px; margin:0 0 14px; border-radius:18px; background:#fff; border:1px solid var(--line); box-shadow:0 5px 18px rgba(29,49,79,.035); }
-  .mission-question-count { display:inline-block; color:var(--teal-dark); background:#e6f8f3; border-radius:7px; padding:4px 8px; font-size:9px; letter-spacing:.1em; font-weight:950; text-transform:uppercase; }
-  .mission-question-title { margin:7px 0 3px; font-size:19px; line-height:1.15; letter-spacing:-.03em; }
-  .mission-question-prompt { margin:0; color:var(--muted); font-size:12px; }
-  .mission-equation { display:flex; align-items:center; justify-content:center; gap:16px; min-height:60px; max-width:500px; margin:10px auto 0; padding:9px 14px; border-radius:13px; background:#f7f9fc; border:1px solid #edf1f6; }
-  .mission-equation .frac { font-size:21px; }
-  .mission-equation .frac .num { padding-bottom:4px; }
-  .mission-equation .frac .den { padding-top:4px; }
-  .mission-equation .operator { font-size:24px; }
-  .mission-question .answer-mark { font-size:24px; }
-  .mission-models-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:18px; align-items:stretch; }
+  /* Kompakte Aufgabenleiste: Rechenaufgabe nur einmal, mit Prüfung direkt darüber. */
+  .mission-question { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px 14px; text-align:left; padding:9px 14px; margin:0 0 10px; border-radius:16px; background:#fff; border:1px solid var(--line); box-shadow:0 5px 18px rgba(29,49,79,.035); }
+  .mission-equation { display:flex; align-items:center; justify-content:flex-start; gap:11px; min-height:49px; min-width:0; max-width:none; margin:0; padding:4px 10px; border-radius:11px; background:#f7f9fc; border:1px solid #edf1f6; text-align:left; }
+  .mission-equation .frac, .mission-equation .frac.large { font-size:18px; min-width:28px; }
+  .mission-equation .frac .num, .mission-equation .frac.large .num { padding:0 4px 3px; }
+  .mission-equation .frac .den, .mission-equation .frac.large .den { padding:3px 4px 0; border-top-width:1.7px; }
+  .mission-equation .operator { font-size:20px; }
+  .mission-equation .whole-number.whole-large { font-size:19px; }
+  .mission-question .answer-mark { font-size:19px; }
+  .mission-question-actions { display:flex; align-items:center; justify-content:flex-end; gap:7px; flex:none; }
+  .mission-question-actions .primary-btn, .mission-question-actions .secondary-btn { width:142px; min-width:142px; height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0 10px; font-size:12px; white-space:nowrap; box-sizing:border-box; }
+  .mission-question .hint-box { grid-column:1 / -1; width:100%; margin:0 0 2px; text-align:left; }
+  .mission-question-actions .mission-back-btn { padding:8px 7px; font-size:11px; white-space:nowrap; }
+  .mission-models-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; align-items:stretch; }
   .mission-model-card { min-width:0; }
-  .mission-model-card .model-head { padding:19px 20px 15px; }
-  .mission-model-card .model-content { padding:16px 18px 19px; }
-  .mission-check-panel { margin-top:18px; padding:18px 22px 16px; }
-  .mission-check-head { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:12px; }
-  .mission-check-title { margin:0; font-size:17px; letter-spacing:-.02em; }
-  .mission-check-subtitle { margin:4px 0 0; color:var(--muted); font-size:12px; }
-  .check-task-count { flex:none; color:#7c889a; background:#f3f6fa; border:1px solid #e5ebf2; border-radius:9px; padding:7px 10px; font-size:11px; font-weight:900; }
-  .mission-check-panel .task-actions { margin-top:12px; }
-  .mission-check-panel .bottom-nav { margin-top:13px; padding-top:11px; }
-  .mission-check-panel .feedback { margin-top:12px; }
+  .mission-model-card .model-head { padding:12px 18px 10px; }
+  .mission-model-card .model-content { padding:11px 16px 13px; }
+  .mission-check-panel { margin-top:9px; padding:0 2px 3px; background:transparent; border:0; box-shadow:none; overflow:visible; }
+  .mission-check-panel .bottom-nav { margin-top:10px; padding-top:8px; }
+  .mission-check-panel .feedback { margin-top:9px; }
+  .mission-check-panel .hint-box, .mission-check-panel .explanation { margin-top:9px; }
   .panel { min-width:0; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .panel.mission-check-panel { margin-top:7px; padding:0 2px 3px; background:transparent; border:0; box-shadow:none; overflow:visible; }
   .task-panel { padding:25px 26px 23px; position:relative; }
   .task-panel::before { content:""; position:absolute; left:0; top:0; width:100%; height:5px; background:linear-gradient(90deg,var(--teal),#93dbb9); }
   .task-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:20px; }
@@ -297,13 +297,14 @@
     .brand-mark { width:37px; height:37px; }
     .modebar { width:auto; }
     .mode-tab { flex:initial; padding:8px 11px; font-size:11px; }
-    .mission-question { padding:12px 12px 13px; margin-bottom:11px; }
-    .mission-question-title { font-size:17px; }
-    .mission-equation { gap:11px; min-height:55px; }
-    .mission-question .frac { font-size:19px; }
-    .task-panel { padding:22px 17px 18px; }
-    .mission-check-panel { padding:17px 15px 14px; }
-    .mission-check-head { align-items:flex-start; flex-direction:column; gap:7px; }
+    .mission-question { grid-template-columns:1fr; gap:6px; padding:8px 10px; margin-bottom:9px; }
+    .mission-equation { gap:9px; min-height:43px; padding:3px 7px; }
+    .mission-equation .frac, .mission-equation .frac.large { font-size:17px; }
+    .mission-equation .operator { font-size:18px; }
+    .mission-question-actions { justify-content:flex-start; flex-wrap:wrap; }
+    .mission-question-actions .primary-btn, .mission-question-actions .secondary-btn { width:132px; min-width:132px; height:38px; padding:0 7px; font-size:11px; }
+    .mission-question-actions .mission-back-btn { padding:7px 5px; }
+    .panel.mission-check-panel { padding:0 1px 3px; }
     .model-head { padding:20px 17px 15px; }
     .model-content { padding:17px 15px 20px; }
     .equation-box { gap:12px; }
@@ -312,8 +313,7 @@
     .memory-card { grid-template-columns:42px 1fr; padding:16px; gap:11px; }
     .memory-icon { width:40px; height:40px; }
     .lab-intro { flex-direction:column; align-items:flex-start; }
-    .mission-check-panel .task-actions .primary-btn { min-width:0; padding:12px 8px; font-size:13px; }
-    .mission-check-panel .task-actions .secondary-btn { padding:11px 8px; font-size:12px; white-space:nowrap; }
+    .mission-question-actions .primary-btn, .mission-question-actions .secondary-btn { min-width:0; }
     .builder-panel { padding:17px; }
     .pie-svg, .pie-placeholder { width:58px; height:58px; }
     .pie-units { gap:7px; }
@@ -369,7 +369,6 @@
         <div class="model-head">
           <div class="model-headline">
             <div><h2 class="model-title">▤ Streifenmodell</h2><p class="model-subtitle">Vergleiche die Stücke der beiden Brüche.</p></div>
-            <div class="model-spark" aria-hidden="true">▰</div>
           </div>
         </div>
         <div class="model-content" id="missionStripModel"></div>
@@ -437,7 +436,6 @@
       <div><h3 class="memory-title">Forscherfrage</h3><p class="memory-text">Was musst du tun, wenn die Nenner verschieden sind? Finde eine Einteilung, bei der beide Brüche aus gleich großen Stücken bestehen. Diese Stücke heißen <b>gemeinsame Nennerstücke</b>.</p></div>
     </section>
   </section>
-  <div class="footer-note">Tipp für den Unterricht: Die Anwendung funktioniert offline, sobald diese HTML-Datei gespeichert ist. Fortschritte werden nicht übertragen.</div>
 </main>
 <script>
 (() => {
@@ -585,29 +583,33 @@
     const host=$('#missionQuestion');
     if(state.index>=tasks.length) { host.classList.add('hidden'); host.innerHTML=''; return; }
     host.classList.remove('hidden');
-    const t=currentTask(), solved=state.solved.has(t.id), r=resultFor(t);
+    const t=currentTask(), solved=state.solved.has(t.id), hint=state.hints.has(t.id), r=resultFor(t);
     const equation=`${operandHTML(t,'a','large')}${opHTML(t.op)}${operandHTML(t,'b','large')}<span class="operator">=</span>${solved?numberHTML(r.n,r.d,isMixedTask(t),'large'):'<span class="answer-mark">?</span>'}`;
-    host.innerHTML=`<div class="mission-question-count">Aufgabe ${state.index+1} von ${tasks.length}</div><h2 class="mission-question-title">${esc(t.title)}</h2><p class="mission-question-prompt">${esc(t.prompt||'Berechne das Ergebnis und stelle es im Modell dar.')}</p><div class="mission-equation" aria-label="${esc(operandPlainText(t,'a'))} ${t.op==='+'?'plus':'minus'} ${esc(operandPlainText(t,'b'))} gleich ${solved?esc(resultPlainText(t,r)):'unbekannt'}">${equation}</div>`;
+    const actionButton=solved
+      ? `<button class="primary-btn" data-action="next">${state.index===tasks.length-1?'Abschluss ansehen →':'Nächste Aufgabe →'}</button>`
+      : '<button class="primary-btn" data-action="check">Antwort prüfen ✓</button>';
+    host.innerHTML=`
+      <div class="mission-equation" aria-label="${esc(operandPlainText(t,'a'))} ${t.op==='+'?'plus':'minus'} ${esc(operandPlainText(t,'b'))} gleich ${solved?esc(resultPlainText(t,r)):'unbekannt'}">${equation}</div>
+      <div class="mission-question-actions">
+        <button class="quiet-btn mission-back-btn" data-action="prev" ${state.index===0?'disabled':''} aria-label="Vorherige Aufgabe">← Zurück</button>
+        ${actionButton}
+        <button class="secondary-btn" data-action="hint" aria-expanded="${hint?'true':'false'}">${hint?'Tipp schließen':'Tipp 💡'}</button>
+      </div>
+      ${hint?`<div class="hint-box" role="status"><strong>Ein kleiner Denkanstoß</strong>${esc(t.hint)}</div>`:''}`;
   }
   function renderMissionTask() {
     const host=$('#taskPanel');
     if (state.index >= tasks.length) {
+      host.classList.remove('hidden');
       host.innerHTML=`<div class="finale"><div class="finale-medal" aria-hidden="true">🏆</div><h2>Bruch-Profi freigeschaltet!</h2><p>Du hast alle 15 Aufgaben in fünf Levels geschafft. Du hast früh mit gemischten Zahlen gerechnet und deine Kenntnisse bis zu kniffligen Sachaufgaben erweitert. Beide Bruchmodelle findest du weiterhin im freien Labor.</p><div class="finale-stats"><div class="stat-chip"><strong>${state.solved.size}/${tasks.length}</strong>Aufgaben gelöst</div><div class="stat-chip"><strong>${Object.values(state.attempts).reduce((a,b)=>a+b,0)}</strong>Rechenversuche</div><div class="stat-chip"><strong>${worlds.length}</strong>Levels</div></div><button class="primary-btn" data-action="restart">Missionen noch einmal spielen ↻</button><div style="margin-top:9px"><button class="quiet-btn" data-mode="lab">Zum freien Bruch-Labor →</button></div></div>`;
       return;
     }
     const t=currentTask(), solved=state.solved.has(t.id), hint=state.hints.has(t.id), feedback=state.feedback[t.id];
+    const hasPanelContent=Boolean(feedback || solved);
+    host.classList.toggle('hidden',!hasPanelContent);
     host.innerHTML=`
-      <div class="mission-check-head">
-        <div><h2 class="mission-check-title">${solved?'Richtig gelöst!':'Prüfe deine Antwort'}</h2><p class="mission-check-subtitle">Wähle die Ergebnisstücke im ${modelNameForTask(t)}. Das Modell wechselt automatisch von Level zu Level. Die Einteilung des Ergebnisses kannst du unabhängig einstellen.</p></div>
-      </div>
-      <div class="task-actions">
-        ${solved?'<button class="primary-btn" data-action="next">Nächste Aufgabe →</button>':'<button class="primary-btn" data-action="check">Antwort prüfen ✓</button>'}
-        <button class="secondary-btn" data-action="hint" aria-expanded="${hint?'true':'false'}">${hint?'Tipp schließen':'Tipp anzeigen 💡'}</button>
-      </div>
       ${feedback?`<div class="feedback ${feedback.kind}" role="status"><span class="feedback-icon">${feedback.kind==='success'?'🎉':feedback.kind==='error'?'🧭':'💡'}</span><div>${feedback.text}</div></div>`:''}
-      ${hint?`<div class="hint-box"><strong>Ein kleiner Denkanstoß</strong>${esc(t.hint)}</div>`:''}
-      ${solved?`<div class="explanation"><strong>So geht’s:</strong> ${explanation(t)} <br><strong>Ergebnis:</strong> ${resultPlainText(t,resultFor(t))}</div>`:''}
-      <div class="bottom-nav"><button class="nav-btn" data-action="prev" ${state.index===0?'disabled':''}>← Zurück</button><span style="color:#a0aabc;font-size:10px;font-weight:800">${solved?'MISSION GESCHAFFT':'NIMM DIR ZEIT ZUM NACHDENKEN'}</span><button class="nav-btn" data-action="next" ${!solved?'disabled':''}>${state.index===tasks.length-1?'Abschluss →':'Weiter →'}</button></div>`;
+      ${solved?`<div class="explanation"><strong>So geht’s:</strong> ${explanation(t)} <br><strong>Ergebnis:</strong> ${resultPlainText(t,resultFor(t))}</div>`:''}`;
   }
   function formatFraction(n,d) { const r=reduced(n,d); return `${r.n}/${r.d}`; }
   function explanation(t) {
@@ -835,7 +837,7 @@
     renderMemoryAndMission();
   }
   function goPrev() { state.index=Math.max(0,state.index-1); renderMemoryAndMission(); }
-  function toggleHint() { const t=currentTask(); if(!t)return; state.hints.has(t.id)?state.hints.delete(t.id):state.hints.add(t.id); renderMissionTask(); }
+  function toggleHint() { const t=currentTask(); if(!t)return; state.hints.has(t.id)?state.hints.delete(t.id):state.hints.add(t.id); renderMissionQuestion(); renderMissionTask(); }
   function restart() { state.index=0; state.solved.clear(); state.attempts={}; state.answers={}; state.partitions={}; state.hints.clear(); state.feedback={}; renderMemoryAndMission(); switchMode('mission'); }
 
   function renderBuilder(which) {
