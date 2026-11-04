@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Computererkundung V35</title>
+  <title>Computererkundung</title>
   <style>
-    /* V31: Titel, Dateien-Ordner bereinigt und Monitorvorschau angepasst. */
+    /* V38: Fortschritt direkt im Zählerbalken und Reset-Text in vier Zeilen. */
     :root{
       --desk-color:#a1887f;
       --highlight:#ffeb3b;
@@ -199,7 +199,9 @@
 
     /* STARTBILDSCHIRM: Vorschauen der drei Lernbereiche */
     .start-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;width:190px;color:#fff;font-size:19px;font-weight:800;text-shadow:1px 2px 3px #3e2723;}
-    .start-progress{font-size:13px;font-weight:700;background:rgba(255,255,255,.92);color:#263238;border-radius:999px;padding:4px 9px;text-shadow:none;box-shadow:0 2px 5px rgba(0,0,0,.2);}
+    .start-progress{position:relative;display:inline-flex;align-items:center;justify-content:center;width:150px;height:23px;box-sizing:border-box;overflow:hidden;border-radius:999px;padding:0 8px;background:rgba(255,255,255,.92);color:#193b22;font-size:13px;font-weight:800;text-shadow:none;box-shadow:0 2px 5px rgba(0,0,0,.2);isolation:isolate;}
+    .start-progress-fill{position:absolute;left:0;top:0;bottom:0;width:0%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#9cdda0,#46ad5b);transition:width .55s ease;z-index:-1;}
+    .start-progress-label{position:relative;z-index:1;white-space:nowrap;line-height:1;}
     .preview-monitor{width:132px;height:105px;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 8px 5px rgba(0,0,0,.35));}
     .preview-monitor-screen{width:122px;height:77px;background:linear-gradient(135deg,#1687d8,#0b4e91);border:8px solid #222;border-bottom-width:9px;border-radius:7px;box-sizing:border-box;position:relative;}
     .preview-monitor-screen:before{content:"";position:absolute;left:5px;top:5px;width:15px;height:15px;border:2px solid rgba(255,255,255,.88);border-radius:2px;box-shadow:20px 0 0 -2px rgba(255,255,255,.28),0 20px 0 -2px rgba(255,255,255,.28);}
@@ -831,6 +833,57 @@
         padding-right:2px !important;
       }
     }
+
+
+    /* V38: Der Zähler selbst füllt sich als Fortschrittsbalken. */
+    /* V37: Fortschritt auf dem Schreibtisch und sicherer Reset-Dialog. */
+    .desk-reset-btn{
+      position:absolute;top:11px;right:12px;z-index:30;
+      display:inline-flex;align-items:center;justify-content:center;gap:6px;
+      padding:7px 11px;border:1px solid #b94b4b;border-radius:9px;
+      background:linear-gradient(180deg,#f6b4ad,#e88f87);color:#5d1717;
+      font:700 12px/1.1 'Segoe UI',Tahoma,sans-serif;cursor:pointer;
+      box-shadow:0 2px 4px rgba(55,20,20,.24);text-shadow:none;
+    }
+    .desk-reset-btn:hover{background:linear-gradient(180deg,#ffc5bd,#e9857d);filter:brightness(1.03);}
+    .desk-reset-btn:active{transform:translateY(2px);box-shadow:0 0 0 rgba(0,0,0,0);}
+    .desk-reset-btn:focus-visible{outline:3px solid #fff;outline-offset:2px;}
+
+    #reset-progress-overlay{
+      display:none;position:fixed;inset:0;z-index:8500;
+      background:rgba(0,0,0,.58);align-items:center;justify-content:center;
+      padding:16px;box-sizing:border-box;
+    }
+    #reset-progress-modal{
+      width:min(500px,calc(100vw - 32px));box-sizing:border-box;
+      background:#fff;border:5px solid #e58a75;border-radius:16px;
+      padding:24px 26px;box-shadow:0 15px 45px rgba(0,0,0,.42);
+      text-align:center;animation:resetDialogPop .35s cubic-bezier(.175,.885,.32,1.275);
+    }
+    @keyframes resetDialogPop{
+      from{transform:scale(.82);opacity:0;}
+      to{transform:scale(1);opacity:1;}
+    }
+    #reset-progress-modal h2{margin:0 0 10px;color:#a33b30;font-size:23px;}
+    #reset-progress-modal p{font-size:17px;line-height:1.45;margin:0;color:#263238;}
+    .reset-progress-line{display:block;white-space:nowrap;}
+    .reset-progress-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+    .reset-progress-actions button{min-width:140px;padding:10px 15px;border:0;border-radius:8px;font-weight:800;font-size:15px;cursor:pointer;}
+    .reset-cancel-btn{background:#eceff1;color:#263238;}
+    .reset-cancel-btn:hover{background:#cfd8dc;}
+    .reset-confirm-btn{background:#d9534f;color:#fff;}
+    .reset-confirm-btn:hover{background:#c43e3a;}
+    @media(max-width:850px){
+      .desk-reset-btn{top:9px;right:9px;padding:6px 8px;font-size:11px;}
+    }
+    @media(max-width:580px){
+      .desk-reset-btn{top:8px;right:8px;padding:6px 7px;font-size:10px;gap:4px;}
+      .start-progress{width:138px;}
+      #reset-progress-modal{padding:20px 16px;}
+      #reset-progress-modal h2{font-size:20px;}
+      #reset-progress-modal p{font-size:14px;}
+    }
+
 </style>
 </head>
 <body>
@@ -843,6 +896,18 @@
     </div>
   </div>
 
+
+  <div id="reset-progress-overlay" role="presentation" onclick="if(event.target===this) cancelResetProgressWarning()">
+    <div id="reset-progress-modal" role="dialog" aria-modal="true" aria-labelledby="reset-progress-title" aria-describedby="reset-progress-description">
+      <h2 id="reset-progress-title">Möchtest du neu anfangen?</h2>
+      <p id="reset-progress-description"><span class="reset-progress-line">Alle Aufgaben werden gelöscht.</span><span class="reset-progress-line">Dein Fortschritt geht verloren.</span><span class="reset-progress-line">Das ist endgültig.</span><span class="reset-progress-line">Wirklich zurücksetzen?</span></p>
+      <div class="reset-progress-actions">
+        <button type="button" class="reset-cancel-btn" onclick="cancelResetProgressWarning()">Abbrechen</button>
+        <button type="button" class="reset-confirm-btn" onclick="confirmResetProgress()">Ja, zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+
   <div id="screen-desk" class="desk-container">
     <div class="instruction-banner">
       <h1 style="margin:0;color:#3e2723;">Willkommen an deinem Arbeitsplatz!</h1>
@@ -851,9 +916,10 @@
     </div>
 
     <div class="desk-surface" aria-label="Schreibtisch mit Bildschirm, Tastatur und Maus">
+      <button type="button" class="desk-reset-btn" onclick="showResetProgressWarning()" aria-label="Gesamten Aufgabenfortschritt zurücksetzen" title="Fortschritt zurücksetzen"><span aria-hidden="true">↻</span> Zurücksetzen</button>
       <div id="start-monitor" class="item-click start-choice" onclick="openDetail('screen-monitor')">
         <div class="preview-monitor"><div class="preview-monitor-screen"></div><div class="preview-monitor-neck"></div><div class="preview-monitor-base"></div></div>
-        <span>Bildschirm</span><span class="start-progress" id="start-score-monitor">0 / 8 erledigt</span>
+        <span>Bildschirm</span><span class="start-progress" id="start-score-monitor" role="progressbar" aria-label="Fortschritt Bildschirm" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-valuetext="0 von 8 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-monitor" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-monitor">0 / 8 erledigt</span></span>
       </div>
       <div id="start-keyboard" class="item-click start-choice" onclick="openDetail('screen-keyboard')">
         <div class="preview-keyboard" aria-hidden="true">
@@ -861,11 +927,11 @@
           <div class="preview-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <div class="preview-key-row preview-key-row-bottom"><span class="preview-side-key"></span><span class="preview-side-key"></span><span class="preview-space-key"></span><span class="preview-side-key"></span><span class="preview-side-key"></span></div>
         </div>
-        <span>Tastatur</span><span class="start-progress" id="start-score-keyboard">0 / 17 erledigt</span>
+        <span>Tastatur</span><span class="start-progress" id="start-score-keyboard" role="progressbar" aria-label="Fortschritt Tastatur" aria-valuemin="0" aria-valuemax="17" aria-valuenow="0" aria-valuetext="0 von 17 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-keyboard" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-keyboard">0 / 17 erledigt</span></span>
       </div>
       <div id="start-mouse" class="item-click start-choice" onclick="openDetail('screen-mouse')">
         <div class="preview-mouse"><div class="preview-mouse-left"></div><div class="preview-mouse-right"></div></div>
-        <span>Maus</span><span class="start-progress" id="start-score-mouse">0 / 3 erledigt</span>
+        <span>Maus</span><span class="start-progress" id="start-score-mouse" role="progressbar" aria-label="Fortschritt Maus" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" aria-valuetext="0 von 3 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-mouse" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-mouse">0 / 3 erledigt</span></span>
       </div>
     </div>
     <div id="all-levels-done">🏆 Fantastisch! Du hast alle Aufgaben geschafft! 🏆</div>
@@ -1302,7 +1368,27 @@
   </div>
 
   <script>
-    const done = new Set();
+    // Aufgabenfortschritt lokal im Browser speichern, damit erledigte Aufgaben
+    // auch nach einem Neuladen der Seite erhalten bleiben.
+    const PROGRESS_STORAGE_KEY = 'computererkundung_pc_fuehrerschein_progress_v1';
+    function loadDoneTasks(){
+      try{
+        const raw=localStorage.getItem(PROGRESS_STORAGE_KEY);
+        const saved=raw ? JSON.parse(raw) : [];
+        if(Array.isArray(saved)) return new Set(saved.filter(key=>typeof key==='string'));
+      }catch(error){
+        console.warn('Gespeicherter Aufgabenfortschritt konnte nicht gelesen werden.',error);
+      }
+      return new Set();
+    }
+    function saveDoneTasks(){
+      try{
+        localStorage.setItem(PROGRESS_STORAGE_KEY,JSON.stringify([...done]));
+      }catch(error){
+        console.warn('Aufgabenfortschritt konnte nicht gespeichert werden.',error);
+      }
+    }
+    const done = loadDoneTasks();
     const filesFolderTaskState = { dropped:false, opened:false, folderCreated:false, folderName:'', movedVideos:new Set() };
     const requiredVideosFolderName = 'Klassenfahrt-Videos';
 
@@ -1366,16 +1452,55 @@
         elMouse.classList.toggle('done', mouseCount === catMouse.length);
       }
 
-      const startMon = document.getElementById('start-score-monitor');
-      const startKb = document.getElementById('start-score-keyboard');
-      const startMouse = document.getElementById('start-score-mouse');
-      if(startMon) startMon.textContent = `${monCount} / ${catMonitor.length} erledigt`;
-      if(startKb) startKb.textContent = `${kbCount} / ${catKeyboard.length} erledigt`;
-      if(startMouse) startMouse.textContent = `${mouseCount} / ${catMouse.length} erledigt`;
+      // Der vorhandene Zähler ist zugleich der Fortschrittsbalken. Es gibt keinen zweiten Balken.
+      const updateStartBar=(name,count,total)=>{
+        const bar=document.getElementById(`start-score-${name}`);
+        const fill=document.getElementById(`start-progress-fill-${name}`);
+        const label=document.getElementById(`start-score-label-${name}`);
+        const percentage=total>0 ? Math.max(0,Math.min(100,(count/total)*100)) : 0;
+        if(fill) fill.style.width=percentage+'%';
+        if(label) label.textContent=`${count} / ${total} erledigt`;
+        if(bar){
+          bar.setAttribute('aria-valuenow',String(count));
+          bar.setAttribute('aria-valuemax',String(total));
+          bar.setAttribute('aria-valuetext',`${count} von ${total} Aufgaben erledigt`);
+        }
+      };
+      updateStartBar('monitor',monCount,catMonitor.length);
+      updateStartBar('keyboard',kbCount,catKeyboard.length);
+      updateStartBar('mouse',mouseCount,catMouse.length);
 
       const allDone = monCount === catMonitor.length && kbCount === catKeyboard.length && mouseCount === catMouse.length;
       const allDoneEl = document.getElementById('all-levels-done');
       if(allDoneEl) allDoneEl.style.display = allDone ? 'block' : 'none';
+    }
+
+    // Fortschritt erst nach einer ausdrücklichen Bestätigung vollständig zurücksetzen.
+    function showResetProgressWarning(){
+      const overlay=document.getElementById('reset-progress-overlay');
+      if(!overlay) return;
+      overlay.style.display='flex';
+      const cancelButton=overlay.querySelector('.reset-cancel-btn');
+      if(cancelButton) cancelButton.focus();
+    }
+    function cancelResetProgressWarning(){
+      const overlay=document.getElementById('reset-progress-overlay');
+      if(overlay) overlay.style.display='none';
+      const resetButton=document.querySelector('.desk-reset-btn');
+      if(resetButton) resetButton.focus();
+    }
+    function confirmResetProgress(){
+      try{
+        localStorage.removeItem(PROGRESS_STORAGE_KEY);
+      }catch(error){
+        // Falls das Entfernen gesperrt ist, wird ein leerer Fortschritt versucht.
+        try{ localStorage.setItem(PROGRESS_STORAGE_KEY,'[]'); }catch(storageError){
+          console.warn('Der Fortschritt konnte nicht aus dem lokalen Speicher gelöscht werden.',storageError);
+        }
+      }
+      done.clear();
+      saveDoneTasks();
+      window.location.reload();
     }
 
     // Navigation
@@ -1750,6 +1875,7 @@
     function finishTask(key){
       if(done.has(key)) return; 
       done.add(key);
+      saveDoneTasks();
       lastSuccessfulTaskKey = key;
 
       if(key === 'files'){
@@ -3674,6 +3800,11 @@
     window.addEventListener('keydown', (e)=>{
       if(e.key !== 'Escape') return;
       let closedSomething = false;
+      const resetOverlay=document.getElementById('reset-progress-overlay');
+      if(resetOverlay && getComputedStyle(resetOverlay).display !== 'none'){
+        cancelResetProgressWarning();
+        closedSomething=true;
+      }
       const infoModal=document.getElementById('info-modal');
       const successOverlay=document.getElementById('success-overlay');
       if(infoModal && getComputedStyle(infoModal).display !== 'none'){
