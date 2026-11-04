@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Computererkundung V40</title>
+  <title>Computererkundung</title>
   <style>
-    /* V41: Papierkorb bleibt auf dem Desktop frei verschiebbar. Vollständige Lernbereiche wippen mit kürzerer Ruhezeit. */
+    /* V42: Desktopobjekte erreichen alle vier Bildschirmränder. Versteckte Aufgaben und Staffelei-Miniatur werden passend angezeigt. */
     :root{
       --desk-color:#a1887f;
       --highlight:#ffeb3b;
@@ -232,6 +232,18 @@
     .preview-mouse-left,.preview-mouse-right{position:absolute;top:0;width:50%;height:34px;box-sizing:border-box;background:#bbdefb;border-bottom:2px solid #333;}
     .preview-mouse-left{left:0;border-radius:28px 0 0 0;border-right:1px solid #333;}
     .preview-mouse-right{right:0;background:#ffccbc;border-radius:0 28px 0 0;border-left:1px solid #333;}
+
+    /* V42: Staffelei mit einer Miniatur des zuletzt gemalten Bildes. Erst nach Fund des Malprogramms sichtbar. */
+    .paint-easel{display:none;position:absolute;left:calc(50% - 235px);top:25px;width:140px;height:190px;z-index:1;pointer-events:none;filter:drop-shadow(0 5px 4px rgba(0,0,0,.24));}
+    .paint-easel-frame{position:absolute;left:4px;top:0;width:132px;height:78px;padding:5px;box-sizing:border-box;background:linear-gradient(135deg,#d7ad78,#a96f3e);border:6px solid #8b5a32;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3),0 2px 4px rgba(0,0,0,.25);transform:rotate(-1deg);}
+    #paint-easel-image{display:block;width:100%;height:100%;object-fit:contain;background:#fff;}
+    .paint-easel-ledge{position:absolute;left:0;top:80px;width:140px;height:8px;border-radius:3px;background:linear-gradient(#d6a36b,#8b5a32);box-shadow:0 2px 3px rgba(0,0,0,.28);}
+    .paint-easel-leg{position:absolute;top:85px;width:8px;height:98px;border-radius:3px;background:linear-gradient(90deg,#87552f,#c18a50,#87552f);transform-origin:top center;}
+    .paint-easel-leg-left{left:54px;transform:rotate(10deg);}
+    .paint-easel-leg-right{left:83px;transform:rotate(-10deg);}
+    .paint-easel-crossbar{position:absolute;left:49px;top:137px;width:49px;height:6px;border-radius:3px;background:#9b673b;transform:rotate(-1deg);}
+    @media(max-width:850px){.paint-easel{left:calc(50% - 195px);top:17px;width:108px;height:158px;}.paint-easel-frame{left:3px;width:102px;height:64px;padding:4px;border-width:5px;}.paint-easel-ledge{top:66px;width:108px;height:7px;}.paint-easel-leg{top:72px;height:79px;width:7px;}.paint-easel-leg-left{left:41px;}.paint-easel-leg-right{left:64px;}.paint-easel-crossbar{left:38px;top:112px;width:40px;height:5px;}}
+    @media(max-width:580px){.paint-easel{left:4px;top:16px;width:98px;height:150px;}.paint-easel-frame{left:2px;width:94px;height:60px;padding:4px;border-width:5px;}.paint-easel-ledge{top:62px;width:98px;height:6px;}.paint-easel-leg{top:68px;height:76px;width:6px;}.paint-easel-leg-left{left:36px;}.paint-easel-leg-right{left:58px;}.paint-easel-crossbar{left:34px;top:108px;width:36px;height:5px;}}
     #all-levels-done{display:none;position:static;left:auto;transform:none;align-self:center;margin:16px auto 0;padding:10px 18px;background:#e8f5e9;color:#1b5e20;border:2px solid #66bb6a;border-radius:14px;font-size:clamp(12px,1.25vw,18px);font-weight:800;width:max-content;max-width:calc(100vw - 24px);white-space:nowrap;text-align:center;box-sizing:border-box;box-shadow:0 4px 12px rgba(0,0,0,.15);}
     /* Bewegliche Desktop-Symbole und Kontextmenü */
     .win-icon.desktop-object{cursor:grab;touch-action:none;}
@@ -896,6 +908,124 @@
       #reset-progress-modal p{font-size:14px;}
     }
 
+
+    /* V43: Desktopobjekte enden bündig an der Taskleiste, statt hinter sie zu rutschen. */
+    /* Dateinamen im Papierkorb: Der Mathe-Dateiname erhält genau zwei Zeilen. */
+    .trash-window-toolbar,.trash-file{grid-template-columns:minmax(190px,1.45fr) minmax(100px,.9fr) minmax(85px,.75fr);}
+    .trash-file-math-name{gap:7px;}
+    .trash-homework-label{display:block;white-space:normal;line-height:1.08;overflow-wrap:normal;}
+    .folder-file-name-hoursplan{flex-wrap:nowrap;white-space:nowrap;}
+    .folder-file-name-hoursplan .folder-file-label{display:inline-block;white-space:nowrap;flex:0 0 auto;}
+    @media(max-width:580px){
+      .trash-window-toolbar,.trash-file{grid-template-columns:minmax(126px,1.3fr) minmax(58px,.7fr) minmax(54px,.65fr);gap:4px;}
+      .trash-file-math-name{font-size:10px;gap:6px;}
+      .trash-file-math-name .trash-file-icon{font-size:20px;flex-basis:22px;width:22px;}
+      .trash-homework-label{font-size:10px;line-height:1.08;white-space:normal;}
+      .folder-file-name-hoursplan{font-size:9px!important;gap:5px;}
+      .folder-file-name-hoursplan .folder-file-icon{width:22px;flex-basis:22px;font-size:18px;}
+      .folder-file-name-hoursplan .folder-file-label{font-size:9px;}
+    }
+
+    /* Staffelei links und Comic-Maus rechts erhalten denselben Abstand zum Bildschirm. */
+    .paint-easel{left:calc(50% - 311px);width:140px;}
+    .paint-easel-frame{width:132px;height:74.25px;aspect-ratio:16/9;}
+    .paint-easel-ledge{top:76.25px;width:140px;}
+    .paint-easel-leg{top:82px;}
+    .paint-easel-crossbar{top:134px;}
+    .cheese-mouse-mascot{display:none;position:absolute;left:calc(50% + 175px);top:22px;width:140px;height:166px;z-index:2;pointer-events:none;filter:drop-shadow(0 5px 4px rgba(0,0,0,.22));}
+    .cheese-mouse-mascot.is-visible{display:block;animation:cheeseMousePop .5s cubic-bezier(.2,.8,.3,1.2) both;}
+    .cheese-mouse-mascot svg{display:block;width:100%;height:100%;overflow:visible;}
+    .cheese-mouse-head{transform-box:view-box;transform-origin:79px 83px;animation:cheeseMouseChew .72s ease-in-out infinite;}
+    .cheese-mouse-mouth{animation:cheeseMouseMunch .36s ease-in-out infinite alternate;}
+    .cheese-mouse-tail{transform-box:view-box;transform-origin:38px 145px;animation:cheeseMouseTail 1.2s ease-in-out infinite;}
+    .cheese-mouse-cheese{transform-box:view-box;transform-origin:128px 105px;animation:cheeseMouseNibble .72s ease-in-out infinite;}
+    @keyframes cheeseMousePop{from{opacity:0;transform:translateY(9px) scale(.88);}to{opacity:1;transform:translateY(0) scale(1);}}
+    @keyframes cheeseMouseChew{0%,100%{transform:rotate(0deg) translateY(0);}50%{transform:rotate(-2deg) translateY(1px);}}
+    @keyframes cheeseMouseMunch{from{transform:scaleY(.65);}to{transform:scaleY(1.2);}}
+    @keyframes cheeseMouseTail{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(8deg);}}
+    @keyframes cheeseMouseNibble{0%,100%{transform:rotate(0deg) translate(0,0);}50%{transform:rotate(-5deg) translate(-2px,1px);}}
+    @media(max-width:850px){
+      .paint-easel{left:calc(50% - 253px);width:108px;height:158px;}
+      #paint-easel .paint-easel-frame{left:3px;width:102px!important;min-width:102px;max-width:102px;height:57.4px;padding:4px;border-width:5px;}
+      .paint-easel-ledge{top:60px;width:108px;height:7px;}
+      .paint-easel-leg{top:66px;height:85px;width:7px;}
+      .paint-easel-leg-left{left:41px;}.paint-easel-leg-right{left:64px;}
+      .paint-easel-crossbar{left:38px;top:112px;width:40px;height:5px;}
+      .cheese-mouse-mascot{left:calc(50% + 148px);top:18px;width:108px;height:132px;}
+    }
+    @media(max-width:580px){
+      .paint-easel{left:0;top:16px;width:66px;height:112px;}
+      #paint-easel .paint-easel-frame{left:1px;top:0;width:61px!important;min-width:61px;max-width:61px;height:34.3px;padding:3px;border-width:4px;}
+      .paint-easel-ledge{top:36px;width:66px;height:6px;}
+      .paint-easel-leg{top:42px;height:64px;width:5px;}
+      .paint-easel-leg-left{left:25px;}.paint-easel-leg-right{left:39px;}
+      .paint-easel-crossbar{left:23px;top:77px;width:23px;height:4px;}
+      .cheese-mouse-mascot{left:calc(50% + 118px);top:15px;width:60px;height:76px;}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .cheese-mouse-mascot.is-visible,.cheese-mouse-head,.cheese-mouse-mouth,.cheese-mouse-tail,.cheese-mouse-cheese{animation:none!important;}
+    }
+
+  
+    /* V44: Desktopobjekte duerfen bis auf 0 px an die Oberkante der Taskleiste reichen. */
+    /* Dateinamen bleiben genau in der gewuenschten Zeilenanzahl lesbar. */
+    .trash-file-math-name{min-width:0;gap:6px!important;}
+    .trash-homework-label{
+      display:block;flex:0 0 auto;white-space:nowrap!important;overflow:visible!important;
+      overflow-wrap:normal!important;word-break:normal!important;line-height:1.08;
+    }
+    .folder-file-name-hoursplan{min-width:0;flex-wrap:nowrap!important;white-space:nowrap!important;overflow:visible!important;}
+    .folder-file-name-hoursplan .folder-file-label{
+      display:inline-block;flex:0 0 auto;min-width:max-content;white-space:nowrap!important;
+      overflow:visible!important;text-overflow:clip!important;overflow-wrap:normal!important;word-break:normal!important;
+    }
+    @media(max-width:580px){
+      /* Explorer-Fenster nutzen auf schmalen Monitoren fast die gesamte Breite,
+         damit Name, Typ und Größe nicht ineinanderlaufen. */
+      #trash-window,#files-folder-window{left:8px!important;width:calc(100% - 16px)!important;}
+      .trash-window-toolbar,.trash-file{
+        grid-template-columns:minmax(126px,1.3fr) minmax(58px,.7fr) minmax(54px,.65fr)!important;
+        gap:4px!important;
+      }
+      .trash-file-math-name{font-size:9.5px!important;gap:5px!important;}
+      .trash-file-math-name .trash-file-icon{font-size:20px!important;flex-basis:22px!important;width:22px!important;}
+      .trash-homework-label{font-size:9.5px!important;white-space:nowrap!important;}
+      .files-folder-toolbar,.folder-file{
+        grid-template-columns:minmax(112px,1.45fr) minmax(40px,.7fr) minmax(34px,.5fr)!important;
+        gap:3px!important;padding-left:2px!important;padding-right:2px!important;
+      }
+      .folder-file-name-hoursplan{font-size:9px!important;gap:5px!important;}
+      .folder-file-name-hoursplan .folder-file-icon{width:27px!important;flex-basis:27px!important;font-size:18px!important;}
+      .folder-file-name-hoursplan .folder-file-label{font-size:9px!important;white-space:nowrap!important;}
+    }
+
+    /* V44: Das gemalte Bild liegt exakt waagerecht im Querformat. */
+    #paint-easel .paint-easel-frame{
+      transform:none!important;aspect-ratio:16/9;rotate:none!important;
+    }
+    #paint-easel-image{display:block;width:100%;height:100%;object-fit:contain;object-position:center center;transform:none!important;}
+
+    /* V44: Kleine, flache Comic-Maus in Seitenansicht mit zweidimensionalem Käsestück. */
+    .cheese-mouse-mascot{
+      left:calc(50% + 175px)!important;top:64px!important;width:96px!important;height:47px!important;
+      z-index:2;filter:drop-shadow(0 2px 1px rgba(0,0,0,.16));
+    }
+    .cheese-mouse-head{transform-box:view-box;transform-origin:119px 52px;animation:cheeseMouseChew .72s ease-in-out infinite;}
+    .cheese-mouse-mouth{transform-box:view-box;transform-origin:129px 60px;animation:cheeseMouseMunch .36s ease-in-out infinite alternate;}
+    .cheese-mouse-tail{transform-box:view-box;transform-origin:48px 61px;animation:cheeseMouseTail 1.2s ease-in-out infinite;}
+    .cheese-mouse-cheese{transform-box:view-box;transform-origin:158px 68px;animation:cheeseMouseNibble .72s ease-in-out infinite;}
+    @media(max-width:850px){
+      .cheese-mouse-mascot{left:calc(50% + 148px)!important;top:58px!important;width:82px!important;height:41px!important;}
+    }
+    @media(max-width:580px){
+      .cheese-mouse-mascot{left:calc(50% + 118px)!important;top:48px!important;width:52px!important;height:26px!important;}
+    }
+
+  
+    /* V46: Die Comic-Maus sitzt etwas tiefer. Der Beschreibungstext der Mausansicht ist wieder sichtbar. */
+    .cheese-mouse-mascot.is-visible{top:68px!important;}
+    @media(max-width:850px){.cheese-mouse-mascot.is-visible{top:68px!important;}}
+    @media(max-width:580px){.cheese-mouse-mascot.is-visible{top:58px!important;}}
 </style>
 </head>
 <body>
@@ -903,7 +1033,7 @@
   <div id="success-overlay">
     <div class="success-box">
       <h2 style="color:#2e7d32;margin-top:0;font-size:28px;">🎉 Super gemacht! 🎉</h2>
-      <p style="font-size:18px;">Du hast die Aufgabe erfolgreich erledigt.</p>
+      <p id="success-message" style="font-size:18px;">Du hast die Aufgabe erfolgreich erledigt.</p>
       <button class="btn-close" style="width:auto;margin-top:10px;font-size:18px;" onclick="closeSuccessPopup()">Klasse!</button>
     </div>
   </div>
@@ -929,6 +1059,40 @@
 
     <div class="desk-surface" aria-label="Schreibtisch mit Bildschirm, Tastatur und Maus">
       <button type="button" class="desk-reset-btn" onclick="showResetProgressWarning()" aria-label="Gesamten Aufgabenfortschritt zurücksetzen" title="Fortschritt zurücksetzen"><span aria-hidden="true">↻</span> Zurücksetzen</button>
+      <div id="paint-easel" class="paint-easel" aria-hidden="true" aria-label="Dein gemaltes Bild auf einer Staffelei">
+        <div class="paint-easel-frame"><img id="paint-easel-image" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 240 135%27%3E%3Crect width=%27240%27 height=%27135%27 fill=%27white%27/%3E%3C/svg%3E" alt="Miniaturansicht deines gemalten Bildes" /></div>
+        <div class="paint-easel-ledge"></div>
+        <div class="paint-easel-leg paint-easel-leg-left"></div>
+        <div class="paint-easel-leg paint-easel-leg-right"></div>
+        <div class="paint-easel-crossbar"></div>
+      </div>
+      <div id="cheese-mouse-mascot" class="cheese-mouse-mascot" aria-hidden="true" aria-label="Eine fröhliche Maus knabbert an einem Stück Käse">
+        <svg viewBox="0 0 190 92" role="img" aria-hidden="true" focusable="false">
+          <path class="cheese-mouse-tail" d="M49 61 C30 61 27 47 15 51 C5 55 10 68 23 66" fill="none" stroke="#9a6b52" stroke-width="3.5" stroke-linecap="round"/>
+          <ellipse cx="79" cy="59" rx="39" ry="23" fill="#d6dde1" stroke="#53636d" stroke-width="2.5"/>
+          <ellipse cx="79" cy="67" rx="22" ry="11" fill="#f4f6f7" stroke="#aab7bf" stroke-width="1.5"/>
+          <path d="M62 76 Q59 82 53 82 M91 77 Q94 82 100 82" fill="none" stroke="#53636d" stroke-width="3.5" stroke-linecap="round"/>
+          <g class="cheese-mouse-head">
+            <circle cx="108" cy="31" r="14" fill="#d6dde1" stroke="#53636d" stroke-width="2.5"/>
+            <circle cx="108" cy="31" r="7.5" fill="#efb1b8"/>
+            <path d="M94 54 C91 40 101 31 116 32 C130 32 139 42 139 54 C139 66 129 72 115 70 L101 67 Z" fill="#e7ecef" stroke="#53636d" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="122" cy="45" r="2.8" fill="#263238"/>
+            <circle cx="122.8" cy="44.2" r=".8" fill="#fff"/>
+            <ellipse cx="138" cy="55" rx="3.7" ry="2.8" fill="#e57373" stroke="#a94d56" stroke-width="1"/>
+            <path class="cheese-mouse-mouth" d="M134 60 Q128 66 122 60" fill="none" stroke="#5d4037" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M133 56 L146 53 M132 60 L145 62" stroke="#7b858b" stroke-width="1.2" stroke-linecap="round"/>
+          </g>
+          <path d="M103 68 Q117 73 132 67" fill="none" stroke="#53636d" stroke-width="3" stroke-linecap="round"/>
+          <g class="cheese-mouse-cheese">
+            <path d="M145 53 L183 61 L170 84 L141 75 Z" fill="#ffca28" stroke="#a66a12" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M145 53 L170 84 L141 75 Z" fill="#f2ad19" stroke="#a66a12" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle cx="158" cy="65" r="3.2" fill="#fff0a6"/>
+            <circle cx="169" cy="70" r="2.5" fill="#fff0a6"/>
+            <circle cx="151" cy="74" r="2" fill="#fff0a6"/>
+          </g>
+          <path d="M148 42 l-3 -4 M157 40 l1 -5" stroke="#7b4b24" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div id="start-monitor" class="item-click start-choice" onclick="openDetail('screen-monitor')">
         <div class="start-choice-inner">
           <div class="preview-monitor"><div class="preview-monitor-screen"></div><div class="preview-monitor-neck"></div><div class="preview-monitor-base"></div></div>
@@ -972,8 +1136,8 @@
         <div class="trash-window-titlebar" title="Fenster durch Ziehen verschieben"><span>🗑️ Papierkorb</span><button type="button" aria-label="Fenster schließen" onclick="document.getElementById('trash-window').style.display='none'">×</button></div>
         <div class="trash-window-toolbar"><span>Name</span><span>Ursprünglicher Speicherort</span><span>Gelöscht am</span></div>
         <div class="trash-window-files" id="trash-window-files">
-          <div id="trash-file-math" class="trash-file" data-file-name="Mathe-Hausaufgaben.docx" data-file-icon="📄" data-original-location="Dokumente" data-deleted-date="28.10.2026" title="Datei mit der Maus auf den Desktop ziehen">
-            <span class="trash-file-name"><span class="trash-file-icon">📄</span>Mathe-Hausaufgaben.docx</span><span class="trash-file-meta">Dokumente</span><span class="trash-file-meta">28.10.2026</span>
+          <div id="trash-file-math" class="trash-file trash-file-math" data-file-name="Mathe-Hausaufgaben.docx" data-file-icon="📄" data-original-location="Dokumente" data-deleted-date="28.10.2026" title="Datei mit der Maus auf den Desktop ziehen">
+            <span class="trash-file-name trash-file-math-name"><span class="trash-file-icon">📄</span><span class="trash-homework-label">Mathe-<br>Hausaufgaben.docx</span></span><span class="trash-file-meta">Dokumente</span><span class="trash-file-meta">28.10.2026</span>
           </div>
           <div id="trash-file-photo" class="trash-file" data-file-name="Klassenfahrt.jpg" data-file-icon="🖼️" data-original-location="Bilder" data-deleted-date="29.10.2026" title="Datei mit der Maus auf den Desktop ziehen">
             <span class="trash-file-name"><span class="trash-file-icon">🖼️</span>Klassenfahrt.jpg</span><span class="trash-file-meta">Bilder</span><span class="trash-file-meta">29.10.2026</span>
@@ -1031,7 +1195,7 @@
         <div class="files-folder-toolbar"><span>Name</span><span>Typ</span><span>Größe</span></div>
         <div id="files-folder-list">
           <div class="folder-file" data-file-name="Stundenplan.docx" data-file-kind="text" data-file-icon="📄" data-file-size="9 KB" data-original-location="Ordner Dateien">
-            <span class="folder-file-name"><span class="folder-file-icon">📄</span>Stundenplan.docx</span><span class="folder-file-meta">Textdokument</span><span class="folder-file-meta">9 KB</span>
+            <span class="folder-file-name folder-file-name-hoursplan"><span class="folder-file-icon">📄</span><span class="folder-file-label">Stundenplan.docx</span></span><span class="folder-file-meta">Textdokument</span><span class="folder-file-meta">9 KB</span>
           </div>
           <div class="folder-file" data-file-name="Klassenfahrt_Tag1.mp4" data-file-kind="video" data-file-icon="🎬" data-file-size="24 MB" data-original-location="Ordner Dateien">
             <span class="folder-file-name"><span class="folder-file-icon">🎬</span>Klassenfahrt_Tag1.mp4</span><span class="folder-file-meta">Videodatei</span><span class="folder-file-meta">24 MB</span>
@@ -1389,6 +1553,7 @@
     // Aufgabenfortschritt lokal im Browser speichern, damit erledigte Aufgaben
     // auch nach einem Neuladen der Seite erhalten bleiben.
     const PROGRESS_STORAGE_KEY = 'computererkundung_pc_fuehrerschein_progress_v1';
+    const PAINT_EASEL_STORAGE_KEY = 'computererkundung_pc_fuehrerschein_paint_easel_v1';
     function loadDoneTasks(){
       try{
         const raw=localStorage.getItem(PROGRESS_STORAGE_KEY);
@@ -1489,6 +1654,12 @@
       updateStartBar('monitor',monCount,catMonitor.length);
       updateStartBar('keyboard',kbCount,catKeyboard.length);
       updateStartBar('mouse',mouseCount,catMouse.length);
+      const cheeseMouse=document.getElementById('cheese-mouse-mascot');
+      if(cheeseMouse){
+        const showCheeseMouse=done.has('sensorMaze');
+        cheeseMouse.classList.toggle('is-visible',showCheeseMouse);
+        cheeseMouse.setAttribute('aria-hidden',String(!showCheeseMouse));
+      }
 
       const allDone = monCount === catMonitor.length && kbCount === catKeyboard.length && mouseCount === catMouse.length;
       const allDoneEl = document.getElementById('all-levels-done');
@@ -1512,6 +1683,7 @@
     function confirmResetProgress(){
       try{
         localStorage.removeItem(PROGRESS_STORAGE_KEY);
+        localStorage.removeItem(PAINT_EASEL_STORAGE_KEY);
       }catch(error){
         // Falls das Entfernen gesperrt ist, wird ein leerer Fortschritt versucht.
         try{ localStorage.setItem(PROGRESS_STORAGE_KEY,'[]'); }catch(storageError){
@@ -1892,6 +2064,63 @@
       if(typeof followUpAction === 'function') followUpAction();
     }
 
+    function updatePaintEaselPreview(canvas){
+      if(!canvas || !done.has('paint')) return;
+      const easel=document.getElementById('paint-easel');
+      const image=document.getElementById('paint-easel-image');
+      if(!easel || !image) return;
+      try{
+        const thumbnail=document.createElement('canvas');
+        thumbnail.width=240;
+        thumbnail.height=100;
+        const context=thumbnail.getContext('2d');
+        if(!context) return;
+        context.fillStyle='#ffffff';
+        context.fillRect(0,0,thumbnail.width,thumbnail.height);
+        const scale=Math.min(thumbnail.width/canvas.width,thumbnail.height/canvas.height);
+        const width=canvas.width*scale;
+        const height=canvas.height*scale;
+        context.drawImage(canvas,(thumbnail.width-width)/2,(thumbnail.height-height)/2,width,height);
+        const dataUrl=thumbnail.toDataURL('image/jpeg',0.82);
+        image.src=dataUrl;
+        easel.style.display='block';
+        easel.setAttribute('aria-hidden','false');
+        try{localStorage.setItem(PAINT_EASEL_STORAGE_KEY,dataUrl);}catch(storageError){
+          console.warn('Die Bildvorschau konnte nicht gespeichert werden.',storageError);
+        }
+      }catch(error){
+        console.warn('Die Bildvorschau für die Staffelei konnte nicht erstellt werden.',error);
+      }
+    }
+
+    function restorePaintEasel(){
+      const easel=document.getElementById('paint-easel');
+      const image=document.getElementById('paint-easel-image');
+      if(!easel || !image) return;
+      if(!done.has('paint')){
+        easel.style.display='none';
+        easel.setAttribute('aria-hidden','true');
+        return;
+      }
+      try{
+        const saved=localStorage.getItem(PAINT_EASEL_STORAGE_KEY);
+        if(saved) image.src=saved;
+        else{
+          const blank=document.createElement('canvas');
+          blank.width=240;blank.height=100;
+          const context=blank.getContext('2d');
+          context.fillStyle='#fff';context.fillRect(0,0,blank.width,blank.height);
+          image.src=blank.toDataURL('image/jpeg',0.82);
+        }
+      }catch(error){
+        console.warn('Die gespeicherte Bildvorschau konnte nicht geladen werden.',error);
+      }
+      easel.style.display='block';
+      easel.setAttribute('aria-hidden','false');
+    }
+
+    window.addEventListener('DOMContentLoaded',restorePaintEasel);
+
     function finishTask(key){
       if(done.has(key)) return; 
       done.add(key);
@@ -1930,6 +2159,12 @@
         const statusEl=document.getElementById(monitorStatusIds[key]);
         if(statusEl){statusEl.textContent=(key==='trash')?'Datei erfolgreich wiederhergestellt und auf dem Desktop abgelegt!':(key==='newfolder'?'Prima! Dein neuer Ordner wurde auf dem Desktop erstellt.':'Richtig! Aufgabe geschafft.');statusEl.className='game-status good';}
       }
+      const successMessage=document.getElementById('success-message');
+      if(successMessage){
+        successMessage.textContent=(key==='paint' || key==='newfolder')
+          ? 'Du hast eine versteckte Aufgabe entdeckt und erfolgreich gemeistert!'
+          : 'Du hast die Aufgabe erfolgreich erledigt.';
+      }
       updateProgress();
       document.getElementById('success-overlay').style.display='block';
     }
@@ -1953,6 +2188,11 @@
       if(key==='power'){
         window.setTimeout(()=>showInfo('Bildschirm ausgeschaltet','Du hast den Bildschirm ausgeschaltet! Damit du den Computer wieder benutzen kannst, musst du ihn zuerst wieder einschalten. Denke daran: Am Ende jeder Informatikstunde schaltest du auch den echten Bildschirm aus, so wie wir es besprochen haben.'),0);
       }
+      if(key==='paint'){
+        window.setTimeout(()=>showInfo('Willkommen im Malprogramm','Hier kannst du kreativ sein und dein eigenes Bild malen. Probiere die Farben und Werkzeuge einfach aus!'),0);
+      }
+      const successMessage=document.getElementById('success-message');
+      if(successMessage) successMessage.textContent='Du hast die Aufgabe erfolgreich erledigt.';
       lastSuccessfulTaskKey=null;
     }
 
@@ -2060,7 +2300,7 @@
       const contentTop=r.top+win.clientTop;
       desktopMenuPoint={
         x:Math.max(6,Math.min(win.clientWidth-94,e.clientX-contentLeft)),
-        y:Math.max(6,Math.min(win.clientHeight-44-86,e.clientY-contentTop))
+        y:clampDesktopObjectTop(win,null,Math.max(6,e.clientY-contentTop),86)
       };
       menu.style.display='block';
       const menuRect=menu.getBoundingClientRect();
@@ -2126,7 +2366,7 @@
       folder.id='folder-'+Date.now()+'-'+Math.floor(Math.random()*10000);
       folder.style.position='absolute';
       folder.style.left=Math.max(4,Math.min(win.clientWidth-94,x))+'px';
-      folder.style.top=Math.max(4,Math.min(win.clientHeight-44-86,y))+'px';
+      folder.style.top=clampDesktopObjectTop(win,folder,Math.max(4,y))+'px';
       folder.style.margin='0';
       folder.innerHTML='📁<span></span>';
       folder.querySelector('span').textContent=folderName;
@@ -2137,6 +2377,27 @@
 
     function formatTrashDate(date=new Date()){
       return new Intl.DateTimeFormat('de-DE').format(date);
+    }
+    function desktopWorkAreaHeight(win=document.getElementById('win-screen')){
+      if(!win) return 0;
+      const taskbar=win.querySelector('.win-taskbar');
+      return taskbar ? Math.max(0,Math.min(win.clientHeight,taskbar.offsetTop)) : win.clientHeight;
+    }
+    function desktopObjectMaxTop(win,object,fallbackHeight=86){
+      if(!win) return 0;
+      let objectHeight=object?.offsetHeight || 0;
+      if(!objectHeight && object){
+        const cssHeight=parseFloat(getComputedStyle(object).height);
+        if(Number.isFinite(cssHeight) && cssHeight>0) objectHeight=cssHeight;
+      }
+      if(!objectHeight) objectHeight=fallbackHeight;
+      // Die Unterkante des Objekts darf exakt an der Oberkante der Taskleiste liegen.
+      // Dadurch ist der Mindestabstand nach unten genauso null wie an den anderen Rändern.
+      const taskbarGap=0;
+      return Math.max(0,desktopWorkAreaHeight(win)-objectHeight-taskbarGap);
+    }
+    function clampDesktopObjectTop(win,object,desiredTop,fallbackHeight=86){
+      return Math.max(0,Math.min(desktopObjectMaxTop(win,object,fallbackHeight),Number.isFinite(desiredTop)?desiredTop:0));
     }
 
     // Sonderzeichen und SVG-Dateisymbole werden beim Verschieben unverändert mitgeführt.
@@ -2200,7 +2461,15 @@
       const icon=document.createElement('span');
       icon.className='trash-file-icon';
       applyIconMarkup(icon,row.dataset.fileIcon,row.dataset.fileIconMarkup);
-      name.append(icon,document.createTextNode(row.dataset.fileName));
+      if(row.dataset.fileName==='Mathe-Hausaufgaben.docx'){
+        name.classList.add('trash-file-math-name');
+        const label=document.createElement('span');
+        label.className='trash-homework-label';
+        label.append(document.createTextNode('Mathe-'),document.createElement('br'),document.createTextNode('Hausaufgaben.docx'));
+        name.append(icon,label);
+      }else{
+        name.append(icon,document.createTextNode(row.dataset.fileName));
+      }
       const location=document.createElement('span');
       location.className='trash-file-meta';
       location.textContent=row.dataset.originalLocation;
@@ -2229,7 +2498,7 @@
       if(fileRow.dataset.desktopAction) restored.dataset.desktopAction=fileRow.dataset.desktopAction;
       if(fileRow.dataset.desktopFolder==='true') restored.dataset.desktopFolder='true';
       restored.style.left=Math.max(0,Math.min(win.clientWidth-88,dropX-origin.left-44))+'px';
-      restored.style.top=Math.max(0,Math.min(win.clientHeight-44-86,dropY-origin.top-43))+'px';
+      restored.style.top=clampDesktopObjectTop(win,restored,dropY-origin.top-43)+'px';
       const iconLabel=document.createElement('span');
       iconLabel.setAttribute('aria-hidden','true');
       const iconMarkup=fileRow.dataset.fileIconMarkup || (name==='Login.exe' ? desktopObjectIconMarkup(document.getElementById('icon-login')) : '');
@@ -2243,7 +2512,6 @@
       const nameLabel=document.createElement('span');
       nameLabel.textContent=name;
       restored.append(iconLabel,nameLabel);
-      restored.title='Wiederhergestellte Datei. Du kannst sie auf dem Desktop verschieben.';
       if(restored.dataset.desktopObject==='true'){
         restored.addEventListener('click',()=>activateDesktopObject(restored));
       }else if(name==='Browser'){
@@ -2260,7 +2528,6 @@
         restored.addEventListener('click',openLoginFileInfo);
       }else if(name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.png')){
         restored.dataset.desktopAction='paint';
-        restored.title='Bilddatei. Anklicken, um sie im Malprogramm zu öffnen.';
         restored.addEventListener('click',openPaintProgram);
       }else if(restored.dataset.fromFilesFolder==='true'){
         restored.dataset.desktopAction='file';
@@ -2292,7 +2559,11 @@
       const icon=document.createElement('span');
       icon.className='folder-file-icon';
       applyIconMarkup(icon,row.dataset.fileIcon,row.dataset.fileIconMarkup);
-      name.append(icon,document.createTextNode(row.dataset.fileName));
+      const fileLabel=document.createElement('span');
+      fileLabel.className='folder-file-label';
+      fileLabel.textContent=row.dataset.fileName;
+      if(row.dataset.fileName==='Stundenplan.docx') name.classList.add('folder-file-name-hoursplan');
+      name.append(icon,fileLabel);
       const kind=document.createElement('span');
       kind.className='folder-file-meta';
       kind.textContent=row.dataset.desktopObject==='true'?'Desktopobjekt':(row.dataset.fileKind==='video'?'Videodatei':'Textdokument');
@@ -2351,7 +2622,7 @@
       if(row.dataset.desktopFolder==='true') el.dataset.desktopFolder='true';
       el.style.position='absolute';
       el.style.left=Math.max(0,Math.min(win.clientWidth-88,clientX-origin.left-44))+'px';
-      el.style.top=Math.max(0,Math.min(win.clientHeight-44-86,clientY-origin.top-43))+'px';
+      el.style.top=clampDesktopObjectTop(win,el,clientY-origin.top-43)+'px';
       const symbol=document.createElement('span');
       symbol.setAttribute('aria-hidden','true');
       const iconMarkup=row.dataset.fileIconMarkup || (name==='Login.exe' ? desktopObjectIconMarkup(document.getElementById('icon-login')) : '');
@@ -2399,7 +2670,7 @@
       file.dataset.originalLocation=row.dataset.originalLocation || 'Ordner Dateien';
       file.style.position='absolute';
       file.style.left=Math.max(0,Math.min(win.clientWidth-88,clientX-origin.left-44))+'px';
-      file.style.top=Math.max(0,Math.min(win.clientHeight-44-86,clientY-origin.top-43))+'px';
+      file.style.top=clampDesktopObjectTop(win,file,clientY-origin.top-43)+'px';
       const iconNode=document.createElement('span');
       iconNode.textContent=icon;
       iconNode.style.fontSize='38px';
@@ -2408,7 +2679,6 @@
       file.append(iconNode,label);
       if(file.dataset.desktopAction==='paint') file.addEventListener('click',openPaintProgram);
       else file.addEventListener('click',()=>showInfo(name,folderFileDescription(name,kind)));
-      file.title='Wiederhergestellte Datei aus dem Ordner Dateien. Anklicken, um mehr zu erfahren.';
       win.appendChild(file);
       row.remove();
       refreshFilesFolderList();
@@ -2534,7 +2804,7 @@
       };
 
       const movePreview=(e)=>{
-        if(!drag) return;
+        if(!drag || (drag.pointerId!=null && e.pointerId!==drag.pointerId)) return;
         const dx=e.clientX-drag.startX, dy=e.clientY-drag.startY;
         if(!drag.moved && Math.hypot(dx,dy)<5) return;
         drag.moved=true;
@@ -2579,7 +2849,7 @@
 
         const origin=contentOrigin();
         const left=clamp(e.clientX-origin.left-drag.offsetX,0,win.clientWidth-drag.el.offsetWidth);
-        const top=clamp(e.clientY-origin.top-drag.offsetY,0,win.clientHeight-44-drag.el.offsetHeight);
+        const top=clamp(e.clientY-origin.top-drag.offsetY,0,desktopObjectMaxTop(win,drag.el));
         drag.el.style.position='absolute';
         drag.el.style.left=left+'px';
         drag.el.style.top=top+'px';
@@ -2664,8 +2934,8 @@
           offsetX:e.clientX-rect.left,offsetY:e.clientY-rect.top,
           startRect:rect,moved:false,ghost:null
         };
-        /* Desktopobjekte einschließlich des Papierkorbs selbst zuverlässig festhalten.
-           Pointer Capture hält Ziehen auch dann aktiv, wenn der Zeiger kurz über den Rand fährt. */
+        /* Alle Desktopobjekte einschließlich Papierkorb, Dateien, Browser, Login und Ordner
+           erhalten Pointer Capture. So bleibt Ziehen auch beim Verlassen des Monitors aktiv. */
         if(object.classList.contains('desktop-object')){
           e.preventDefault();
           try{object.setPointerCapture(e.pointerId);}catch(_){/* Fallback: Dokument-Listener übernehmen weiter. */}
@@ -2675,7 +2945,7 @@
       document.addEventListener('pointermove',movePreview,{passive:false});
 
       document.addEventListener('pointerup',e=>{
-        if(!drag) return;
+        if(!drag || (drag.pointerId!=null && e.pointerId!==drag.pointerId)) return;
         movePreview(e);
         const current=drag;
         if(current.moved){
@@ -2708,7 +2978,7 @@
               current.el.style.visibility='visible';
             }else{
               const origin=contentOrigin();
-              const desktopRect={left:origin.left,top:origin.top,right:origin.left+win.clientWidth,bottom:origin.top+win.clientHeight-44};
+              const desktopRect={left:origin.left,top:origin.top,right:origin.left+win.clientWidth,bottom:origin.top+desktopWorkAreaHeight(win)};
               if(pointInside(desktopRect,e.clientX,e.clientY)){
                 const fileName=restoreTrashFileToDesktop(current.el,e.clientX,e.clientY,current.offsetX,current.offsetY,win,origin);
                 const status=document.getElementById('trash-game-status');
@@ -2763,7 +3033,7 @@
               current.el.style.visibility='visible';
             }else{
               const origin=contentOrigin();
-              const desktopRect={left:origin.left,top:origin.top,right:origin.left+win.clientWidth,bottom:origin.top+win.clientHeight-44};
+              const desktopRect={left:origin.left,top:origin.top,right:origin.left+win.clientWidth,bottom:origin.top+desktopWorkAreaHeight(win)};
               if(pointInside(desktopRect,e.clientX,e.clientY)){
                 createDesktopFileFromFolderRow(current.el,e.clientX,e.clientY,current.offsetX,current.offsetY,win,origin);
               }else current.el.style.visibility='visible';
@@ -2806,22 +3076,6 @@
               }
             }else if(topWindow){
               restoreDesktopObjectPosition(current);
-            }else if(current.el.id==='icon-trash'){
-              // Der Papierkorb ist wie jedes andere Desktopobjekt frei beweglich.
-              // Geschützt ist nur das Ablegen in einem anderen Fenster, nicht das Verschieben auf dem Desktop.
-              const origin=contentOrigin();
-              const desktopRect={left:origin.left,top:origin.top,right:origin.left+win.clientWidth,bottom:origin.top+win.clientHeight-44};
-              if(pointInside(desktopRect,e.clientX,e.clientY)){
-                const left=clamp(e.clientX-origin.left-current.offsetX,0,Math.max(0,win.clientWidth-current.el.offsetWidth));
-                const top=clamp(e.clientY-origin.top-current.offsetY,0,Math.max(0,win.clientHeight-44-current.el.offsetHeight));
-                current.el.style.position='absolute';
-                current.el.style.left=left+'px';
-                current.el.style.top=top+'px';
-                current.el.style.margin='0';
-                current.el.classList.remove('dragging');
-              }else{
-                restoreDesktopObjectPosition(current);
-              }
             }else if(current.el.id==='icon-files'){
               const targetRect=target.getBoundingClientRect();
               const hit=pointInside(targetRect,e.clientX,e.clientY);
@@ -2847,8 +3101,19 @@
                   status.className='game-status wait';
                 }
               }
+            }else if(current.el.classList.contains('desktop-object')){
+              // Alle Desktopobjekte verhalten sich beim freien Verschieben wie der Dateien-Ordner.
+              // Die Vorschau begrenzt ihre Position bereits auf den virtuellen Bildschirm.
+              // Auch wenn außerhalb des Bildschirms losgelassen wird, bleibt das Objekt am nächstliegenden Rand.
+              const origin=contentOrigin();
+              const left=clamp(e.clientX-origin.left-current.offsetX,0,Math.max(0,win.clientWidth-current.el.offsetWidth));
+              const top=clamp(e.clientY-origin.top-current.offsetY,0,desktopObjectMaxTop(win,current.el));
+              current.el.style.position='absolute';
+              current.el.style.left=left+'px';
+              current.el.style.top=top+'px';
+              current.el.style.margin='0';
+              current.el.classList.remove('dragging');
             }else{
-              // Auch ein Loslassen außerhalb des virtuellen Desktops setzt das Objekt zurück.
               restoreDesktopObjectPosition(current);
             }
           }
@@ -2861,8 +3126,8 @@
         drag=null;
       });
 
-      document.addEventListener('pointercancel',()=>{
-        if(!drag) return;
+      document.addEventListener('pointercancel',e=>{
+        if(!drag || (drag.pointerId!=null && e.pointerId!==drag.pointerId)) return;
         if(drag.isTrashFile || drag.isFolderFile) drag.el.style.visibility='visible';
         else if(drag.el && drag.el.classList && drag.el.classList.contains('desktop-object')) restoreDesktopObjectPosition(drag);
         document.getElementById('files-created-folder')?.classList.remove('drag-over');
@@ -3638,11 +3903,17 @@
     function openPaintProgram(){
       const paintWindow=document.getElementById('paint-window');
       if(!paintWindow) return;
+      const firstDiscovery=!done.has('paint');
       paintWindow.style.display='block';
       bringDesktopWindowToFront('paint-window');
       initPaintProgram();
-      // Versteckte sechste Bildschirm-Aufgabe: das wiederhergestellte Bild öffnen.
-      finishTask('paint');
+      // Das erste Öffnen entdeckt die versteckte Aufgabe und stellt die Staffelei auf.
+      if(firstDiscovery){
+        finishTask('paint');
+        updatePaintEaselPreview(document.getElementById('paint-canvas'));
+      }else{
+        restorePaintEasel();
+      }
     }
     function closePaintProgram(){
       const paintWindow=document.getElementById('paint-window');
@@ -3694,12 +3965,14 @@
         if(history.length>maxHistory) history.shift();
         historyIndex=history.length-1;
         updateHistoryButtons();
+        if(historyIndex>0) updatePaintEaselPreview(canvas);
       };
       const restoreHistory=index=>{
         if(index<0 || index>=history.length) return;
         historyIndex=index;
         ctx.putImageData(history[historyIndex],0,0);
         updateHistoryButtons();
+        updatePaintEaselPreview(canvas);
       };
       const updateActive=()=>{
         // Die Farbauswahl ändert die Farbe, aber nicht das aktuell gewählte Werkzeug (z. B. den Fülleimer).
