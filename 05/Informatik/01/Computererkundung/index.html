@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Computererkundung</title>
+  <title>Computererkundung V40</title>
   <style>
-    /* V38: Fortschritt direkt im Zählerbalken und Reset-Text in vier Zeilen. */
+    /* V41: Papierkorb bleibt auf dem Desktop frei verschiebbar. Vollständige Lernbereiche wippen mit kürzerer Ruhezeit. */
     :root{
       --desk-color:#a1887f;
       --highlight:#ffeb3b;
@@ -199,6 +199,18 @@
 
     /* STARTBILDSCHIRM: Vorschauen der drei Lernbereiche */
     .start-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;width:190px;color:#fff;font-size:19px;font-weight:800;text-shadow:1px 2px 3px #3e2723;}
+    /* Jeder vollständig erledigte Bereich wippt eigenständig um seinen Mittelpunkt. */
+    .start-choice-inner{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;transform-origin:50% 50%;}
+    .start-choice.section-complete .start-choice-inner{animation:completedSectionSway 1.93s ease-in-out infinite;will-change:transform;}
+    @keyframes completedSectionSway{
+      /* 52% Ruhezeit = ca. 1 Sekunde. Die vier Bewegungsabschnitte
+         behalten dieselbe Dauer wie zuvor, damit die Wippgeschwindigkeit gleich bleibt. */
+      0%,52%,100%{transform:rotate(0deg);}
+      64%{transform:rotate(-1.7deg);}
+      76%{transform:rotate(1.7deg);}
+      88%{transform:rotate(-0.7deg);}
+    }
+    @media(prefers-reduced-motion:reduce){.start-choice.section-complete .start-choice-inner{animation-duration:6s;}}
     .start-progress{position:relative;display:inline-flex;align-items:center;justify-content:center;width:150px;height:23px;box-sizing:border-box;overflow:hidden;border-radius:999px;padding:0 8px;background:rgba(255,255,255,.92);color:#193b22;font-size:13px;font-weight:800;text-shadow:none;box-shadow:0 2px 5px rgba(0,0,0,.2);isolation:isolate;}
     .start-progress-fill{position:absolute;left:0;top:0;bottom:0;width:0%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#9cdda0,#46ad5b);transition:width .55s ease;z-index:-1;}
     .start-progress-label{position:relative;z-index:1;white-space:nowrap;line-height:1;}
@@ -918,20 +930,26 @@
     <div class="desk-surface" aria-label="Schreibtisch mit Bildschirm, Tastatur und Maus">
       <button type="button" class="desk-reset-btn" onclick="showResetProgressWarning()" aria-label="Gesamten Aufgabenfortschritt zurücksetzen" title="Fortschritt zurücksetzen"><span aria-hidden="true">↻</span> Zurücksetzen</button>
       <div id="start-monitor" class="item-click start-choice" onclick="openDetail('screen-monitor')">
-        <div class="preview-monitor"><div class="preview-monitor-screen"></div><div class="preview-monitor-neck"></div><div class="preview-monitor-base"></div></div>
-        <span>Bildschirm</span><span class="start-progress" id="start-score-monitor" role="progressbar" aria-label="Fortschritt Bildschirm" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-valuetext="0 von 8 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-monitor" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-monitor">0 / 8 erledigt</span></span>
+        <div class="start-choice-inner">
+          <div class="preview-monitor"><div class="preview-monitor-screen"></div><div class="preview-monitor-neck"></div><div class="preview-monitor-base"></div></div>
+          <span>Bildschirm</span><span class="start-progress" id="start-score-monitor" role="progressbar" aria-label="Fortschritt Bildschirm" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0" aria-valuetext="0 von 8 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-monitor" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-monitor">0 / 8 erledigt</span></span>
+        </div>
       </div>
       <div id="start-keyboard" class="item-click start-choice" onclick="openDetail('screen-keyboard')">
-        <div class="preview-keyboard" aria-hidden="true">
-          <div class="preview-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <div class="preview-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <div class="preview-key-row preview-key-row-bottom"><span class="preview-side-key"></span><span class="preview-side-key"></span><span class="preview-space-key"></span><span class="preview-side-key"></span><span class="preview-side-key"></span></div>
+        <div class="start-choice-inner">
+          <div class="preview-keyboard" aria-hidden="true">
+            <div class="preview-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="preview-key-row"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="preview-key-row preview-key-row-bottom"><span class="preview-side-key"></span><span class="preview-side-key"></span><span class="preview-space-key"></span><span class="preview-side-key"></span><span class="preview-side-key"></span></div>
+          </div>
+          <span>Tastatur</span><span class="start-progress" id="start-score-keyboard" role="progressbar" aria-label="Fortschritt Tastatur" aria-valuemin="0" aria-valuemax="17" aria-valuenow="0" aria-valuetext="0 von 17 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-keyboard" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-keyboard">0 / 17 erledigt</span></span>
         </div>
-        <span>Tastatur</span><span class="start-progress" id="start-score-keyboard" role="progressbar" aria-label="Fortschritt Tastatur" aria-valuemin="0" aria-valuemax="17" aria-valuenow="0" aria-valuetext="0 von 17 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-keyboard" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-keyboard">0 / 17 erledigt</span></span>
       </div>
       <div id="start-mouse" class="item-click start-choice" onclick="openDetail('screen-mouse')">
-        <div class="preview-mouse"><div class="preview-mouse-left"></div><div class="preview-mouse-right"></div></div>
-        <span>Maus</span><span class="start-progress" id="start-score-mouse" role="progressbar" aria-label="Fortschritt Maus" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" aria-valuetext="0 von 3 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-mouse" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-mouse">0 / 3 erledigt</span></span>
+        <div class="start-choice-inner">
+          <div class="preview-mouse"><div class="preview-mouse-left"></div><div class="preview-mouse-right"></div></div>
+          <span>Maus</span><span class="start-progress" id="start-score-mouse" role="progressbar" aria-label="Fortschritt Maus" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" aria-valuetext="0 von 4 Aufgaben erledigt"><span class="start-progress-fill" id="start-progress-fill-mouse" aria-hidden="true"></span><span class="start-progress-label" id="start-score-label-mouse">0 / 4 erledigt</span></span>
+        </div>
       </div>
     </div>
     <div id="all-levels-done">🏆 Fantastisch! Du hast alle Aufgaben geschafft! 🏆</div>
@@ -1460,6 +1478,8 @@
         const percentage=total>0 ? Math.max(0,Math.min(100,(count/total)*100)) : 0;
         if(fill) fill.style.width=percentage+'%';
         if(label) label.textContent=`${count} / ${total} erledigt`;
+        const choice=document.getElementById(`start-${name}`);
+        if(choice) choice.classList.toggle('section-complete',count===total);
         if(bar){
           bar.setAttribute('aria-valuenow',String(count));
           bar.setAttribute('aria-valuemax',String(total));
@@ -2484,6 +2504,15 @@
         if(drag && drag.ghost && drag.ghost.parentNode) drag.ghost.remove();
       };
       const pointInside=(rect,x,y)=>x>=rect.left && x<=rect.right && y>=rect.top && y<=rect.bottom;
+      const restoreDesktopObjectPosition=(current)=>{
+        if(!current || !current.el || !current.el.isConnected || !current.startRect) return;
+        const origin=contentOrigin();
+        current.el.style.position='absolute';
+        current.el.style.left=(current.startRect.left-origin.left)+'px';
+        current.el.style.top=(current.startRect.top-origin.top)+'px';
+        current.el.style.margin='0';
+        current.el.classList.remove('dragging');
+      };
       const topmostDesktopWindowAt=(x,y)=>{
         const candidates=[
           {id:'trash-window',el:trashWindow},
@@ -2635,6 +2664,12 @@
           offsetX:e.clientX-rect.left,offsetY:e.clientY-rect.top,
           startRect:rect,moved:false,ghost:null
         };
+        /* Desktopobjekte einschließlich des Papierkorbs selbst zuverlässig festhalten.
+           Pointer Capture hält Ziehen auch dann aktiv, wenn der Zeiger kurz über den Rand fährt. */
+        if(object.classList.contains('desktop-object')){
+          e.preventDefault();
+          try{object.setPointerCapture(e.pointerId);}catch(_){/* Fallback: Dokument-Listener übernehmen weiter. */}
+        }
       });
 
       document.addEventListener('pointermove',movePreview,{passive:false});
@@ -2740,9 +2775,7 @@
             const topWindow=topmostDesktopWindowAt(e.clientX,e.clientY);
             if(topWindow && topWindow.id==='files-folder-window'){
               if(current.el.id==='icon-trash' || current.el.id==='icon-files'){
-                current.el.style.left=(current.startRect.left-contentOrigin().left)+'px';
-                current.el.style.top=(current.startRect.top-contentOrigin().top)+'px';
-                current.el.style.margin='0';
+                restoreDesktopObjectPosition(current);
                 showProtectedMoveMessage(current.el.id==='icon-trash'?'trash':'files');
               }else if(current.el.classList.contains('desktop-object')){
                 addDesktopObjectToFilesFolder(current.el,filesFolderList);
@@ -2752,6 +2785,8 @@
               }
             }else if(topWindow && topWindow.id==='trash-window'){
               if(current.el.id==='icon-trash'){
+                // Der Papierkorb ist geschützt. Nach dem Zurückweisen wird das Symbol exakt an seine Startposition gesetzt.
+                restoreDesktopObjectPosition(current);
                 showInfo('Geschützter Systemordner','Der Papierkorb ist ein geschützter Systemordner und kein normales Objekt. Er kann deshalb nicht in den Papierkorb verschoben werden. Er bleibt lieber im Dienst und passt auf die gelöschten Dateien auf! 😄');
               }else if(current.el.dataset.desktopFile==='true'){
                 if(current.el.id==='icon-files' && !done.has('files')){
@@ -2770,8 +2805,23 @@
                 current.el.style.top=(current.startRect.top-contentOrigin().top)+'px';
               }
             }else if(topWindow){
-              current.el.style.left=(current.startRect.left-contentOrigin().left)+'px';
-              current.el.style.top=(current.startRect.top-contentOrigin().top)+'px';
+              restoreDesktopObjectPosition(current);
+            }else if(current.el.id==='icon-trash'){
+              // Der Papierkorb ist wie jedes andere Desktopobjekt frei beweglich.
+              // Geschützt ist nur das Ablegen in einem anderen Fenster, nicht das Verschieben auf dem Desktop.
+              const origin=contentOrigin();
+              const desktopRect={left:origin.left,top:origin.top,right:origin.left+win.clientWidth,bottom:origin.top+win.clientHeight-44};
+              if(pointInside(desktopRect,e.clientX,e.clientY)){
+                const left=clamp(e.clientX-origin.left-current.offsetX,0,Math.max(0,win.clientWidth-current.el.offsetWidth));
+                const top=clamp(e.clientY-origin.top-current.offsetY,0,Math.max(0,win.clientHeight-44-current.el.offsetHeight));
+                current.el.style.position='absolute';
+                current.el.style.left=left+'px';
+                current.el.style.top=top+'px';
+                current.el.style.margin='0';
+                current.el.classList.remove('dragging');
+              }else{
+                restoreDesktopObjectPosition(current);
+              }
             }else if(current.el.id==='icon-files'){
               const targetRect=target.getBoundingClientRect();
               const hit=pointInside(targetRect,e.clientX,e.clientY);
@@ -2797,6 +2847,9 @@
                   status.className='game-status wait';
                 }
               }
+            }else{
+              // Auch ein Loslassen außerhalb des virtuellen Desktops setzt das Objekt zurück.
+              restoreDesktopObjectPosition(current);
             }
           }
           suppressNextDesktopClick=true;
@@ -2811,6 +2864,7 @@
       document.addEventListener('pointercancel',()=>{
         if(!drag) return;
         if(drag.isTrashFile || drag.isFolderFile) drag.el.style.visibility='visible';
+        else if(drag.el && drag.el.classList && drag.el.classList.contains('desktop-object')) restoreDesktopObjectPosition(drag);
         document.getElementById('files-created-folder')?.classList.remove('drag-over');
         if(drag.el && drag.el.classList) drag.el.classList.remove('dragging');
         removeGhost();
