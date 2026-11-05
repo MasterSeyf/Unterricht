@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Computererkundung</title>
+  <title>Computererkundung V049</title>
   <style>
     /* V42: Desktopobjekte erreichen alle vier Bildschirmränder. Versteckte Aufgaben und Staffelei-Miniatur werden passend angezeigt. */
     :root{
@@ -321,7 +321,8 @@
     .win-taskbar{height:40px;left:0;right:0;width:100%;padding:0;box-sizing:border-box;}
     .win-start,.win-clock{height:40px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;margin:0;border-radius:0;}
     .win-start{padding:0 16px;min-width:105px;}
-    .win-clock{padding:0 12px;min-width:115px;flex-direction:column;gap:1px;line-height:1.1;}
+    .win-clock{padding:0 12px;min-width:128px;width:128px;flex:0 0 128px;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.1;white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums;}
+    .win-clock span{display:block;flex:0 0 auto;line-height:1.1;white-space:nowrap;}
     #file-drop-target{z-index:15;top:28px;right:18px;width:230px;height:115px;}
     #desktop-context-menu{position:fixed;}
     .drag-ghost{z-index:5000;opacity:.9;filter:drop-shadow(0 10px 9px rgba(0,0,0,.35));}
@@ -480,7 +481,7 @@
     .trash-file{touch-action:none;}
     .trash-window-files{min-height:112px;height:auto;}
     #trash-window{height:auto;}
-    #scroll-inner{height:auto!important;min-height:650px;padding:6px 4px;}
+    #scroll-inner{height:auto!important;min-height:0!important;padding:6px 4px 12px;}
     #scroll-inner>p:first-child{margin-top:0;}
     @media(max-width:580px){
       /* Auch auf schmalen Displays bleiben die Tasten exakt auf den Reihen ausgerichtet; die Tastatur kann horizontal scrollen. */
@@ -862,7 +863,7 @@
     /* V38: Der Zähler selbst füllt sich als Fortschrittsbalken. */
     /* V37: Fortschritt auf dem Schreibtisch und sicherer Reset-Dialog. */
     .desk-reset-btn{
-      position:absolute;top:11px;right:12px;z-index:30;
+      position:absolute;top:20px;right:12px;z-index:30;
       display:inline-flex;align-items:center;justify-content:center;gap:6px;
       padding:7px 11px;border:1px solid #b94b4b;border-radius:9px;
       background:linear-gradient(180deg,#f6b4ad,#e88f87);color:#5d1717;
@@ -879,31 +880,33 @@
       padding:16px;box-sizing:border-box;
     }
     #reset-progress-modal{
-      width:min(500px,calc(100vw - 32px));box-sizing:border-box;
+      width:min(680px,calc(100vw - 40px));box-sizing:border-box;
       background:#fff;border:5px solid #e58a75;border-radius:16px;
       padding:24px 26px;box-shadow:0 15px 45px rgba(0,0,0,.42);
-      text-align:center;animation:resetDialogPop .35s cubic-bezier(.175,.885,.32,1.275);
+      text-align:center;
     }
+    #reset-progress-modal.reset-dialog-pop{animation:resetDialogPop .35s cubic-bezier(.175,.885,.32,1.275);}
     @keyframes resetDialogPop{
       from{transform:scale(.82);opacity:0;}
       to{transform:scale(1);opacity:1;}
     }
     #reset-progress-modal h2{margin:0 0 10px;color:#a33b30;font-size:23px;}
-    #reset-progress-modal p{font-size:17px;line-height:1.45;margin:0;color:#263238;}
-    .reset-progress-line{display:block;white-space:nowrap;}
-    .reset-progress-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
-    .reset-progress-actions button{min-width:140px;padding:10px 15px;border:0;border-radius:8px;font-weight:800;font-size:15px;cursor:pointer;}
-    .reset-cancel-btn{background:#eceff1;color:#263238;}
-    .reset-cancel-btn:hover{background:#cfd8dc;}
+    #reset-progress-modal p{font-size:17px;line-height:1.5;margin:0;color:#263238;text-align:justify;text-align-last:left;}
+    .reset-progress-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px;}
+    .reset-progress-actions button{box-sizing:border-box;width:100%;min-width:0;min-height:48px;padding:10px 8px;border:0;border-radius:8px;font-weight:800;font-size:clamp(9.5px,2.1vw,15px);line-height:1.2;white-space:nowrap;cursor:pointer;}
+    .reset-cancel-btn{background:#43a047;color:#fff;}
+    .reset-cancel-btn:hover{background:#2e7d32;}
     .reset-confirm-btn{background:#d9534f;color:#fff;}
     .reset-confirm-btn:hover{background:#c43e3a;}
     @media(max-width:850px){
-      .desk-reset-btn{top:9px;right:9px;padding:6px 8px;font-size:11px;}
+      .desk-reset-btn{top:8px;right:9px;padding:6px 8px;font-size:11px;}
     }
     @media(max-width:580px){
       .desk-reset-btn{top:8px;right:8px;padding:6px 7px;font-size:10px;gap:4px;}
       .start-progress{width:138px;}
-      #reset-progress-modal{padding:20px 16px;}
+      #reset-progress-modal{padding:20px 12px;}
+      .reset-progress-actions{grid-template-columns:1fr;gap:8px;}
+      .reset-progress-actions button{font-size:clamp(12px,4vw,15px);}
       #reset-progress-modal h2{font-size:20px;}
       #reset-progress-modal p{font-size:14px;}
     }
@@ -1026,7 +1029,23 @@
     .cheese-mouse-mascot.is-visible{top:68px!important;}
     @media(max-width:850px){.cheese-mouse-mascot.is-visible{top:68px!important;}}
     @media(max-width:580px){.cheese-mouse-mascot.is-visible{top:58px!important;}}
-</style>
+
+    /* V048: Fokusfallen für Tab, echter Alt+Tab-Nachweis und zweistufige Reset-Bestätigung. */
+    /* V47: stabile Uhrzeitanzeige in zweizeiliger Taskleiste */
+    .win-clock span{max-width:100%;}
+    /* V47: Textfelder der Strg-Aufgabe sind geschützt und nicht editierbar. */
+    .ctrl-transfer-panel textarea[readonly]{resize:none;user-select:text;cursor:default;background:#fff;}
+    .ctrl-transfer-panel textarea[readonly]:focus{outline:3px solid #90caf9;border-color:#1976d2;}
+    /* V048: Aktionen zur Wiederherstellung des Alt-Tab-Fensters. */
+    .alt-real-task .game-choice{margin:8px 6px 0;}
+
+        /* V47: sichtbares Drücken des Ordner-Ziels beim Linksklick. */
+    .dblclick-target{transition:transform .12s ease,box-shadow .12s ease;box-shadow:0 4px 0 #90caf9;}
+    .dblclick-target.pressed{transform:translateY(4px);box-shadow:0 0 0 transparent;}
+    .alt-real-task{margin:12px 0;padding:14px;border:2px solid #90caf9;border-radius:12px;background:linear-gradient(135deg,#e3f2fd,#f3e5f5);}
+    .alt-real-task .game-choice{margin-top:8px;}
+
+  </style>
 </head>
 <body>
 
@@ -1042,9 +1061,9 @@
   <div id="reset-progress-overlay" role="presentation" onclick="if(event.target===this) cancelResetProgressWarning()">
     <div id="reset-progress-modal" role="dialog" aria-modal="true" aria-labelledby="reset-progress-title" aria-describedby="reset-progress-description">
       <h2 id="reset-progress-title">Möchtest du neu anfangen?</h2>
-      <p id="reset-progress-description"><span class="reset-progress-line">Alle Aufgaben werden gelöscht.</span><span class="reset-progress-line">Dein Fortschritt geht verloren.</span><span class="reset-progress-line">Das ist endgültig.</span><span class="reset-progress-line">Wirklich zurücksetzen?</span></p>
+      <p id="reset-progress-description">Hiermit werden alle bisherigen gelösten Aufgaben zurückgesetzt. Das ist endgültig und kann nicht rückgängig gemacht werden. Wirklich zurücksetzen?</p>
       <div class="reset-progress-actions">
-        <button type="button" class="reset-cancel-btn" onclick="cancelResetProgressWarning()">Abbrechen</button>
+        <button type="button" class="reset-cancel-btn" onclick="cancelResetProgressWarning()">Nein, nicht zurücksetzen</button>
         <button type="button" class="reset-confirm-btn" onclick="confirmResetProgress()">Ja, zurücksetzen</button>
       </div>
     </div>
@@ -1213,7 +1232,7 @@
 
       <div class="win-taskbar">
         <div class="win-start" onclick="showInfo('Der Start-Knopf','Die Schaltzentrale! Hier findest du Programme und Einstellungen. Außerdem kann der Computer hier ausgeschaltet, in den Energiesparmodus versetzt oder neugestartet werden. Insbesondere das Neustarten hilft oft, um Probleme zu beheben.',{key:'start',task:'Wofür könnte der Energiesparmodus gut sein? Wähle die passende Antwort im Übungs-Kasten.',unlockArea:'monitor-exercise-area'})">⊞ Start</div>
-        <div class="win-clock" id="win-clock" onclick="showInfo('Uhrzeit & Datum','Die Anzeige zeigt die aktuelle Uhrzeit und das heutige Datum deines Computers.',{key:'clock',task:'Lies die aktuelle Uhrzeit ab. Wähle die passende Uhrzeit im Übungs-Kasten.',unlockArea:'monitor-exercise-area'})"><span id="clock-time">--:--:--</span><br><span id="clock-date">--.--.----</span></div>
+        <div class="win-clock" id="win-clock" onclick="showInfo('Uhrzeit & Datum','Die Anzeige zeigt die aktuelle Uhrzeit und das heutige Datum deines Computers.',{key:'clock',task:'Lies die aktuelle Uhrzeit ab. Wähle die passende Uhrzeit im Übungs-Kasten.',unlockArea:'monitor-exercise-area'})"><span id="clock-time">--:--:--</span><span id="clock-date">--.--.----</span></div>
       </div>
       <div id="monitor-off-overlay" aria-hidden="true" aria-label="Bildschirm ausgeschaltet"></div>
     </div>
@@ -1310,7 +1329,7 @@
         <div class="k-key s-4 k-symbol-group k-symbol-key" title="Mit Shift: Gravis" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">`</span><span class="key-number-main">´</span></div>
         <div class="k-key k-backspace s-8" onclick="showInfo('Backspace (Löschen)','Tippfehler? Diese Taste löscht den Buchstaben LINKS vom blinkenden Strich (Cursor).', {key:'backspace', task:'Lösche die falschen Buchstaben und mache aus „Haaallo“ das Wort „Hallo“.', unlockArea:'keyboard-exercise-area'})">⌫</div>
 
-        <div class="k-key s-6 k-tab" onclick="showInfo('Tabulator (Tab)','Damit kannst du in einem Formular schnell zum nächsten Feld springen.', {key:'tab', task:'Klicke in das erste Feld und drücke die Tab-Taste auf deiner Tastatur.', unlockArea:'keyboard-exercise-area'})"><span class="tab-arrow-stack" aria-hidden="true"><span>⇤</span><span>⇥</span></span><span class="tab-key-label">Tab</span></div>
+        <div class="k-key s-6 k-tab" onclick="showInfo('Tabulator (Tab)','Damit kannst du in einem Formular schnell zum nächsten Feld springen.', {key:'tab', task:'Der Fokus startet im ersten Feld. Klicke nicht mit der Maus in ein anderes Feld. Drücke die Tab-Taste, um zum zweiten Feld zu springen.', unlockArea:'keyboard-exercise-area'})"><span class="tab-arrow-stack" aria-hidden="true"><span>⇤</span><span>⇥</span></span><span class="tab-key-label">Tab</span></div>
         <div class="k-key k-letter s-4">Q</div>
         <div class="k-key k-letter s-4">W</div>
         <div class="k-key k-letter s-4">E</div>
@@ -1358,13 +1377,13 @@
         <div class="k-key s-4 k-symbol-group k-symbol-key" title="Mit Shift: _" onclick="showInfo('Satz- und Rechenzeichen','Mit diesen Tasten schreibst du Satz und Rechenzeichen.',{key:'symbols',task:'Schreibe genau die Rechnung 3+2 in das Eingabefeld.',expected:'3+2',unlockArea:'keyboard-exercise-area'})"><span class="key-shift-symbol">_</span><span class="key-number-main">-</span></div>
         <div class="k-key k-shift s-11" onclick="showInfo('Shift (rechts)','Genau das Gleiche wie links! Nimm einfach die Taste, die deine Hand besser erreicht. In Kombination mit Shift kannst du außerdem sehr viele Sonderzeichen schreiben.', {key:'shift', task:'Schreibe das Wort „Haus“ in Großbuchstaben!', unlockArea:'keyboard-exercise-area'})">⇧ Shift</div>
 
-        <div class="k-key s-6" onclick="showInfo('Strg (Steuerung)','Mit Strg (kurz für Steuerung) kannst du wichtige Tastenkombinationen verwenden. Beispiele:\n• Strg + C: Kopieren\n• Strg + V: Einfügen\n• Strg + X: Ausschneiden\n• Strg + A: Alles auswählen',{key:'ctrl',task:'Markiere alles im linken Textfeld mit Strg + A. Schneide den Text mit Strg + X aus. Klicke in das rechte Feld und füge ihn mit Strg + V ein.',unlockArea:'keyboard-exercise-area'})">Strg</div>
+        <div class="k-key s-6" onclick="showInfo('Strg (Steuerung)','Mit Strg (kurz für Steuerung) kannst du wichtige Tastenkombinationen verwenden. Beispiele:\n• Strg + C: Kopieren\n• Strg + V: Einfügen\n• Strg + X: Ausschneiden\n• Strg + A: Alles auswählen',{key:'ctrl',task:'Halte Strg gedrückt und drücke A, um alles zu markieren. Halte Strg weiter gedrückt und drücke X, um den Text auszuschneiden. Klicke anschließend in das rechte Feld. Halte dort Strg gedrückt und drücke V, um den Text einzufügen.',unlockArea:'keyboard-exercise-area'})">Strg</div>
         <div class="k-key s-5 k-windows-symbol" onclick="showWindowsKeyInfo()">⊞</div>
-        <div class="k-key s-5" onclick="showInfo('Alt','Mit Alt kannst du zusammen mit anderen Tasten besondere Funktionen auslösen. Ein bekanntes Beispiel ist Alt + Tab: Damit wechselst du zwischen geöffneten Programmen.', {key:'alt',task:'Probiere im kleinen Fenstersprung-Spiel aus, welche Tastenkombination zwischen geöffneten Programmen wechselt.',unlockArea:'keyboard-exercise-area'})">Alt</div>
+        <div class="k-key s-5" onclick="showInfo('Alt','Mit Alt kannst du zusammen mit anderen Tasten besondere Funktionen auslösen. Ein bekanntes Beispiel ist Alt + Tab: Damit wechselst du zwischen geöffneten Programmen.', {key:'alt',task:'Halte die Alt-Taste gedrückt und drücke zusätzlich Tab. Wechsle so vom neuen Aufgabenfenster zurück zu deinen Computeraufgaben.',unlockArea:'keyboard-exercise-area'})">Alt</div>
         <div class="k-key k-space s-28" onclick="showInfo('Leertaste','Die größte Taste macht ein Leerzeichen zwischen zwei Wörtern.', {key:'space', task:'Tippe „Hallo Welt“ mit einem Leerzeichen dazwischen.', unlockArea:'keyboard-exercise-area'})">Leertaste</div>
-        <div class="k-key k-altgr s-5" onclick="showInfo('Alt Gr','Der Geheimschlüssel! Halte diese Taste gedrückt und drücke dann das Q, um ein @-Zeichen für E-Mails zu machen.', {key:'altgr', task:'Mache das Klammeraffe-Zeichen: @', unlockArea:'keyboard-exercise-area'})">Alt Gr</div>
+        <div class="k-key k-altgr s-5" onclick="showInfo('Alt Gr','Der Geheimschlüssel! Halte die Alt-Gr-Taste gedrückt und drücke gleichzeitig Q, um ein @-Zeichen für E-Mails zu schreiben.', {key:'altgr', task:'Mache das Klammeraffe-Zeichen: @', unlockArea:'keyboard-exercise-area'})">Alt Gr</div>
         <div class="k-key s-5 k-menu-key" aria-label="Menü-Taste" onclick="showInfo('Menü-Taste','Mit der Menü-Taste öffnest du ein kleines Menü mit Möglichkeiten für das ausgewählte Element. Das ist eine Alternative zum Rechtsklick. Du kannst die Auswahl mit der Tastatur öffnen, ohne die Maus zu benutzen.')"><span class="k-menu-symbol" aria-hidden="true"><i></i><i></i><i></i></span></div>
-        <div class="k-key s-6" onclick="showInfo('Strg (Steuerung)','Mit Strg (kurz für Steuerung) kannst du wichtige Tastenkombinationen verwenden. Beispiele:\n• Strg + C: Kopieren\n• Strg + V: Einfügen\n• Strg + X: Ausschneiden\n• Strg + A: Alles auswählen',{key:'ctrl',task:'Markiere alles im linken Textfeld mit Strg + A. Schneide den Text mit Strg + X aus. Klicke in das rechte Feld und füge ihn mit Strg + V ein.',unlockArea:'keyboard-exercise-area'})">Strg</div>
+        <div class="k-key s-6" onclick="showInfo('Strg (Steuerung)','Mit Strg (kurz für Steuerung) kannst du wichtige Tastenkombinationen verwenden. Beispiele:\n• Strg + C: Kopieren\n• Strg + V: Einfügen\n• Strg + X: Ausschneiden\n• Strg + A: Alles auswählen',{key:'ctrl',task:'Halte Strg gedrückt und drücke A, um alles zu markieren. Halte Strg weiter gedrückt und drücke X, um den Text auszuschneiden. Klicke anschließend in das rechte Feld. Halte dort Strg gedrückt und drücke V, um den Text einzufügen.',unlockArea:'keyboard-exercise-area'})">Strg</div>
       </div>
 
       <div class="kb-right-side">
@@ -1465,7 +1484,7 @@
 
       <div id="mouse-task-leftclick" style="display:none;">
         <p><span class="badge">Linke Taste</span> Doppelklick-Training:</p>
-        <div id="dblclick-target" style="display:inline-flex;align-items:center;justify-content:center;width:180px;height:70px;border:2px solid #90caf9;border-radius:12px;background:#fff;cursor:pointer;font-weight:900;">
+        <div id="dblclick-target" class="dblclick-target" style="display:inline-flex;align-items:center;justify-content:center;width:180px;height:70px;border:2px solid #90caf9;border-radius:12px;background:#fff;cursor:pointer;font-weight:900;">
           Ordner Öffnen
         </div>
         <p class="status wait" id="dblclick-status">Status: Noch nicht doppelt geklickt.</p>
@@ -1476,10 +1495,15 @@
         <div id="scroll-box">
           <div id="scroll-inner">
             <p>Scroll nach unten …</p>
-            <p style="margin-top:145px;">… noch ein Stück …</p>
-            <p style="margin-top:150px;">… fast da …</p>
-            <div style="margin-top:145px;padding:12px;border-radius:12px;background:#e8f5e9;border:2px solid #66bb6a;">
-              Ziel erreicht! <button class="btn-close" style="width:auto;margin-top:10px;" onclick="finishTask('wheel')">Fertig</button>
+            <p style="margin-top:150px;">… der Text geht weiter …</p>
+            <p style="margin-top:170px;">… noch ein Stück …</p>
+            <p style="margin-top:165px;">… hier gibt es noch mehr zu entdecken …</p>
+            <p style="margin-top:170px;">… immer weiter nach unten …</p>
+            <p style="margin-top:165px;">… du bist auf dem richtigen Weg …</p>
+            <p style="margin-top:170px;">… fast geschafft, noch ein Stück …</p>
+            <p style="margin-top:165px;">… gleich ist das Ende erreicht …</p>
+            <div style="margin-top:170px;padding:12px;border-radius:12px;background:#e8f5e9;border:2px solid #66bb6a;text-align:center;font-weight:800;">
+              Ziel erreicht!
             </div>
           </div>
         </div>
@@ -1510,7 +1534,6 @@
           Rechtsklick hier drin.
         </div>
         <div id="custom-menu">
-          <div class="menu-item">Ansicht</div>
           <div class="menu-item" onclick="createMouseExerciseFolder()">Neuer Ordner</div>
           <div class="menu-item">Kopieren</div>
           <div class="menu-item menu-goal" onclick="finishTask('rightclick')">⭐ Übung abschließen</div>
@@ -1575,6 +1598,42 @@
     const filesFolderTaskState = { dropped:false, opened:false, folderCreated:false, folderName:'', movedVideos:new Set() };
     const requiredVideosFolderName = 'Klassenfahrt-Videos';
 
+    // Wird der Dateien-Ordner vor Abschluss gelöscht, startet seine Übung nach
+    // dem Wiederherstellen sauber neu. Alle ursprünglichen Beispieldateien kommen zurück.
+    function resetFilesFolderTaskState(){
+      filesFolderTaskState.dropped=false;
+      filesFolderTaskState.opened=false;
+      filesFolderTaskState.folderCreated=false;
+      filesFolderTaskState.folderName='';
+      filesFolderTaskState.movedVideos.clear();
+      const list=document.getElementById('files-folder-list');
+      const subfolder=document.getElementById('files-created-folder');
+      if(subfolder){
+        subfolder.style.display='none';
+        const name=document.getElementById('files-created-folder-name');
+        const hint=document.getElementById('files-created-folder-hint');
+        const contents=document.getElementById('files-created-folder-contents');
+        if(name) name.textContent='Neuer Ordner';
+        if(hint){hint.textContent='Ziehe die beiden Videos hier hinein.';hint.style.display='';}
+        if(contents) contents.innerHTML='';
+      }
+      if(list){
+        const required=[
+          {name:'Stundenplan.docx',kind:'text',icon:'📄',size:'9 KB'},
+          {name:'Klassenfahrt_Tag1.mp4',kind:'video',icon:'🎬',size:'24 MB'},
+          {name:'Klassenfahrt_Tag2.mp4',kind:'video',icon:'🎬',size:'31 MB'}
+        ];
+        required.forEach(file=>{
+          const exists=[...list.querySelectorAll(':scope > .folder-file')].some(row=>row.dataset.fileName===file.name);
+          if(!exists) list.appendChild(createFolderFileRow({...file,originalLocation:'Ordner Dateien'}));
+        });
+        refreshFilesFolderList();
+      }
+      closeFilesFolderWindow();
+      resetFilesDropTarget();
+      updateFilesTaskUI();
+    }
+
     function refreshFilesFolderList(){
       const list=document.getElementById('files-folder-list');
       if(!list) return;
@@ -1593,6 +1652,243 @@
     let currentTaskKey = null;
     let lastInfoTask = null;
     let tabForwardComplete = false;
+    let activeTabFocusAnchor = null;
+    let activeTabFocusFields = [];
+    let activeTabFocusMode = null;
+    let allowTabFocusTransition = false;
+    let altTaskPopup = null;
+    let altTaskActive = false;
+    let altTaskReturnWasAltTab = null;
+
+    function clearTabTaskFocusLock(){
+      activeTabFocusAnchor=null;
+      activeTabFocusFields=[];
+      activeTabFocusMode=null;
+      allowTabFocusTransition=false;
+    }
+
+    function setTabTaskFocusLock(anchor,fields,mode){
+      activeTabFocusAnchor=anchor;
+      activeTabFocusFields=fields;
+      activeTabFocusMode=mode;
+    }
+
+    function withAllowedTabFocusChange(action){
+      allowTabFocusTransition=true;
+      try{action();}finally{allowTabFocusTransition=false;}
+    }
+
+    // Während der Tab-Übung bleibt der Fokus im aktuellen Übungsfeld.
+    // Mausklicks auf beliebige Stellen der Webseite dürfen ihn nicht verschieben.
+    // Ein Feldwechsel ist ausschließlich über die unten abgefangenen Tab-Tastendrücke möglich.
+    function isActiveTabTask(){
+      const screen=document.getElementById('screen-keyboard');
+      return currentTaskKey==='tab' && !done.has('tab') && !!activeTabFocusAnchor && !!screen && screen.classList.contains('active');
+    }
+    document.addEventListener('pointerdown',e=>{
+      if(!isActiveTabTask() || e.target===activeTabFocusAnchor) return;
+      e.preventDefault();
+      activeTabFocusAnchor.focus({preventScroll:true});
+    },true);
+    document.addEventListener('focusin',e=>{
+      if(!isActiveTabTask() || e.target===activeTabFocusAnchor) return;
+      if(allowTabFocusTransition && activeTabFocusFields.includes(e.target)){
+        activeTabFocusAnchor=e.target;
+        return;
+      }
+      const anchor=activeTabFocusAnchor;
+      window.setTimeout(()=>{
+        if(isActiveTabTask() && activeTabFocusAnchor===anchor && document.activeElement!==anchor){
+          anchor.focus({preventScroll:true});
+        }
+      },0);
+    },true);
+    window.addEventListener('focus',()=>{
+      if(isActiveTabTask() && activeTabFocusAnchor && document.activeElement!==activeTabFocusAnchor){
+        activeTabFocusAnchor.focus({preventScroll:true});
+      }
+    });
+
+    function closeAltTaskPopup(){
+      altTaskActive=false;
+      altTaskReturnWasAltTab=null;
+      const popup=altTaskPopup;
+      altTaskPopup=null;
+      if(popup && !popup.closed){try{popup.close();}catch(_){} }
+      const retry=document.getElementById('alt-task-retry');
+      if(retry) retry.style.display='none';
+    }
+
+    function showAltTaskReturnError(message='Das war noch kein Alt + Tab. Du hast das Fenster anders gewechselt. Versuche es noch einmal mit Alt + Tab.'){
+      const status=document.getElementById('kb-task-status');
+      const retry=document.getElementById('alt-task-retry');
+      if(status){status.textContent=message;status.className='status wait';}
+      if(retry) retry.style.display='inline-flex';
+    }
+
+    function completeAltTaskAfterWindowSwitch(){
+      if(!altTaskActive || !document.hasFocus()) return;
+      const popup=altTaskPopup;
+      const status=document.getElementById('kb-task-status');
+      const retry=document.getElementById('alt-task-retry');
+      if(!popup || popup.closed){
+        altTaskActive=false;
+        altTaskReturnWasAltTab=null;
+        if(status){status.textContent='Das zweite Fenster wurde geschlossen. Öffne es erneut und wechsle mit Alt + Tab zurück.';status.className='status wait';}
+        if(retry) retry.style.display='inline-flex';
+        return;
+      }
+      let childHasFocus=true;
+      try{childHasFocus=popup.document.hasFocus();}catch(_){return;}
+      if(childHasFocus) return;
+
+      // Erst die Nachricht des Zweitfensters abwarten. So wird ein echter
+      // Alt+Tab-Wechsel nicht mit einem Mausklick verwechselt.
+      if(altTaskReturnWasAltTab===true){
+        closeAltTaskPopup();
+        if(status){status.textContent='Richtig! Du bist mit Alt + Tab zu deinen Aufgaben zurückgekehrt.';status.className='status good';}
+        finishTask('alt');
+      }else if(altTaskReturnWasAltTab===false){
+        altTaskReturnWasAltTab=null;
+        showAltTaskReturnError();
+      }
+    }
+
+    // Das Zweitfenster meldet sowohl einen Rückwechsel als auch seine erneute Aktivierung.
+    window.addEventListener('focus',()=>window.setTimeout(completeAltTaskAfterWindowSwitch,260));
+    window.addEventListener('message',event=>{
+      if(event.source!==altTaskPopup || !event.data) return;
+      if(event.data.type==='computererkundung-alt-task-focus'){
+        const retry=document.getElementById('alt-task-retry');
+        const status=document.getElementById('kb-task-status');
+        if(retry) retry.style.display='none';
+        if(status && altTaskActive){status.textContent='Das zweite Fenster ist wieder aktiv. Wechsle mit Alt + Tab zurück.';status.className='status wait';}
+        altTaskReturnWasAltTab=null;
+        return;
+      }
+      if(event.data.type==='computererkundung-alt-task-return'){
+        altTaskReturnWasAltTab=event.data.altTabUsed===true;
+        if(document.hasFocus()) completeAltTaskAfterWindowSwitch();
+      }
+    });
+
+    function openAltTaskPopup(game,status){
+      const retry=document.getElementById('alt-task-retry');
+      altTaskReturnWasAltTab=null;
+      if(retry) retry.style.display='none';
+      const width=Math.max(800,screen.availWidth || window.outerWidth || 1280);
+      const height=Math.max(600,screen.availHeight || window.outerHeight || 800);
+      let popup=null;
+      try{
+        popup=window.open('about:blank','computererkundung_alt_tab_task',`popup=yes,width=${width},height=${height},left=0,top=0,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`);
+      }catch(_){popup=null;}
+      if(!popup || popup.closed){
+        altTaskActive=false;
+        if(status){status.textContent='Dein Browser hat das neue Fenster blockiert. Erlaube Pop-ups für diese Datei und versuche es noch einmal.';status.className='status wait';}
+        if(retry) retry.style.display='inline-flex';
+        return false;
+      }
+      altTaskPopup=popup;
+      altTaskActive=true;
+      try{
+        popup.document.open();
+        popup.document.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Aufgabe: Fensterwechsel mit Alt + Tab</title><style>
+          *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}body{display:grid;place-items:center;padding:clamp(16px,3vw,42px);font-family:Segoe UI,Tahoma,sans-serif;color:#16324a;background:radial-gradient(circle at 15% 20%,#d8f3ff 0,#e8f5e9 48%,#ede7f6 100%)}main{width:min(100%,1480px);min-height:min(80vh,720px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:rgba(255,255,255,.94);border:6px solid #2196f3;border-radius:34px;padding:clamp(28px,4vw,64px);box-shadow:0 25px 70px rgba(20,55,85,.22)}.tag{font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#1976d2;font-size:clamp(14px,2vw,20px)}.opening{max-width:1380px;margin:12px 0 20px;font-size:clamp(27px,4vw,48px);line-height:1.25;font-weight:800;color:#173c5a}.instructions{width:100%;max-width:1380px;font-size:clamp(18px,2vw,28px);line-height:1.4;font-weight:400;color:#263238}.instructions p{margin:10px 0;white-space:nowrap}.hint{margin-top:28px;padding:15px 24px;border-radius:16px;background:#e3f2fd;font-size:clamp(16px,2vw,22px);font-weight:700;color:#145b84}
+          </style></head><body><main><div class="tag">Deine Aufgabe</div><div class="opening">Oh nein! Du bist im falschen Fenster.<br>Wie kommst du zurück zu deinen Aufgaben?</div><div class="instructions"><p>Halte die Alt-Taste gedrückt und drücke zusätzlich einmal die Tab-Taste.</p><p>So wechselst du zurück zu deiner Computererkundung.</p></div><div class="hint">Probiere es jetzt aus!</div></main><script>
+            let altTabPressedSinceFocus=false;
+            let altKeyIsDown=false;
+            window.addEventListener('keydown',function(event){
+              // Der echte Windows-Shortcut Alt+Tab wird vom Betriebssystem häufig
+              // abgefangen: Das Fenster verliert den Fokus, bevor der Browser ein
+              // Tab-Keydown mit event.altKey erhält. Deshalb merken wir uns bereits
+              // das vertrauenswürdige Drücken der Alt-Taste und werten es beim Blur aus.
+              if(event.isTrusted && (event.key==='Alt' || event.code==='AltLeft' || event.code==='AltRight')){
+                altKeyIsDown=true;
+              }
+              if(event.isTrusted && event.key==='Tab' && (event.altKey || altKeyIsDown)){
+                event.preventDefault();
+                altTabPressedSinceFocus=true;
+                // Fallback für Browser, die Alt+Tab an die Seite durchreichen.
+                try{if(window.opener&&!window.opener.closed) window.opener.focus();}catch(_){ }
+              }
+            },true);
+            window.addEventListener('keyup',function(event){
+              if(event.key==='Alt' || event.code==='AltLeft' || event.code==='AltRight') altKeyIsDown=false;
+            },true);
+            window.addEventListener('focus',function(){
+              altTabPressedSinceFocus=false;altKeyIsDown=false;
+              try{if(window.opener&&!window.opener.closed) window.opener.postMessage({type:'computererkundung-alt-task-focus'},'*');}catch(_){ }
+            });
+            window.addEventListener('blur',function(){
+              // Bei einem systemweiten Alt+Tab trifft das Blur-Ereignis oft ein,
+              // bevor ein Tab-Keydown an die Webseite gesendet werden kann.
+              // Die noch gehaltene Alt-Taste ist dann das zuverlässige Signal.
+              const usedAltTab=altTabPressedSinceFocus || altKeyIsDown;
+              altTabPressedSinceFocus=false;altKeyIsDown=false;
+              setTimeout(function(){
+                try{
+                  if(window.opener&&!window.opener.closed&&window.opener.document.hasFocus()){
+                    window.opener.postMessage({type:'computererkundung-alt-task-return',altTabUsed:usedAltTab},'*');
+                  }
+                }catch(_){ }
+              },140);
+            });
+          <\/script></body></html>`);
+        popup.document.close();
+        try{popup.moveTo(0,0);popup.resizeTo(width,height);}catch(_){ }
+        // Wenn möglich, wird Vollbild mit Tastatursperre aktiviert. So kann
+        // Chromium den echten Alt + Tab-Tastendruck an dieses Fenster weitergeben.
+        try{
+          const root=popup.document.documentElement;
+          const activateKeyboardLock=()=>{
+            try{
+              if(popup.navigator.keyboard&&typeof popup.navigator.keyboard.lock==='function'){
+                const lock=popup.navigator.keyboard.lock(['Tab']);
+                if(lock&&lock.catch) lock.catch(()=>{});
+              }
+            }catch(_){ }
+          };
+          const request=root.requestFullscreen && root.requestFullscreen({keyboardLock:'browser'});
+          if(request&&request.then){
+            request.then(activateKeyboardLock).catch(()=>{
+              // Ältere Browser erhalten wenigstens den normalen Vollbildversuch.
+              try{
+                const fallback=root.requestFullscreen && root.requestFullscreen();
+                if(fallback&&fallback.then) fallback.then(activateKeyboardLock).catch(()=>{});
+              }catch(_){ }
+            });
+          }
+        }catch(_){
+          try{const fallback=popup.document.documentElement.requestFullscreen && popup.document.documentElement.requestFullscreen();if(fallback&&fallback.catch)fallback.catch(()=>{});}catch(__){ }
+        }
+        popup.focus();
+      }catch(error){
+        try{popup.close();}catch(_){ }
+        altTaskPopup=null;altTaskActive=false;
+        if(status){status.textContent='Das Aufgabenfenster konnte nicht geöffnet werden. Prüfe die Pop-up-Einstellung und versuche es erneut.';status.className='status wait';}
+        if(retry) retry.style.display='inline-flex';
+        return false;
+      }
+      if(status){status.textContent='Das zweite Fenster ist geöffnet. Wechsle mit Alt + Tab zurück zu deinen Aufgaben.';status.className='status wait';}
+      return true;
+    }
+
+    function retryAltTaskPopup(){
+      const game=document.getElementById('kb-input-container')?.querySelector('.alt-real-task');
+      const status=document.getElementById('kb-task-status');
+      const retry=document.getElementById('alt-task-retry');
+      if(altTaskPopup && !altTaskPopup.closed){
+        try{altTaskPopup.focus();}catch(_){ }
+        if(status){status.textContent='Wechsle in das zweite Fenster. Danach kannst du es erneut mit Alt + Tab versuchen.';status.className='status wait';}
+        window.setTimeout(()=>{
+          if(altTaskPopup && !altTaskPopup.closed){
+            try{if(altTaskPopup.document.hasFocus() && retry) retry.style.display='none';}catch(_){ }
+          }
+        },180);
+        return;
+      }
+      if(game) openAltTaskPopup(game,status);
+    }
     let lastSuccessfulTaskKey = null;
     let afterInfoCloseAction = null;
 
@@ -1666,21 +1962,54 @@
       if(allDoneEl) allDoneEl.style.display = allDone ? 'block' : 'none';
     }
 
-    // Fortschritt erst nach einer ausdrücklichen Bestätigung vollständig zurücksetzen.
+    // Der Fortschritt wird erst nach zwei getrennten Bestätigungen zurückgesetzt.
+    let resetConfirmationStep=0;
+    function replayResetDialogPop(){
+      const modal=document.getElementById('reset-progress-modal');
+      if(!modal) return;
+      modal.classList.remove('reset-dialog-pop');
+      void modal.offsetWidth;
+      modal.classList.add('reset-dialog-pop');
+    }
     function showResetProgressWarning(){
       const overlay=document.getElementById('reset-progress-overlay');
       if(!overlay) return;
-      overlay.style.display='flex';
+      resetConfirmationStep=1;
+      const title=document.getElementById('reset-progress-title');
+      const description=document.getElementById('reset-progress-description');
+      const confirmButton=overlay.querySelector('.reset-confirm-btn');
       const cancelButton=overlay.querySelector('.reset-cancel-btn');
+      if(title) title.textContent='Möchtest du neu anfangen?';
+      if(description) description.textContent='Hiermit werden alle bisherigen gelösten Aufgaben zurückgesetzt. Das ist endgültig und kann nicht rückgängig gemacht werden. Wirklich zurücksetzen?';
+      if(confirmButton) confirmButton.textContent='Ja, zurücksetzen';
+      if(cancelButton) cancelButton.textContent='Nein, nicht zurücksetzen';
+      overlay.style.display='flex';
+      replayResetDialogPop();
       if(cancelButton) cancelButton.focus();
     }
     function cancelResetProgressWarning(){
       const overlay=document.getElementById('reset-progress-overlay');
       if(overlay) overlay.style.display='none';
+      resetConfirmationStep=0;
       const resetButton=document.querySelector('.desk-reset-btn');
       if(resetButton) resetButton.focus();
     }
     function confirmResetProgress(){
+      if(resetConfirmationStep===1){
+        resetConfirmationStep=2;
+        const title=document.getElementById('reset-progress-title');
+        const description=document.getElementById('reset-progress-description');
+        const confirmButton=document.querySelector('#reset-progress-overlay .reset-confirm-btn');
+        if(title) title.textContent='Bist du dir absolut sicher?';
+        if(description) description.textContent='Alle bisher gelösten Aufgaben und dein gespeicherter Fortschritt werden endgültig gelöscht. Möchtest du wirklich alles zurücksetzen?';
+        if(confirmButton) {
+          confirmButton.textContent='Ja, endgültig zurücksetzen';
+        }
+        replayResetDialogPop();
+        if(confirmButton) confirmButton.focus();
+        return;
+      }
+      if(resetConfirmationStep!==2) return;
       try{
         localStorage.removeItem(PROGRESS_STORAGE_KEY);
         localStorage.removeItem(PAINT_EASEL_STORAGE_KEY);
@@ -1701,6 +2030,8 @@
       document.getElementById(id).classList.add('active');
     }
     function goBack(){
+      clearTabTaskFocusLock();
+      closeAltTaskPopup();
       document.querySelectorAll('.detail-screen').forEach(s=>s.classList.remove('active'));
       document.querySelectorAll('.exercise-area').forEach(area=>area.style.display='none');
       currentTaskKey=null;
@@ -1992,7 +2323,7 @@
     }
 
     function openLoginFileInfo(){
-      showInfo('Login.exe','Das ist die Login-Datei. Wenn du dich hiermit auf dem echten Desktop anmeldest, kannst du auf deinen persönlichen Speicherort zugreifen. Dort kannst du deine Aufgaben und Abgaben über mehrere Informatikstunden hinweg speichern. Die Anmeldedaten sind dieselben wie für den Zugang zu Moodle.');
+      showInfo('Login.exe','Das ist die Login-Datei. Wenn du dich hiermit auf dem echten Desktop anmeldest, kannst du auf deinen persönlichen Speicherort zugreifen. Dort kannst du deine Aufgaben und Abgaben über mehrere Informatikstunden hinweg speichern. Die Anmeldedaten sind dieselben wie für den Zugang zu Moodle.\n\nWichtig: Dieses Fenster ist nur ein Beispiel. Hier kannst du dich nicht wirklich anmelden. Das machst du später mit der echten Login-Datei auf dem echten Desktop.');
       afterInfoCloseAction = openLoginWindow;
     }
 
@@ -2343,6 +2674,7 @@
         if(!filesArea) return;
         filesArea.querySelector('.trash-empty')?.remove();
         filesArea.appendChild(createTrashFileRow({name,icon,iconMarkup:desktopObjectIconMarkup(object),originalLocation,deletedDate:formatTrashDate(),desktopObject:true,desktopAction:desktopObjectActionForElement(object),desktopFolder:object.dataset.desktopFolder==='true'}));
+        if(object.id==='icon-files' && !done.has('files')) resetFilesFolderTaskState();
         object.remove();
         // Papierkorb-Fensterzustand nicht verändern: ein geschlossenes Fenster
         // bleibt geschlossen, ein bereits geöffnetes bleibt sichtbar.
@@ -2497,6 +2829,19 @@
       if(fileRow.dataset.desktopObject==='true') restored.dataset.desktopObject='true';
       if(fileRow.dataset.desktopAction) restored.dataset.desktopAction=fileRow.dataset.desktopAction;
       if(fileRow.dataset.desktopFolder==='true') restored.dataset.desktopFolder='true';
+      // Bekannte Desktopobjekte erhalten beim Wiederherstellen wieder ihre feste ID.
+      // So greifen ihre vorhandenen Aufgaben und Spezialfunktionen erneut zuverlässig.
+      const restoredActions={
+        'Dateien':{id:'icon-files',action:'files'},
+        'Browser':{id:'icon-browser',action:'browser'},
+        'Papierkorb':{id:'icon-trash',action:'trash'},
+        'Login.exe':{id:'icon-login',action:'login'}
+      };
+      if(restoredActions[name]){
+        restored.id=restoredActions[name].id;
+        restored.dataset.desktopObject='true';
+        restored.dataset.desktopAction=restoredActions[name].action;
+      }
       restored.style.left=Math.max(0,Math.min(win.clientWidth-88,dropX-origin.left-44))+'px';
       restored.style.top=clampDesktopObjectTop(win,restored,dropY-origin.top-43)+'px';
       const iconLabel=document.createElement('span');
@@ -3059,9 +3404,7 @@
                 restoreDesktopObjectPosition(current);
                 showInfo('Geschützter Systemordner','Der Papierkorb ist ein geschützter Systemordner und kein normales Objekt. Er kann deshalb nicht in den Papierkorb verschoben werden. Er bleibt lieber im Dienst und passt auf die gelöschten Dateien auf! 😄');
               }else if(current.el.dataset.desktopFile==='true'){
-                if(current.el.id==='icon-files' && !done.has('files')){
-                  filesFolderTaskState.dropped=false;filesFolderTaskState.opened=false;closeFilesFolderWindow();resetFilesDropTarget();updateFilesTaskUI();
-                }
+                if(current.el.id==='icon-files' && !done.has('files')) resetFilesFolderTaskState();
                 const name=current.el.dataset.fileName || current.el.querySelector('span:last-child')?.textContent || 'Datei';
                 const icon=current.el.dataset.fileIcon || '📄';
                 const originalLocation=current.el.dataset.originalLocation || 'Desktop';
@@ -3233,6 +3576,7 @@
 
     /* === TASTATUR INTERAKTIVE TASKS === */
     function setupKeyboardTask(key, taskText, expectedValue=null) {
+      if(key!=='tab') clearTabTaskFocusLock();
       document.getElementById('keyboard-exercise-area').style.display = 'block';
       document.getElementById('kb-instruction').innerHTML = "Aufgabe: " + taskText;
 
@@ -3271,20 +3615,26 @@
         input.focus();
       }
       else if(key === 'tab') {
-        const in1 = document.createElement('input'); in1.type = 'text'; in1.className = 'task-input'; in1.placeholder = 'Feld 1: Starte hier';
-        const in2 = document.createElement('input'); in2.type = 'text'; in2.className = 'task-input'; in2.placeholder = 'Feld 2: Ziel mit Tab';
-        in1.addEventListener('keydown', (e) => {
-          if(e.key === 'Tab' && !e.shiftKey){
-            // Die erste Stufe ist nur ein Zwischenschritt. Sie zählt noch nicht als erledigte Aufgabe.
-            window.setTimeout(()=>{
-              if(document.activeElement === in2 && !tabForwardComplete){
-                tabForwardComplete = true;
-                if(advancedTab) advancedTab.style.display='block';
-                status.textContent='Prima! Du bist mit Tab zum zweiten Feld gesprungen. Jetzt kommt die Fortgeschrittenen-Aufgabe.';
-                status.className='status good';
-                startShiftTabGame();
-              }
-            },0);
+        const in1 = document.createElement('input'); in1.type = 'text'; in1.className = 'task-input'; in1.placeholder = 'Feld 1: Starte hier'; in1.readOnly=true;
+        const in2 = document.createElement('input'); in2.type = 'text'; in2.className = 'task-input'; in2.placeholder = 'Feld 2: Ziel mit Tab'; in2.readOnly=true;
+        setTabTaskFocusLock(in1,[in1,in2],'first');
+        in1.addEventListener('keydown',e=>{
+          if(e.key!=='Tab') return;
+          e.preventDefault();
+          if(e.shiftKey){
+            withAllowedTabFocusChange(()=>in1.focus({preventScroll:true}));
+            return;
+          }
+          if(!tabForwardComplete){
+            tabForwardComplete=true;
+            withAllowedTabFocusChange(()=>in2.focus({preventScroll:true}));
+            if(advancedTab) advancedTab.style.display='block';
+            status.textContent='Prima! Du bist mit Tab zum zweiten Feld gesprungen. Die erste Teilaufgabe ist geschafft.';
+            status.className='status good';
+            // Der zweite Teil beginnt mit dem dritten Feld als aktivem Feld.
+            startShiftTabGame();
+          }else{
+            startShiftTabGame();
           }
         });
         container.appendChild(in1);
@@ -3295,7 +3645,7 @@
           startShiftTabGame();
         }else{
           if(advancedTab) advancedTab.style.display='none';
-          in1.focus();
+          in1.focus({preventScroll:true});
         }
       }
       else if(key === 'navigation') {
@@ -3320,67 +3670,21 @@
       }
       else if(key === 'alt') {
         const game=document.createElement('div');
-        game.className='alt-switch-game';
-        game.tabIndex=0;
+        game.className='alt-real-task';
         const intro=document.createElement('p');
-        intro.innerHTML='<b>Fensterwechsel-Spiel:</b> Halte die ALT-Taste im Spiel mit der Maus gedrückt. Drücke dann zweimal die TAB-Taste auf deiner echten Tastatur, bis das dritte Fenster ganz rechts markiert ist.';
-        const windows=document.createElement('div');
-        windows.className='alt-switch-windows';
-        windows.innerHTML='<div class="alt-switch-window active"><strong>🌐 Browser</strong><span>Schul-Webseite</span></div><div class="alt-switch-window"><strong>📝 Textdokument</strong><span>Hausaufgaben</span></div><div class="alt-switch-window"><strong>📊 Präsentation</strong><span>Referat</span></div>';
-        const keyRow=document.createElement('div');
-        keyRow.className='alt-game-key-row';
-        const altButton=document.createElement('button');
-        altButton.type='button';
-        altButton.className='alt-game-key';
-        altButton.textContent='ALT';
-        altButton.setAttribute('aria-pressed','false');
-        let altHeld=false;
-        let activeWindow=0;
-        const cards=()=>Array.from(windows.querySelectorAll('.alt-switch-window'));
-        const releaseAlt=()=>{
-          altHeld=false;
-          altButton.classList.remove('pressed');
-          altButton.setAttribute('aria-pressed','false');
-        };
-        altButton.addEventListener('pointerdown',e=>{
-          e.preventDefault();
-          altHeld=true;
-          altButton.classList.add('pressed');
-          altButton.setAttribute('aria-pressed','true');
-          try{altButton.setPointerCapture(e.pointerId);}catch(_){}
-          game.focus({preventScroll:true});
-          status.textContent='ALT wird festgehalten. Drücke jetzt TAB, um zum nächsten Fenster zu springen.';
-          status.className='status wait';
-        });
-        altButton.addEventListener('pointerup',releaseAlt);
-        altButton.addEventListener('pointercancel',releaseAlt);
-        altButton.addEventListener('lostpointercapture',releaseAlt);
-        const plus=document.createElement('span');
-        plus.className='alt-game-plus';
-        plus.textContent='+';
-        const tabKey=document.createElement('div');
-        tabKey.className='alt-game-key alt-game-tabkey';
-        tabKey.textContent='TAB';
-        keyRow.append(altButton,plus,tabKey);
-        game.addEventListener('keydown',e=>{
-          if(e.key==='Tab' && altHeld){
-            e.preventDefault();
-            e.stopPropagation();
-            activeWindow=Math.min(activeWindow+1,2);
-            cards().forEach((card,index)=>card.classList.toggle('active',index===activeWindow));
-            if(activeWindow===2){
-              status.textContent='Geschafft! Du bist vom Browser über das Textdokument zur Präsentation ganz rechts gesprungen.';
-              status.className='status good';
-              finishTask(key);
-            }else{
-              status.textContent='Guter Sprung! Halte ALT weiter gedrückt und drücke TAB noch einmal.';
-              status.className='status wait';
-            }
-          }
-        });
-        game.addEventListener('pointerdown',()=>game.focus({preventScroll:true}));
-        game.append(intro,windows,keyRow);
+        intro.innerHTML='<b>Fensterwechsel:</b> Es öffnet sich ein zweites Fenster. Halte dort die Alt-Taste gedrückt und drücke Tab, um zu deinen Aufgaben zurückzukehren.';
+        const retry=document.createElement('button');
+        retry.type='button';
+        retry.id='alt-task-retry';
+        retry.className='game-choice';
+        retry.textContent='Zweites Fenster erneut öffnen';
+        retry.style.display='none';
+        retry.addEventListener('click',retryAltTaskPopup);
+        game.append(intro,retry);
         container.appendChild(game);
+        // Wird direkt nach dem Klick auf „Alles klar!“ geöffnet. So darf der Browser
+        // das neue Fenster als Reaktion auf eine bewusste Nutzeraktion öffnen.
+        openAltTaskPopup(game,status);
       }
       else if(key === 'windows') {
         const hint=document.createElement('p');
@@ -3391,10 +3695,12 @@
         choices.style.gap='10px';
         choices.style.justifyContent='center';
         const pictureChoices=[
-          {symbol:'🪟',value:'window'},
-          {symbol:'🪑',value:'chair'},
           {symbol:'⚽',value:'ball'},
+          {symbol:'🚲',value:'bicycle'},
+          {symbol:'🪑',value:'chair'},
           {symbol:'🌳',value:'tree'},
+          {symbol:'🚪',value:'door'},
+          {symbol:'🪟',value:'window'},
           {symbol:'📚',value:'books'},
           {symbol:'☂️',value:'umbrella'}
         ];
@@ -3434,11 +3740,17 @@
         const source=document.createElement('textarea');
         source.id='ctrl-source-text';
         source.spellcheck=false;
+        source.readOnly=true;
+        source.setAttribute('aria-readonly','true');
+        source.setAttribute('aria-label','Geschützter Beispieltext. Markiere ihn mit Strg und A.');
         source.value='Heute entdecken wir den Computer.\nAuf dem Bildschirm sehen wir viele Symbole.\nMit der Tastatur können wir Wörter und Zahlen schreiben.\nIm Informatikunterricht lernen wir, wie Dateien und Ordner funktionieren.';
         const target=document.createElement('textarea');
         target.id='ctrl-target-text';
         target.placeholder='Hier kommt der ausgeschnittene Text hinein.';
         target.spellcheck=false;
+        target.readOnly=true;
+        target.setAttribute('aria-readonly','true');
+        target.setAttribute('aria-label','Geschütztes Feld zum Einfügen. Klicke hier und nutze Strg und V.');
         leftLabel.htmlFor=source.id;
         rightLabel.htmlFor=target.id;
         leftBox.append(leftLabel,source);
@@ -3455,65 +3767,64 @@
           status.className=good?'status good':'status wait';
         };
 
-        // Mouse selection, context-menu selection, or manual editing must never
-        // count as the required keyboard shortcut.
+        // Die Felder sind schreibgeschützt. Nur die drei geforderten Tastenkombinationen
+        // dürfen den sichtbaren Inhalt verändern. Mausauswahl zählt nicht als Strg+A.
+        const exactCtrlShortcut=(e,key)=>e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey && e.key.toLowerCase()===key;
         source.addEventListener('pointerdown',()=>{selectedByCtrlA=false;});
         source.addEventListener('mousedown',()=>{selectedByCtrlA=false;});
-        source.addEventListener('input',()=>{selectedByCtrlA=false;cutByCtrlX=false;ctrlClipboard='';});
-        source.addEventListener('contextmenu',e=>{
-          e.preventDefault();
-          selectedByCtrlA=false;
-          setCtrlStatus('Nutze Strg + A auf der Tastatur, um den ganzen Text zu markieren.');
+        source.addEventListener('select',()=>{
+          if(!selectedByCtrlA && source.selectionStart===0 && source.selectionEnd===originalText.length){
+            setCtrlStatus('Nutze Strg + A auf der Tastatur. Eine Markierung mit der Maus reicht nicht.');
+          }
         });
-        source.addEventListener('copy',e=>e.preventDefault());
-        source.addEventListener('cut',e=>e.preventDefault());
-        target.addEventListener('paste',e=>{
-          e.preventDefault();
-          setCtrlStatus('Zum Einfügen musst du Strg + V auf der Tastatur drücken.');
-        });
-        target.addEventListener('contextmenu',e=>{
-          e.preventDefault();
-          setCtrlStatus('Zum Einfügen musst du Strg + V auf der Tastatur drücken.');
+        [source,target].forEach(field=>{
+          field.addEventListener('beforeinput',e=>e.preventDefault());
+          field.addEventListener('paste',e=>{e.preventDefault();setCtrlStatus('Verwende zum Einfügen die Tastenkombination Strg + V.');});
+          field.addEventListener('drop',e=>e.preventDefault());
+          field.addEventListener('cut',e=>e.preventDefault());
+          field.addEventListener('copy',e=>e.preventDefault());
+          field.addEventListener('contextmenu',e=>{e.preventDefault();setCtrlStatus('Benutze für diese Aufgabe nur Strg + A, Strg + X und Strg + V.');});
         });
 
         source.addEventListener('keydown',e=>{
-          const mod=e.ctrlKey || e.metaKey;
-          const keyName=e.key.toLowerCase();
-          if(mod && keyName==='a'){
-            e.preventDefault();
-            e.stopPropagation();
+          // Das Drücken der Strg-Taste allein ist noch keine Eingabe. Sie muss
+          // gehalten werden dürfen, bis A, X oder V zusätzlich gedrückt wird.
+          if(e.key==='Control') return;
+          if(exactCtrlShortcut(e,'a')){
+            e.preventDefault();e.stopPropagation();
             source.setSelectionRange(0,source.value.length);
             selectedByCtrlA=true;
-            setCtrlStatus('Prima! Du hast mit Strg + A alles markiert. Drücke jetzt Strg + X.');
+            setCtrlStatus('Prima! Alles ist mit Strg + A markiert. Halte Strg weiter gedrückt und drücke X.');
             return;
           }
-          if(mod && keyName==='x'){
-            e.preventDefault();
-            e.stopPropagation();
-            const reallyAllSelected=source.selectionStart===0 && source.selectionEnd===originalText.length && source.value===originalText;
-            if(selectedByCtrlA && reallyAllSelected){
+          if(exactCtrlShortcut(e,'x')){
+            e.preventDefault();e.stopPropagation();
+            const reallyAllSelected=selectedByCtrlA && source.selectionStart===0 && source.selectionEnd===originalText.length && source.value===originalText;
+            if(reallyAllSelected){
               ctrlClipboard=source.value;
               source.value='';
               source.setSelectionRange(0,0);
               selectedByCtrlA=false;
               cutByCtrlX=true;
-              setCtrlStatus('Der Text ist ausgeschnitten. Klicke rechts in das leere Feld und drücke Strg + V.');
-              target.focus();
+              setCtrlStatus('Der Text ist ausgeschnitten. Klicke jetzt selbst in das rechte Feld und drücke dort Strg + V.');
             }else{
               selectedByCtrlA=false;
-              setCtrlStatus('Markiere zuerst den ganzen Text mit Strg + A. Eine Mausauswahl reicht hier nicht.');
+              setCtrlStatus('Markiere zuerst den gesamten Text mit Strg + A. Eine Mausauswahl reicht nicht.');
             }
             return;
           }
-          // Any other key action after Ctrl+A cancels the shortcut confirmation.
-          if(selectedByCtrlA && !mod){selectedByCtrlA=false;}
+          // Jede andere Eingabe wird abgefangen und kann den Text nicht verändern.
+          e.preventDefault();e.stopPropagation();
+          if(selectedByCtrlA){selectedByCtrlA=false;source.setSelectionRange(0,0);}
+          if(e.key.length===1 || e.ctrlKey || e.metaKey){
+            setCtrlStatus('Für diese Aufgabe brauchst du nur Strg + A und danach Strg + X.');
+          }
         });
 
         target.addEventListener('keydown',e=>{
-          const mod=e.ctrlKey || e.metaKey;
-          if(mod && e.key.toLowerCase()==='v'){
-            e.preventDefault();
-            e.stopPropagation();
+          if(e.key==='Control') return;
+          if(exactCtrlShortcut(e,'v')){
+            e.preventDefault();e.stopPropagation();
             if(!cutByCtrlX || !ctrlClipboard || source.value!=='' || target.value!==''){
               setCtrlStatus('Schneide zuerst den gesamten Text links mit Strg + A und Strg + X aus.');
               return;
@@ -3527,6 +3838,8 @@
             }
             return;
           }
+          e.preventDefault();e.stopPropagation();
+          setCtrlStatus('Zum Einfügen brauchst du Strg + V. Andere Eingaben sind hier gesperrt.');
         });
         source.focus();
       }
@@ -3610,31 +3923,58 @@
       const ids=['tab-adv-1','tab-adv-2','tab-adv-3'];
       const fields=ids.map(id=>document.getElementById(id));
       if(fields.some(field=>!field)) return;
-      fields.forEach(field=>{field.value='';field.onkeydown=null;});
+      fields.forEach(field=>{field.value='';field.onkeydown=null;field.readOnly=true;});
       const status=document.getElementById('tab-advanced-status');
       tabBackStep=0;
-      status.textContent='Status: Das letzte Feld ist ausgewählt. Drücke zweimal Shift + Tab.';
+      setTabTaskFocusLock(fields[2],fields,'advanced');
+      status.textContent='Status: Das dritte Feld ist ausgewählt. Drücke zweimal Shift + Tab.';
       status.className='wait';
+
       fields[2].onkeydown=e=>{
-        if(e.key==='Tab' && e.shiftKey && tabBackStep===0){
-          e.preventDefault();
+        if(e.key!=='Tab') return;
+        e.preventDefault();
+        if(e.shiftKey){
           tabBackStep=1;
-          fields[1].focus();
+          withAllowedTabFocusChange(()=>fields[1].focus({preventScroll:true}));
           status.textContent='Gut! Du bist im zweiten Feld. Noch einmal Shift + Tab.';
           status.className='wait';
+        }else{
+          tabBackStep=0;
+          withAllowedTabFocusChange(()=>fields[2].focus({preventScroll:true}));
         }
       };
       fields[1].onkeydown=e=>{
-        if(e.key==='Tab' && e.shiftKey && tabBackStep===1){
-          e.preventDefault();
+        if(e.key!=='Tab') return;
+        e.preventDefault();
+        if(e.shiftKey && tabBackStep===1){
           tabBackStep=2;
-          fields[0].focus();
+          withAllowedTabFocusChange(()=>fields[0].focus({preventScroll:true}));
           status.textContent='Super! Du hast beide Tab-Aufgaben geschafft und bist wieder im ersten Feld.';
           status.className='good';
           finishTask('tab');
+        }else if(e.shiftKey){
+          withAllowedTabFocusChange(()=>fields[1].focus({preventScroll:true}));
+        }else{
+          // Nach Shift + Tab darf ein normales Tab wieder zurück ins dritte Feld.
+          // Die Aufgabe bleibt offen und lässt sich anschließend korrekt wiederholen.
+          tabBackStep=0;
+          withAllowedTabFocusChange(()=>fields[2].focus({preventScroll:true}));
+          status.textContent='Du bist wieder im dritten Feld. Versuche es erneut mit zweimal Shift + Tab.';
+          status.className='wait';
         }
       };
-      window.setTimeout(()=>fields[2].focus(),40);
+      fields[0].onkeydown=e=>{
+        if(e.key!=='Tab') return;
+        e.preventDefault();
+        if(e.shiftKey){
+          withAllowedTabFocusChange(()=>fields[0].focus({preventScroll:true}));
+        }else{
+          tabBackStep=0;
+          withAllowedTabFocusChange(()=>fields[1].focus({preventScroll:true}));
+        }
+      };
+      // Nicht nur den Fokus-Anker setzen: Feld 3 muss tatsächlich aktiv sein.
+      withAllowedTabFocusChange(()=>fields[2].focus({preventScroll:true}));
     }
 
     /* === MAUS TASKS === */
@@ -3851,9 +4191,32 @@
       placeCheeses();
     })();
 
-    document.getElementById('dblclick-target').addEventListener('dblclick', ()=>{
-      finishTask('leftclick');
-    });
+    (function initDoubleClickTask(){
+      const target=document.getElementById('dblclick-target');
+      const status=document.getElementById('dblclick-status');
+      if(!target) return;
+      let clickCount=0;
+      let singleClickTimer=null;
+      target.addEventListener('pointerdown',()=>target.classList.add('pressed'));
+      ['pointerup','pointercancel','pointerleave'].forEach(type=>target.addEventListener(type,()=>target.classList.remove('pressed')));
+      target.addEventListener('click',()=>{
+        clickCount++;
+        if(clickCount===1){
+          window.clearTimeout(singleClickTimer);
+          singleClickTimer=window.setTimeout(()=>{
+            clickCount=0;
+            if(status && !done.has('leftclick')){status.textContent='Das war ein einfacher Klick. Versuche es noch einmal und klicke zweimal schnell hintereinander.';status.className='status wait';}
+          },520);
+        }else if(clickCount>=2){
+          if(status){status.textContent='Du hast schnell zweimal geklickt!';status.className='status good';}
+        }
+      });
+      target.addEventListener('dblclick',()=>{
+        window.clearTimeout(singleClickTimer);
+        clickCount=0;
+        finishTask('leftclick');
+      });
+    })();
 
     (function initScrollTask(){
       const box=document.getElementById('scroll-box');
@@ -4190,6 +4553,7 @@
     }
     updateLocalClock();
     setInterval(updateLocalClock,1000);
+    window.addEventListener('beforeunload',closeAltTaskPopup);
   </script>
 </body>
 </html>
