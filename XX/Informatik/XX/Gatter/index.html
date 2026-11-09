@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#101722" />
+<title>GatterLab_V005</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0d131c;
+    --panel: #141d29;
+    --panel-2: #192433;
+    --panel-3: #202e40;
+    --line: #2b3a4d;
+    --muted: #91a1b5;
+    --text: #e7eef8;
+    --accent: #67b7ff;
+    --accent-2: #8cceff;
+    --green: #55e5a4;
+    --red: #ff7785;
+    --yellow: #ffd36e;
+    --shadow: 0 14px 34px rgba(0,0,0,.28);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font: 14px/1.4 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  button { font: inherit; color: inherit; }
+  .app { width: 100%; height: 100%; display: flex; flex-direction: column; min-width: 320px; }
+  .topbar { height: 58px; flex: 0 0 58px; display: flex; align-items: center; gap: 14px; padding: 0 18px; background: #111a26; border-bottom: 1px solid #273547; z-index: 5; }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 205px; }
+  .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient(145deg,#4b9cfa,#66e0bc); color: #081421; font-size: 18px; font-weight: 900; box-shadow: 0 4px 14px #4b9cfa33; }
+  .brand-name { font-weight: 750; letter-spacing: .2px; font-size: 15px; }
+  .brand-sub { display: block; font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: .9px; text-transform: uppercase; margin-top: -2px; }
+  .top-sep { height: 27px; width: 1px; background: var(--line); }
+  .toolbar { display: flex; align-items: center; gap: 6px; }
+  .toolbar-spacer { flex: 1; }
+  .btn { border: 1px solid var(--line); background: #1a2635; padding: 7px 11px; border-radius: 8px; cursor: pointer; color: #dce7f4; display: inline-flex; align-items: center; gap: 7px; transition: background .15s,border-color .15s,transform .15s; white-space: nowrap; }
+  .btn:hover { background: #25364a; border-color: #47627f; }
+  .btn:active { transform: translateY(1px); }
+  .btn.active { background: #20466a; border-color: #428ac7; color: #eaf6ff; }
+  .btn.primary { background: #2779bd; border-color: #3998e5; color: #fff; font-weight: 650; }
+  .btn.primary:hover { background: #328bd1; }
+  .btn.icon-only { padding: 7px 9px; min-width: 34px; justify-content: center; }
+  .btn.danger:hover { border-color: #a94f5b; background: #432631; }
+  .btn:focus-visible, .palette-item:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  .shortcut { color: #8495a9; font-size: 10px; margin-left: 3px; }
+  .workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: 224px minmax(0,1fr) 230px; }
+  .sidebar { background: var(--panel); min-height: 0; overflow-y: auto; border-right: 1px solid #273547; }
+  .sidebar.right { border-right: 0; border-left: 1px solid #273547; padding-bottom: 14px; }
+  .side-head { padding: 18px 16px 10px; display: flex; align-items: baseline; justify-content: space-between; }
+  .side-title { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1.1px; color: #aebed0; }
+  .side-hint { color: #75869b; font-size: 10px; }
+  .palette-section { padding: 5px 12px 10px; }
+  .section-label { color: #788ba2; font-weight: 700; text-transform: uppercase; letter-spacing: .9px; font-size: 10px; padding: 8px 5px; }
+  .palette-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .palette-item { min-height: 66px; border: 1px solid #2b3b50; border-radius: 9px; background: #192535; padding: 8px 7px 7px; text-align: left; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; transition: border-color .15s,background .15s,transform .15s; }
+  .palette-item:hover { background: #223349; border-color: #4a6888; transform: translateY(-1px); }
+  .palette-top { display: flex; align-items: center; justify-content: space-between; }
+  .gate-icon { width: 29px; height: 23px; display: inline-grid; place-items: center; border: 1px solid #45627e; border-radius: 6px; background: #21384e; color: #a9d8ff; font-size: 11px; font-weight: 800; }
+  .palette-symbol { color: #8295aa; font-size: 10px; }
+  .palette-name { color: #e2ebf5; font-weight: 650; font-size: 11px; }
+  .palette-desc { color: #8293a8; font-size: 9px; margin-top: 1px; }
+  .sidebar-note { margin: 5px 13px 14px; padding: 10px 11px; border: 1px solid #2b4055; border-radius: 9px; color: #9aadc1; background: #172331; font-size: 11px; }
+  .sidebar-note strong { color: #dce9f6; display: block; font-size: 11px; margin-bottom: 3px; }
+  .stage-wrap { min-width: 0; min-height: 0; display: flex; flex-direction: column; position: relative; background: #0f1722; }
+  .stage-toolbar { height: 43px; flex: 0 0 43px; border-bottom: 1px solid #273547; background: #131d29; display: flex; align-items: center; padding: 0 12px; gap: 6px; }
+  .stage-toolbar .btn { font-size: 11px; padding: 5px 9px; background: transparent; border-color: transparent; color: #a8b8ca; }
+  .stage-toolbar .btn:hover { border-color: #32465e; background: #1d2b3c; color: #e7eef8; }
+  .stage-toolbar .btn.active { color: #dff2ff; background: #1e3c58; border-color: #315d81; }
+  .stage-caption { margin-left: auto; color: #71849b; font-size: 10px; white-space: nowrap; }
+  .stage { flex: 1; min-height: 0; position: relative; overflow: hidden; touch-action: none; cursor: default; }
+  .stage.panning { cursor: grabbing; }
+  .stage.selecting { cursor: crosshair; }
+  .stage.wire-mode { cursor: crosshair; }
+  #scene { display: block; width: 100%; height: 100%; user-select: none; }
+  #gridBg { fill: url(#gridPattern); }
+  .wire-base { fill: none; stroke: #50657d; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: .95; }
+  .wire-base.energized { stroke: #3eaa83; stroke-width: 2.8; filter: drop-shadow(0 0 3px #48dca0aa); }
+  .wire-flow { fill: none; stroke: #a2ffd5; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 13; opacity: 0; pointer-events: none; }
+  .wire-flow.energized { opacity: .95; animation: flow 650ms linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -28; } }
+  .wire-hit { fill: none; stroke: transparent; stroke-width: 24; vector-effect: non-scaling-stroke; cursor: pointer; pointer-events: stroke; }
+  .wire-base.selected { stroke: var(--yellow); stroke-width: 3.5; }
+  .selection-marquee { fill: #58aaff22; stroke: #83caff; stroke-width: 1.5; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .node.preview-node { opacity: .78; pointer-events: none; }
+  .pin.snap-target { fill: #52e6a4; stroke: #e0fff0; stroke-width: 3; filter: drop-shadow(0 0 7px #52e6a4); }
+  .snap-halo { fill: #52e6a422; stroke: #6bf0b4; stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .wire-endpoint-hit { fill: transparent; stroke: transparent; cursor: grab; pointer-events: all; }
+  .wire-endpoint-hit:hover { fill:#ffd36e44; stroke:#ffd36eaa; stroke-width:1.4; }
+  .wire-endpoint-hit:active { cursor: grabbing; }
+  .wire-endpoint { fill: #ffd36e; stroke: #fff1c5; stroke-width: 1.8; pointer-events: none; filter: drop-shadow(0 0 4px #ffd36e99); }
+  .node { cursor: grab; }
+  .node:active { cursor: grabbing; }
+  .node .body { fill: #1b2a3b; stroke: #60758d; stroke-width: 1.6; filter: drop-shadow(0 4px 6px #0005); }
+  .node.input-node .body { fill: #1c3444; stroke: #4b91af; }
+  .node.output-node .body { fill: #29313d; stroke: #758397; }
+  .node.active-node .body { stroke: #50dba2; filter: drop-shadow(0 0 6px #45dc9c66); }
+  .node.selected .body { stroke: #83caff; stroke-width: 2.3; }
+  .node .node-title { font-size: 12px; font-weight: 800; fill: #e6eef8; text-anchor: middle; dominant-baseline: middle; letter-spacing: .3px; pointer-events: none; }
+  .node .node-sub { font-size: 8px; fill: #91a5bb; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+  .node .node-glyph { font-size: 16px; font-weight: 800; fill: #9fd3ff; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+  .node .state-pill { fill: #26394b; stroke: #3b566f; stroke-width: 1; }
+  .node .state-text { font-size: 11px; font-weight: 800; fill: #a9bacb; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+  .node.input-node.on .state-pill { fill: #1d7558; stroke: #5be4aa; }
+  .node.input-node.on .state-text { fill: #e4fff2; }
+  .node.output-node.on .body { stroke: #56e5a4; fill: #193d34; filter: drop-shadow(0 0 8px #46dca077); }
+  .node.output-node.on .state-text { fill: #b7ffdc; }
+  .pin { fill: #0e1722; stroke: #8da5bf; stroke-width: 1.5; cursor: crosshair; }
+  .pin:hover { fill: #75c6ff; stroke: #d7f1ff; stroke-width: 2.2; }
+  .pin.connected { fill: #63bafa; stroke: #d1eeff; }
+  .pin.hot { fill: #4fe1a0; stroke: #caffdf; filter: drop-shadow(0 0 4px #4fe1a0); }
+  .port-label { font-size: 8px; fill: #8297ad; pointer-events: none; }
+  .temp-wire { fill: none; stroke: #80caff; stroke-width: 2.5; stroke-dasharray: 6 5; pointer-events: none; }
+  .empty-hint { pointer-events: none; text-anchor: middle; fill: #667b92; }
+  .empty-hint .big { fill: #92a6bc; font-size: 16px; font-weight: 700; }
+  .empty-hint .small { font-size: 11px; }
+  .statusbar { height: 29px; flex: 0 0 29px; display: flex; align-items: center; gap: 16px; padding: 0 13px; border-top: 1px solid #273547; background: #131d29; font-size: 10px; color: #8498af; }
+  .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 6px; box-shadow: 0 0 7px #55e5a477; }
+  .status-right { margin-left: auto; }
+  .inspector-empty { padding: 17px 15px; color: #8294a8; font-size: 11px; line-height: 1.55; }
+  .inspector-card { margin: 8px 12px; padding: 12px; border: 1px solid #2a3b50; border-radius: 10px; background: #192535; }
+  .inspector-title { font-size: 14px; font-weight: 750; margin-bottom: 2px; }
+  .inspector-type { font-size: 10px; text-transform: uppercase; letter-spacing: .9px; color: #8297af; }
+  .inspector-rule { height: 1px; background: #2d4056; margin: 12px 0; }
+  .prop-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: #9bacbf; margin: 7px 0; }
+  .prop-value { color: #e2edf8; font-weight: 650; }
+  .value-chip { display: inline-flex; min-width: 32px; justify-content: center; padding: 3px 8px; border-radius: 6px; background: #28394b; color: #9fb2c7; font-size: 11px; font-weight: 800; }
+  .value-chip.on { color: #c8ffe2; background: #1d654d; }
+  .inspector-actions { display: flex; gap: 6px; margin-top: 12px; }
+  .inspector-actions .btn { flex: 1; justify-content: center; font-size: 10px; padding: 7px 6px; }
+  .toggle-row { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#a7b7c9; font-size:11px; margin-top: 10px; }
+  .switch { width: 39px; height: 22px; border: 1px solid #455a71; background: #263648; border-radius: 99px; position: relative; cursor: pointer; padding: 0; }
+  .switch::after { content:""; position:absolute; width:14px; height:14px; top:3px; left:3px; border-radius:50%; background:#9aabba; transition:transform .16s,background .16s; }
+  .switch.on { background:#1d6e53; border-color:#4bcf98; }
+  .switch.on::after { transform:translateX(17px); background:#eafff4; }
+  .tips { padding: 10px 14px; color: #7f91a6; font-size: 10px; line-height: 1.6; }
+  .tips strong { color: #aabbd0; }
+  .toast { position: absolute; bottom: 42px; left: 50%; transform: translate(-50%,12px); opacity: 0; pointer-events: none; background: #26384a; color: #eaf4ff; border: 1px solid #4b6884; border-radius: 9px; padding: 9px 14px; box-shadow: var(--shadow); font-size: 11px; transition: opacity .18s,transform .18s; z-index: 8; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translate(-50%,0); }
+  .modal-backdrop { display:none; position:absolute; inset:0; background:#07101acc; z-index:10; align-items:center; justify-content:center; padding:18px; }
+  .modal-backdrop.show { display:flex; }
+  .modal { width:min(520px,100%); background:#172332; border:1px solid #3a5069; border-radius:14px; box-shadow:var(--shadow); padding:18px; }
+  .modal h2 { font-size:16px; margin:0 0 5px; }
+  .modal p { color:#9aadc2; font-size:11px; margin:0 0 12px; }
+  .share-url { width:100%; padding:10px; background:#0e1722; border:1px solid #34485e; color:#cde4f8; border-radius:8px; font:11px ui-monospace,monospace; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:12px; }
+  .file-label { display:inline-flex; align-items:center; }
+
+  .history-btn { min-width:34px; justify-content:center; font-size:16px !important; }
+  .history-btn:disabled { opacity:.35; cursor:not-allowed; }
+  .minimap { position:absolute; right:13px; bottom:12px; width:214px; height:158px; z-index:6; overflow:hidden; border:1px solid #354b63; border-radius:11px; background:rgba(15,24,36,.94); box-shadow:0 8px 24px #0006; backdrop-filter:blur(7px); user-select:none; }
+  .minimap-head { height:28px; display:flex; align-items:center; gap:5px; padding:0 7px 0 10px; border-bottom:1px solid #293b50; color:#a9bbce; font-size:10px; font-weight:700; letter-spacing:.35px; }
+  .minimap-head .spacer { flex:1; }
+  .minimap-head button { height:20px; border:1px solid #3a5068; border-radius:5px; background:#1a2939; color:#b7cce0; font-size:9px; padding:0 6px; cursor:pointer; }
+  .minimap-head button:hover:not(:disabled) { background:#29425d; border-color:#6293bd; }
+  .minimap-head button:disabled { opacity:.35; cursor:not-allowed; }
+  #minimapSvg { display:block; width:100%; height:calc(100% - 28px); touch-action:none; cursor:crosshair; }
+  .minimap-bg { fill:#0d1723; }
+  .mini-wire { fill:none; stroke:#536f8e; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; opacity:.9; }
+  .mini-wire.hot { stroke:#5ce5ae; stroke-width:2; }
+  .mini-node { fill:#25384d; stroke:#607b98; stroke-width:1.2; vector-effect:non-scaling-stroke; }
+  .mini-node.hot { fill:#205942; stroke:#5ce5ae; }
+  .mini-node.selected { fill:#24517a; stroke:#85caff; stroke-width:1.6; }
+  .minimap-viewport { fill:#70bfff18; stroke:#84caff; stroke-width:1.4; vector-effect:non-scaling-stroke; pointer-events:none; }
+  .minimap-empty { fill:#8295aa; font-size:9px; text-anchor:middle; pointer-events:none; }
+  @media (max-width: 650px) {
+    .minimap { width:174px; height:132px; right:8px; bottom:8px; }
+    .minimap-head { height:25px; }
+    #minimapSvg { height:calc(100% - 25px); }
+  }
+
+  @media (max-width: 980px) {
+    .workspace { grid-template-columns: 190px minmax(0,1fr); }
+    .sidebar.right { display:none; }
+    .brand { min-width: 170px; }
+  }
+  @media (max-width: 650px) {
+    .topbar { padding:0 9px; gap:7px; }
+    .brand { min-width:0; }
+    .brand-sub, .brand-name { display:none; }
+    .top-sep { display:none; }
+    .topbar .btn .btn-text { display:none; }
+    .workspace { grid-template-columns: 118px minmax(0,1fr); }
+    .palette-grid { grid-template-columns:1fr; }
+    .palette-item { min-height:48px; flex-direction:row; align-items:center; gap:6px; }
+    .palette-top { gap:5px; }
+    .palette-desc, .side-hint, .sidebar-note { display:none; }
+    .side-head { padding:12px 9px 7px; }
+    .palette-section { padding:2px 7px 8px; }
+    .section-label { padding:7px 3px; font-size:9px; }
+    .stage-caption { display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand" aria-label="GatterLab">
+      <div class="brand-mark">⌁</div>
+      <div><div class="brand-name">GatterLab</div></div>
+    </div>
+    <div class="toolbar-spacer"></div>
+    <button class="btn" id="importBtn" title="JSON-Konfiguration laden">↥ <span class="btn-text">Import</span></button>
+    <button class="btn" id="exportBtn" title="Konfiguration als JSON speichern">⇩ <span class="btn-text">Export</span></button>
+    <button class="btn primary" id="shareBtn" title="Konfiguration in URL speichern und Link kopieren">↗ <span class="btn-text">Teilen</span></button>
+  </header>
+
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="side-head"><span class="side-title">Bauteile</span></div>
+      <div class="palette-section">
+        <div class="section-label">Ein- & Ausgänge</div>
+        <div class="palette-grid">
+          <button class="palette-item" data-type="INPUT"><span class="palette-top"><span class="gate-icon">IN</span><span class="palette-symbol">● →</span></span><span><span class="palette-name">Eingang</span><span class="palette-desc">Schalter 0 / 1</span></span></button>
+          <button class="palette-item" data-type="OUTPUT"><span class="palette-top"><span class="gate-icon">OUT</span><span class="palette-symbol">→ ◉</span></span><span><span class="palette-name">Ausgang</span><span class="palette-desc">LED / Anzeige</span></span></button>
+        </div>
+      </div>
+      <div class="palette-section">
+        <div class="section-label">Logikgatter</div>
+        <div class="palette-grid">
+          <button class="palette-item" data-type="AND"><span class="palette-top"><span class="gate-icon">&</span><span class="palette-symbol">A · B</span></span><span><span class="palette-name">AND</span><span class="palette-desc">UND</span></span></button>
+          <button class="palette-item" data-type="OR"><span class="palette-top"><span class="gate-icon">≥1</span><span class="palette-symbol">A + B</span></span><span><span class="palette-name">OR</span><span class="palette-desc">ODER</span></span></button>
+          <button class="palette-item" data-type="NOT"><span class="palette-top"><span class="gate-icon">1</span><span class="palette-symbol">¬ A</span></span><span><span class="palette-name">NOT</span><span class="palette-desc">NICHT</span></span></button>
+          <button class="palette-item" data-type="NAND"><span class="palette-top"><span class="gate-icon">&amp;○</span><span class="palette-symbol">¬(A · B)</span></span><span><span class="palette-name">NAND</span><span class="palette-desc">NICHT-UND</span></span></button>
+          <button class="palette-item" data-type="NOR"><span class="palette-top"><span class="gate-icon">≥1○</span><span class="palette-symbol">¬(A + B)</span></span><span><span class="palette-name">NOR</span><span class="palette-desc">NICHT-ODER</span></span></button>
+          <button class="palette-item" data-type="XOR"><span class="palette-top"><span class="gate-icon">=1</span><span class="palette-symbol">A ⊕ B</span></span><span><span class="palette-name">XOR</span><span class="palette-desc">Exklusiv-ODER</span></span></button>
+          <button class="palette-item" data-type="XNOR"><span class="palette-top"><span class="gate-icon">=1○</span><span class="palette-symbol">¬(A ⊕ B)</span></span><span><span class="palette-name">XNOR</span><span class="palette-desc">Äquivalenz</span></span></button>
+        </div>
+      </div>
+      <div class="sidebar-note"><strong>Bedienung</strong>Bauteile aus der Palette ziehen. Ausgangspin auf einen Eingangspin ziehen. Rechtsklick halten und ziehen verschiebt die Ansicht; Linksklick halten wählt einen Bereich. Shift erweitert die Auswahl und startet am Kabelstart eine zusätzliche Verbindung. Eingänge anklicken, um zwischen 0 und 1 umzuschalten.</div>
+    </aside>
+
+    <main class="stage-wrap">
+      <div class="stage-toolbar">
+        <button class="btn active" id="gridBtn" title="Raster ein-/ausblenden">▦ Raster</button>
+        <button class="btn history-btn" id="undoBtn" title="Rückgängig (Strg + Z)" aria-label="Rückgängig" disabled>↶</button>
+        <button class="btn history-btn" id="redoBtn" title="Wiederherstellen (Strg + Y)" aria-label="Wiederherstellen" disabled>↷</button>
+        <button class="btn" id="zoomOut" title="Verkleinern">−</button>
+        <span id="zoomLabel" style="font-size:10px;color:#a7b7c9;min-width:38px;text-align:center">100%</span>
+        <button class="btn" id="zoomIn" title="Vergrößern">+</button>
+        <button class="btn" id="fitBtn" title="Ansicht anpassen">□ Anpassen</button>
+      </div>
+      <div class="stage" id="stage">
+        <svg id="scene" xmlns="http://www.w3.org/2000/svg" aria-label="Schaltungsarbeitsfläche">
+          <defs>
+            <pattern id="gridPattern" width="24" height="24" patternUnits="userSpaceOnUse">
+              <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#263548" stroke-width="1" opacity=".72" />
+              <circle cx="0" cy="0" r="1.2" fill="#3b5068" opacity=".55" />
+            </pattern>
+          </defs>
+          <g id="world">
+            <rect id="gridBg" x="-12000" y="-12000" width="24000" height="24000" />
+            <g id="wireLayer"></g>
+            <g id="nodeLayer"></g>
+            <g id="wireHandleLayer"></g>
+            <g id="tempLayer"></g>
+          </g>
+          <g id="emptyLayer"></g>
+          <g id="selectionLayer"></g>
+        </svg>
+        <div class="minimap" id="minimap" aria-label="Schaltungsübersicht">
+          <div class="minimap-head"><span>Übersicht</span><span class="spacer"></span><button id="minimapSelectionFit" type="button" title="Auf Auswahl zoomen" disabled>Auswahl</button><button id="minimapAllFit" type="button" title="Gesamte Schaltung anzeigen">Alles</button></div>
+          <svg id="minimapSvg" viewBox="0 0 214 130" role="img" aria-label="Minimap; anklicken oder ziehen zum Navigieren">
+            <rect class="minimap-bg" x="0" y="0" width="214" height="130" />
+            <g id="minimapContent"><g id="minimapWireLayer"></g><g id="minimapNodeLayer"></g></g>
+            <rect id="minimapViewport" class="minimap-viewport" x="8" y="8" width="198" height="114" rx="2" />
+            <text id="minimapEmpty" class="minimap-empty" x="107" y="66">Noch keine Bauteile</text>
+          </svg>
+        </div>
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        <div class="modal-backdrop" id="shareModal">
+          <div class="modal">
+            <h2>Schaltung teilen</h2>
+            <p>Die komplette Schaltung steckt im Link. Wer ihn öffnet, erhält denselben Aufbau inklusive aktueller Eingangszustände.</p>
+            <input class="share-url" id="shareUrl" readonly aria-label="Freigabelink" />
+            <div class="modal-actions">
+              <button class="btn" id="closeShare">Schließen</button>
+              <button class="btn primary" id="copyShare">Link kopieren</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="statusbar">
+        <span><i class="status-dot"></i><span id="runStatus">Simulation aktiv</span></span>
+        <span id="nodeCount">0 Bauteile</span>
+        <span id="wireCount">0 Kabel</span>
+        <span id="selectionStatus">Nichts ausgewählt</span>
+        <span class="status-right" id="coordStatus">x: 0 · y: 0</span>
+      </div>
+    </main>
+
+    <aside class="sidebar right">
+      <div class="side-head"><span class="side-title">Eigenschaften</span></div>
+      <div id="inspector"><div class="inspector-empty">Wähle ein Bauteil oder ein Kabel auf der Arbeitsfläche aus, um Details und Signale zu sehen.</div></div>
+      <div class="tips"><strong>Tastenkürzel</strong><br />Strg + S – Link teilen<br />Strg + Z – Rückgängig<br />Strg + Y – Wiederherstellen<br />Strg + C – Kopieren<br />Strg + X – Ausschneiden<br />Strg + V – Einfügen<br />Strg + D – Duplizieren<br />Entf – Auswahl löschen<br />Esc – Aktion abbrechen</div>
+    </aside>
+  </div>
+  <input type="file" id="importFile" accept="application/json,.json" hidden />
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const GRID = 24;
+  const STORAGE_KEY = 'gatterlab-config-v1';
+  const TYPES = {
+    INPUT:  { label: 'Eingang', inputs: 0, kind: 'input', glyph: 'IN' },
+    OUTPUT: { label: 'Ausgang', inputs: 1, kind: 'output', glyph: 'OUT' },
+    AND:    { label: 'AND', inputs: 2, kind: 'gate', glyph: '&' },
+    OR:     { label: 'OR', inputs: 2, kind: 'gate', glyph: '≥1' },
+    NOT:    { label: 'NOT', inputs: 1, kind: 'gate', glyph: '1' },
+    NAND:   { label: 'NAND', inputs: 2, kind: 'gate', glyph: '&' },
+    NOR:    { label: 'NOR', inputs: 2, kind: 'gate', glyph: '≥1' },
+    XOR:    { label: 'XOR', inputs: 2, kind: 'gate', glyph: '=1' },
+    XNOR:   { label: 'XNOR', inputs: 2, kind: 'gate', glyph: '=1' }
+  };
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), scene = $('scene'), world = $('world');
+  const nodeLayer = $('nodeLayer'), wireLayer = $('wireLayer'), wireHandleLayer = $('wireHandleLayer'), tempLayer = $('tempLayer');
+  const selectionLayer = $('selectionLayer');
+  const minimapSvg = $('minimapSvg'), minimapContent = $('minimapContent');
+  const minimapWireLayer = $('minimapWireLayer'), minimapNodeLayer = $('minimapNodeLayer'), minimapViewport = $('minimapViewport');
+  let nodes = [], wires = [], camera = { x: 0, y: 0, z: 1 };
+  let selectedNodes = new Set(), selectedWires = new Set();
+  let gridVisible = true, gesture = null, armedFrom = null, toastTimer = null;
+  let currentPointer = { x: 0, y: 0 }, clipboard = null, pasteCount = 0;
+  let undoHistory = [], undoIndex = -1, minimapTransform = { scale: 1, offsetX: 8, offsetY: 8 }, minimapGesture = null;
+
+  const snap = v => Math.round(v / GRID) * GRID;
+  const snapZoom = z => Math.max(.25, Math.min(2.5, Math.round(z * 20) / 20));
+  const uid = prefix => prefix + Math.random().toString(36).slice(2, 9);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const byId = id => nodes.find(n => n.id === id);
+  const meta = n => TYPES[n.type];
+  const worldPoint = (clientX, clientY) => {
+    const r = stage.getBoundingClientRect();
+    return { x: (clientX - r.left - camera.x) / camera.z, y: (clientY - r.top - camera.y) / camera.z };
+  };
+  const stagePoint = (clientX, clientY) => {
+    const r = stage.getBoundingClientRect();
+    return { x: clientX - r.left, y: clientY - r.top };
+  };
+  const stageCenterWorld = () => worldPoint(stage.getBoundingClientRect().left + stage.clientWidth / 2, stage.getBoundingClientRect().top + stage.clientHeight / 2);
+  const editingTarget = () => /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '') || !!document.activeElement?.isContentEditable;
+  const selectionEmpty = () => selectedNodes.size === 0 && selectedWires.size === 0;
+
+  function showToast(message) {
+    const el = $('toast'); el.textContent = message; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+  function clearSelection() { selectedNodes.clear(); selectedWires.clear(); }
+  function selectOnlyNode(id) { clearSelection(); selectedNodes.add(id); }
+  function selectOnlyWire(id) { clearSelection(); selectedWires.add(id); }
+  function portPos(nodeId, direction, index = 0) {
+    const n = byId(nodeId); if (!n) return { x: 0, y: 0 };
+    const m = meta(n);
+    if (m.kind === 'input') return { x: n.x + 42, y: n.y };
+    if (m.kind === 'output') return { x: n.x - 42, y: n.y };
+    if (direction === 'out') return { x: n.x + 54, y: n.y };
+    return { x: n.x - 54, y: n.y + (m.inputs === 1 ? 0 : (index === 0 ? -15 : 15)) };
+  }
+  function pathBetween(a, b) {
+    const mid = snap(a.x + (b.x - a.x) * .5);
+    return `M ${a.x} ${a.y} H ${mid} V ${b.y} H ${b.x}`;
+  }
+  function pathForWire(w) {
+    const a = portPos(w.from.id, 'out', 0), b = portPos(w.to.id, 'in', w.to.port);
+    return pathBetween(a, b);
+  }
+  function incomingWire(nodeId, port) { return wires.find(w => w.to.id === nodeId && w.to.port === port); }
+  function isConnected(nodeId, direction, port) {
+    return direction === 'out' ? wires.some(w => w.from.id === nodeId) : !!incomingWire(nodeId, port);
+  }
+
+  function evaluate() {
+    const cache = new Map(), visiting = new Set();
+    function read(id) {
+      if (cache.has(id)) return cache.get(id);
+      const n = byId(id); if (!n) return false;
+      if (visiting.has(id)) return false;
+      visiting.add(id);
+      const m = meta(n); let value = false;
+      if (m.kind === 'input') value = !!n.state;
+      else if (m.kind === 'output') {
+        const w = incomingWire(n.id, 0); value = w ? read(w.from.id) : false;
+      } else {
+        const inputs = Array.from({ length: m.inputs }, (_, i) => {
+          const w = incomingWire(n.id, i); return w ? read(w.from.id) : false;
+        });
+        const a = !!inputs[0], b = !!inputs[1];
+        switch (n.type) {
+          case 'AND': value = a && b; break;
+          case 'OR': value = a || b; break;
+          case 'NOT': value = !a; break;
+          case 'NAND': value = !(a && b); break;
+          case 'NOR': value = !(a || b); break;
+          case 'XOR': value = a !== b; break;
+          case 'XNOR': value = a === b; break;
+        }
+      }
+      visiting.delete(id); cache.set(id, !!value); return !!value;
+    }
+    nodes.forEach(n => { n.value = read(n.id); });
+  }
+
+  function nodeMarkup(n, preview = false) {
+    const m = meta(n), kind = m.kind;
+    const selectedClass = (selectedNodes.has(n.id) || preview) ? ' selected' : '';
+    const activeClass = n.value ? ' active-node' : '';
+    const previewClass = preview ? ' preview-node' : '';
+    const nodeAttrs = preview ? '' : `data-node="${esc(n.id)}"`;
+    if (kind === 'input') {
+      const cls = `node input-node${n.state ? ' on' : ''}${selectedClass}${activeClass}${previewClass}`;
+      const outputAttrs = preview ? '' : `data-pin="out" data-node="${esc(n.id)}" data-port="0"`;
+      return `<g class="${cls}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+        <rect class="body" x="-38" y="-25" width="76" height="50" rx="11" />
+        <text class="node-title" x="-8" y="-5">${esc(n.label || 'IN')}</text>
+        <rect class="state-pill" x="-18" y="5" width="36" height="14" rx="7" />
+        <text class="state-text" x="0" y="12">${n.state ? '1 · EIN' : '0 · AUS'}</text>
+        <circle class="pin ${isConnected(n.id,'out',0) ? 'connected' : ''} ${n.state ? 'hot' : ''}" ${outputAttrs} cx="42" cy="0" r="5" />
+      </g>`;
+    }
+    if (kind === 'output') {
+      const incoming = incomingWire(n.id, 0);
+      const cls = `node output-node${n.value ? ' on' : ''}${selectedClass}${previewClass}`;
+      const inputAttrs = preview ? '' : `data-pin="in" data-node="${esc(n.id)}" data-port="0"`;
+      return `<g class="${cls}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+        <rect class="body" x="-38" y="-25" width="76" height="50" rx="11" />
+        <circle cx="0" cy="-4" r="8" fill="${n.value ? '#5ce4a7' : '#46586b'}" stroke="${n.value ? '#b9ffdc' : '#8395a9'}" stroke-width="1.5" />
+        <text class="node-title" x="0" y="14">${esc(n.label || 'OUT')}</text>
+        <text class="node-sub" x="0" y="-17">${n.value ? 'HIGH' : 'LOW'}</text>
+        <circle class="pin ${incoming ? 'connected' : ''}" ${inputAttrs} cx="-42" cy="0" r="5" />
+      </g>`;
+    }
+    const pinY = m.inputs === 1 ? [0] : [-15, 15];
+    const pinMarkup = pinY.map((y, i) => {
+      const attrs = preview ? '' : `data-pin="in" data-node="${esc(n.id)}" data-port="${i}"`;
+      return `<circle class="pin ${isConnected(n.id,'in',i) ? 'connected' : ''}" ${attrs} cx="-54" cy="${y}" r="5" />`;
+    }).join('');
+    const outputAttrs = preview ? '' : `data-pin="out" data-node="${esc(n.id)}" data-port="0"`;
+    const outputHot = n.value && isConnected(n.id,'out',0) ? ' hot' : '';
+    let glyph = m.glyph;
+    if (n.type === 'NAND' || n.type === 'NOR' || n.type === 'XNOR') glyph += ' ○';
+    return `<g class="node gate-node${selectedClass}${activeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+      <rect class="body" x="-46" y="-34" width="92" height="68" rx="10" />
+      <text class="node-glyph" x="0" y="-5">${esc(glyph)}</text>
+      <text class="node-title" x="0" y="18">${esc(n.label || n.type)}</text>
+      ${pinMarkup}
+      <circle class="pin ${isConnected(n.id,'out',0) ? 'connected' : ''}${outputHot}" ${outputAttrs} cx="54" cy="0" r="5" />
+    </g>`;
+  }
+
+  function renderNodes() {
+    nodeLayer.innerHTML = nodes.map(n => nodeMarkup(n)).join('');
+  }
+
+  function renderWires() {
+    const handles = [];
+    wireLayer.innerHTML = wires.map(w => {
+      const source = byId(w.from.id), active = !!(source && source.value);
+      const d = pathForWire(w), chosen = selectedWires.has(w.id);
+      const a = portPos(w.from.id, 'out', 0), b = portPos(w.to.id, 'in', w.to.port);
+      // Unsichtbare Hit-Flächen werden dauerhaft gerendert: Ein Endpunkt kann so direkt
+      // gegriffen werden, ohne das Kabel zuvor auswählen zu müssen.
+      handles.push(`<circle class="wire-endpoint-hit" cx="${a.x}" cy="${a.y}" r="12" data-wire-end="from" data-wire-id="${esc(w.id)}" title="Kabelstart direkt ziehen" aria-label="Kabelstart direkt ziehen" />`);
+      if (chosen) handles.push(`<circle class="wire-endpoint" cx="${a.x}" cy="${a.y}" r="5" />`);
+      handles.push(`<circle class="wire-endpoint-hit" cx="${b.x}" cy="${b.y}" r="12" data-wire-end="to" data-wire-id="${esc(w.id)}" title="Kabelende direkt ziehen" aria-label="Kabelende direkt ziehen" />`);
+      if (chosen) handles.push(`<circle class="wire-endpoint" cx="${b.x}" cy="${b.y}" r="5" />`);
+      return `<g data-wire="${esc(w.id)}">
+        <path class="wire-base${active ? ' energized' : ''}${chosen ? ' selected' : ''}" d="${d}" />
+        <path class="wire-flow${active ? ' energized' : ''}" d="${d}" />
+        <path class="wire-hit" d="${d}" data-wire-select="${esc(w.id)}" />
+      </g>`;
+    }).join('');
+    wireHandleLayer.innerHTML = handles.join('');
+  }
+
+  function renderEmpty() {
+    if (nodes.length) { $('emptyLayer').innerHTML = ''; return; }
+    const r = stage.getBoundingClientRect(), cx = r.width / 2, cy = r.height / 2;
+    $('emptyLayer').innerHTML = `<g class="empty-hint" transform="translate(${cx} ${cy})">
+      <text class="big" y="-15">Deine Schaltung beginnt hier</text>
+      <text class="small" y="9">Bauteile aus der linken Palette hierher ziehen.</text>
+      <text class="small" y="29">Linksklick halten und ziehen wählt mehrere Objekte aus.</text>
+    </g>`;
+  }
+  function updateCamera() {
+    camera.z = snapZoom(camera.z);
+    world.setAttribute('transform', `translate(${camera.x} ${camera.y}) scale(${camera.z})`);
+    $('zoomLabel').textContent = `${Math.round(camera.z * 100)}%`;
+    updateMinimap();
+  }
+  function updateHistoryButtons() {
+    $('undoBtn').disabled = undoIndex <= 0;
+    $('redoBtn').disabled = undoIndex < 0 || undoIndex >= undoHistory.length - 1;
+  }
+  function updateStatus() {
+    $('nodeCount').textContent = `${nodes.length} ${nodes.length === 1 ? 'Bauteil' : 'Bauteile'}`;
+    $('wireCount').textContent = `${wires.length} Kabel`;
+    const count = selectedNodes.size + selectedWires.size;
+    $('selectionStatus').textContent = count ? `${selectedNodes.size} Bauteile · ${selectedWires.size} Kabel ausgewählt` : 'Nichts ausgewählt';
+    $('coordStatus').textContent = `Zoom ${Math.round(camera.z * 100)}%`;
+    $('minimapSelectionFit').disabled = selectionEmpty();
+    updateHistoryButtons();
+  }
+
+  function updateMinimap() {
+    if (!minimapSvg || !minimapContent) return;
+    const mapW = 214, mapH = 130;
+    const area = { x:8, y:7, w:198, h:116 };
+    const view = { left:-camera.x/camera.z, top:-camera.y/camera.z, width:stage.clientWidth/camera.z, height:stage.clientHeight/camera.z };
+    let minX = view.left, minY = view.top, maxX = view.left + view.width, maxY = view.top + view.height;
+    for (const n of nodes) {
+      const halfW = meta(n).kind === 'gate' ? 62 : 52;
+      const halfH = meta(n).kind === 'gate' ? 46 : 38;
+      minX = Math.min(minX, n.x-halfW); maxX = Math.max(maxX, n.x+halfW);
+      minY = Math.min(minY, n.y-halfH); maxY = Math.max(maxY, n.y+halfH);
+    }
+    const padX = Math.max(48, (maxX-minX)*.07), padY = Math.max(42, (maxY-minY)*.07);
+    minX -= padX; maxX += padX; minY -= padY; maxY += padY;
+    const rangeW = Math.max(1,maxX-minX), rangeH = Math.max(1,maxY-minY);
+    const scale = Math.min(area.w/rangeW, area.h/rangeH);
+    const offsetX = area.x + (area.w-rangeW*scale)/2 - minX*scale;
+    const offsetY = area.y + (area.h-rangeH*scale)/2 - minY*scale;
+    minimapTransform = { scale, offsetX, offsetY };
+    minimapContent.setAttribute('transform', `translate(${offsetX} ${offsetY}) scale(${scale})`);
+    minimapWireLayer.innerHTML = wires.map(w => {
+      const active = !!byId(w.from.id)?.value;
+      return `<path class="mini-wire${active ? ' hot' : ''}" d="${pathForWire(w)}" />`;
+    }).join('');
+    minimapNodeLayer.innerHTML = nodes.map(n => {
+      const m = meta(n), width = m.kind === 'gate' ? 92 : 76, height = m.kind === 'gate' ? 68 : 50;
+      const cls = `mini-node${n.value ? ' hot' : ''}${selectedNodes.has(n.id) ? ' selected' : ''}`;
+      return `<rect class="${cls}" x="${n.x-width/2}" y="${n.y-height/2}" width="${width}" height="${height}" rx="${m.kind==='gate'?8:9}" />`;
+    }).join('');
+    const vx = offsetX + view.left*scale, vy = offsetY + view.top*scale;
+    const vw = Math.max(1,view.width*scale), vh = Math.max(1,view.height*scale);
+    minimapViewport.setAttribute('x',vx); minimapViewport.setAttribute('y',vy);
+    minimapViewport.setAttribute('width',vw); minimapViewport.setAttribute('height',vh);
+    $('minimapEmpty').style.display = nodes.length ? 'none' : '';
+  }
+
+  function historySnapshot() {
+    return JSON.stringify({ version:1, nodes:nodes.map(n => ({id:n.id,type:n.type,x:n.x,y:n.y,label:n.label,state:!!n.state})), wires:wires.map(w => ({id:w.id,from:{...w.from},to:{...w.to}})), gridVisible });
+  }
+  function undo() {
+    if (undoIndex <= 0) return;
+    undoIndex--;
+    applyConfig(JSON.parse(undoHistory[undoIndex]));
+    showToast('Aktion rückgängig gemacht');
+    updateHistoryButtons();
+  }
+  function redo() {
+    if (undoIndex < 0 || undoIndex >= undoHistory.length-1) return;
+    undoIndex++;
+    applyConfig(JSON.parse(undoHistory[undoIndex]));
+    showToast('Aktion wiederhergestellt');
+    updateHistoryButtons();
+  }
+
+  function render() {
+    evaluate(); renderWires(); renderNodes(); renderEmpty(); updateCamera(); updateStatus(); renderInspector(); saveLocal();
+  }
+  function renderInspector() {
+    const root = $('inspector');
+    if (selectedNodes.size + selectedWires.size > 1) {
+      root.innerHTML = `<div class="inspector-card">
+        <div class="inspector-title">Mehrfachauswahl</div>
+        <div class="inspector-type">${selectedNodes.size} Bauteile · ${selectedWires.size} Kabel</div>
+        <div class="inspector-rule"></div>
+        <div class="prop-row"><span>Enthaltene Verbindungen</span><span class="prop-value">${selectedWires.size}</span></div>
+        <div class="inspector-actions"><button class="btn" id="duplicateSelected">Duplizieren</button><button class="btn danger" id="deleteSelected">Löschen</button></div>
+      </div>`;
+    } else if (selectedNodes.size === 1) {
+      const id = [...selectedNodes][0], n = byId(id);
+      if (!n) { clearSelection(); root.innerHTML = '<div class="inspector-empty">Wähle ein Bauteil oder ein Kabel aus.</div>'; return; }
+      const m = meta(n), val = n.value ? '1 · HIGH' : '0 · LOW';
+      let extra = '';
+      if (m.kind === 'input') extra = `<div class="toggle-row"><span>Eingangssignal</span><button class="switch ${n.state ? 'on' : ''}" id="inspectorToggle" aria-label="Eingang umschalten"></button></div>`;
+      else if (m.kind === 'gate') {
+        const values = Array.from({length:m.inputs}, (_,i) => { const w=incomingWire(n.id,i); const src=w&&byId(w.from.id); return src ? (src.value?'1':'0') : '–'; });
+        extra = `<div class="prop-row"><span>Eingänge</span><span class="prop-value">${values.join(' / ')}</span></div><div class="prop-row"><span>Verbundene Pins</span><span class="prop-value">${values.filter(v=>v!=='–').length} / ${m.inputs}</span></div>`;
+      } else {
+        const w = incomingWire(n.id,0); extra = `<div class="prop-row"><span>Signalquelle</span><span class="prop-value">${w && byId(w.from.id) ? esc(byId(w.from.id).label || meta(byId(w.from.id)).label) : 'Nicht verbunden'}</span></div>`;
+      }
+      root.innerHTML = `<div class="inspector-card">
+        <div class="inspector-title">${esc(n.label || m.label)}</div><div class="inspector-type">${esc(m.label)} · ${esc(n.id.slice(0,8))}</div>
+        <div class="inspector-rule"></div>
+        <div class="prop-row"><span>Ausgangswert</span><span class="value-chip ${n.value ? 'on' : ''}">${val}</span></div>
+        ${extra}
+        <div class="inspector-actions"><button class="btn" id="duplicateSelected">Duplizieren</button><button class="btn danger" id="deleteSelected">Löschen</button></div>
+      </div>`;
+      const toggle = $('inspectorToggle'); if (toggle) toggle.addEventListener('click', () => { n.state = !n.state; render(); });
+    } else if (selectedWires.size === 1) {
+      const id = [...selectedWires][0], w = wires.find(x => x.id === id);
+      if (!w) { clearSelection(); root.innerHTML = '<div class="inspector-empty">Wähle ein Bauteil oder ein Kabel aus.</div>'; return; }
+      const a = byId(w.from.id), b = byId(w.to.id);
+      root.innerHTML = `<div class="inspector-card"><div class="inspector-title">Verbindung</div><div class="inspector-type">SIGNALKABEL · ${esc(w.id.slice(0,8))}</div><div class="inspector-rule"></div>
+        <div class="prop-row"><span>Von</span><span class="prop-value">${esc(a?.label || meta(a || {type:'INPUT'}).label)}</span></div>
+        <div class="prop-row"><span>Nach</span><span class="prop-value">${esc(b?.label || meta(b || {type:'OUTPUT'}).label)}</span></div>
+        <div class="prop-row"><span>Signal</span><span class="value-chip ${a?.value ? 'on' : ''}">${a?.value ? '1 · HIGH' : '0 · LOW'}</span></div>
+        <div class="prop-row"><span>Bearbeitung</span><span class="prop-value">Endpunkte ziehen</span></div>
+        <div style="color:#91a5bb;font-size:10px;line-height:1.45;margin-top:7px">Gelbe Punkte an den Kabelenden auf einen passenden Ausgangs- oder freien Eingangspin ziehen.</div>
+        <div class="inspector-actions"><button class="btn danger" id="deleteSelected">Kabel trennen</button></div></div>`;
+    } else {
+      root.innerHTML = '<div class="inspector-empty">Wähle ein Bauteil oder ein Kabel auf der Arbeitsfläche aus, um Details und Signale zu sehen.</div>';
+    }
+    const del = $('deleteSelected'); if (del) del.addEventListener('click', deleteSelection);
+    const dup = $('duplicateSelected'); if (dup) dup.addEventListener('click', duplicateSelection);
+  }
+
+  function addNode(type, x, y) {
+    if (!TYPES[type]) return null;
+    const n = { id: uid('n'), type, x: snap(x), y: snap(y), label: TYPES[type].label, state: false, value: false };
+    nodes.push(n); clearSelection(); selectedNodes.add(n.id); armedFrom = null; render(); return n;
+  }
+  function removeNode(id) {
+    nodes = nodes.filter(n => n.id !== id);
+    wires = wires.filter(w => w.from.id !== id && w.to.id !== id);
+  }
+  function deleteSelection() {
+    if (selectionEmpty()) return;
+    const removeIds = new Set(selectedNodes);
+    nodes.filter(n => removeIds.has(n.id)).forEach(n => removeNode(n.id));
+    wires = wires.filter(w => !selectedWires.has(w.id));
+    clearSelection(); armedFrom = null; render(); showToast('Auswahl gelöscht');
+  }
+  function buildClipboard() {
+    if (selectionEmpty()) return null;
+    // Beim Kopieren eines einzelnen Kabels werden seine beiden Endbauteile mitgenommen.
+    const nodeIds = new Set(selectedNodes);
+    wires.filter(w => selectedWires.has(w.id)).forEach(w => { nodeIds.add(w.from.id); nodeIds.add(w.to.id); });
+    const copyNodes = nodes.filter(n => nodeIds.has(n.id)).map(n => ({...n}));
+    const copyWires = wires.filter(w => selectedWires.has(w.id) || (nodeIds.has(w.from.id) && nodeIds.has(w.to.id))).map(w => ({...w, from:{...w.from}, to:{...w.to}}));
+    return { nodes: copyNodes, wires: copyWires };
+  }
+  function copySelection() {
+    const data = buildClipboard();
+    if (!data) return false;
+    clipboard = data; pasteCount = 0;
+    showToast(`${data.nodes.length} Bauteile und ${data.wires.length} Kabel kopiert`);
+    return true;
+  }
+  function pasteSelection() {
+    if (!clipboard || !clipboard.nodes.length) return false;
+    const offset = GRID * 2 * (pasteCount + 1), idMap = new Map();
+    const newNodes = clipboard.nodes.map(n => {
+      const id = uid('n'); idMap.set(n.id, id);
+      return {...n, id, x:snap(n.x + offset), y:snap(n.y + offset), value:false};
+    });
+    const existing = new Set(nodes.map(n => n.id));
+    const newWires = clipboard.wires.map(w => ({
+      id: uid('w'),
+      from: {id:idMap.get(w.from.id) || (existing.has(w.from.id) ? w.from.id : null), port:0},
+      to: {id:idMap.get(w.to.id) || (existing.has(w.to.id) ? w.to.id : null), port:w.to.port}
+    })).filter(w => w.from.id && w.to.id);
+    nodes.push(...newNodes);
+    // Eingangspins bleiben eindeutig: Bei bereits belegtem Ziel wird der eingefügte Draht ausgelassen.
+    const occupied = new Set(wires.map(w => `${w.to.id}:${w.to.port}`));
+    const validWires = newWires.filter(w => { const k=`${w.to.id}:${w.to.port}`; if (occupied.has(k)) return false; occupied.add(k); return true; });
+    wires.push(...validWires);
+    clearSelection(); newNodes.forEach(n => selectedNodes.add(n.id)); validWires.forEach(w => selectedWires.add(w.id));
+    pasteCount++; render(); showToast('Auswahl eingefügt'); return true;
+  }
+  function duplicateSelection() {
+    const data = buildClipboard(); if (!data) return;
+    clipboard = data; pasteCount = 0; pasteSelection();
+  }
+  function connect(from, to) {
+    if (!from || !to || from.id === to.id || from.dir !== 'out' || to.dir !== 'in') return false;
+    const src = byId(from.id), dst = byId(to.id); if (!src || !dst) return false;
+    const inputCount = meta(dst).inputs;
+    if (to.port < 0 || to.port >= inputCount) return false;
+    wires = wires.filter(w => !(w.to.id === to.id && w.to.port === to.port));
+    wires.push({ id: uid('w'), from: { id: from.id, port: 0 }, to: { id: to.id, port: to.port } });
+    clearSelection(); armedFrom = null; gesture = null; render(); tempLayer.innerHTML = ''; showToast('Kabel verbunden'); return true;
+  }
+  function clientPinAt(x, y) {
+    const el = document.elementFromPoint(x, y);
+    const pin = el && el.closest ? el.closest('.pin') : null;
+    if (!pin) return null;
+    return { id: pin.dataset.node, dir: pin.dataset.pin, port: Number(pin.dataset.port || 0) };
+  }
+  function clearSnapHighlight() {
+    nodeLayer.querySelectorAll('.pin.snap-target').forEach(el => el.classList.remove('snap-target'));
+    if (gesture && (gesture.kind === 'wire' || gesture.kind === 'rewire')) gesture.snapTarget = null;
+  }
+  function nearestInputPin(clientX, clientY, excludeNodeId = gesture?.from?.id, excludeWireId = null) {
+    const rect = stage.getBoundingClientRect();
+    let best = null, bestDistance = 23;
+    for (const n of nodes) {
+      if (n.id === excludeNodeId) continue;
+      const count = meta(n).inputs;
+      for (let port = 0; port < count; port++) {
+        const occupied = incomingWire(n.id, port);
+        if (excludeWireId && occupied && occupied.id !== excludeWireId) continue;
+        const p = portPos(n.id, 'in', port);
+        const sx = rect.left + camera.x + p.x * camera.z;
+        const sy = rect.top + camera.y + p.y * camera.z;
+        const distance = Math.hypot(clientX - sx, clientY - sy);
+        if (distance <= bestDistance) { bestDistance = distance; best = { id:n.id, dir:'in', port, x:p.x, y:p.y }; }
+      }
+    }
+    return best;
+  }
+  function nearestOutputPin(clientX, clientY, excludeNodeId = null) {
+    const rect = stage.getBoundingClientRect();
+    let best = null, bestDistance = 23;
+    for (const n of nodes) {
+      if (n.id === excludeNodeId || meta(n).kind === 'output') continue;
+      const p = portPos(n.id, 'out', 0);
+      const sx = rect.left + camera.x + p.x * camera.z;
+      const sy = rect.top + camera.y + p.y * camera.z;
+      const distance = Math.hypot(clientX - sx, clientY - sy);
+      if (distance <= bestDistance) bestDistance = distance, best = { id:n.id, dir:'out', port:0, x:p.x, y:p.y };
+    }
+    return best;
+  }
+  function updateTempWire() {
+    if (!gesture || gesture.kind !== 'wire') { tempLayer.innerHTML = ''; return; }
+    const a = portPos(gesture.from.id, 'out', 0);
+    const target = nearestInputPin(currentPointer.x, currentPointer.y);
+    clearSnapHighlight();
+    if (target) {
+      gesture.snapTarget = { id:target.id, dir:'in', port:target.port };
+      const selector = `.pin[data-node="${CSS.escape(target.id)}"][data-pin="in"][data-port="${target.port}"]`;
+      const pinEl = nodeLayer.querySelector(selector);
+      if (pinEl) pinEl.classList.add('snap-target');
+    }
+    const b = target ? {x:target.x,y:target.y} : worldPoint(currentPointer.x, currentPointer.y);
+    const mid = snap(a.x + (b.x - a.x) * .5);
+    const d = `M ${a.x} ${a.y} H ${mid} V ${b.y} H ${b.x}`;
+    tempLayer.innerHTML = `<path class="temp-wire" d="${d}" />${target ? `<circle class="snap-halo" cx="${b.x}" cy="${b.y}" r="11" />` : ''}`;
+  }
+  function updateRewirePreview() {
+    if (!gesture || gesture.kind !== 'rewire') { tempLayer.innerHTML = ''; return; }
+    const wire = wires.find(w => w.id === gesture.wireId);
+    if (!wire) { tempLayer.innerHTML = ''; return; }
+    const fixed = gesture.end === 'from'
+      ? portPos(wire.to.id, 'in', wire.to.port)
+      : portPos(wire.from.id, 'out', 0);
+    const target = gesture.end === 'from'
+      ? nearestOutputPin(currentPointer.x, currentPointer.y, wire.to.id)
+      : nearestInputPin(currentPointer.x, currentPointer.y, wire.from.id, wire.id);
+    clearSnapHighlight();
+    if (target) {
+      gesture.snapTarget = { id:target.id, dir:target.dir, port:target.port };
+      const selector = `.pin[data-node="${CSS.escape(target.id)}"][data-pin="${target.dir}"][data-port="${target.port}"]`;
+      const pinEl = nodeLayer.querySelector(selector);
+      if (pinEl) pinEl.classList.add('snap-target');
+    }
+    const cursor = target ? {x:target.x,y:target.y} : worldPoint(currentPointer.x,currentPointer.y);
+    const a = gesture.end === 'from' ? cursor : fixed;
+    const b = gesture.end === 'from' ? fixed : cursor;
+    const d = pathBetween(a,b);
+    tempLayer.innerHTML = `<path class="temp-wire" d="${d}" />${target ? `<circle class="snap-halo" cx="${cursor.x}" cy="${cursor.y}" r="11" />` : ''}`;
+  }
+  function saveLocal() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(makeConfig())); } catch (_) { /* private browsing / quota */ }
+    const snapshot = historySnapshot();
+    if (undoIndex < 0) {
+      undoHistory = [snapshot]; undoIndex = 0;
+    } else if (undoHistory[undoIndex] !== snapshot) {
+      undoHistory = undoHistory.slice(0, undoIndex + 1);
+      undoHistory.push(snapshot);
+      if (undoHistory.length > 101) undoHistory.shift();
+      undoIndex = undoHistory.length - 1;
+    }
+    updateHistoryButtons();
+  }
+  function makeConfig() {
+    return { version: 1, nodes: nodes.map(n => ({ id:n.id,type:n.type,x:n.x,y:n.y,label:n.label,state:!!n.state })), wires: wires.map(w => ({ id:w.id,from:{...w.from},to:{...w.to} })), camera: { ...camera, z:snapZoom(camera.z) }, gridVisible };
+  }
+  function applyConfig(raw, fit = false) {
+    if (!raw || raw.version !== 1 || !Array.isArray(raw.nodes) || !Array.isArray(raw.wires)) throw new Error('Ungültige Konfiguration');
+    nodes = raw.nodes.filter(n => n && TYPES[n.type] && Number.isFinite(Number(n.x)) && Number.isFinite(Number(n.y))).map(n => ({ id:String(n.id || uid('n')), type:n.type, x:snap(Number(n.x)), y:snap(Number(n.y)), label:String(n.label || TYPES[n.type].label).slice(0,28), state:!!n.state, value:false }));
+    const ids = new Set(nodes.map(n => n.id));
+    wires = raw.wires.filter(w => w && w.from && w.to && ids.has(w.from.id) && ids.has(w.to.id)).filter(w => {
+      const a=byId(w.from.id), b=byId(w.to.id); return a && b && meta(a).kind !== 'output' && meta(b).kind !== 'input' && Number(w.to.port) >= 0 && Number(w.to.port) < meta(b).inputs;
+    }).map(w => ({ id:String(w.id || uid('w')), from:{id:w.from.id,port:0}, to:{id:w.to.id,port:Number(w.to.port)} }));
+    const seen = new Set(); wires = wires.filter(w => { const k=w.to.id+':'+w.to.port; if(seen.has(k)) return false; seen.add(k); return true; });
+    if (raw.camera && !fit) camera = { x:Number(raw.camera.x)||0, y:Number(raw.camera.y)||0, z:snapZoom(Number(raw.camera.z)||1) };
+    gridVisible = raw.gridVisible !== false; $('gridBg').style.display = gridVisible ? '' : 'none'; $('gridBtn').classList.toggle('active',gridVisible);
+    clearSelection(); armedFrom = null; render(); if (fit) fitView();
+  }
+  function encodeConfig(config) {
+    const bytes = new TextEncoder().encode(JSON.stringify(config)); let binary = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function decodeConfig(value) {
+    const base = value.replace(/-/g,'+').replace(/_/g,'/');
+    const binary = atob(base + '='.repeat((4 - base.length % 4) % 4));
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }
+  function configFromHash() {
+    const m = location.hash.match(/(?:^#|&)c=([^&]+)/); if (!m) return null;
+    return decodeConfig(m[1]);
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); showToast('Link in die Zwischenablage kopiert'); }
+    catch (_) { window.prompt('Link kopieren:', text); }
+  }
+  function shareConfig() {
+    const packed = encodeConfig(makeConfig());
+    const url = location.href.split('#')[0] + '#c=' + packed;
+    try { history.replaceState(null, '', url); } catch (_) { location.hash = 'c=' + packed; }
+    $('shareUrl').value = url; $('shareModal').classList.add('show');
+  }
+  function exportConfig() {
+    const blob = new Blob([JSON.stringify(makeConfig(), null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'gatterlab-schaltung.json'; a.click(); URL.revokeObjectURL(url); showToast('JSON-Konfiguration exportiert');
+  }
+  function importConfigFile(file) {
+    if (!file) return;
+    const reader = new FileReader(); reader.onload = () => { try { applyConfig(JSON.parse(reader.result), true); showToast('Konfiguration geladen'); } catch(e) { alert('Datei konnte nicht geladen werden: ' + e.message); } };
+    reader.readAsText(file);
+  }
+  function fitView() {
+    if (!nodes.length) { camera = { x:stage.clientWidth/2, y:stage.clientHeight/2, z:1 }; updateCamera(); updateStatus(); saveLocal(); return; }
+    const minX = Math.min(...nodes.map(n => n.x)) - 62, maxX = Math.max(...nodes.map(n => n.x)) + 62;
+    const minY = Math.min(...nodes.map(n => n.y)) - 46, maxY = Math.max(...nodes.map(n => n.y)) + 46;
+    fitBounds(minX,minY,maxX,maxY,1.7);
+  }
+  function fitBounds(minX, minY, maxX, maxY, maxZoom = 2.0) {
+    const padX = Math.max(90,(maxX-minX)*.16), padY = Math.max(75,(maxY-minY)*.16);
+    minX -= padX; maxX += padX; minY -= padY; maxY += padY;
+    const w = Math.max(160,maxX-minX), h = Math.max(120,maxY-minY);
+    camera.z = snapZoom(Math.max(.25,Math.min(maxZoom,(stage.clientWidth-80)/w,(stage.clientHeight-80)/h)));
+    camera.x = (stage.clientWidth-(minX+maxX)*camera.z)/2;
+    camera.y = (stage.clientHeight-(minY+maxY)*camera.z)/2;
+    updateCamera(); updateStatus(); saveLocal();
+  }
+  function fitSelection() {
+    if (selectionEmpty()) return;
+    const points = [];
+    nodes.filter(n=>selectedNodes.has(n.id)).forEach(n => {
+      const halfW = meta(n).kind === 'gate' ? 62 : 52, halfH = meta(n).kind === 'gate' ? 46 : 38;
+      points.push({x:n.x-halfW,y:n.y-halfH},{x:n.x+halfW,y:n.y+halfH});
+    });
+    wires.filter(w=>selectedWires.has(w.id)).forEach(w => {
+      points.push(portPos(w.from.id,'out',0),portPos(w.to.id,'in',w.to.port));
+    });
+    if (!points.length) return;
+    fitBounds(Math.min(...points.map(p=>p.x)),Math.min(...points.map(p=>p.y)),Math.max(...points.map(p=>p.x)),Math.max(...points.map(p=>p.y)),2.5);
+  }
+  function minimapWorldAt(clientX, clientY, transform = minimapTransform, rect = minimapSvg.getBoundingClientRect()) {
+    const sx = (clientX-rect.left)*214/rect.width, sy = (clientY-rect.top)*130/rect.height;
+    return { x:(sx-transform.offsetX)/transform.scale, y:(sy-transform.offsetY)/transform.scale };
+  }
+  function navigateMinimap(clientX, clientY, transform, rect) {
+    const p = minimapWorldAt(clientX,clientY,transform,rect);
+    camera.x = stage.clientWidth/2 - p.x*camera.z;
+    camera.y = stage.clientHeight/2 - p.y*camera.z;
+    updateCamera(); updateStatus(); saveLocal();
+  }
+  minimapSvg.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    const rect = minimapSvg.getBoundingClientRect();
+    minimapGesture = { pointerId:e.pointerId, rect, transform:{...minimapTransform} };
+    try { minimapSvg.setPointerCapture(e.pointerId); } catch(_) {}
+    navigateMinimap(e.clientX,e.clientY,minimapGesture.transform,rect);
+    e.preventDefault(); e.stopPropagation();
+  });
+  minimapSvg.addEventListener('pointermove', e => {
+    if (!minimapGesture || minimapGesture.pointerId !== e.pointerId) return;
+    navigateMinimap(e.clientX,e.clientY,minimapGesture.transform,minimapGesture.rect);
+    e.preventDefault();
+  });
+  minimapSvg.addEventListener('pointerup', e => { if (minimapGesture?.pointerId === e.pointerId) minimapGesture = null; });
+  minimapSvg.addEventListener('pointercancel', () => { minimapGesture = null; });
+
+  function zoomAt(next, clientX, clientY) {
+    const z = snapZoom(next);
+    const p = worldPoint(clientX, clientY), rect = stage.getBoundingClientRect();
+    const sx = clientX - rect.left, sy = clientY - rect.top;
+    camera.z = z; camera.x = sx - p.x*z; camera.y = sy - p.y*z;
+    updateCamera(); updateStatus(); saveLocal();
+  }
+
+  // Bauteile werden ausschließlich per Drag-and-drop aus der Palette platziert.
+  document.querySelectorAll('.palette-item').forEach(btn => {
+    btn.addEventListener('dragstart', e => e.preventDefault());
+    btn.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      gesture = {kind:'palette', type:btn.dataset.type, startX:e.clientX, startY:e.clientY, moved:false};
+      try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+  });
+  $('gridBtn').addEventListener('click', () => { gridVisible=!gridVisible; $('gridBg').style.display=gridVisible?'':'none'; $('gridBtn').classList.toggle('active',gridVisible); saveLocal(); });
+  $('zoomIn').addEventListener('click', () => zoomAt(camera.z + .05, stage.getBoundingClientRect().left+stage.clientWidth/2, stage.getBoundingClientRect().top+stage.clientHeight/2));
+  $('zoomOut').addEventListener('click', () => zoomAt(camera.z - .05, stage.getBoundingClientRect().left+stage.clientWidth/2, stage.getBoundingClientRect().top+stage.clientHeight/2));
+  $('fitBtn').addEventListener('click', fitView);
+  $('undoBtn').addEventListener('click', undo);
+  $('redoBtn').addEventListener('click', redo);
+  $('minimapSelectionFit').addEventListener('click', fitSelection);
+  $('minimapAllFit').addEventListener('click', fitView);
+  $('shareBtn').addEventListener('click', shareConfig);
+  $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
+  $('closeShare').addEventListener('click', () => $('shareModal').classList.remove('show'));
+  $('shareModal').addEventListener('click', e => { if (e.target === $('shareModal')) $('shareModal').classList.remove('show'); });
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('exportBtn').addEventListener('click', exportConfig);
+  $('importFile').addEventListener('change', e => { importConfigFile(e.target.files[0]); e.target.value=''; });
+  $('exportBtn').addEventListener('contextmenu', e => { e.preventDefault(); $('importFile').click(); });
+
+  scene.addEventListener('wheel', e => {
+    e.preventDefault(); zoomAt(camera.z + (e.deltaY < 0 ? .05 : -.05), e.clientX, e.clientY);
+  }, {passive:false});
+  scene.addEventListener('contextmenu', e => e.preventDefault());
+
+  scene.addEventListener('pointerdown', e => {
+    currentPointer = {x:e.clientX,y:e.clientY};
+    // Rechtsklick halten und ziehen verschiebt die Ansicht – unabhängig davon, worauf man startet.
+    if (e.button === 2 || e.button === 1) {
+      gesture={kind:'pan',button:e.button,startX:e.clientX,startY:e.clientY,originX:camera.x,originY:camera.y,moved:false};
+      stage.classList.add('panning');
+      try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+      e.preventDefault(); return;
+    }
+    if (e.button !== 0) return;
+
+    const wireEndEl = e.target.closest && e.target.closest('[data-wire-end]');
+    if (wireEndEl) {
+      const wireId = wireEndEl.dataset.wireId;
+      const end = wireEndEl.dataset.wireEnd;
+      const wire = wires.find(w => w.id === wireId);
+      if (wire && (end === 'from' || end === 'to')) {
+        // Shift + Ziehen am Kabelstart legt eine zusätzliche Verbindung vom selben Ausgang an.
+        if (e.shiftKey && end === 'from') {
+          const sourcePin = {id:wire.from.id,dir:'out',port:0};
+          gesture = {kind:'wire',from:sourcePin,snapTarget:null}; armedFrom = sourcePin;
+          clearSelection(); renderNodes(); renderInspector(); updateStatus();
+          try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+          updateTempWire();
+        } else {
+          selectedNodes.clear(); selectedWires.clear(); selectedWires.add(wireId);
+          gesture = {kind:'rewire', wireId, end, snapTarget:null};
+          renderWires(); renderNodes(); renderInspector(); updateStatus();
+          try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+          updateRewirePreview();
+        }
+      }
+      e.preventDefault(); e.stopPropagation(); return;
+    }
+
+    const pinEl = e.target.closest && e.target.closest('.pin');
+    if (pinEl) {
+      const pin = {id:pinEl.dataset.node,dir:pinEl.dataset.pin,port:Number(pinEl.dataset.port||0)};
+      if (pin.dir === 'out') {
+        gesture = {kind:'wire',from:pin,snapTarget:null}; armedFrom = pin;
+        clearSelection(); renderNodes(); renderInspector(); updateStatus();
+        try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+        updateTempWire();
+      } else if (armedFrom) {
+        connect(armedFrom,pin);
+      } else {
+        const id=pin.id;
+        if (e.shiftKey) selectedNodes.add(id); else selectOnlyNode(id);
+        renderNodes(); renderInspector(); updateStatus();
+        const n=byId(id);
+        const origins = new Map([...selectedNodes].map(nodeId => { const item=byId(nodeId); return [nodeId,{x:item.x,y:item.y}]; }).filter(([,v])=>!!v));
+        gesture={kind:'node',id,startX:e.clientX,startY:e.clientY,origins,moved:false,toggleCandidate:meta(n).kind==='input'};
+        try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+      }
+      e.preventDefault(); e.stopPropagation(); return;
+    }
+    const wireEl = e.target.closest && e.target.closest('[data-wire-select]');
+    if (wireEl) {
+      const id=wireEl.dataset.wireSelect;
+      if (e.shiftKey) selectedWires.add(id);
+      else if (!selectedWires.has(id) || selectedNodes.size) selectOnlyWire(id);
+      renderWires(); renderNodes(); renderInspector(); updateStatus();
+      gesture={kind:'wire-select'};
+      try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+      e.preventDefault(); return;
+    }
+    const nodeEl = e.target.closest && e.target.closest('[data-node]');
+    if (nodeEl) {
+      const id=nodeEl.dataset.node, n=byId(id); if (!n) return;
+      if (e.shiftKey) selectedNodes.add(id);
+      else if (!selectedNodes.has(id)) selectOnlyNode(id);
+      renderNodes(); renderInspector(); updateStatus();
+      const origins = new Map([...selectedNodes].map(nodeId => { const item=byId(nodeId); return [nodeId,{x:item.x,y:item.y}]; }).filter(([,v])=>!!v));
+      gesture={kind:'node',id,startX:e.clientX,startY:e.clientY,origins,moved:false,toggleCandidate:meta(n).kind==='input'};
+      try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+      e.preventDefault(); return;
+    }
+    // Linksklick auf freier Fläche: Rahmenauswahl. Shift behält die bisherige Auswahl bei.
+    const p=stagePoint(e.clientX,e.clientY);
+    if (!e.shiftKey) clearSelection();
+    gesture={kind:'marquee',startX:p.x,startY:p.y,add:!!e.shiftKey,moved:false};
+    stage.classList.add('selecting');
+    renderNodes(); renderWires(); renderInspector(); updateStatus();
+    try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+    e.preventDefault();
+  });
+
+  window.addEventListener('pointermove', e => {
+    currentPointer={x:e.clientX,y:e.clientY};
+    if (!gesture) {
+      const p=worldPoint(e.clientX,e.clientY); $('coordStatus').textContent=`x: ${Math.round(p.x)} · y: ${Math.round(p.y)}`; return;
+    }
+    if (gesture.kind==='palette') {
+      const dx=e.clientX-gesture.startX, dy=e.clientY-gesture.startY;
+      if (!gesture.moved && Math.hypot(dx,dy)>5) gesture.moved=true;
+      const r=stage.getBoundingClientRect();
+      if (gesture.moved && e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom) {
+        const p=worldPoint(e.clientX,e.clientY);
+        const preview={id:'__palette_preview__',type:gesture.type,x:snap(p.x),y:snap(p.y),label:TYPES[gesture.type].label,state:false,value:false};
+        tempLayer.innerHTML=nodeMarkup(preview,true);
+      } else tempLayer.innerHTML='';
+      return;
+    }
+    if (gesture.kind==='wire') { updateTempWire(); return; }
+    if (gesture.kind==='rewire') { updateRewirePreview(); return; }
+    if (gesture.kind==='pan') {
+      const dx=e.clientX-gesture.startX, dy=e.clientY-gesture.startY;
+      if (Math.hypot(dx,dy)>3) gesture.moved=true;
+      if (gesture.moved) { camera.x=gesture.originX+dx; camera.y=gesture.originY+dy; updateCamera(); updateStatus(); }
+      return;
+    }
+    if (gesture.kind==='marquee') {
+      const p=stagePoint(e.clientX,e.clientY);
+      if (Math.hypot(p.x-gesture.startX,p.y-gesture.startY)>4) gesture.moved=true;
+      const x=Math.min(gesture.startX,p.x), y=Math.min(gesture.startY,p.y), w=Math.abs(p.x-gesture.startX), h=Math.abs(p.y-gesture.startY);
+      selectionLayer.innerHTML=`<rect class="selection-marquee" x="${x}" y="${y}" width="${w}" height="${h}" rx="2" />`;
+      return;
+    }
+    if (gesture.kind==='node') {
+      const dx=e.clientX-gesture.startX, dy=e.clientY-gesture.startY;
+      if (Math.hypot(dx,dy)>3) gesture.moved=true;
+      if (gesture.moved) {
+        const gx=Math.round((dx/camera.z)/GRID)*GRID, gy=Math.round((dy/camera.z)/GRID)*GRID;
+        gesture.origins.forEach((origin,id) => {
+          const n=byId(id); if (!n) return;
+          n.x=origin.x+gx; n.y=origin.y+gy;
+          const el=nodeLayer.querySelector(`[data-node="${CSS.escape(n.id)}"]`); if(el) el.setAttribute('transform',`translate(${n.x} ${n.y})`);
+        });
+        renderWires(); updateMinimap();
+      }
+    }
+  });
+
+  window.addEventListener('pointerup', e => {
+    if (!gesture) return;
+    const done=gesture; gesture=null;
+    if (done.kind==='palette') {
+      tempLayer.innerHTML='';
+      const r=stage.getBoundingClientRect();
+      if (done.moved && e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom) {
+        const p=worldPoint(e.clientX,e.clientY), n=addNode(done.type,p.x,p.y);
+        if(n) showToast(`${TYPES[n.type].label} platziert`);
+      }
+      return;
+    }
+    if (done.kind==='wire') {
+      const snapped = nearestInputPin(e.clientX,e.clientY,done.from.id);
+      const dest = snapped ? {id:snapped.id,dir:'in',port:snapped.port} : clientPinAt(e.clientX,e.clientY);
+      clearSnapHighlight();
+      if (dest && dest.dir==='in') connect(done.from,dest);
+      else if (dest && dest.dir==='out' && dest.id!==done.from.id) { armedFrom=dest; showToast('Ausgang gewählt – jetzt zu einem Eingang ziehen'); }
+      else { armedFrom=done.from; showToast('Ausgang gewählt – zu einem Eingang ziehen oder Eingang anklicken'); }
+      tempLayer.innerHTML=''; return;
+    }
+    if (done.kind==='rewire') {
+      const wire = wires.find(w => w.id === done.wireId);
+      const target = done.end === 'from'
+        ? nearestOutputPin(e.clientX,e.clientY,wire?.to.id)
+        : nearestInputPin(e.clientX,e.clientY,wire?.from.id,done.wireId);
+      clearSnapHighlight(); tempLayer.innerHTML='';
+      if (wire && target) {
+        if (done.end === 'from' && target.dir === 'out') wire.from = {id:target.id,port:0};
+        else if (done.end === 'to' && target.dir === 'in') wire.to = {id:target.id,port:target.port};
+        else { render(); showToast('Dieser Pin ist kein passendes Kabelende'); return; }
+        render(); showToast('Kabelende umplatziert');
+      } else {
+        render(); showToast('Kein passender freier Ziel-Pin getroffen');
+      }
+      return;
+    }
+    if (done.kind==='node') {
+      const n=byId(done.id);
+      if (n && !done.moved && done.toggleCandidate && selectedNodes.size===1) { n.state=!n.state; render(); }
+      else if (done.moved) render();
+      return;
+    }
+    if (done.kind==='marquee') {
+      selectionLayer.innerHTML=''; stage.classList.remove('selecting');
+      if (done.moved) {
+        const p=stagePoint(e.clientX,e.clientY);
+        const screen={left:Math.min(done.startX,p.x),right:Math.max(done.startX,p.x),top:Math.min(done.startY,p.y),bottom:Math.max(done.startY,p.y)};
+        const world={left:(screen.left-camera.x)/camera.z,right:(screen.right-camera.x)/camera.z,top:(screen.top-camera.y)/camera.z,bottom:(screen.bottom-camera.y)/camera.z};
+        const inside = n => n.x>=world.left && n.x<=world.right && n.y>=world.top && n.y<=world.bottom;
+        nodes.filter(inside).forEach(n=>selectedNodes.add(n.id));
+        const pointInside = q => q.x>=world.left && q.x<=world.right && q.y>=world.top && q.y<=world.bottom;
+        wires.filter(w => pointInside(portPos(w.from.id,'out',w.from.port)) && pointInside(portPos(w.to.id,'in',w.to.port))).forEach(w=>selectedWires.add(w.id));
+      }
+      render(); return;
+    }
+    if (done.kind==='pan') {
+      stage.classList.remove('panning');
+      saveLocal(); return;
+    }
+  });
+  window.addEventListener('pointercancel', () => {
+    clearSnapHighlight();
+    gesture=null; tempLayer.innerHTML=''; selectionLayer.innerHTML=''; stage.classList.remove('panning','selecting');
+  });
+
+  window.addEventListener('keydown', e => {
+    if (e.key==='Escape') { clearSnapHighlight(); gesture=null; armedFrom=null; tempLayer.innerHTML=''; selectionLayer.innerHTML=''; stage.classList.remove('panning','selecting'); $('shareModal').classList.remove('show'); }
+    if (editingTarget()) return;
+    const mod=e.ctrlKey||e.metaKey;
+    if (mod && e.key.toLowerCase()==='s') { e.preventDefault(); shareConfig(); }
+    if (mod && e.key.toLowerCase()==='z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+    if (mod && e.key.toLowerCase()==='y') { e.preventDefault(); redo(); return; }
+    if (mod && e.key.toLowerCase()==='c') { e.preventDefault(); copySelection(); }
+    if (mod && e.key.toLowerCase()==='x') { e.preventDefault(); if(copySelection()) deleteSelection(); }
+    if (mod && e.key.toLowerCase()==='v') { e.preventDefault(); pasteSelection(); }
+    if (mod && e.key.toLowerCase()==='d') { e.preventDefault(); duplicateSelection(); }
+    if (e.key==='Delete' || e.key==='Backspace') { e.preventDefault(); deleteSelection(); }
+  });
+  window.addEventListener('blur', () => { clearSnapHighlight(); stage.classList.remove('panning','selecting'); gesture=null; tempLayer.innerHTML=''; selectionLayer.innerHTML=''; });
+  window.addEventListener('resize', () => { renderEmpty(); updateMinimap(); });
+  window.addEventListener('hashchange', () => { try { const cfg=configFromHash(); if(cfg) { applyConfig(cfg); showToast('Schaltung aus URL geladen'); } } catch(e) { showToast('Der Link enthält keine gültige Schaltung'); } });
+
+  try {
+    const linked=configFromHash();
+    if (linked) applyConfig(linked);
+    else {
+      const saved=localStorage.getItem(STORAGE_KEY);
+      if (saved) applyConfig(JSON.parse(saved));
+      else { camera={x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}; render(); }
+    }
+  } catch(e) { nodes=[]; wires=[]; camera={x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}; render(); showToast('Gespeicherte Konfiguration konnte nicht geladen werden'); }
+})();
+
+</script>
+</body>
+</html>
