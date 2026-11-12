@@ -26,12 +26,24 @@
   html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font: 14px/1.4 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   button { font: inherit; color: inherit; }
   .app { width: 100%; height: 100%; display: flex; flex-direction: column; min-width: 320px; }
-  .topbar { height: 58px; flex: 0 0 58px; display: flex; align-items: center; gap: 14px; padding: 0 18px; background: #111a26; border-bottom: 1px solid #273547; z-index: 5; }
-  .brand { display: flex; align-items: center; gap: 10px; min-width: 205px; }
+  .topbar { height: 58px; flex: 0 0 58px; display: flex; align-items: center; gap: 0; padding: 0; background: #111a26; border-bottom: 1px solid #273547; z-index: 5; }
+  .brand { display: flex; align-items: center; gap: 10px; flex:0 0 224px; width:224px; min-width:224px; height:100%; padding:0 18px; background:#0b141f; border-right:1px solid #273547; }
   .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient(145deg,#4b9cfa,#66e0bc); color: #081421; font-size: 18px; font-weight: 900; box-shadow: 0 4px 14px #4b9cfa33; }
   .brand-name { font-weight: 750; letter-spacing: .2px; font-size: 15px; }
-  .brand-sub { display: block; font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: .9px; text-transform: uppercase; margin-top: -2px; }
-  .top-sep { height: 27px; width: 1px; background: var(--line); }
+  .menubar { display:flex; align-items:center; gap:3px; height:100%; margin-left:14px; }
+  .menu { position:relative; height:100%; display:flex; align-items:center; }
+  .menu-trigger { border:1px solid transparent; border-radius:7px; padding:7px 11px; background:transparent; color:#c5d2e0; cursor:pointer; font-size:12px; }
+  .menu-trigger:hover, .menu.open .menu-trigger { background:#1d2b3b; border-color:#30465e; color:#f0f6fc; }
+  .menu-popover { display:none; position:absolute; top:calc(100% - 3px); left:0; min-width:244px; padding:5px; border:1px solid #3a5069; border-radius:9px; background:#172332; box-shadow:0 14px 32px #0008; z-index:20; }
+  .menu.open .menu-popover { display:block; }
+  .menu-item { width:100%; min-height:33px; display:flex; align-items:center; gap:9px; border:0; border-radius:6px; padding:6px 9px; background:transparent; color:#dce7f3; text-align:left; font-size:11px; cursor:pointer; white-space:nowrap; }
+  .menu-item:hover:not(:disabled) { background:#263a50; }
+  .menu-item:disabled { opacity:.36; cursor:not-allowed; }
+  .menu-item .menu-check { width:13px; color:#68e2ac; font-weight:900; text-align:center; }
+  .menu-item .menu-shortcut { margin-left:auto; color:#8194aa; font-size:10px; }
+  .menu-divider { height:1px; margin:5px 4px; background:#2c3e52; }
+  .menu-item[aria-checked="false"] .menu-check { color:transparent; }
+  .menu-item.danger { color:#ffb0b8; }
   .toolbar { display: flex; align-items: center; gap: 6px; }
   .toolbar-spacer { flex: 1; }
   .btn { border: 1px solid var(--line); background: #1a2635; padding: 7px 11px; border-radius: 8px; cursor: pointer; color: #dce7f4; display: inline-flex; align-items: center; gap: 7px; transition: background .15s,border-color .15s,transform .15s; white-space: nowrap; }
@@ -40,7 +52,6 @@
   .btn.active { background: #20466a; border-color: #428ac7; color: #eaf6ff; }
   .btn.primary { background: #2779bd; border-color: #3998e5; color: #fff; font-weight: 650; }
   .btn.primary:hover { background: #328bd1; }
-  .btn.icon-only { padding: 7px 9px; min-width: 34px; justify-content: center; }
   .btn.danger:hover { border-color: #a94f5b; background: #432631; }
   .btn:focus-visible, .palette-item:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
   .shortcut { color: #8495a9; font-size: 10px; margin-left: 3px; }
@@ -79,24 +90,32 @@
   .stage { flex: 1; min-height: 0; position: relative; overflow: hidden; touch-action: none; cursor: default; }
   .stage.panning { cursor: grabbing; }
   .stage.selecting { cursor: crosshair; }
-  .stage.wire-mode { cursor: crosshair; }
   #scene { display: block; width: 100%; height: 100%; user-select: none; }
   #gridBg { fill: url(#gridPattern); }
   .wire-base { fill: none; stroke: #50657d; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: .95; }
   .wire-base.energized { stroke: #3eaa83; stroke-width: 2.8; filter: drop-shadow(0 0 3px #48dca0aa); }
-  .wire-flow { fill: none; stroke: #a2ffd5; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 13; opacity: 0; pointer-events: none; }
-  .wire-flow.energized { opacity: .95; animation: flow 650ms linear infinite; }
+  .wire-flow { fill: none; stroke: #a2ffd5; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 13; opacity: 0; pointer-events: none; animation: flow 650ms linear infinite; animation-play-state: paused; }
+  .wire-flow.energized { opacity: .95; animation-play-state: running; }
+  .wire-base.bus-wire { stroke-width:4.8; }
+  .temp-wire.bus-wire { stroke-width:4.8; }
+  .wire-base.bus-wire.energized { stroke-width:5.1; }
+  .wire-flow.bus-wire { stroke-width:3.8; stroke-dasharray:1 15; }
+  .wire-base.bus-wire.selected { stroke-width:5.6; }
   @keyframes flow { to { stroke-dashoffset: -28; } }
   .wire-hit { fill: none; stroke: transparent; stroke-width: 24; vector-effect: non-scaling-stroke; cursor: pointer; pointer-events: stroke; }
   .wire-base.selected { stroke: var(--yellow); stroke-width: 3.5; }
   .selection-marquee { fill: #58aaff22; stroke: #83caff; stroke-width: 1.5; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; pointer-events: none; }
   .node.marquee-preview .body { fill:#66502a !important; stroke:#ffd36e !important; stroke-width:2.4 !important; filter:drop-shadow(0 0 7px #ffd36e66); }
+  .node.collision-preview .body { fill:#572832 !important; stroke:#ff6578 !important; stroke-width:2.8 !important; filter:drop-shadow(0 0 8px #ff526b99); }
   .wire-base.marquee-preview { stroke:#ffd36e !important; stroke-width:4 !important; filter:drop-shadow(0 0 5px #ffd36e88); }
+  .wire-base.partial-preview { stroke:#e9b978 !important; stroke-width:3.8 !important; stroke-dasharray:2 5 !important; stroke-linecap:butt !important; filter:drop-shadow(0 0 4px #e9b97866); }
+  .wire-base.replacement-preview { stroke:#ff6475 !important; stroke-width:4.4 !important; filter:drop-shadow(0 0 6px #ff536cbb); }
+  .wire-flow.replacement-preview { stroke:#ffd1d7 !important; opacity:1 !important; filter:drop-shadow(0 0 5px #ff6475aa); }
   .node.preview-node { opacity: .78; pointer-events: none; }
   .pin.snap-target { fill: #52e6a4; stroke: #e0fff0; stroke-width: 3; filter: drop-shadow(0 0 7px #52e6a4); }
   .snap-halo { fill: #52e6a422; stroke: #6bf0b4; stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; }
   .wire-endpoint-hit { fill: transparent; stroke: transparent; cursor: grab; pointer-events: all; }
-  .wire-endpoint-hit:hover { fill:#ffd36e44; stroke:#ffd36eaa; stroke-width:1.4; }
+  .wire-endpoint-hit:hover, .pin-endpoint-hit:hover { fill:#ffd36e44; stroke:#ffd36eaa; stroke-width:1.4; }
   .wire-endpoint-hit:active { cursor: grabbing; }
   .wire-endpoint { fill: #ffd36e; stroke: #fff1c5; stroke-width: 1.8; pointer-events: none; filter: drop-shadow(0 0 4px #ffd36e99); }
   .node { cursor: grab; }
@@ -114,7 +133,6 @@
   .node .display-value { fill:#82ffc2; font-family:ui-monospace,monospace; font-size:15px; font-weight:800; text-anchor:middle; dominant-baseline:middle; }
   .node.flipflop-node .body { fill:#252c43; stroke:#8a8cc5; }
   .node.flipflop-node .node-glyph { fill:#c3c4ff; }
-  .node .node-description { font-size:8px; fill:#8297ad; text-anchor:middle; pointer-events:none; }
   .node.input-node .body { fill: #1c3444; stroke: #4b91af; }
   .node.output-node .body { fill: #29313d; stroke: #758397; }
   .node.active-node .body { stroke: #50dba2; filter: drop-shadow(0 0 6px #45dc9c66); }
@@ -135,6 +153,7 @@
   .pin { fill: #0e1722; stroke: #8da5bf; stroke-width: 1.5; cursor: crosshair; }
   .pin:hover { fill: #75c6ff; stroke: #d7f1ff; stroke-width: 2.2; }
   .pin.connected { fill: #63bafa; stroke: #d1eeff; }
+  .pin.bus-pin { stroke:#f4cb76; stroke-width:2.3; }
   .pin.hot { fill: #4fe1a0; stroke: #caffdf; filter: drop-shadow(0 0 4px #4fe1a0); }
   .port-label { font-size: 8px; fill: #8297ad; pointer-events: none; }
   .temp-wire { fill: none; stroke: #80caff; stroke-width: 2.5; stroke-dasharray: 6 5; pointer-events: none; }
@@ -151,7 +170,7 @@
   .inspector-rule { height: 1px; background: #2d4056; margin: 12px 0; }
   .inspector-description { color:#9aadc2; font-size:10px; line-height:1.55; margin:8px 0 12px; }
   .inspector-input { width:100%; background:#0f1925; color:#e4eef8; border:1px solid #34495e; border-radius:7px; padding:7px 8px; font:inherit; font-size:11px; }
-  .clock-frequency { width:108px; min-width:108px; }
+  .clock-frequency, .clock-offset { width:75px; min-width:75px; max-width:75px; padding-left:6px; padding-right:4px; box-sizing:border-box; }
   .prop-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: #9bacbf; margin: 7px 0; }
   .prop-value { color: #e2edf8; font-weight: 650; }
   .value-chip { display: inline-flex; min-width: 32px; justify-content: center; padding: 3px 8px; border-radius: 6px; background: #28394b; color: #9fb2c7; font-size: 11px; font-weight: 800; }
@@ -179,15 +198,21 @@
   .modal p { color:#9aadc2; font-size:11px; margin:0 0 12px; }
   .share-url { width:100%; padding:10px; background:#0e1722; border:1px solid #34485e; color:#cde4f8; border-radius:8px; font:11px ui-monospace,monospace; }
   .modal-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:12px; }
-  .file-label { display:inline-flex; align-items:center; }
+  .confirm-backdrop { position:fixed; }
+  .confirm-modal { width:min(430px,100%); }
+  .confirm-warning { display:flex; align-items:flex-start; gap:12px; padding:12px; border:1px solid #674b36; border-radius:9px; background:#30251f; color:#f0c6a0; font-size:11px; line-height:1.5; margin:13px 0 16px; }
+  .confirm-warning .icon { flex:0 0 26px; width:26px; height:26px; display:grid; place-items:center; border-radius:50%; background:#5b3b27; color:#ffd09c; font-weight:900; font-size:15px; }
+  .btn.danger-solid { background:#a63e50; border-color:#d85b70; color:#fff; }
+  .btn.danger-solid:hover { background:#bf4a5e; }
 
   .history-btn { min-width:34px; justify-content:center; font-size:16px !important; }
   .history-btn:disabled { opacity:.35; cursor:not-allowed; }
+  .minimap[hidden] { display:none !important; }
   .minimap { min-width:180px; position:absolute; right:13px; bottom:12px; width:214px; height:158px; --mini-scale:1; z-index:6; overflow:visible; border:1px solid #354b63; border-radius:11px; background:rgba(15,24,36,.96); box-shadow:0 8px 24px #0006; backdrop-filter:blur(7px); user-select:none; }
-  .minimap-head { height:28px; display:flex; flex:0 0 28px; align-items:center; gap:5px; padding:0 7px 0 10px; border-bottom:1px solid #293b50; color:#a9bbce; font-size:10px; font-weight:700; letter-spacing:.35px; border-radius:10px 10px 0 0; overflow:hidden; }
+  .minimap-head { height:28px; display:flex; flex:0 0 28px; align-items:center; gap:5px; padding:0 7px 0 10px; border-bottom:1px solid #293b50; color:#a9bbce; font-size:10px; font-weight:700; letter-spacing:.35px; border-radius:10px 10px 0 0; overflow:hidden; cursor:move; touch-action:none; }
   .minimap-title { cursor:move; touch-action:none; white-space:nowrap; }
   .minimap-head .spacer { flex:1; }
-  .minimap-head button { flex:0 0 auto; height:20px; border:1px solid #3a5068; border-radius:5px; background:#1a2939; color:#b7cce0; font-size:9px; padding:0 6px; cursor:pointer; white-space:nowrap; }
+  .minimap-head button { flex:0 0 auto; height:20px; border:1px solid #3a5068; border-radius:5px; background:#1a2939; color:#b7cce0; font-size:9px; padding:0 6px; cursor:pointer; white-space:nowrap; touch-action:auto; }
   .minimap-head button:hover:not(:disabled) { background:#29425d; border-color:#6293bd; }
   .minimap-head button:disabled { opacity:.35; cursor:not-allowed; }
   #minimapSvg { display:block; width:100%; height:calc(100% - 28px); touch-action:none; cursor:crosshair; border-radius:0 0 10px 10px; }
@@ -198,15 +223,16 @@
   .minimap-resize.ne { right:-5px; top:-5px; cursor:nesw-resize; }
   .minimap-resize.sw { left:-5px; bottom:-5px; cursor:nesw-resize; }
   .minimap-resize.se { right:-5px; bottom:-5px; cursor:nwse-resize; }
-  .minimap-head { cursor:move; touch-action:none; }
-  .minimap-head button { cursor:pointer; touch-action:auto; }
   .minimap-bg { fill:#0d1723; }
   .mini-wire { fill:none; stroke:#536f8e; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; opacity:.9; }
   .mini-wire.hot { stroke:#5ce5ae; stroke-width:2; }
+  .mini-wire.bus-wire { stroke-width:2.6; }
   .mini-wire.selected, .mini-wire.marquee-preview { stroke:#ffd36e; stroke-width:2.8; filter:drop-shadow(0 0 2px #ffd36e88); }
+  .mini-wire.partial-preview { stroke:#e9b978; stroke-width:2.5; stroke-dasharray:1.5 2.8; stroke-linecap:butt; }
   .mini-node { fill:#25384d; stroke:#607b98; stroke-width:1.2; vector-effect:non-scaling-stroke; }
   .mini-node.hot { fill:#205942; stroke:#5ce5ae; }
   .mini-node.selected, .mini-node.marquee-preview { fill:#66502a; stroke:#ffd36e; stroke-width:1.8; filter:drop-shadow(0 0 2px #ffd36e88); }
+  .mini-node.collision-preview { fill:#572832; stroke:#ff6578; stroke-width:2.2; filter:drop-shadow(0 0 3px #ff657899); }
   .minimap-viewport { fill:#70bfff18; stroke:#84caff; stroke-width:1.4; vector-effect:non-scaling-stroke; pointer-events:none; }
   .minimap-empty { fill:#8295aa; font-size:9px; text-anchor:middle; pointer-events:none; }
   .inline-label-editor { position:absolute; z-index:8; box-sizing:border-box; min-width:0; height:36px; padding:0 12px; border:1px dashed #72849a; border-radius:7px; outline:2px solid #4da6ff55; background:#1b2836; color:#e6eef8; font:800 12px/34px Inter,ui-sans-serif,system-ui,sans-serif; letter-spacing:.3px; text-align:center; white-space:nowrap; box-shadow:0 4px 16px #0005; }
@@ -217,11 +243,13 @@
     .brand { min-width: 170px; }
   }
   @media (max-width: 650px) {
-    .topbar { padding:0 9px; gap:7px; }
-    .brand { min-width:0; }
-    .brand-sub, .brand-name { display:none; }
-    .top-sep { display:none; }
-    .topbar .btn .btn-text { display:none; }
+    .topbar { padding:0 9px; gap:5px; }
+    .brand { min-width:0; gap:6px; }
+    .brand-name { display:none; }
+    .menubar { gap:0; }
+    .menu-trigger { padding:6px 7px; font-size:10px; }
+    .menu-popover { min-width:210px; }
+      .topbar .btn .btn-text { display:none; }
     .workspace { grid-template-columns: 118px minmax(0,1fr); }
     .palette-grid { grid-template-columns:1fr; }
     .palette-item { height:68px; min-height:68px; flex-direction:column; align-items:stretch; gap:4px; }
@@ -243,9 +271,49 @@
       <div class="brand-mark">⌁</div>
       <div><div class="brand-name">GatterLab</div></div>
     </div>
+    <nav class="menubar" aria-label="Hauptmenü">
+      <div class="menu" data-menu="file">
+        <button class="menu-trigger" type="button" aria-haspopup="true" aria-expanded="false">Datei</button>
+        <div class="menu-popover" role="menu">
+          <button class="menu-item" type="button" data-menu-action="new"> <span class="menu-check"></span><span>Neue Schaltung</span><span class="menu-shortcut">Alt + N</span></button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" type="button" data-menu-action="import"><span class="menu-check"></span><span>Importieren …</span><span class="menu-shortcut">JSON</span></button>
+          <button class="menu-item" type="button" data-menu-action="export"><span class="menu-check"></span><span>Exportieren …</span><span class="menu-shortcut">JSON</span></button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" type="button" data-menu-action="share"><span class="menu-check"></span><span>Link anzeigen</span><span class="menu-shortcut">Strg + S</span></button>
+        </div>
+      </div>
+      <div class="menu" data-menu="edit">
+        <button class="menu-trigger" type="button" aria-haspopup="true" aria-expanded="false">Bearbeiten</button>
+        <div class="menu-popover" role="menu">
+          <button class="menu-item" type="button" data-menu-action="undo" id="menuUndo"><span class="menu-check"></span><span>Rückgängig</span><span class="menu-shortcut">Strg + Z</span></button>
+          <button class="menu-item" type="button" data-menu-action="redo" id="menuRedo"><span class="menu-check"></span><span>Wiederherstellen</span><span class="menu-shortcut">Strg + Y</span></button>
+          <button class="menu-item" type="button" data-menu-action="selectAll"><span class="menu-check"></span><span>Alles auswählen</span><span class="menu-shortcut">Strg + A</span></button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" type="button" data-menu-action="cut"><span class="menu-check"></span><span>Ausschneiden</span><span class="menu-shortcut">Strg + X</span></button>
+          <button class="menu-item" type="button" data-menu-action="copy"><span class="menu-check"></span><span>Kopieren</span><span class="menu-shortcut">Strg + C</span></button>
+          <button class="menu-item" type="button" data-menu-action="paste"><span class="menu-check"></span><span>Einfügen</span><span class="menu-shortcut">Strg + V</span></button>
+          <button class="menu-item" type="button" data-menu-action="duplicate"><span class="menu-check"></span><span>Duplizieren</span><span class="menu-shortcut">Strg + D</span></button>
+          <button class="menu-item" type="button" data-menu-action="delete"><span class="menu-check"></span><span>Auswahl löschen</span><span class="menu-shortcut">Entf</span></button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" type="button" id="allowOverlapsBtn" role="menuitemcheckbox" aria-checked="true"><span class="menu-check">✓</span><span>Objektüberschneidungen zulassen</span></button>
+        </div>
+      </div>
+      <div class="menu" data-menu="view">
+        <button class="menu-trigger" type="button" aria-haspopup="true" aria-expanded="false">Ansicht</button>
+        <div class="menu-popover" role="menu">
+          <button class="menu-item" type="button" data-menu-action="grid"><span class="menu-check" id="menuGridCheck">✓</span><span>Raster anzeigen</span></button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" type="button" data-menu-action="zoomIn"><span class="menu-check"></span><span>Vergrößern</span><span class="menu-shortcut">+</span></button>
+          <button class="menu-item" type="button" data-menu-action="zoomOut"><span class="menu-check"></span><span>Verkleinern</span><span class="menu-shortcut">−</span></button>
+          <button class="menu-item" type="button" data-menu-action="fit"><span class="menu-check"></span><span>Gesamtanpassung</span></button>
+          <button class="menu-item" type="button" data-menu-action="fitSelection"><span class="menu-check"></span><span>Auswahlanpassung</span></button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" type="button" data-menu-action="minimap" id="menuMinimapToggle" role="menuitemcheckbox" aria-checked="true"><span class="menu-check" id="menuMinimapCheck">✓</span><span>Minimap anzeigen</span></button>
+        </div>
+      </div>
+    </nav>
     <div class="toolbar-spacer"></div>
-    <button class="btn" id="importBtn" title="JSON-Konfiguration laden">↥ <span class="btn-text">Import</span></button>
-    <button class="btn" id="exportBtn" title="Konfiguration als JSON speichern">⇩ <span class="btn-text">Export</span></button>
     <button class="btn primary" id="shareBtn" title="Konfiguration als Link anzeigen">↗ <span class="btn-text">Link anzeigen</span></button>
   </header>
 
@@ -287,7 +355,7 @@
           <g id="selectionLayer"></g>
         </svg>
         <div class="minimap" id="minimap" aria-label="Minimap">
-          <div class="minimap-head" id="minimapDragHandle" title="Zum Verschieben am Kopfbereich ziehen"><span class="minimap-title">Minimap</span><span class="spacer"></span><button id="minimapSelectionFit" type="button" title="Auf Auswahl zoomen" disabled>Auswahl</button><button id="minimapAllFit" type="button" title="Gesamte Schaltung anzeigen">Alles</button></div>
+          <div class="minimap-head" id="minimapDragHandle" title="Zum Verschieben am Kopfbereich ziehen"><span class="minimap-title">Minimap</span><span class="spacer"></span><button id="minimapSelectionFit" type="button" title="Auf Auswahl zoomen" disabled>Auswahl</button><button id="minimapAllFit" type="button" title="Gesamte Schaltung anzeigen">Gesamt</button></div>
           <svg id="minimapSvg" viewBox="0 0 214 130" role="img" aria-label="Minimap; anklicken oder ziehen zum Navigieren">
             <rect class="minimap-bg" x="0" y="0" width="214" height="130" />
             <g id="minimapContent"><g id="minimapWireLayer"></g><g id="minimapNodeLayer"></g></g>
@@ -311,6 +379,16 @@
             </div>
           </div>
         </div>
+        <div class="modal-backdrop confirm-backdrop" id="newCircuitModal" role="dialog" aria-modal="true" aria-labelledby="newCircuitTitle" aria-describedby="newCircuitMessage">
+          <div class="modal confirm-modal">
+            <h2 id="newCircuitTitle">Neue Schaltung erstellen?</h2>
+            <div class="confirm-warning"><span class="icon">!</span><span id="newCircuitMessage">Die aktuelle Schaltung geht verloren, sofern sie zuvor nicht abgespeichert wurde.</span></div>
+            <div class="modal-actions">
+              <button class="btn" id="cancelNewCircuit" type="button">Abbrechen</button>
+              <button class="btn danger-solid" id="confirmNewCircuit" type="button">Neue Schaltung erstellen</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="statusbar">
         <span><i class="status-dot"></i><span id="runStatus">Simulation aktiv</span></span>
@@ -328,6 +406,7 @@
         <strong>Tastenkürzel</strong>
         <table class="shortcut-table"><tbody>
           <tr><td><kbd>Strg + S</kbd></td><td>Link anzeigen</td></tr>
+          <tr><td><kbd>Strg + A</kbd></td><td>Alles auswählen</td></tr>
           <tr><td><kbd>Strg + Z</kbd></td><td>Rückgängig</td></tr>
           <tr><td><kbd>Strg + Y</kbd></td><td>Wiederherstellen</td></tr>
           <tr><td><kbd>Strg + C</kbd></td><td>Kopieren</td></tr>
@@ -348,10 +427,16 @@
   'use strict';
   const GRID = 24;
   const STORAGE_KEY = 'gatterlab-config-v1';
+  const OVERLAP_STORAGE_KEY = 'gatterlab-allow-overlaps-v1';
+  let allowNodeOverlaps = true;
+  try {
+    const storedOverlapSetting = localStorage.getItem(OVERLAP_STORAGE_KEY);
+    if (storedOverlapSetting !== null) allowNodeOverlaps = storedOverlapSetting === 'true';
+  } catch (_) {}
   const TYPES = {
     INPUT:    { label:'Schalter', category:'Eingabeelemente', inputs:0, kind:'input', glyph:'SW', description:'Manueller Ein-/Ausschalter.' },
     PUSH:     { label:'Taster', category:'Eingabeelemente', inputs:0, kind:'input', glyph:'PB', description:'Manueller Ein-/Ausschalter. Signal wird geliefert, solange die Maustaste direkt auf dem Knopf gedrückt gehalten wird.' },
-    CLOCK:    { label:'Clock', category:'Eingabeelemente', inputs:0, kind:'input', glyph:'CLK', description:'Einstellbarer Taktgenerator. Die Frequenz ist in 0,1-Hz-Schritten von 0,1 bis 2,0 Hz einstellbar.' },
+    CLOCK:    { label:'Clock', category:'Eingabeelemente', inputs:0, kind:'input', glyph:'CLK', description:'Einstellbarer Taktgenerator. Die Frequenz ist einstellbar. Positive Werte für die Phasenversetzung verzögern, negative eilen vor.' },
     HIGH:     { label:'HIGH', category:'Eingabeelemente', inputs:0, kind:'input', glyph:'1', description:'Konstante logische 1 (HIGH). Die Quelle ist dauerhaft aktiv.' },
     LOW:      { label:'LOW', category:'Eingabeelemente', inputs:0, kind:'input', glyph:'0', description:'Konstante logische 0 (LOW). Die Quelle bleibt dauerhaft inaktiv.' },
     OUTPUT:   { label:'LED-Ausgang', category:'Ausgabeelemente', inputs:1, kind:'output', glyph:'LED', description:'Ein-Bit-Ausgang. Zeigt HIGH als leuchtende LED und LOW als dunkle LED.' },
@@ -371,7 +456,9 @@
     D_FF:     { label:'D-Flip-Flop', category:'Flip-Flops', inputs:2, kind:'flipflop', glyph:'D', clockPort:1, description:'Übernimmt den D-Eingang ausschließlich bei einer steigenden Flanke am CLK-Eingang und hält den Wert bis zur nächsten Flanke.' },
     JK_FF:    { label:'JK-Flip-Flop', category:'Flip-Flops', inputs:3, kind:'flipflop', glyph:'JK', clockPort:2, description:'Getaktetes JK-Flip-Flop. J=1 setzt, K=1 löscht; J=K=1 toggelt den gespeicherten Ausgang bei der steigenden Taktflanke.' },
     T_FF:     { label:'T-Flip-Flop', category:'Flip-Flops', inputs:2, kind:'flipflop', glyph:'T', clockPort:1, description:'Toggle-Flip-Flop. Bei T=1 wechselt Q an jeder steigenden Taktflanke; bei T=0 bleibt der Zustand erhalten.' },
-    LABEL:    { label:'Textlabel', category:'Sonstiges', inputs:0, kind:'label', glyph:'TXT', description:'Freies Textlabel zur Beschriftung und Dokumentation der Schaltung.' }
+    LABEL:    { label:'Textlabel', category:'Sonstiges', inputs:0, kind:'label', glyph:'TXT', description:'Freies Textlabel zur Beschriftung und Dokumentation der Schaltung.' },
+    BUS_COMBINER: { label:'Bus-Combiner', category:'Sonstiges', inputs:4, kind:'bus-combiner', glyph:'B+', description:'Fasst mehrere einzelne Digitalsignale zu einem Mehrbit-Bus zusammen. Eingang 0 ist das höchstwertige Bit (MSB).' },
+    BUS_SPLITTER: { label:'Bus-Splitter', category:'Sonstiges', inputs:1, kind:'bus-splitter', glyph:'B÷', description:'Teilt einen Mehrbit-Bus in einzelne Digitalsignale auf. Ausgang 0 liefert das höchstwertige Bit (MSB).' }
   };
   const CATEGORY_ORDER = ['Eingabeelemente','Ausgabeelemente','Logikgatter','Flip-Flops','Sonstiges'];
   const CATEGORY_TYPE_ORDER = {
@@ -379,22 +466,49 @@
     'Ausgabeelemente':['OUTPUT','DISPLAY2','DISPLAY4','DISPLAY8'],
     'Logikgatter':['AND','OR','NAND','NOR','XOR','XNOR','NOT','BUFFER','TRISTATE'],
     'Flip-Flops':['SR_FF','D_FF','JK_FF','T_FF'],
-    'Sonstiges':['LABEL']
+    'Sonstiges':['BUS_COMBINER','BUS_SPLITTER','LABEL']
   };
+  // Unveränderliche Bibliotheksliste: Einmal nach der sichtbaren Kategorienreihenfolge
+  // aufbauen, statt sie bei jedem Tastendruck im Suchfeld neu zu sortieren.
+  const PALETTE_ENTRIES = CATEGORY_ORDER.flatMap(category =>
+    (CATEGORY_TYPE_ORDER[category] || []).filter(type => TYPES[type]).map(type => ({type, ...TYPES[type]}))
+  );
   const $ = id => document.getElementById(id);
   const stage = $('stage'), scene = $('scene'), world = $('world');
   const nodeLayer = $('nodeLayer'), wireLayer = $('wireLayer'), wireHandleLayer = $('wireHandleLayer'), tempLayer = $('tempLayer');
   const selectionLayer = $('selectionLayer');
   const minimapPanel = $('minimap'), minimapSvg = $('minimapSvg'), minimapContent = $('minimapContent');
   const minimapWireLayer = $('minimapWireLayer'), minimapNodeLayer = $('minimapNodeLayer'), minimapViewport = $('minimapViewport');
-  let nodes = [], wires = [], camera = { x: 0, y: 0, z: 1 };
+  let nodes = [], wires = [], nodeDrawOrder = [], wireDrawOrder = [], camera = { x: 0, y: 0, z: 1 };
   let selectedNodes = new Set(), selectedWires = new Set();
-  let marqueePreviewNodes = new Set(), marqueePreviewWires = new Set();
+  let marqueePreviewNodes = new Set(), marqueePreviewWires = new Set(), marqueePartialWires = new Set();
+  let collisionPreviewNodeIds = new Set();
+  let pendingPaste = null;
   let gridVisible = true, gesture = null, armedFrom = null, toastTimer = null;
-  let currentPointer = { x: stage.getBoundingClientRect().left + stage.clientWidth/2, y: stage.getBoundingClientRect().top + stage.clientHeight/2 }, clipboard = null, pasteCount = 0;
+  let currentPointer = { x: stage.getBoundingClientRect().left + stage.clientWidth/2, y: stage.getBoundingClientRect().top + stage.clientHeight/2 }, clipboard = null;
   let undoHistory = [], undoIndex = -1, minimapTransform = { scale: 1, offsetX: 8, offsetY: 8 }, minimapGesture = null;
   let minimapUiGesture = null, inlineLabelEditor = null, lastLabelClick = null, selectedPaletteType = null;
   const MINIMAP_LAYOUT_KEY = 'gatterlab-minimap-layout-v1';
+  const MINIMAP_VISIBLE_KEY = 'gatterlab-minimap-visible-v1';
+  // Tabübergreifende Zwischenablage: localStorage/BroadcastChannel für Tabs
+  // derselben Origin und die native Text-Zwischenablage als Fallback (z. B. file://).
+  const SHARED_CLIPBOARD_KEY = 'gatterlab-shared-clipboard-v1';
+  const SHARED_CLIPBOARD_FORMAT = 'GATTERLAB_CLIPBOARD_V1:';
+  let clipboardChannel = null;
+  try {
+    if ('BroadcastChannel' in window) {
+      clipboardChannel = new BroadcastChannel('gatterlab-clipboard-v1');
+      clipboardChannel.addEventListener('message', event => {
+        const data = normalizeClipboardData(event.data?.data);
+        if (data) clipboard = data;
+      });
+    }
+  } catch (_) { clipboardChannel = null; }
+  let minimapVisible = true;
+  try {
+    const storedVisibility = localStorage.getItem(MINIMAP_VISIBLE_KEY);
+    if (storedVisibility !== null) minimapVisible = storedVisibility === 'true';
+  } catch (_) {}
   const minimapDefaultWidth = window.matchMedia && window.matchMedia('(max-width: 650px)').matches ? 186 : 214;
   let minimapLayout = { left:null, top:null, width:minimapDefaultWidth };
   try {
@@ -404,7 +518,15 @@
 
   const snap = v => Math.round(v / GRID) * GRID;
   const normalizeClockFrequency = value => { const n=Number(value); return Math.max(0.1, Math.min(2, Math.round((Number.isFinite(n) ? n : 1) * 10) / 10)); };
-  const clockEpochForState = (frequency, state, now=performance.now()) => now - (state ? 750 : 0) / normalizeClockFrequency(frequency);
+  const normalizeClockOffset = value => { const n=Number(value); return Math.max(-0.5, Math.min(0.5, Math.round((Number.isFinite(n) ? n : 0) * 10) / 10)); };
+  // Gemeinsame Zeitbasis: identische Frequenzen und Offset 0 bleiben unabhängig vom Erstellungszeitpunkt synchron.
+  const CLOCK_PHASE_ORIGIN = performance.now();
+  function clockPhaseFraction(clock, now=performance.now()) {
+    const period=1000/normalizeClockFrequency(clock.frequency);
+    const delayedElapsed=(now-CLOCK_PHASE_ORIGIN)-normalizeClockOffset(clock.phaseOffset)*1000;
+    return ((delayedElapsed%period)+period)%period/period;
+  }
+  const clockStateAt = (clock, now=performance.now()) => clockPhaseFraction(clock,now)>=0.5;
   const snapZoom = z => Math.max(.25, Math.min(2.5, Math.round(z * 20) / 20));
   const uid = prefix => prefix + Math.random().toString(36).slice(2, 9);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -422,15 +544,23 @@
   const editingTarget = () => /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '') || !!document.activeElement?.isContentEditable;
   const selectionEmpty = () => selectedNodes.size === 0 && selectedWires.size === 0;
 
+  function setMinimapVisible(visible, persist=true) {
+    minimapVisible=!!visible;
+    if (minimapPanel) minimapPanel.hidden=!minimapVisible;
+    const item=$('menuMinimapToggle'), check=$('menuMinimapCheck');
+    if (item) item.setAttribute('aria-checked',String(minimapVisible));
+    if (check) check.textContent=minimapVisible?'✓':'';
+    if (persist) { try { localStorage.setItem(MINIMAP_VISIBLE_KEY,String(minimapVisible)); } catch (_) {} }
+    if (minimapVisible) updateMinimap();
+  }
 
   function renderPalette() {
     const query = ($('paletteSearch')?.value || '').trim().toLocaleLowerCase('de');
-    const entries = Object.entries(TYPES).map(([type, m]) => ({type, ...m}));
+    const entries = PALETTE_ENTRIES;
     const filtered = entries.filter(item => !query || item.label.toLocaleLowerCase('de').includes(query));
     let html = '';
     CATEGORY_ORDER.forEach(category => {
-      const order = CATEGORY_TYPE_ORDER[category] || [];
-      const items = filtered.filter(item => item.category === category).sort((a,b) => order.indexOf(a.type) - order.indexOf(b.type));
+      const items = filtered.filter(item => item.category === category);
       if (!items.length) return;
       html += `<section class="palette-section"><div class="section-label">${esc(category)}</div><div class="palette-grid">`;
       items.forEach(item => {
@@ -443,16 +573,6 @@
     if (!html) html = '<div class="palette-empty">Keine passenden Bauteile gefunden.</div>';
     $('paletteCategories').innerHTML = html;
     $('paletteCount').textContent = `${filtered.length} / ${entries.length}`;
-    document.querySelectorAll('.palette-item').forEach(btn => {
-      btn.addEventListener('click', e => { if (e.detail === 0) selectPaletteItem(btn.dataset.type); });
-      btn.addEventListener('dragstart', e => e.preventDefault());
-      btn.addEventListener('pointerdown', e => {
-        if (e.button !== 0) return;
-        e.preventDefault();
-        gesture = {kind:'palette', type:btn.dataset.type, startX:e.clientX, startY:e.clientY, moved:false};
-        try { btn.setPointerCapture(e.pointerId); } catch (_) {}
-      });
-    });
   }
 
   function selectPaletteItem(type) {
@@ -470,15 +590,59 @@
   function clearSelection() { selectedNodes.clear(); selectedWires.clear(); }
   function selectOnlyNode(id) { clearSelection(); selectedNodes.add(id); }
   function selectOnlyWire(id) { clearSelection(); selectedWires.add(id); }
+  function selectAllObjects() {
+    if (pendingPaste) cancelPendingPaste();
+    clearMarqueePreview();
+    selectedNodes = new Set(nodes.map(n=>n.id));
+    selectedWires = new Set(wires.map(w=>w.id));
+    render(false,false);
+    showToast(`${selectedNodes.size} Bauteile und ${selectedWires.size} Kabel ausgewählt`);
+  }
   function inputOffset(count, index) {
     if (count <= 1) return 0;
     const span = count >= 6 ? 56 : count >= 3 ? 44 : 28;
     return -span/2 + (span/(count-1))*index;
   }
+  const normalizeBusWidth = value => [2,4,8].includes(Number(value)) ? Number(value) : 4;
+  const inputPortCount = n => n.type==='BUS_COMBINER' ? normalizeBusWidth(n.busWidth) : meta(n).inputs;
+  const outputPortCount = n => n.type==='BUS_SPLITTER' ? normalizeBusWidth(n.busWidth) : 1;
+  const outputPortWidth = (n, port=0) => n?.type==='BUS_COMBINER' ? normalizeBusWidth(n.busWidth) : 1;
+  function inputAcceptsWidth(n, port, width) {
+    const m=meta(n);
+    if (n.type==='BUS_SPLITTER') return port===0 && width===normalizeBusWidth(n.busWidth);
+    if (n.type==='BUS_COMBINER') return port>=0 && port<normalizeBusWidth(n.busWidth) && width===1;
+    if (m.kind==='output' && m.displayBits) return (width===1 && port>=0 && port<m.inputs) || (width===m.displayBits && port===0);
+    return width===1 && port>=0 && port<m.inputs;
+  }
+  function canConnectPorts(from, to) {
+    const src=byId(from?.id), dst=byId(to?.id);
+    if (!src || !dst || from.id===to.id || meta(src).kind==='output' || meta(src).kind==='label' || meta(dst).kind==='input' || meta(dst).kind==='label') return false;
+    if (from.port<0 || from.port>=outputPortCount(src)) return false;
+    return inputAcceptsWidth(dst,to.port,outputPortWidth(src,from.port));
+  }
+  function busSignal(width, bits) {
+    const normalized=bits.map(Boolean);
+    return { __busSignal:true, width, bits:normalized, value:normalized.reduce((sum,bit)=>sum*2+(bit?1:0),0) };
+  }
+  function isBusSignal(value) { return !!(value && typeof value==='object' && value.__busSignal===true && Array.isArray(value.bits)); }
+  function outputSignalActive(n, port=0) {
+    if (!n) return false;
+    const value=n.type==='BUS_SPLITTER' ? (n.portValues?.[port] ?? false) : n.value;
+    return isBusSignal(value) ? value.bits.some(Boolean) : value===true;
+  }
+  function busBitsForNode(n) {
+    if (n.type==='BUS_COMBINER' && isBusSignal(n.value)) return n.value.bits;
+    if (n.type==='BUS_SPLITTER') return (n.portValues || []).map(Boolean);
+    return [];
+  }
   let labelMeasureContext = null;
+  const labelWidthCache = new WeakMap();
   function labelText(n) { return String(n.text ?? n.label ?? ''); }
   function labelWidth(n) {
     const text = labelText(n);
+    const cached = labelWidthCache.get(n);
+    if (cached && cached.text === text) return cached.width;
+    const characterCount = Array.from(text).length;
     if (!labelMeasureContext) {
       const canvas = document.createElement('canvas');
       labelMeasureContext = canvas.getContext('2d');
@@ -487,10 +651,14 @@
       // Gleiche Schriftparameter wie .node-title; nur echte Glyphenbreite plus Label-Padding.
       labelMeasureContext.font = '800 12px Inter, ui-sans-serif, system-ui, sans-serif';
       const measured = labelMeasureContext.measureText(text).width;
-      const tracking = Math.max(0, Array.from(text).length - 1) * 0.3;
-      return Math.max(92, Math.ceil(measured + tracking + 24));
+      const tracking = Math.max(0, characterCount - 1) * 0.3;
+      const width = Math.max(92, Math.ceil(measured + tracking + 24));
+      labelWidthCache.set(n, {text, width});
+      return width;
     }
-    return Math.max(92, Math.ceil(Array.from(text).length * 7 + 24));
+    const width = Math.max(92, Math.ceil(characterCount * 7 + 24));
+    labelWidthCache.set(n, {text, width});
+    return width;
   }
   function nodeBounds(n) {
     const m = meta(n);
@@ -504,6 +672,10 @@
       return {left:n.x-63, right:n.x+54, top:n.y-halfH, bottom:n.y+halfH};
     }
     if (m.kind === 'output') return {left:n.x-63, right:n.x+52, top:n.y-32, bottom:n.y+32};
+    if (n.type==='BUS_COMBINER' || n.type==='BUS_SPLITTER') {
+      const width=normalizeBusWidth(n.busWidth), halfH=Math.max(38,Math.abs(inputOffset(width,0))+25);
+      return {left:n.x-64,right:n.x+64,top:n.y-halfH,bottom:n.y+halfH};
+    }
     if (m.kind === 'gate' || m.kind === 'flipflop') {
       const halfH = Math.max(36, Math.abs(inputOffset(m.inputs,0))+23);
       // Anschluss-Pins gehören zur sichtbaren/auswählbaren Objektfläche.
@@ -512,12 +684,119 @@
     if (m.kind === 'input') return {left:n.x-52, right:n.x+63, top:n.y-32, bottom:n.y+32};
     return {left:n.x-52, right:n.x+52, top:n.y-32, bottom:n.y+32};
   }
-  function portPos(nodeId, direction, index = 0) {
-    const n = byId(nodeId); if (!n) return { x: 0, y: 0 };
+  // Für die Kollisionsprüfung zählen die sichtbaren Bauteilkörper, nicht die Pins.
+  // So dürfen zwei passende Anschlusspins direkt verbunden werden, ohne als Kollision zu gelten.
+  function nodeCollisionBounds(n) {
+    const m = meta(n);
+    if (m.kind === 'label') {
+      const width = labelWidth(n);
+      return {left:n.x-width/2, right:n.x+width/2, top:n.y-18, bottom:n.y+18};
+    }
+    if (m.kind === 'output' && m.displayBits) {
+      const top = inputOffset(m.inputs,0)-24;
+      const bottom = inputOffset(m.inputs,m.inputs-1)+24;
+      return {left:n.x-52, right:n.x+52, top:n.y+top, bottom:n.y+bottom};
+    }
+    if (n.type==='BUS_COMBINER' || n.type==='BUS_SPLITTER') {
+      const width=normalizeBusWidth(n.busWidth), halfH=Math.max(34,Math.abs(inputOffset(width,0))+20);
+      return {left:n.x-50,right:n.x+50,top:n.y-halfH,bottom:n.y+halfH};
+    }
+    if (m.kind === 'gate' || m.kind === 'flipflop') {
+      const b = nodeBounds(n);
+      return {left:n.x-50, right:n.x+50, top:b.top, bottom:b.bottom};
+    }
+    return {left:n.x-52, right:n.x+52, top:n.y-31, bottom:n.y+31};
+  }
+  function positiveOverlap(a,b) {
+    // Reines Berühren der Kanten ist erlaubt; echte Flächenüberschneidung nicht.
+    const eps = 0.5;
+    return a.left < b.right-eps && a.right > b.left+eps && a.top < b.bottom-eps && a.bottom > b.top+eps;
+  }
+  function collisionCandidateIds(candidates, stationary = nodes) {
+    const ids=new Set();
+    for (let i=0;i<candidates.length;i++) {
+      const candidate=candidates[i], a=nodeCollisionBounds(candidate);
+      for (const other of stationary) {
+        if (other.id!==candidate.id && positiveOverlap(a,nodeCollisionBounds(other))) ids.add(candidate.id);
+      }
+      for (let j=i+1;j<candidates.length;j++) {
+        const other=candidates[j];
+        if (positiveOverlap(a,nodeCollisionBounds(other))) { ids.add(candidate.id); ids.add(other.id); }
+      }
+    }
+    return ids;
+  }
+  function findPlacementCollision(candidates, stationary = nodes) {
+    const ids=collisionCandidateIds(candidates,stationary);
+    if (!ids.size) return null;
+    const a=candidates.find(n=>ids.has(n.id));
+    const b=stationary.find(n=>n.id!==a?.id && positiveOverlap(nodeCollisionBounds(a),nodeCollisionBounds(n))) || candidates.find(n=>n.id!==a?.id && positiveOverlap(nodeCollisionBounds(a),nodeCollisionBounds(n)));
+    return a && b ? {a,b} : null;
+  }
+  function applyCollisionPreviewClasses() {
+    nodeLayer.querySelectorAll('[data-node]').forEach(el=>el.classList.toggle('collision-preview',collisionPreviewNodeIds.has(el.dataset.node)));
+  }
+  function updateCollisionPreviewForMove(ids) {
+    if (allowNodeOverlaps) collisionPreviewNodeIds.clear();
+    else {
+      const moving=nodes.filter(n=>ids.has(n.id)), stationary=nodes.filter(n=>!ids.has(n.id));
+      collisionPreviewNodeIds=collisionCandidateIds(moving,stationary);
+    }
+    applyCollisionPreviewClasses();
+    updateMinimap();
+  }
+  function setAllowNodeOverlaps(value, persist=true) {
+    allowNodeOverlaps=!!value;
+    const button=$('allowOverlapsBtn');
+    if (button) {
+      button.setAttribute('aria-checked',String(allowNodeOverlaps));
+      const check=button.querySelector('.menu-check');
+      if (check) check.textContent=allowNodeOverlaps?'✓':'';
+    }
+    if (persist) { try { localStorage.setItem(OVERLAP_STORAGE_KEY,String(allowNodeOverlaps)); } catch (_) {} }
+    return allowNodeOverlaps;
+  }
+  function promoteNode(id) {
+    if (!byId(id)) return false;
+    const index=nodeDrawOrder.indexOf(id);
+    if (index===nodeDrawOrder.length-1) return false;
+    nodeDrawOrder=nodeDrawOrder.filter(existingId=>existingId!==id);
+    nodeDrawOrder.push(id);
+    // Die Zeichenreihenfolge ist persistent, beeinflusst aber nicht die Simulationsreihenfolge.
+    if (undoIndex>=0 && undoHistory[undoIndex]) {
+      try {
+        const current=JSON.parse(undoHistory[undoIndex]);
+        current.nodeDrawOrder=[...nodeDrawOrder];
+        undoHistory[undoIndex]=JSON.stringify(current);
+      } catch (_) {}
+    }
+    saveLocal(false,true);
+    return true;
+  }
+  function promoteWire(id) {
+    if (!wires.some(w=>w.id===id)) return false;
+    if (wireDrawOrder[wireDrawOrder.length-1]===id) return false;
+    wireDrawOrder=wireDrawOrder.filter(existingId=>existingId!==id);
+    wireDrawOrder.push(id);
+    if (undoIndex>=0 && undoHistory[undoIndex]) {
+      try {
+        const current=JSON.parse(undoHistory[undoIndex]);
+        current.wireDrawOrder=[...wireDrawOrder];
+        undoHistory[undoIndex]=JSON.stringify(current);
+      } catch (_) {}
+    }
+    saveLocal(false,true);
+    return true;
+  }
+  function portPos(nodeId, direction, index = 0, nodeMap = null) {
+    const n = nodeMap ? nodeMap.get(nodeId) : byId(nodeId); if (!n) return { x: 0, y: 0 };
     const m = meta(n);
     if (m.kind === 'input') return { x: n.x + 58, y: n.y };
     if (m.kind === 'output') return { x: n.x - 58, y: n.y + inputOffset(m.inputs, index) };
     if (m.kind === 'label') return {x:n.x,y:n.y};
+    if (n.type==='BUS_SPLITTER' && direction==='out') return {x:n.x+58,y:n.y+inputOffset(normalizeBusWidth(n.busWidth),index)};
+    if (n.type==='BUS_SPLITTER' && direction==='in') return {x:n.x-58,y:n.y};
+    if (n.type==='BUS_COMBINER' && direction==='in') return {x:n.x-58,y:n.y+inputOffset(normalizeBusWidth(n.busWidth),index)};
     if (direction === 'out') return { x: n.x + 58, y: n.y };
     return { x: n.x - 58, y: n.y + inputOffset(m.inputs, index) };
   }
@@ -525,99 +804,151 @@
     const mid = snap(a.x + (b.x - a.x) * .5);
     return `M ${a.x} ${a.y} H ${mid} V ${b.y} H ${b.x}`;
   }
-  function pathForWire(w) {
-    const a = portPos(w.from.id, 'out', 0), b = portPos(w.to.id, 'in', w.to.port);
+  function pathForWire(w, nodeMap = null) {
+    const a = portPos(w.from.id, 'out', w.from.port || 0, nodeMap), b = portPos(w.to.id, 'in', w.to.port, nodeMap);
     return pathBetween(a, b);
   }
   function incomingWire(nodeId, port) { return wires.find(w => w.to.id === nodeId && w.to.port === port); }
-  function isConnected(nodeId, direction, port) {
-    return direction === 'out' ? wires.some(w => w.from.id === nodeId) : !!incomingWire(nodeId, port);
+  function displayInputOccupancy(node, totalInputs) {
+    const busWire=incomingWire(node.id,0);
+    if (busWire) {
+      const source=byId(busWire.from.id);
+      if (source && outputPortWidth(source,busWire.from.port||0)===totalInputs && totalInputs>1) return totalInputs;
+    }
+    return new Set(wires.filter(w=>w.to.id===node.id && w.to.port>=0 && w.to.port<totalInputs).map(w=>w.to.port)).size;
+  }
+  function wireSignalDescription(w) {
+    const source=byId(w.from.id), port=w.from.port||0;
+    if (!source) return 'Nicht verfügbar';
+    const width=outputPortWidth(source,port);
+    if (width>1 && isBusSignal(source.value)) {
+      const bits=source.value.bits.map(bit=>bit?'1':'0').join('');
+      return `${width} Bit · ${bits} · ${source.value.value} dez.`;
+    }
+    const value=source.type==='BUS_SPLITTER' ? (source.portValues?.[port] ?? false) : source.value;
+    return value===null ? 'Z · hochohmig' : value ? '1 · HIGH' : '0 · LOW';
+  }
+  function buildConnectionIndex() {
+    const inputs = new Set(), outputs = new Set();
+    for (const wire of wires) {
+      inputs.add(`${wire.to.id}:${wire.to.port}`);
+      outputs.add(`${wire.from.id}:${wire.from.port||0}`);
+    }
+    return {inputs, outputs};
+  }
+  function isConnected(nodeId, direction, port, connectionIndex = null) {
+    if (connectionIndex) return (direction === 'out' ? connectionIndex.outputs : connectionIndex.inputs).has(`${nodeId}:${port}`);
+    return direction === 'out' ? wires.some(w => w.from.id === nodeId && (w.from.port||0)===port) : !!incomingWire(nodeId, port);
   }
 
   function evaluate() {
     const cache = new Map(), visiting = new Set();
-    function read(id) {
-      if (cache.has(id)) return cache.get(id);
-      const n = byId(id); if (!n) return false;
-      if (visiting.has(id)) return false;
-      visiting.add(id);
-      const m = meta(n); let value = false;
-      if (m.kind === 'input') {
+    const nodeById = new Map(nodes.map(n=>[n.id,n]));
+    const incomingByPort = new Map();
+    for (const wire of wires) {
+      const key = `${wire.to.id}:${wire.to.port}`;
+      if (!incomingByPort.has(key)) incomingByPort.set(key,wire);
+    }
+    const inputWire = (id,port) => incomingByPort.get(`${id}:${port}`);
+    function read(id, port=0) {
+      const key=`${id}:${port}`;
+      if (cache.has(key)) return cache.get(key);
+      const n=nodeById.get(id); if (!n) return false;
+      if (visiting.has(key)) return false;
+      visiting.add(key);
+      const m=meta(n); let value=false;
+      if (n.type==='BUS_COMBINER') {
+        if (port===0) {
+          const width=normalizeBusWidth(n.busWidth);
+          const bits=Array.from({length:width},(_,i)=>{ const w=inputWire(n.id,i); return w ? read(w.from.id,w.from.port||0)===true : false; });
+          value=busSignal(width,bits);
+        }
+      } else if (n.type==='BUS_SPLITTER') {
+        const width=normalizeBusWidth(n.busWidth), wire=inputWire(n.id,0);
+        const bus=wire ? read(wire.from.id,wire.from.port||0) : null;
+        if (port>=0 && port<width && isBusSignal(bus) && bus.width===width) value=!!bus.bits[port];
+      } else if (m.kind === 'input') {
         if (n.type === 'HIGH') value = true;
         else if (n.type === 'LOW') value = false;
         else value = !!n.state;
       } else if (m.kind === 'output') {
         if (m.displayBits) {
-          const bits = Array.from({length:m.inputs}, (_,i) => { const w=incomingWire(n.id,i); return w ? !!read(w.from.id) : false; });
-          n.bits = bits;
-          value = bits.reduce((sum,bit) => sum*2 + (bit?1:0), 0);
+          const firstWire=inputWire(n.id,0);
+          const firstValue=firstWire ? read(firstWire.from.id,firstWire.from.port||0) : null;
+          let bits;
+          if (isBusSignal(firstValue) && firstValue.width===m.displayBits) bits=[...firstValue.bits];
+          else bits=Array.from({length:m.inputs},(_,i)=>{ const w=inputWire(n.id,i); return w ? read(w.from.id,w.from.port||0)===true : false; });
+          n.bits=bits;
+          value=bits.reduce((sum,bit)=>sum*2+(bit?1:0),0);
         } else {
-          const w = incomingWire(n.id, 0); value = w ? !!read(w.from.id) : false;
+          const w=inputWire(n.id,0); value=w ? read(w.from.id,w.from.port||0)===true : false;
         }
       } else if (m.kind === 'flipflop') {
-        const inputs = Array.from({length:m.inputs}, (_,i) => { const w=incomingWire(n.id,i); return w ? !!read(w.from.id) : false; });
-        const clk = !!inputs[m.clockPort];
+        const inputs=Array.from({length:m.inputs},(_,i)=>{ const w=inputWire(n.id,i); return w ? read(w.from.id,w.from.port||0)===true : false; });
+        const clk=!!inputs[m.clockPort];
         if (clk && !n.clockWasHigh) {
-          if (n.type === 'D_FF') n.q = !!inputs[0];
-          else if (n.type === 'T_FF') { if (inputs[0]) n.q = !n.q; }
-          else if (n.type === 'JK_FF') {
-            const j=inputs[0], k=inputs[1];
-            if (j && k) n.q = !n.q; else if (j) n.q = true; else if (k) n.q = false;
-          } else if (n.type === 'SR_FF') {
-            const set=inputs[0], reset=inputs[1];
-            if (set && !reset) n.q = true; else if (reset && !set) n.q = false;
-          }
+          if (n.type==='D_FF') n.q=!!inputs[0];
+          else if (n.type==='T_FF') { if(inputs[0]) n.q=!n.q; }
+          else if (n.type==='JK_FF') { const j=inputs[0],k=inputs[1]; if(j&&k)n.q=!n.q; else if(j)n.q=true; else if(k)n.q=false; }
+          else if (n.type==='SR_FF') { const set=inputs[0],reset=inputs[1]; if(set&&!reset)n.q=true; else if(reset&&!set)n.q=false; }
         }
-        n.clockWasHigh = clk;
-        value = !!n.q;
+        n.clockWasHigh=clk; value=!!n.q;
       } else if (m.kind === 'gate') {
-        const inputs = Array.from({length:m.inputs}, (_,i) => { const w=incomingWire(n.id,i); return w ? read(w.from.id) : false; });
-        const a = !!inputs[0], b = !!inputs[1];
-        switch (n.type) {
-          case 'AND': value = a && b; break;
-          case 'OR': value = a || b; break;
-          case 'NOT': value = !a; break;
-          case 'NAND': value = !(a && b); break;
-          case 'NOR': value = !(a || b); break;
-          case 'XOR': value = a !== b; break;
-          case 'XNOR': value = a === b; break;
-          case 'BUFFER': value = a; break;
-          case 'TRISTATE': value = b ? a : null; break;
+        const inputs=Array.from({length:m.inputs},(_,i)=>{ const w=inputWire(n.id,i); return w ? read(w.from.id,w.from.port||0)===true : false; });
+        const a=!!inputs[0], b=!!inputs[1];
+        switch(n.type) {
+          case 'AND': value=a&&b; break;
+          case 'OR': value=a||b; break;
+          case 'NOT': value=!a; break;
+          case 'NAND': value=!(a&&b); break;
+          case 'NOR': value=!(a||b); break;
+          case 'XOR': value=a!==b; break;
+          case 'XNOR': value=a===b; break;
+          case 'BUFFER': value=a; break;
+          case 'TRISTATE': value=b?a:null; break;
         }
       }
-      visiting.delete(id); cache.set(id, value); return value;
+      visiting.delete(key); cache.set(key,value); return value;
     }
-    nodes.forEach(n => { n.value = read(n.id); });
+    nodes.forEach(n=>{
+      n.value=read(n.id,0);
+      if(n.type==='BUS_SPLITTER') n.portValues=Array.from({length:normalizeBusWidth(n.busWidth)},(_,port)=>read(n.id,port)===true);
+    });
   }
 
   function clockNeedleAngle(n, now = performance.now()) {
-    const frequency = normalizeClockFrequency(n.frequency);
-    const period = 1000 / frequency;
-    if (!Number.isFinite(n.clockEpoch)) n.clockEpoch = clockEpochForState(frequency, !!n.state, now);
-    const phase = ((now - n.clockEpoch) % period + period) % period / period;
+    const phase = clockPhaseFraction(n, now);
     // Eine vollständige Schwingung pro Taktperiode: links oben → rechts oben → links oben.
     return phase < 0.5 ? -45 + phase * 180 : 45 - (phase - 0.5) * 180;
   }
 
   function updateClockNeedles(now = performance.now()) {
-    for (const n of nodes) {
-      if (n.type !== 'CLOCK') continue;
-      const needle = nodeLayer.querySelector(`[data-clock-needle="${CSS.escape(n.id)}"]`);
-      if (needle) needle.setAttribute('transform', `rotate(${clockNeedleAngle(n, now).toFixed(2)} 20 7)`);
+    const needles = nodeLayer.querySelectorAll('[data-clock-needle]');
+    const clocksById = new Map(nodes.filter(n=>n.type==='CLOCK').map(n=>[n.id,n]));
+    needles.forEach(needle => {
+      const clock = clocksById.get(needle.dataset.clockNeedle);
+      if (clock) needle.setAttribute('transform', `rotate(${clockNeedleAngle(clock, now).toFixed(2)} 20 7)`);
+    });
+    // Die Uhr in der noch nicht platzierten Palette-Vorschau läuft ebenfalls
+    // zeitbasiert weiter, auch wenn der Mauszeiger vollkommen stillsteht.
+    if (gesture?.kind === 'palette' && gesture.type === 'CLOCK') {
+      const previewNeedle = tempLayer.querySelector('[data-clock-needle="__palette_preview__"]');
+      if (previewNeedle) previewNeedle.setAttribute('transform', `rotate(${clockNeedleAngle({frequency:1,phaseOffset:0}, now).toFixed(2)} 20 7)`);
     }
   }
 
-  function nodeMarkup(n, preview = false) {
+  function nodeMarkup(n, preview = false, connectionIndex = null) {
     const m = meta(n), kind = m.kind;
     const selectedClass = (selectedNodes.has(n.id) || preview) ? ' selected' : '';
     const marqueeClass = !preview && marqueePreviewNodes.has(n.id) && !selectedNodes.has(n.id) ? ' marquee-preview' : '';
-    const activeClass = n.value === true ? ' active-node' : '';
+    const activeClass = (n.value === true || (isBusSignal(n.value) && n.value.bits.some(Boolean))) ? ' active-node' : '';
     const previewClass = preview ? ' preview-node' : '';
+    const collisionClass = (collisionPreviewNodeIds.has(n.id) || n.invalidPlacement) ? ' collision-preview' : '';
     const nodeAttrs = preview ? '' : `data-node="${esc(n.id)}"`;
     const safeLabel = kind === 'label' ? esc(labelText(n)) : esc(n.label || m.label);
     if (kind === 'label') {
       const width = labelWidth(n);
-      return `<g class="node label-node${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+      return `<g class="node label-node${selectedClass}${marqueeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="${-width/2}" y="-18" width="${width}" height="36" rx="7" />
         <text class="node-title" xml:space="preserve" style="white-space:pre" x="0" y="1">${safeLabel}</text>
       </g>`;
@@ -644,64 +975,94 @@
       } else {
         face = `<rect class="state-pill" x="2" y="-11" width="36" height="22" rx="6" /><text class="node-glyph" x="20" y="1" style="font-size:14px">${n.type === 'HIGH' ? '1' : '0'}</text>`;
       }
-      return `<g class="${cls}${marqueeClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+      return `<g class="${cls}${marqueeClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-52" y="-31" width="104" height="62" rx="11" />
         <text class="node-title" x="-24" y="-12" style="font-size:10px">${safeLabel}</text>
         ${face}
-        <circle class="pin ${isConnected(n.id,'out',0) ? 'connected' : ''} ${n.value === true ? 'hot' : ''}" ${outputAttrs} cx="58" cy="0" r="5" />
+        <circle class="pin ${isConnected(n.id,'out',0,connectionIndex) ? 'connected' : ''} ${n.value === true ? 'hot' : ''}" ${outputAttrs} cx="58" cy="0" r="5" />
       </g>`;
     }
     if (kind === 'output') {
       const pinMarkup = Array.from({length:m.inputs}, (_,i) => {
         const attrs = preview ? '' : `data-pin="in" data-node="${esc(n.id)}" data-port="${i}"`;
         const y = inputOffset(m.inputs,i);
-        return `<circle class="pin ${isConnected(n.id,'in',i) ? 'connected' : ''}" ${attrs} cx="-58" cy="${y}" r="5" />`;
+        return `<circle class="pin ${isConnected(n.id,'in',i,connectionIndex) ? 'connected' : ''}" ${attrs} cx="-58" cy="${y}" r="5" />`;
       }).join('');
       if (m.displayBits) {
         const bits = Array.isArray(n.bits) ? n.bits : Array(m.inputs).fill(false);
         const bitText = bits.map(v => v ? '1' : '0').join('');
         const decimal = Number.isFinite(n.value) ? n.value : 0;
         const top = inputOffset(m.inputs,0)-24, bottom=inputOffset(m.inputs,m.inputs-1)+24;
-        return `<g class="node output-node${n.value ? ' on' : ''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+        return `<g class="node output-node${n.value ? ' on' : ''}${selectedClass}${marqueeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
           <rect class="body" x="-52" y="${top}" width="104" height="${bottom-top}" rx="10" />
           ${pinMarkup}
           <rect class="display-readout" x="-36" y="-18" width="72" height="36" rx="5" />
           <text class="display-value" x="0" y="-4">${bitText}</text>
-          <text class="node-sub" x="0" y="11">${decimal} dez.</text>
+          <text class="node-sub display-decimal" x="0" y="11">${decimal} dez.</text>
           <text class="node-title" x="0" y="${bottom-8}" style="font-size:9px">${safeLabel}</text>
         </g>`;
       }
       const incoming = incomingWire(n.id, 0);
       const inputAttrs = preview ? '' : `data-pin="in" data-node="${esc(n.id)}" data-port="0"`;
-      return `<g class="node output-node${n.value ? ' on' : ''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+      return `<g class="node output-node${n.value ? ' on' : ''}${selectedClass}${marqueeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-52" y="-31" width="104" height="62" rx="11" />
-        <circle cx="0" cy="-5" r="9" fill="${n.value ? '#5ce4a7' : '#46586b'}" stroke="${n.value ? '#b9ffdc' : '#8395a9'}" stroke-width="1.5" />
+        <circle class="led-indicator" cx="0" cy="-5" r="9" fill="${n.value ? '#5ce4a7' : '#46586b'}" stroke="${n.value ? '#b9ffdc' : '#8395a9'}" stroke-width="1.5" />
         <text class="node-title" x="0" y="16">${safeLabel}</text>
-        <text class="node-sub" x="0" y="-20">${n.value ? 'HIGH' : 'LOW'}</text>
+        <text class="node-sub led-status" x="0" y="-20">${n.value ? 'HIGH' : 'LOW'}</text>
         <circle class="pin ${incoming ? 'connected' : ''}" ${inputAttrs} cx="-58" cy="0" r="5" />
+      </g>`;
+    }
+    if (n.type==='BUS_COMBINER' || n.type==='BUS_SPLITTER') {
+      const width=normalizeBusWidth(n.busWidth), halfH=Math.max(38,Math.abs(inputOffset(width,0))+25), top=-halfH, height=halfH*2;
+      const busBits=busBitsForNode(n).map(v=>v?'1':'0').join('') || '0'.repeat(width);
+      const pins=n.type==='BUS_COMBINER'
+        ? Array.from({length:width},(_,i)=>{ const attrs=preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="${i}"`; const y=inputOffset(width,i); return `<text class="port-label" text-anchor="end" x="-42" y="${y+3}">${width-1-i}</text><circle class="pin ${isConnected(n.id,'in',i,connectionIndex)?'connected':''}" ${attrs} cx="-58" cy="${y}" r="5" />`; }).join('')
+        : (()=>{ const attrs=preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="0"`; return `<circle class="pin bus-pin ${isConnected(n.id,'in',0,connectionIndex)?'connected':''}" ${attrs} cx="-58" cy="0" r="6" />`; })();
+      const outputs=n.type==='BUS_COMBINER'
+        ? `<circle class="pin bus-pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="6" />`
+        : Array.from({length:width},(_,i)=>{ const attrs=preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="${i}"`; const y=inputOffset(width,i); return `<circle class="pin ${n.portValues?.[i]?'hot':''} ${isConnected(n.id,'out',i,connectionIndex)?'connected':''}" ${attrs} cx="58" cy="${y}" r="5" /><text class="port-label" x="40" y="${y+3}">${width-1-i}</text>`; }).join('');
+      const title=n.type==='BUS_COMBINER'?'Bus-Combiner':'Bus-Splitter';
+      const glyph=n.type==='BUS_COMBINER'?'B+':'B÷';
+      const stateLine=n.type==='BUS_COMBINER' ? `${width} BIT · ${busBits}` : `${width} BIT · ${busBits}`;
+      return `<g class="node bus-node${selectedClass}${marqueeClass}${activeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+        <rect class="body" x="-50" y="${top}" width="100" height="${height}" rx="10" />
+        <text class="node-glyph" x="0" y="-10">${glyph}</text>
+        <text class="node-title" x="0" y="12" style="font-size:10px">${title}</text>
+        <text class="node-sub bus-live-value" x="0" y="${halfH-9}">${stateLine}</text>
+        ${pins}${outputs}
       </g>`;
     }
     const pinMarkup = Array.from({length:m.inputs}, (_,i) => {
       const attrs = preview ? '' : `data-pin="in" data-node="${esc(n.id)}" data-port="${i}"`;
-      return `<circle class="pin ${isConnected(n.id,'in',i) ? 'connected' : ''}" ${attrs} cx="-58" cy="${inputOffset(m.inputs,i)}" r="5" />`;
+      return `<circle class="pin ${isConnected(n.id,'in',i,connectionIndex) ? 'connected' : ''}" ${attrs} cx="-58" cy="${inputOffset(m.inputs,i)}" r="5" />`;
     }).join('');
     const outputAttrs = preview ? '' : `data-pin="out" data-node="${esc(n.id)}" data-port="0"`;
-    const outputHot = n.value === true && isConnected(n.id,'out',0) ? ' hot' : '';
+    const outputHot = n.value === true && isConnected(n.id,'out',0,connectionIndex) ? ' hot' : '';
     const bounds = nodeBounds(n), height = bounds.bottom-bounds.top;
     const gateClass = kind === 'flipflop' ? ' flipflop-node' : ' gate-node';
     const stateLine = kind === 'flipflop' ? `Q=${n.q ? '1' : '0'}` : (n.type === 'TRISTATE' && n.value === null ? 'Z' : (n.value ? 'HIGH' : 'LOW'));
-    return `<g class="node${gateClass}${selectedClass}${marqueeClass}${activeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
+    return `<g class="node${gateClass}${selectedClass}${marqueeClass}${activeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
       <rect class="body" x="-50" y="${-height/2}" width="100" height="${height}" rx="10" />
       <text class="node-glyph" x="0" y="-7">${esc(m.glyph)}</text>
       <text class="node-title" x="0" y="14">${safeLabel}</text>
       ${pinMarkup}
-      <circle class="pin ${isConnected(n.id,'out',0) ? 'connected' : ''}${outputHot}" ${outputAttrs} cx="58" cy="0" r="5" />
-      <text class="node-sub" x="0" y="${height/2-7}">${stateLine}</text>
+      <circle class="pin ${isConnected(n.id,'out',0,connectionIndex) ? 'connected' : ''}${outputHot}" ${outputAttrs} cx="58" cy="0" r="5" />
+      <text class="node-sub state-line" x="0" y="${height/2-7}">${stateLine}</text>
     </g>`;
   }
 
   function renderNodes() {
-    nodeLayer.innerHTML = nodes.map(n => nodeMarkup(n)).join('');
+    const map = new Map(nodes.map(n=>[n.id,n]));
+    const seen = new Set();
+    const ordered = [];
+    for (const id of nodeDrawOrder) {
+      const n=map.get(id);
+      if (n && !seen.has(id)) { ordered.push(n); seen.add(id); }
+    }
+    for (const n of nodes) if (!seen.has(n.id)) { ordered.push(n); seen.add(n.id); }
+    nodeDrawOrder = ordered.map(n=>n.id);
+    const connectionIndex = buildConnectionIndex();
+    nodeLayer.innerHTML = ordered.map(n => nodeMarkup(n, false, connectionIndex)).join('');
   }
 
   function normalizedRect(a,b) {
@@ -721,7 +1082,7 @@
     return false;
   }
   function cableTouchesRect(w,r) {
-    const a=portPos(w.from.id,'out',0), b=portPos(w.to.id,'in',w.to.port);
+    const a=portPos(w.from.id,'out',w.from.port||0), b=portPos(w.to.id,'in',w.to.port);
     const mid=snap(a.x+(b.x-a.x)*.5), bend1={x:mid,y:a.y}, bend2={x:mid,y:b.y};
     return segmentTouchesRect(a,bend1,r) || segmentTouchesRect(bend1,bend2,r) || segmentTouchesRect(bend2,b,r);
   }
@@ -729,8 +1090,15 @@
     const screen=normalizedRect(startScreen,endScreen);
     const worldRect={left:(screen.left-camera.x)/camera.z,right:(screen.right-camera.x)/camera.z,top:(screen.top-camera.y)/camera.z,bottom:(screen.bottom-camera.y)/camera.z};
     const nodeIds=new Set(nodes.filter(n=>rectsTouch(nodeBounds(n),worldRect)).map(n=>n.id));
-    const wireIds=new Set(wires.filter(w=>cableTouchesRect(w,worldRect)).map(w=>w.id));
-    return {nodeIds,wireIds,screen,worldRect};
+    const wireIds=new Set(), partialWireIds=new Set();
+    for (const wire of wires) {
+      // Beide Endbauteile ausgewählt = Kabel immer vollständig ausgewählt, selbst wenn
+      // der geroutete Leitungsverlauf außerhalb des Auswahlrechtecks verläuft.
+      if (nodeIds.has(wire.from.id) && nodeIds.has(wire.to.id)) { wireIds.add(wire.id); continue; }
+      // Ein nur berührter Kabelverlauf bleibt als Teiltreffer schraffiert und wird nicht kopiert.
+      if (cableTouchesRect(wire,worldRect)) partialWireIds.add(wire.id);
+    }
+    return {nodeIds,wireIds,partialWireIds,screen,worldRect};
   }
   function applyMarqueePreviewClasses() {
     // Toggle preview classes on existing elements. Rebuilding wireLayer here would
@@ -742,18 +1110,22 @@
     wireLayer.querySelectorAll('g[data-wire]').forEach(group => {
       const id=group.dataset.wire;
       const path=group.querySelector('.wire-base');
-      if (path) path.classList.toggle('marquee-preview',marqueePreviewWires.has(id) && !selectedWires.has(id));
+      if (path) {
+        path.classList.toggle('marquee-preview',marqueePreviewWires.has(id) && !selectedWires.has(id));
+        path.classList.toggle('partial-preview',marqueePartialWires.has(id) && !marqueePreviewWires.has(id) && !selectedWires.has(id));
+      }
     });
   }
   function clearMarqueePreview() {
-    marqueePreviewNodes.clear(); marqueePreviewWires.clear();
+    marqueePreviewNodes.clear(); marqueePreviewWires.clear(); marqueePartialWires.clear();
     nodeLayer.querySelectorAll('.marquee-preview').forEach(el=>el.classList.remove('marquee-preview'));
-    wireLayer.querySelectorAll('.marquee-preview').forEach(el=>el.classList.remove('marquee-preview'));
+    wireLayer.querySelectorAll('.marquee-preview,.partial-preview').forEach(el=>el.classList.remove('marquee-preview','partial-preview'));
   }
   function updateMarqueePreview(start,end) {
     const targets=marqueeTargets(start,end);
     marqueePreviewNodes=targets.nodeIds;
     marqueePreviewWires=targets.wireIds;
+    marqueePartialWires=targets.partialWireIds;
     const {screen}=targets;
     selectionLayer.innerHTML=`<rect class="selection-marquee" x="${screen.left}" y="${screen.top}" width="${screen.right-screen.left}" height="${screen.bottom-screen.top}" rx="2" />`;
     applyMarqueePreviewClasses();
@@ -762,12 +1134,21 @@
 
   function renderWires() {
     const handles = [];
-    wireLayer.innerHTML = wires.map(w => {
-      const source = byId(w.from.id), active = !!(source && source.value);
-      const d = pathForWire(w), chosen = selectedWires.has(w.id), marqueePreview = marqueePreviewWires.has(w.id) && !chosen;
-      const a = portPos(w.from.id, 'out', 0), b = portPos(w.to.id, 'in', w.to.port);
-      // Unsichtbare Hit-Flächen werden dauerhaft gerendert: Ein Endpunkt kann so direkt
-      // gegriffen werden, ohne das Kabel zuvor auswählen zu müssen.
+    const map = new Map(wires.map(w=>[w.id,w]));
+    const nodeMap = new Map(nodes.map(n=>[n.id,n]));
+    const incomingPorts = new Set(wires.map(w=>`${w.to.id}:${w.to.port}`));
+    const outgoingPorts = new Set(wires.map(w=>`${w.from.id}:${w.from.port||0}`));
+    const seen = new Set();
+    const ordered = [];
+    for (const id of wireDrawOrder) { const w=map.get(id); if(w && !seen.has(id)){ordered.push(w);seen.add(id);} }
+    for (const w of wires) if(!seen.has(w.id)){ordered.push(w);seen.add(w.id);}
+    wireDrawOrder = ordered.map(w=>w.id);
+    wireLayer.innerHTML = ordered.map(w => {
+      const source = nodeMap.get(w.from.id), active = outputSignalActive(source,w.from.port||0), isBus=outputPortWidth(source,w.from.port||0)>1;
+      const d = pathForWire(w,nodeMap), chosen = selectedWires.has(w.id), marqueePreview = marqueePreviewWires.has(w.id) && !chosen, partialPreview = marqueePartialWires.has(w.id) && !marqueePreview && !chosen;
+      const a = portPos(w.from.id, 'out', w.from.port || 0,nodeMap), b = portPos(w.to.id, 'in', w.to.port,nodeMap);
+      // Kabelanschlüsse besitzen eine 12-Einheiten-Hitbox. Freie Pins erhalten exakt
+      // dieselbe Hitbox, damit das Greifen eines neuen Kabelstarts gleich zuverlässig ist.
       handles.push(`<circle class="wire-endpoint-hit" cx="${a.x}" cy="${a.y}" r="12" data-wire-end="from" data-wire-id="${esc(w.id)}" title="Kabelstart direkt ziehen" aria-label="Kabelstart direkt ziehen" />`);
       if (chosen) handles.push(`<circle class="wire-endpoint" cx="${a.x}" cy="${a.y}" r="5" />`);
       handles.push(`<circle class="wire-endpoint-hit" cx="${b.x}" cy="${b.y}" r="12" data-wire-end="to" data-wire-id="${esc(w.id)}" title="Kabelende direkt ziehen" aria-label="Kabelende direkt ziehen" />`);
@@ -776,11 +1157,32 @@
       // restarting the pulse after selection previews or live clock updates.
       const flowDelay = active ? ` style="animation-delay:-${(performance.now() % 650).toFixed(1)}ms"` : '';
       return `<g data-wire="${esc(w.id)}">
-        <path class="wire-base${active ? ' energized' : ''}${chosen ? ' selected' : ''}${marqueePreview ? ' marquee-preview' : ''}" d="${d}" />
-        <path class="wire-flow${active ? ' energized' : ''}"${flowDelay} d="${d}" />
+        <path class="wire-base${isBus ? ' bus-wire' : ''}${active ? ' energized' : ''}${chosen ? ' selected' : ''}${marqueePreview ? ' marquee-preview' : ''}${partialPreview ? ' partial-preview' : ''}" d="${d}" />
+        <path class="wire-flow${isBus ? ' bus-wire' : ''}${active ? ' energized' : ''}"${flowDelay} d="${d}" />
         <path class="wire-hit" d="${d}" data-wire-select="${esc(w.id)}" />
       </g>`;
     }).join('');
+    // Hitflächen für noch nicht belegte Pins: gleiche Größe und Hoverfarbe wie
+    // bestehende Kabelendpunkte; Pointerdown wird von der normalen Pin-Logik verarbeitet.
+    for (const n of nodes) {
+      // Nur Bauteile mit echtem Ausgang erhalten freie Ausgangs-Hitboxen.
+      // Anzeige-Bauteile (LED und n-Bit-Digits) besitzen ausschließlich Eingänge;
+      // portPos() legt deren Eingänge ebenfalls links ab. Eine phantomatische
+      // Ausgangs-Hitbox an derselben Stelle würde sonst das Eingangs-Kabelende
+      // überdecken und Dragging/Umstöpseln zufällig fehlleiten.
+      if (meta(n).kind!=='output' && meta(n).kind!=='label') {
+        for (let port=0; port<outputPortCount(n); port++) {
+          if (outgoingPorts.has(`${n.id}:${port}`)) continue;
+          const p=portPos(n.id,'out',port);
+          handles.push(`<circle class="wire-endpoint-hit pin-endpoint-hit" cx="${p.x}" cy="${p.y}" r="12" data-pin-hit="1" data-pin="out" data-node="${esc(n.id)}" data-port="${port}" title="Neues Kabel vom Ausgang ziehen" aria-label="Neues Kabel vom Ausgang ziehen" />`);
+        }
+      }
+      for (let port=0; port<inputPortCount(n); port++) {
+        if (incomingPorts.has(`${n.id}:${port}`)) continue;
+        const p=portPos(n.id,'in',port);
+        handles.push(`<circle class="wire-endpoint-hit pin-endpoint-hit" cx="${p.x}" cy="${p.y}" r="12" data-pin-hit="1" data-pin="in" data-node="${esc(n.id)}" data-port="${port}" title="Neues Kabel zum Eingang ziehen" aria-label="Neues Kabel zum Eingang ziehen" />`);
+      }
+    }
     wireHandleLayer.innerHTML = handles.join('');
   }
 
@@ -801,8 +1203,13 @@
     if (inlineLabelEditor) positionInlineLabelEditor();
   }
   function updateHistoryButtons() {
-    $('undoBtn').disabled = undoIndex <= 0;
-    $('redoBtn').disabled = undoIndex < 0 || undoIndex >= undoHistory.length - 1;
+    const canUndo = undoIndex > 0;
+    const canRedo = undoIndex >= 0 && undoIndex < undoHistory.length - 1;
+    $('undoBtn').disabled = !canUndo;
+    $('redoBtn').disabled = !canRedo;
+    const menuUndo=$('menuUndo'), menuRedo=$('menuRedo');
+    if (menuUndo) menuUndo.disabled=!canUndo;
+    if (menuRedo) menuRedo.disabled=!canRedo;
   }
   function updateStatus() {
     $('nodeCount').textContent = `${nodes.length} ${nodes.length === 1 ? 'Bauteil' : 'Bauteile'}`;
@@ -816,7 +1223,7 @@
   }
 
   function updateMinimap() {
-    if (!minimapSvg || !minimapContent) return;
+    if (!minimapSvg || !minimapContent || !minimapVisible || minimapPanel.hidden) return;
     const mapW = 214;
     // The title bar occupies its own fixed 28px row, as in the earlier layout.
     // The drawable SVG below it scales with the panel; its plot keeps a uniform
@@ -848,14 +1255,20 @@
     const offsetY = area.y + (area.h-rangeH*scale)/2 - minY*scale;
     minimapTransform = { scale, offsetX, offsetY, mapW, mapH };
     minimapContent.setAttribute('transform', `translate(${offsetX} ${offsetY}) scale(${scale})`);
-    minimapWireLayer.innerHTML = wires.map(w => {
-      const active = !!byId(w.from.id)?.value;
-      const cls = `mini-wire${active ? ' hot' : ''}${selectedWires.has(w.id) ? ' selected' : ''}${marqueePreviewWires.has(w.id) && !selectedWires.has(w.id) ? ' marquee-preview' : ''}`;
-      return `<path class="${cls}" d="${pathForWire(w)}" />`;
+    const nodeById = new Map(nodes.map(n=>[n.id,n]));
+    const wireById = new Map(wires.map(w=>[w.id,w]));
+    const orderedWireIds = new Set(wireDrawOrder);
+    const miniWireOrder = wireDrawOrder.map(id=>wireById.get(id)).filter(Boolean).concat(wires.filter(w=>!orderedWireIds.has(w.id)));
+    minimapWireLayer.innerHTML = miniWireOrder.map(w => {
+      const source=nodeById.get(w.from.id), active = outputSignalActive(source,w.from.port||0), isBus=outputPortWidth(source,w.from.port||0)>1;
+      const cls = `mini-wire${isBus ? ' bus-wire' : ''}${active ? ' hot' : ''}${selectedWires.has(w.id) ? ' selected' : ''}${marqueePreviewWires.has(w.id) && !selectedWires.has(w.id) ? ' marquee-preview' : ''}${marqueePartialWires.has(w.id) && !marqueePreviewWires.has(w.id) && !selectedWires.has(w.id) ? ' partial-preview' : ''}`;
+      return `<path class="${cls}" d="${pathForWire(w,nodeById)}" />`;
     }).join('');
-    minimapNodeLayer.innerHTML = nodes.map(n => {
+    const orderedNodeIds = new Set(nodeDrawOrder);
+    const miniOrder = nodeDrawOrder.map(id=>nodeById.get(id)).filter(Boolean).concat(nodes.filter(n=>!orderedNodeIds.has(n.id)));
+    minimapNodeLayer.innerHTML = miniOrder.map(n => {
       const b = nodeBounds(n), width=b.right-b.left, height=b.bottom-b.top;
-      const cls = `mini-node${n.value === true ? ' hot' : ''}${selectedNodes.has(n.id) ? ' selected' : ''}${marqueePreviewNodes.has(n.id) && !selectedNodes.has(n.id) ? ' marquee-preview' : ''}`;
+      const cls = `mini-node${(n.value === true || (isBusSignal(n.value)&&n.value.bits.some(Boolean))) ? ' hot' : ''}${selectedNodes.has(n.id) ? ' selected' : ''}${marqueePreviewNodes.has(n.id) && !selectedNodes.has(n.id) ? ' marquee-preview' : ''}${collisionPreviewNodeIds.has(n.id) ? ' collision-preview' : ''}`;
       return `<rect class="${cls}" x="${b.left}" y="${b.top}" width="${width}" height="${height}" rx="8" />`;
     }).join('');
     const vx = offsetX + view.left*scale, vy = offsetY + view.top*scale;
@@ -866,9 +1279,10 @@
   }
 
   function historySnapshot() {
-    return JSON.stringify({ version:1, nodes:nodes.map(n => ({id:n.id,type:n.type,x:n.x,y:n.y,label:n.type==='LABEL'?'Textlabel':n.label,text:n.type==='LABEL'?labelText(n):undefined,state:!!n.state,q:!!n.q,clockWasHigh:!!n.clockWasHigh,frequency:n.type==='CLOCK'?normalizeClockFrequency(n.frequency):undefined})), wires:wires.map(w => ({id:w.id,from:{...w.from},to:{...w.to}})), gridVisible });
+    return JSON.stringify({ version:1, nodes:nodes.map(n => ({id:n.id,type:n.type,x:n.x,y:n.y,label:n.type==='LABEL'?'Textlabel':n.label,text:n.type==='LABEL'?labelText(n):undefined,state:!!n.state,q:!!n.q,clockWasHigh:!!n.clockWasHigh,frequency:n.type==='CLOCK'?normalizeClockFrequency(n.frequency):undefined,phaseOffset:n.type==='CLOCK'?normalizeClockOffset(n.phaseOffset):undefined,busWidth:(n.type==='BUS_COMBINER'||n.type==='BUS_SPLITTER')?normalizeBusWidth(n.busWidth):undefined})), nodeDrawOrder:[...nodeDrawOrder], wires:wires.map(w => ({id:w.id,from:{...w.from},to:{...w.to}})), wireDrawOrder:[...wireDrawOrder], gridVisible });
   }
   function undo() {
+    if (pendingPaste) { cancelPendingPaste(); showToast('Nicht bestätigtes Einfügen verworfen'); return; }
     if (undoIndex <= 0) return;
     undoIndex--;
     applyConfig(JSON.parse(undoHistory[undoIndex]));
@@ -876,6 +1290,7 @@
     updateHistoryButtons();
   }
   function redo() {
+    if (pendingPaste) { cancelPendingPaste(); showToast('Nicht bestätigtes Einfügen verworfen'); return; }
     if (undoIndex < 0 || undoIndex >= undoHistory.length-1) return;
     undoIndex++;
     applyConfig(JSON.parse(undoHistory[undoIndex]));
@@ -901,10 +1316,20 @@
       if (decimal) decimal.textContent = String(Number(n.value) || 0);
       const occupancy = $('inspectorInputOccupancy');
       if (occupancy) {
-        const count = new Set(wires.filter(w => w.to.id === n.id && w.to.port >= 0 && w.to.port < m.inputs).map(w => w.to.port)).size;
+        const count = displayInputOccupancy(n,m.inputs);
         occupancy.textContent = `${count}/${m.inputs}`;
         occupancy.classList.toggle('on', count === m.inputs);
       }
+    }
+    if(n.type==='BUS_COMBINER') {
+      const bits=$('inspectorBusBinary'), decimal=$('inspectorBusDecimal'), occupancy=$('inspectorBusOccupancy'), width=normalizeBusWidth(n.busWidth);
+      if(bits) bits.textContent=isBusSignal(n.value)?n.value.bits.map(v=>v?'1':'0').join(''):'0'.repeat(width);
+      if(decimal) decimal.textContent=String(isBusSignal(n.value)?n.value.value:0);
+      if(occupancy) { const count=new Set(wires.filter(w=>w.to.id===n.id).map(w=>w.to.port)).size; occupancy.textContent=`${count}/${width}`; occupancy.classList.toggle('on',count===width); }
+    } else if(n.type==='BUS_SPLITTER') {
+      const bits=$('inspectorBusBinary'), occupancy=$('inspectorBusOccupancy'), width=normalizeBusWidth(n.busWidth);
+      if(bits) bits.textContent=(n.portValues||Array(width).fill(false)).map(v=>v?'1':'0').join('');
+      if(occupancy) { const count=incomingWire(n.id,0)?1:0; occupancy.textContent=`${count}/1`; occupancy.classList.toggle('on',!!count); }
     }
     const out = $('inspectorOutputValue');
     if (out) {
@@ -914,10 +1339,72 @@
     const q = $('inspectorQValue');
     if (q) { q.textContent = n.q ? '1' : '0'; q.classList.toggle('on', !!n.q); }
   }
-  function renderLiveSimulation() {
+  function renderLiveSimulation(now = performance.now()) {
     evaluate();
-    renderWires();
-    renderNodes();
+    // Aktualisiere nur dynamische Attribute und Texte. Die SVG-Pfade bleiben
+    // bestehen, damit CSS-Keyframes (Kabelpulse, Übergänge und Vorschauen) nicht
+    // bei jedem Taktwechsel neu gestartet werden.
+    const nodeById = new Map(nodes.map(n=>[n.id,n]));
+    const nodeElements = new Map([...nodeLayer.querySelectorAll('g.node[data-node]')].map(el=>[el.dataset.node,el]));
+    const wireById = new Map(wires.map(w => [w.id,w]));
+    const wireElements = new Map([...wireLayer.querySelectorAll('g[data-wire]')].map(el=>[el.dataset.wire,el]));
+    for (const [wireId,group] of wireElements) {
+      const w = wireById.get(wireId); if (!w) continue;
+      const active = outputSignalActive(nodeById.get(w.from.id), w.from.port || 0);
+      group.querySelector('.wire-base')?.classList.toggle('energized', active);
+      group.querySelector('.wire-flow')?.classList.toggle('energized', active);
+    }
+    for (const n of nodes) {
+      const el = nodeElements.get(n.id); if (!el) continue;
+      const m = meta(n);
+      const isActive = n.value === true || (isBusSignal(n.value) && n.value.bits.some(Boolean));
+      el.classList.toggle('active-node', isActive);
+      if (m.kind === 'input') {
+        el.classList.toggle('on', !!n.state);
+        const count = el.querySelector('.signal-count');
+        if (count) count.textContent = n.state ? '1/1' : '0/1';
+        if (n.type === 'INPUT') el.querySelector('.toggle-knob')?.setAttribute('cx', n.state ? '29' : '11');
+        if (n.type === 'PUSH') {
+          const value = el.querySelector('.push-value'); if (value) value.textContent = n.state ? '1' : '0';
+        }
+      } else if (m.kind === 'output') {
+        el.classList.toggle('on', !!n.value);
+        if (m.displayBits) {
+          const binary = el.querySelector('.display-value');
+          const decimal = el.querySelector('.display-decimal');
+          if (binary) binary.textContent = (n.bits || Array(m.inputs).fill(false)).map(v=>v?'1':'0').join('');
+          if (decimal) decimal.textContent = `${Number(n.value)||0} dez.`;
+        } else {
+          const indicator = el.querySelector('.led-indicator');
+          if (indicator) {
+            indicator.setAttribute('fill', n.value ? '#5ce4a7' : '#46586b');
+            indicator.setAttribute('stroke', n.value ? '#b9ffdc' : '#8395a9');
+          }
+          const status = el.querySelector('.led-status');
+          if (status) status.textContent = n.value ? 'HIGH' : 'LOW';
+        }
+      } else if (n.type === 'BUS_COMBINER' || n.type === 'BUS_SPLITTER') {
+        const value = el.querySelector('.bus-live-value');
+        if (value) {
+          const bits = n.type === 'BUS_COMBINER'
+            ? (isBusSignal(n.value) ? n.value.bits.map(v=>v?'1':'0').join('') : '0'.repeat(normalizeBusWidth(n.busWidth)))
+            : (n.portValues || []).map(v=>v?'1':'0').join('');
+          value.textContent = `${normalizeBusWidth(n.busWidth)} BIT · ${bits}`;
+        }
+      } else {
+        const stateLine = el.querySelector('.state-line');
+        if (stateLine) stateLine.textContent = m.kind === 'flipflop'
+          ? `Q=${n.q ? '1' : '0'}`
+          : (n.type === 'TRISTATE' && n.value === null ? 'Z' : (n.value ? 'HIGH' : 'LOW'));
+      }
+      // Ausgangs-Pins können sich dynamisch erwärmen (insbesondere Splitter-Bits).
+      el.querySelectorAll('.pin[data-pin="out"]').forEach(pin => {
+        const port = Number(pin.dataset.port || 0);
+        const hot = n.type === 'BUS_SPLITTER' ? !!n.portValues?.[port] : outputSignalActive(n,port);
+        pin.classList.toggle('hot', hot);
+      });
+    }
+    updateClockNeedles(now);
     updateStatus();
     syncInspectorLiveReadouts();
   }
@@ -925,7 +1412,7 @@
     const root = $('inspector');
     if (selectionEmpty() && selectedPaletteType && TYPES[selectedPaletteType]) {
       const m = TYPES[selectedPaletteType];
-      const io = m.kind === 'input' ? 'Signalquelle · 1 Ausgang' : m.kind === 'output' ? `Anzeige · ${m.inputs} Eingänge` : m.kind === 'label' ? 'Freies Beschriftungselement' : `${m.inputs} Eingänge · 1 Ausgang`;
+      const io = m.kind === 'input' ? 'Signalquelle · 1 Ausgang' : m.kind === 'output' ? `Anzeige · ${m.inputs} Eingänge` : m.kind === 'label' ? 'Freies Beschriftungselement' : m.kind==='bus-combiner' ? 'Mehrere Bit-Eingänge · 1 Bus-Ausgang' : m.kind==='bus-splitter' ? '1 Bus-Eingang · mehrere Bit-Ausgänge' : `${m.inputs} Eingänge · 1 Ausgang`;
       root.innerHTML = `<div class="inspector-card">
         <div class="inspector-title">${esc(m.label)}</div>
         <div class="inspector-type">${esc(m.category)} · Bauteilbibliothek</div>
@@ -937,13 +1424,40 @@
       return;
     }
     if (selectedNodes.size + selectedWires.size > 1) {
+      const clockGroupNodes=selectedWires.size===0 ? [...selectedNodes].map(byId).filter(n=>n?.type==='CLOCK') : [];
+      const isClockGroup=clockGroupNodes.length>1 && clockGroupNodes.length===selectedNodes.size;
+      let clockGroupControls='';
+      if (isClockGroup) {
+        const frequencies=new Set(clockGroupNodes.map(n=>normalizeClockFrequency(n.frequency).toFixed(1)));
+        const offsets=new Set(clockGroupNodes.map(n=>normalizeClockOffset(n.phaseOffset).toFixed(1)));
+        const currentFrequency=frequencies.size===1?[...frequencies][0]:'';
+        const currentOffset=offsets.size===1?[...offsets][0]:'';
+        const frequencyOptions=`<option value="" ${currentFrequency===''?'selected':''}>Gemischt</option>`+Array.from({length:20},(_,i)=>{const v=((i+1)/10).toFixed(1);return `<option value="${v}" ${v===currentFrequency?'selected':''}>${v.replace('.',',')} Hz</option>`;}).join('');
+        const offsetOptions=`<option value="" ${currentOffset===''?'selected':''}>Gemischt</option>`+Array.from({length:11},(_,i)=>{const v=((i-5)/10).toFixed(1);const label=`${Number(v)>0?'+':''}${v.replace('.',',')} s`;return `<option value="${v}" ${v===currentOffset?'selected':''}>${label}</option>`;}).join('');
+        clockGroupControls=`<div class="inspector-rule"></div><div class="inspector-type">TAKTGRUPPE · ${clockGroupNodes.length} CLOCKS</div><div class="prop-row"><span>Frequenz</span><select class="inspector-input clock-frequency" id="clockGroupFrequency" aria-label="Frequenz für alle ausgewählten Clocks">${frequencyOptions}</select></div><div class="prop-row"><span>Phasenversetzung</span><select class="inspector-input clock-offset" id="clockGroupOffset" aria-label="Phasenversetzung für alle ausgewählten Clocks">${offsetOptions}</select></div>`;
+      }
       root.innerHTML = `<div class="inspector-card">
-        <div class="inspector-title">Mehrfachauswahl</div>
+        <div class="inspector-title">${isClockGroup?'Clock-Gruppe':'Mehrfachauswahl'}</div>
         <div class="inspector-type">${selectedNodes.size} Bauteile · ${selectedWires.size} Kabel</div>
         <div class="inspector-rule"></div>
         <div class="prop-row"><span>Enthaltene Verbindungen</span><span class="prop-value">${selectedWires.size}</span></div>
+        ${clockGroupControls}
         <div class="inspector-actions"><button class="btn" id="duplicateSelected">Duplizieren</button><button class="btn danger" id="deleteSelected">Löschen</button></div>
       </div>`;
+      const groupFrequency=$('clockGroupFrequency');
+      if(groupFrequency) groupFrequency.addEventListener('change',()=>{
+        if(groupFrequency.value==='') return;
+        const value=normalizeClockFrequency(groupFrequency.value);
+        clockGroupNodes.forEach(clock=>{clock.frequency=value;clock.state=clockStateAt(clock);});
+        render(); showToast(`Frequenz für ${clockGroupNodes.length} Clocks auf ${value.toFixed(1).replace('.',',')} Hz gesetzt`);
+      });
+      const groupOffset=$('clockGroupOffset');
+      if(groupOffset) groupOffset.addEventListener('change',()=>{
+        if(groupOffset.value==='') return;
+        const value=normalizeClockOffset(groupOffset.value);
+        clockGroupNodes.forEach(clock=>{clock.phaseOffset=value;clock.state=clockStateAt(clock);});
+        render(); showToast(`Phasenversetzung für ${clockGroupNodes.length} Clocks eingestellt`);
+      });
     } else if (selectedNodes.size === 1) {
       const id = [...selectedNodes][0], n = byId(id);
       if (!n) { clearSelection(); root.innerHTML = '<div class="inspector-empty">Wähle ein Bauteil oder ein Kabel aus.</div>'; return; }
@@ -953,9 +1467,24 @@
         if (n.type === 'INPUT') extra = `<div class="toggle-row"><span>Eingangssignal</span><button class="switch ${n.state ? 'on' : ''}" id="inspectorToggle" aria-label="Eingang umschalten"></button></div>`;
         else if (n.type === 'CLOCK') {
           const selectedFrequency = normalizeClockFrequency(n.frequency).toFixed(1);
+          const selectedOffset = normalizeClockOffset(n.phaseOffset).toFixed(1);
           const options = Array.from({length:20}, (_,i) => { const v=((i+1)/10).toFixed(1); return `<option value="${v}" ${v===selectedFrequency?'selected':''}>${v.replace('.',',')} Hz</option>`; }).join('');
-          extra = `<div class="prop-row"><span>Frequenz</span><select class="inspector-input clock-frequency" id="clockFrequency" aria-label="Clock-Frequenz">${options}</select></div>`;
+          const offsetOptions = Array.from({length:11}, (_,i) => { const v=((i-5)/10).toFixed(1); const label=`${Number(v)>0?'+':''}${v.replace('.',',')} s`; return `<option value="${v}" ${v===selectedOffset?'selected':''}>${label}</option>`; }).join('');
+          extra = `<div class="prop-row"><span>Frequenz</span><select class="inspector-input clock-frequency" id="clockFrequency" aria-label="Clock-Frequenz">${options}</select></div><div class="prop-row"><span>Phasenversetzung</span><select class="inspector-input clock-offset" id="clockOffset" aria-label="Clock-Phasenversetzung">${offsetOptions}</select></div>`;
         } else if (n.type === 'HIGH' || n.type === 'LOW') extra = '';
+      } else if (n.type==='BUS_COMBINER' || n.type==='BUS_SPLITTER') {
+        const width=normalizeBusWidth(n.busWidth);
+        const options=[2,4,8].map(v=>`<option value="${v}" ${v===width?'selected':''}>${v} Bit</option>`).join('');
+        const widthRow=`<div class="prop-row"><span>Busbreite</span><select class="inspector-input" id="busWidthSelect" aria-label="Busbreite">${options}</select></div>`;
+        if(n.type==='BUS_COMBINER') {
+          const occupied=new Set(wires.filter(w=>w.to.id===n.id && w.to.port>=0 && w.to.port<width).map(w=>w.to.port)).size;
+          const bits=isBusSignal(n.value)?n.value.bits.map(v=>v?'1':'0').join(''):'0'.repeat(width);
+          extra=widthRow+`<div class="prop-row"><span>Eingangsbelegung</span><span class="value-chip ${occupied===width?'on':''}" id="inspectorBusOccupancy">${occupied}/${width}</span></div><div class="prop-row"><span>Buswert · Binär</span><span class="prop-value" id="inspectorBusBinary">${bits}</span></div><div class="prop-row"><span>Buswert · Dezimal</span><span class="prop-value" id="inspectorBusDecimal">${isBusSignal(n.value)?n.value.value:0}</span></div>`;
+        } else {
+          const connected=incomingWire(n.id,0)?1:0;
+          const bits=(n.portValues||Array(width).fill(false)).map(v=>v?'1':'0').join('');
+          extra=widthRow+`<div class="prop-row"><span>Bus-Eingang</span><span class="value-chip ${connected?'on':''}" id="inspectorBusOccupancy">${connected}/1</span></div><div class="prop-row"><span>Einzelbits · MSB → LSB</span><span class="prop-value" id="inspectorBusBinary">${bits}</span></div>`;
+        }
       } else if (m.kind === 'gate' || m.kind === 'flipflop') {
         const occupiedInputs = wires.filter(w => w.to.id === n.id).length;
         extra = `<div class="prop-row" title="Belegte Eingänge im Verhältnis zu allen verfügbaren Eingängen"><span>Eingangsbelegung</span><span class="value-chip ${occupiedInputs===m.inputs?'on':''}">${occupiedInputs}/${m.inputs}</span></div>`;
@@ -963,7 +1492,7 @@
       } else if (m.kind === 'output') {
         if (m.displayBits) {
           const bits = (n.bits || Array(m.inputs).fill(false)).map(v=>v?'1':'0').join('');
-          const occupiedInputs = new Set(wires.filter(w => w.to.id === n.id && w.to.port >= 0 && w.to.port < m.inputs).map(w => w.to.port)).size;
+          const occupiedInputs = displayInputOccupancy(n,m.inputs);
           extra = `<div class="prop-row"><span>Binär</span><span class="prop-value" id="inspectorDisplayBinary">${bits}</span></div><div class="prop-row"><span>Dezimal</span><span class="prop-value" id="inspectorDisplayDecimal">${Number(n.value)||0}</span></div><div class="prop-row" title="Belegte Eingänge im Verhältnis zu allen verfügbaren Eingängen"><span>Eingangsbelegung</span><span class="value-chip ${occupiedInputs===m.inputs?'on':''}" id="inspectorInputOccupancy">${occupiedInputs}/${m.inputs}</span></div>`;
         } else {
           const w = incomingWire(n.id,0), src = w && byId(w.from.id);
@@ -974,7 +1503,7 @@
         extra = '';
       }
       const valueText = n.value === null ? 'Z · hochohmig' : (n.value ? '1 · HIGH' : '0 · LOW');
-      const showOutputRow = m.kind !== 'label' && !(m.kind === 'output' && m.displayBits);
+      const showOutputRow = m.kind !== 'label' && !(m.kind === 'output' && m.displayBits) && !['BUS_COMBINER','BUS_SPLITTER'].includes(n.type);
       root.innerHTML = `<div class="inspector-card">
         <div class="inspector-title">${esc(m.kind === 'label' ? m.label : (n.label || m.label))}</div><div class="inspector-type">${esc(m.category)} · ${esc(m.label)} · ${esc(n.id.slice(0,8))}</div>
         <div class="inspector-description">${esc(m.description)}</div>
@@ -983,24 +1512,31 @@
         <div class="inspector-actions"><button class="btn" id="duplicateSelected">Duplizieren</button><button class="btn danger" id="deleteSelected">Löschen</button></div>
       </div>`;
       const toggle = $('inspectorToggle'); if (toggle) toggle.addEventListener('click', () => { n.state = !n.state; render(); });
+      const busWidthSelect=$('busWidthSelect');
+      if(busWidthSelect) busWidthSelect.addEventListener('change',()=>resizeBusComponent(n,Number(busWidthSelect.value)));
       const clockFrequency = $('clockFrequency');
       if (clockFrequency) clockFrequency.addEventListener('change', () => {
         n.frequency = normalizeClockFrequency(clockFrequency.value);
-        n.state = false;
-        n.clockEpoch = clockEpochForState(n.frequency, false);
+        n.state = clockStateAt(n);
         render();
         showToast(`Clock-Frequenz auf ${n.frequency.toFixed(1).replace('.',',')} Hz gesetzt`);
+      });
+      const clockOffset = $('clockOffset');
+      if (clockOffset) clockOffset.addEventListener('change', () => {
+        n.phaseOffset = normalizeClockOffset(clockOffset.value);
+        n.state = clockStateAt(n);
+        render();
+        const value=n.phaseOffset.toFixed(1).replace('.',',');
+        showToast(`Phasenversetzung auf ${value.startsWith('-')?value:'+'+value} s gesetzt`);
       });
     } else if (selectedWires.size === 1) {
       const id = [...selectedWires][0], w = wires.find(x => x.id === id);
       if (!w) { clearSelection(); root.innerHTML = '<div class="inspector-empty">Wähle ein Bauteil oder ein Kabel aus.</div>'; return; }
-      const a = byId(w.from.id), b = byId(w.to.id);
+      const a = byId(w.from.id), b = byId(w.to.id), signalDescription=wireSignalDescription(w), signalIsHigh=signalDescription==='1 · HIGH' || (a && isBusSignal(a.value) && a.value.bits.some(Boolean));
       root.innerHTML = `<div class="inspector-card"><div class="inspector-title">Verbindung</div><div class="inspector-type">SIGNALKABEL · ${esc(w.id.slice(0,8))}</div><div class="inspector-rule"></div>
-        <div class="prop-row"><span>Von</span><span class="prop-value">${esc(a?.label || meta(a || {type:'INPUT'}).label)}</span></div>
+        <div class="prop-row"><span>Von</span><span class="prop-value">${esc(a?.label || meta(a || {type:'INPUT'}).label)}${outputPortWidth(a,w.from.port||0)>1?` · Bitbreite ${outputPortWidth(a,w.from.port||0)}`:''}</span></div>
         <div class="prop-row"><span>Nach</span><span class="prop-value">${esc(b?.label || meta(b || {type:'OUTPUT'}).label)}</span></div>
-        <div class="prop-row"><span>Signal</span><span class="value-chip ${a?.value === true ? 'on' : ''}">${a?.value === null ? 'Z' : a?.value ? '1 · HIGH' : '0 · LOW'}</span></div>
-        <div class="prop-row"><span>Bearbeitung</span><span class="prop-value">Endpunkte ziehen</span></div>
-        <div style="color:#91a5bb;font-size:10px;line-height:1.45;margin-top:7px">Gelbe Punkte an den Kabelenden auf einen passenden Ausgangs- oder freien Eingangspin ziehen.</div>
+        <div class="prop-row"><span>Signal</span><span class="value-chip ${signalIsHigh?'on':''}">${esc(signalDescription)}</span></div>
         <div class="inspector-actions"><button class="btn danger" id="deleteSelected">Kabel trennen</button></div></div>`;
     } else {
       root.innerHTML = '<div class="inspector-empty">Wähle ein Bauteil oder ein Kabel auf der Arbeitsfläche aus, um Beschreibung und Signale zu sehen.</div>';
@@ -1009,21 +1545,59 @@
     const dup = $('duplicateSelected'); if (dup) dup.addEventListener('click', duplicateSelection);
   }
 
+  function resizeBusComponent(node,width) {
+    if(!node || !['BUS_COMBINER','BUS_SPLITTER'].includes(node.type)) return;
+    const oldWidth=normalizeBusWidth(node.busWidth), nextWidth=normalizeBusWidth(width);
+    if(oldWidth===nextWidth) return;
+    node.busWidth=nextWidth;
+    const before=wires.length;
+    wires=wires.filter(w=>canConnectPorts({...w.from,dir:'out'},{...w.to,dir:'in'}));
+    const occupied=new Set();
+    wires=wires.filter(w=>{ const key=`${w.to.id}:${w.to.port}`; if(occupied.has(key)) return false; occupied.add(key); return true; });
+    const keep=new Set(wires.map(w=>w.id)); wireDrawOrder=wireDrawOrder.filter(id=>keep.has(id));
+    render();
+    showToast(before===wires.length?`Busbreite auf ${nextWidth} Bit geändert`:`Busbreite auf ${nextWidth} Bit geändert · ungültige Verbindungen entfernt`);
+  }
+  function cancelPendingPaste() {
+    if(!pendingPaste) return false;
+    const ids=pendingPaste.ids;
+    nodes=nodes.filter(n=>!ids.has(n.id));
+    const removedWireIds=new Set(wires.filter(w=>ids.has(w.from.id)||ids.has(w.to.id)).map(w=>w.id));
+    wires=wires.filter(w=>!ids.has(w.from.id)&&!ids.has(w.to.id));
+    nodeDrawOrder=nodeDrawOrder.filter(id=>!ids.has(id));
+    wireDrawOrder=wireDrawOrder.filter(id=>!removedWireIds.has(id));
+    pendingPaste=null; collisionPreviewNodeIds.clear(); clearSelection(); render(false,false);
+    showToast('Ungültige Einfügeposition verworfen');
+    return true;
+  }
+
   function addNode(type, x, y) {
     if (!TYPES[type]) return null;
     const frequency = type === 'CLOCK' ? 1 : undefined;
-    const n = { id: uid('n'), type, x: snap(x), y: snap(y), label: TYPES[type].label, text: type === 'LABEL' ? TYPES[type].label : undefined, state: type === 'HIGH', q:false, clockWasHigh:false, frequency, clockEpoch: type === 'CLOCK' ? clockEpochForState(frequency, false) : undefined, value: type === 'HIGH' ? true : false };
-    nodes.push(n); clearSelection(); selectedNodes.add(n.id); armedFrom = null; render(); return n;
+    const phaseOffset = type === 'CLOCK' ? 0 : undefined;
+    const initialClockState = type === 'CLOCK' ? clockStateAt({frequency,phaseOffset}) : false;
+    const n = { id: uid('n'), type, x: snap(x), y: snap(y), label: TYPES[type].label, text: type === 'LABEL' ? TYPES[type].label : undefined, state: type === 'HIGH' ? true : initialClockState, q:false, clockWasHigh:false, frequency, phaseOffset, busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?4:undefined, value: type === 'HIGH' ? true : false };
+    if (!allowNodeOverlaps) {
+      const collision=findPlacementCollision([n],nodes);
+      if (collision) { showToast(`Platzierung nicht möglich: ${meta(collision.b).label} liegt im Weg`); return null; }
+    }
+    nodes.push(n); nodeDrawOrder.push(n.id); clearSelection(); selectedNodes.add(n.id); armedFrom = null; render(); return n;
   }
   function removeNode(id) {
     nodes = nodes.filter(n => n.id !== id);
+    nodeDrawOrder = nodeDrawOrder.filter(nodeId=>nodeId!==id);
     wires = wires.filter(w => w.from.id !== id && w.to.id !== id);
+    const remainingWireIds=new Set(wires.map(w=>w.id));
+    wireDrawOrder=wireDrawOrder.filter(wireId=>remainingWireIds.has(wireId));
   }
   function deleteSelection() {
+    if (pendingPaste) { cancelPendingPaste(); return; }
     if (selectionEmpty()) return;
     const removeIds = new Set(selectedNodes);
     nodes.filter(n => removeIds.has(n.id)).forEach(n => removeNode(n.id));
     wires = wires.filter(w => !selectedWires.has(w.id));
+    const remainingWireIds=new Set(wires.map(w=>w.id));
+    wireDrawOrder=wireDrawOrder.filter(wireId=>remainingWireIds.has(wireId));
     clearSelection(); armedFrom = null; render(); showToast('Auswahl gelöscht');
   }
   function buildClipboard() {
@@ -1035,54 +1609,166 @@
     const copyWires = wires.filter(w => selectedWires.has(w.id) || (nodeIds.has(w.from.id) && nodeIds.has(w.to.id))).map(w => ({...w, from:{...w.from}, to:{...w.to}}));
     return { nodes: copyNodes, wires: copyWires };
   }
+  function normalizeClipboardData(value) {
+    if (!value || !Array.isArray(value.nodes) || !Array.isArray(value.wires) || !value.nodes.length) return null;
+    // Clipboard-Inhalte sind externe Daten: nur bekannte Bauteile, endliche
+    // Koordinaten und Verbindungen innerhalb der kopierten Gruppe übernehmen.
+    if (value.nodes.length > 10000 || value.wires.length > 20000) return null;
+    const seen = new Set();
+    const safeNodes = [];
+    for (const node of value.nodes) {
+      if (!node || typeof node.id !== 'string' || !node.id || seen.has(node.id) || !TYPES[node.type] ||
+          !Number.isFinite(Number(node.x)) || !Number.isFinite(Number(node.y))) return null;
+      seen.add(node.id);
+      safeNodes.push({...node, x:Number(node.x), y:Number(node.y)});
+    }
+    const safeWires = [];
+    for (const wire of value.wires) {
+      if (!wire || !wire.from || !wire.to || !seen.has(wire.from.id) || !seen.has(wire.to.id)) continue;
+      safeWires.push({
+        ...wire,
+        from:{id:wire.from.id, port:Number.isFinite(Number(wire.from.port))?Number(wire.from.port):0},
+        to:{id:wire.to.id, port:Number.isFinite(Number(wire.to.port))?Number(wire.to.port):0}
+      });
+    }
+    return {nodes:safeNodes, wires:safeWires};
+  }
+  function clipboardPayload(data) {
+    return {format:'gatterlab-clipboard', version:1, copiedAt:Date.now(), data};
+  }
+  function parseClipboardPayload(raw) {
+    try {
+      let payload;
+      if (typeof raw === 'string') {
+        const text = raw.startsWith(SHARED_CLIPBOARD_FORMAT) ? raw.slice(SHARED_CLIPBOARD_FORMAT.length) : raw;
+        payload = JSON.parse(text);
+      } else payload = raw;
+      if (!payload || payload.format !== 'gatterlab-clipboard' || payload.version !== 1) return null;
+      return normalizeClipboardData(payload.data);
+    } catch (_) { return null; }
+  }
+  function readSharedClipboard() {
+    try {
+      const raw = localStorage.getItem(SHARED_CLIPBOARD_KEY);
+      const data = raw ? parseClipboardPayload(raw) : null;
+      if (data) clipboard = data;
+    } catch (_) { /* storage may be unavailable in private or file contexts */ }
+    return clipboard;
+  }
+  function publishClipboard(data) {
+    const normalized = normalizeClipboardData(data);
+    if (!normalized) return false;
+    clipboard = normalized;
+    const payload = clipboardPayload(normalized);
+    let storagePublished = false;
+    try { localStorage.setItem(SHARED_CLIPBOARD_KEY, JSON.stringify(payload)); storagePublished = true; } catch (_) {}
+    try { clipboardChannel?.postMessage(payload); } catch (_) {}
+    // Bei file://-URLs können Tabs trotz derselben Datei getrennte Storage-Origins
+    // erhalten. Dort ist die native Zwischenablage der zuverlässige Tab-übergreifende Weg.
+    // Bei normalen Origins bleiben Betriebssystem-Textkopien dagegen unangetastet.
+    if (!storagePublished || location.protocol === 'file:') {
+      try {
+        if (navigator.clipboard?.writeText) {
+          const text = SHARED_CLIPBOARD_FORMAT + JSON.stringify(payload);
+          const pending = navigator.clipboard.writeText(text);
+          if (pending && typeof pending.catch === 'function') pending.catch(() => {});
+        }
+      } catch (_) {}
+    }
+    return true;
+  }
+  async function readNativeClipboardData() {
+    try {
+      if (!navigator.clipboard?.readText) return null;
+      const text = await navigator.clipboard.readText();
+      return parseClipboardPayload(text);
+    } catch (_) { return null; }
+  }
   function copySelection() {
+    if (pendingPaste) { cancelPendingPaste(); showToast('Nicht bestätigtes Einfügen zuerst platzieren'); return false; }
     const data = buildClipboard();
     if (!data) return false;
-    clipboard = data; pasteCount = 0;
+    if (!publishClipboard(data)) return false;
     showToast(`${data.nodes.length} Bauteile und ${data.wires.length} Kabel kopiert`);
     return true;
   }
-  function pasteSelection() {
-    if (!clipboard || !clipboard.nodes.length) return false;
-    const stageRect = stage.getBoundingClientRect();
-    const pointerInsideStage = currentPointer.x >= stageRect.left && currentPointer.x <= stageRect.right && currentPointer.y >= stageRect.top && currentPointer.y <= stageRect.bottom;
-    const targetWorld = pointerInsideStage ? worldPoint(currentPointer.x,currentPointer.y) : stageCenterWorld();
-    const bounds = clipboard.nodes.map(nodeBounds);
-    const centerX = (Math.min(...bounds.map(b=>b.left)) + Math.max(...bounds.map(b=>b.right))) / 2;
-    const centerY = (Math.min(...bounds.map(b=>b.top)) + Math.max(...bounds.map(b=>b.bottom))) / 2;
-    // Der Mittelpunkt der kopierten Auswahl wird auf die aktuelle Mausposition gesetzt.
-    const offsetX = snap(targetWorld.x - centerX), offsetY = snap(targetWorld.y - centerY), idMap = new Map();
-    const newNodes = clipboard.nodes.map(n => {
-      const id = uid('n'); idMap.set(n.id, id);
-      return {...n, id, x:snap(n.x + offsetX), y:snap(n.y + offsetY), value:false};
-    });
-    const existing = new Set(nodes.map(n => n.id));
-    const newWires = clipboard.wires.map(w => ({
-      id: uid('w'),
-      from: {id:idMap.get(w.from.id) || (existing.has(w.from.id) ? w.from.id : null), port:0},
-      to: {id:idMap.get(w.to.id) || (existing.has(w.to.id) ? w.to.id : null), port:w.to.port}
-    })).filter(w => w.from.id && w.to.id);
-    nodes.push(...newNodes);
-    // Eingangspins bleiben eindeutig: Bei bereits belegtem Ziel wird der eingefügte Draht ausgelassen.
-    const occupied = new Set(wires.map(w => `${w.to.id}:${w.to.port}`));
-    const validWires = newWires.filter(w => { const k=`${w.to.id}:${w.to.port}`; if (occupied.has(k)) return false; occupied.add(k); return true; });
-    wires.push(...validWires);
-    clearSelection(); newNodes.forEach(n => selectedNodes.add(n.id)); validWires.forEach(w => selectedWires.add(w.id));
-    pasteCount++; render(); showToast('Auswahl eingefügt'); return true;
+  function pasteClipboardData(sourceData) {
+    const data = normalizeClipboardData(sourceData);
+    if (!data || !data.nodes.length) return false;
+    clipboard = data;
+    if(pendingPaste) cancelPendingPaste();
+    const stageRect=stage.getBoundingClientRect();
+    const pointerInsideStage=currentPointer.x>=stageRect.left && currentPointer.x<=stageRect.right && currentPointer.y>=stageRect.top && currentPointer.y<=stageRect.bottom;
+    const targetWorld=pointerInsideStage?worldPoint(currentPointer.x,currentPointer.y):stageCenterWorld();
+    const bounds=data.nodes.map(nodeBounds);
+    const centerX=(Math.min(...bounds.map(b=>b.left))+Math.max(...bounds.map(b=>b.right)))/2;
+    const centerY=(Math.min(...bounds.map(b=>b.top))+Math.max(...bounds.map(b=>b.bottom)))/2;
+    const offsetX=snap(targetWorld.x-centerX), offsetY=snap(targetWorld.y-centerY), idMap=new Map();
+    const newNodes=data.nodes.map(n=>{ const id=uid('n'); idMap.set(n.id,id); return {...n,id,x:snap(n.x+offsetX),y:snap(n.y+offsetY),value:false,portValues:undefined}; });
+    const newNodeIds=new Set(newNodes.map(n=>n.id));
+    const newWires=data.wires.map(w=>({id:uid('w'),from:{id:idMap.get(w.from.id)||(newNodeIds.has(w.from.id)?w.from.id:null),port:w.from.port||0},to:{id:idMap.get(w.to.id)||(newNodeIds.has(w.to.id)?w.to.id:null),port:w.to.port}})).filter(w=>w.from.id&&w.to.id);
+    // Kandidaten sowohl gegen vorhandene Bauteile als auch untereinander prüfen.
+    const collisionIds=allowNodeOverlaps?new Set():collisionCandidateIds(newNodes,[...nodes,...newNodes]);
+    nodes.push(...newNodes); nodeDrawOrder.push(...newNodes.map(n=>n.id));
+    const occupied=new Set(wires.map(w=>`${w.to.id}:${w.to.port}`));
+    const validWires=newWires.filter(w=>{ const k=`${w.to.id}:${w.to.port}`; if(occupied.has(k) || !canConnectPorts(w.from,w.to)) return false; occupied.add(k); return true; });
+    wires.push(...validWires); wireDrawOrder.push(...validWires.map(w=>w.id));
+    clearSelection(); newNodes.forEach(n=>selectedNodes.add(n.id)); validWires.forEach(w=>selectedWires.add(w.id));
+    if(collisionIds.size) {
+      pendingPaste={ids:new Set(newNodes.map(n=>n.id)),wireIds:new Set(validWires.map(w=>w.id))};
+      collisionPreviewNodeIds=collisionIds;
+      // Nur eine temporäre Vorschau. Erst eine kollisionsfreie Platzierung wird gespeichert.
+      render(false,false);
+    } else {
+      pendingPaste=null; collisionPreviewNodeIds.clear();
+      render(true,true);
+    }
+    showToast(collisionIds.size?'Einfügegruppe überschneidet Bauteile – markierte Gruppe an eine freie Stelle ziehen':'Auswahl eingefügt');
+    return true;
   }
+  async function pasteSelection() {
+    // file://-Tabs können getrennte Storage-Bereiche haben; dort hat die native
+    // Zwischenablage Vorrang, damit keine lokale alte Kopie eine neue überdeckt.
+    if (location.protocol === 'file:') {
+      const nativeData = await readNativeClipboardData();
+      if (nativeData) { clipboard=nativeData; return pasteClipboardData(nativeData); }
+    }
+    // Bei normalen Origins sind localStorage und BroadcastChannel tabübergreifend.
+    const shared = readSharedClipboard();
+    if (shared?.nodes?.length) return pasteClipboardData(shared);
+    if (clipboard?.nodes?.length) return pasteClipboardData(clipboard);
+    // Letzter Fallback, wenn Storage/Channel nicht verfügbar oder blockiert sind.
+    const nativeData = await readNativeClipboardData();
+    if (nativeData) { clipboard=nativeData; return pasteClipboardData(nativeData); }
+    showToast('Keine GatterLab-Kopie in der Zwischenablage gefunden');
+    return false;
+  }
+
   function duplicateSelection() {
+    if (pendingPaste) { cancelPendingPaste(); showToast('Nicht bestätigtes Einfügen zuerst platzieren'); return; }
     const data = buildClipboard(); if (!data) return;
-    clipboard = data; pasteCount = 0; pasteSelection();
+    clipboard = data; pasteClipboardData(data);
   }
   function connect(from, to) {
-    if (!from || !to || from.id === to.id || from.dir !== 'out' || to.dir !== 'in') return false;
-    const src = byId(from.id), dst = byId(to.id); if (!src || !dst) return false;
-    const inputCount = meta(dst).inputs;
-    if (to.port < 0 || to.port >= inputCount) return false;
-    wires = wires.filter(w => !(w.to.id === to.id && w.to.port === to.port));
-    wires.push({ id: uid('w'), from: { id: from.id, port: 0 }, to: { id: to.id, port: to.port } });
-    clearSelection(); armedFrom = null; gesture = null; render(); tempLayer.innerHTML = ''; showToast('Kabel verbunden'); return true;
+    if (!from || !to || from.dir!=='out' || to.dir!=='in' || !canConnectPorts(from,to)) {
+      showToast('Nicht kompatibel: Bit- und Busbreiten müssen zusammenpassen');
+      return false;
+    }
+    const src=byId(from.id), dst=byId(to.id);
+    const busToDisplay=meta(dst).kind==='output' && meta(dst).displayBits && outputPortWidth(src,from.port||0)>1;
+    // Eine Verbindung, die bereits exakt zwischen diesen beiden Ports besteht,
+    // bleibt unangetastet. Insbesondere Shift-Abzweige zurück zum gleichen Ziel
+    // dürfen das vorhandene Kabel weder rot markieren noch neu erzeugen.
+    const identical = wires.find(w => w.from.id===from.id && (w.from.port||0)===(from.port||0) && w.to.id===to.id && w.to.port===to.port);
+    if (identical) { clearSelection(); armedFrom=null; gesture=null; render(false,false); tempLayer.innerHTML=''; showToast('Diese Verbindung besteht bereits'); return true; }
+    const replacedIds=new Set(wires.filter(w=>w.to.id===to.id && (busToDisplay || w.to.port===to.port)).map(w=>w.id));
+    wires=wires.filter(w=>!replacedIds.has(w.id));
+    wireDrawOrder=wireDrawOrder.filter(id=>!replacedIds.has(id));
+    const newWire={id:uid('w'),from:{id:from.id,port:from.port||0},to:{id:to.id,port:to.port}};
+    wires.push(newWire); wireDrawOrder.push(newWire.id);
+    clearSelection(); armedFrom=null; gesture=null; render(); tempLayer.innerHTML=''; showToast('Kabel verbunden'); return true;
   }
+
   function clientPinAt(x, y) {
     const el = document.elementFromPoint(x, y);
     const pin = el && el.closest ? el.closest('.pin') : null;
@@ -1091,77 +1777,128 @@
   }
   function clearSnapHighlight() {
     nodeLayer.querySelectorAll('.pin.snap-target').forEach(el => el.classList.remove('snap-target'));
-    if (gesture && (gesture.kind === 'wire' || gesture.kind === 'rewire')) gesture.snapTarget = null;
+    wireLayer.querySelectorAll('.wire-base.replacement-preview,.wire-flow.replacement-preview').forEach(el => el.classList.remove('replacement-preview'));
+    if (gesture && ['wire','wire-from-input','rewire'].includes(gesture.kind)) gesture.snapTarget = null;
   }
-  function nearestInputPin(clientX, clientY, excludeNodeId = gesture?.from?.id, excludeWireId = null) {
-    const rect = stage.getBoundingClientRect();
-    let best = null, bestDistance = 23;
-    for (const n of nodes) {
-      if (n.id === excludeNodeId) continue;
-      const count = meta(n).inputs;
-      for (let port = 0; port < count; port++) {
-        const occupied = incomingWire(n.id, port);
-        if (excludeWireId && occupied && occupied.id !== excludeWireId) continue;
-        const p = portPos(n.id, 'in', port);
-        const sx = rect.left + camera.x + p.x * camera.z;
-        const sy = rect.top + camera.y + p.y * camera.z;
-        const distance = Math.hypot(clientX - sx, clientY - sy);
-        if (distance <= bestDistance) { bestDistance = distance; best = { id:n.id, dir:'in', port, x:p.x, y:p.y }; }
+  function markWireReplacementPreview(wireId) {
+    if (!wireId) return;
+    wireLayer.querySelector(`g[data-wire="${CSS.escape(wireId)}"]`)
+      ?.querySelectorAll('.wire-base,.wire-flow')
+      .forEach(path => path.classList.add('replacement-preview'));
+  }
+  function nearestInputPin(clientX, clientY, excludeNodeId = gesture?.from?.id, excludeWireId = null, sourceRef = gesture?.from, allowOccupied = false) {
+    const rect=stage.getBoundingClientRect(); let best=null,bestDistance=23;
+    for(const n of nodes) {
+      if(n.id===excludeNodeId) continue;
+      for(let port=0;port<inputPortCount(n);port++) {
+        const occupied=incomingWire(n.id,port);
+        if(occupied && occupied.id!==excludeWireId && !allowOccupied) continue;
+        if(sourceRef && !canConnectPorts(sourceRef,{id:n.id,dir:'in',port})) continue;
+        const sameExistingConnection = !!(occupied && sourceRef && occupied.from.id===sourceRef.id && (occupied.from.port||0)===(sourceRef.port||0));
+        const p=portPos(n.id,'in',port), sx=rect.left+camera.x+p.x*camera.z, sy=rect.top+camera.y+p.y*camera.z;
+        const distance=Math.hypot(clientX-sx,clientY-sy);
+        if(distance<=bestDistance) { bestDistance=distance; best={id:n.id,dir:'in',port,x:p.x,y:p.y,distance,occupiedWireId:occupied && occupied.id!==excludeWireId && !sameExistingConnection ? occupied.id : null,alreadyConnected:sameExistingConnection}; }
       }
     }
     return best;
   }
-  function nearestOutputPin(clientX, clientY, excludeNodeId = null) {
-    const rect = stage.getBoundingClientRect();
-    let best = null, bestDistance = 23;
-    for (const n of nodes) {
-      if (n.id === excludeNodeId || meta(n).kind === 'output' || meta(n).kind === 'label') continue;
-      const p = portPos(n.id, 'out', 0);
-      const sx = rect.left + camera.x + p.x * camera.z;
-      const sy = rect.top + camera.y + p.y * camera.z;
-      const distance = Math.hypot(clientX - sx, clientY - sy);
-      if (distance <= bestDistance) bestDistance = distance, best = { id:n.id, dir:'out', port:0, x:p.x, y:p.y };
+  function nearestOutputPin(clientX, clientY, excludeNodeId = null, targetNodeId = null, targetPort = 0) {
+    const rect=stage.getBoundingClientRect(); let best=null,bestDistance=23;
+    for(const n of nodes) {
+      if(n.id===excludeNodeId || meta(n).kind==='output' || meta(n).kind==='label') continue;
+      for(let port=0;port<outputPortCount(n);port++) {
+        if(targetNodeId && !canConnectPorts({id:n.id,dir:'out',port},{id:targetNodeId,dir:'in',port:targetPort})) continue;
+        const p=portPos(n.id,'out',port), sx=rect.left+camera.x+p.x*camera.z, sy=rect.top+camera.y+p.y*camera.z;
+        const distance=Math.hypot(clientX-sx,clientY-sy);
+        if(distance<=bestDistance) bestDistance=distance,best={id:n.id,dir:'out',port,x:p.x,y:p.y,distance};
+      }
     }
     return best;
   }
+
   function updateTempWire() {
-    if (!gesture || gesture.kind !== 'wire') { tempLayer.innerHTML = ''; return; }
-    const a = portPos(gesture.from.id, 'out', 0);
-    const target = nearestInputPin(currentPointer.x, currentPointer.y);
+    if (!gesture || !['wire','wire-from-input'].includes(gesture.kind)) { tempLayer.innerHTML = ''; return; }
     clearSnapHighlight();
-    if (target) {
-      gesture.snapTarget = { id:target.id, dir:'in', port:target.port };
-      const selector = `.pin[data-node="${CSS.escape(target.id)}"][data-pin="in"][data-port="${target.port}"]`;
-      const pinEl = nodeLayer.querySelector(selector);
-      if (pinEl) pinEl.classList.add('snap-target');
+    if (gesture.kind === 'wire') {
+      const a = portPos(gesture.from.id, 'out', gesture.from.port||0);
+      // Belegte Eingänge dürfen als Ziel gewählt werden: Beim Loslassen ersetzt
+      // die neue Leitung die alte. Das alte Kabel wird schon in der Vorschau rot.
+      const target = nearestInputPin(currentPointer.x, currentPointer.y, gesture.from.id, null, gesture.from, true);
+      if (target) {
+        gesture.snapTarget = { id:target.id, dir:'in', port:target.port, occupiedWireId:target.occupiedWireId||null };
+        const selector = `.pin[data-node="${CSS.escape(target.id)}"][data-pin="in"][data-port="${target.port}"]`;
+        nodeLayer.querySelector(selector)?.classList.add('snap-target');
+        if (target.occupiedWireId) wireLayer.querySelector(`g[data-wire="${CSS.escape(target.occupiedWireId)}"]`)?.querySelectorAll('.wire-base,.wire-flow').forEach(path=>path.classList.add('replacement-preview'));
+      }
+      const b = target ? {x:target.x,y:target.y} : worldPoint(currentPointer.x, currentPointer.y);
+      const mid = snap(a.x + (b.x - a.x) * .5);
+      const d = `M ${a.x} ${a.y} H ${mid} V ${b.y} H ${b.x}`;
+      const busClass=outputPortWidth(byId(gesture.from.id),gesture.from.port||0)>1?' bus-wire':'';
+      tempLayer.innerHTML = `<path class="temp-wire${busClass}" d="${d}" />${target ? `<circle class="snap-halo" cx="${b.x}" cy="${b.y}" r="11" />` : ''}`;
+      return;
     }
-    const b = target ? {x:target.x,y:target.y} : worldPoint(currentPointer.x, currentPointer.y);
-    const mid = snap(a.x + (b.x - a.x) * .5);
-    const d = `M ${a.x} ${a.y} H ${mid} V ${b.y} H ${b.x}`;
-    tempLayer.innerHTML = `<path class="temp-wire" d="${d}" />${target ? `<circle class="snap-halo" cx="${b.x}" cy="${b.y}" r="11" />` : ''}`;
+    // Kabelziehen vom Eingang zum Ausgang ist die umgekehrte Bedienrichtung,
+    // wird intern jedoch als Ausgang -> Eingang gespeichert.
+    const fixed = portPos(gesture.to.id, 'in', gesture.to.port);
+    const target = nearestOutputPin(currentPointer.x, currentPointer.y, gesture.to.id, gesture.to.id, gesture.to.port);
+    if (target) {
+      gesture.snapTarget = {id:target.id,dir:'out',port:target.port};
+      nodeLayer.querySelector(`.pin[data-node="${CSS.escape(target.id)}"][data-pin="out"][data-port="${target.port}"]`)?.classList.add('snap-target');
+      // Beim Umverdrahten von einem Eingangs-Pin wird die bisherige Leitung
+      // schon während des Hoverns rot markiert. Die alte Verbindung bleibt bis
+      // zum Loslassen vollständig erhalten.
+      const oldWire = gesture.existingWireId ? wires.find(w => w.id===gesture.existingWireId) : incomingWire(gesture.to.id,gesture.to.port);
+      const sameSource = oldWire && oldWire.from.id===target.id && (oldWire.from.port||0)===(target.port||0);
+      if (oldWire && !sameSource) markWireReplacementPreview(oldWire.id);
+    }
+    const a = target ? {x:target.x,y:target.y} : worldPoint(currentPointer.x,currentPointer.y);
+    const d = pathBetween(a,fixed);
+    const busClass=target && outputPortWidth(byId(target.id),target.port)>1?' bus-wire':'';
+    tempLayer.innerHTML = `<path class="temp-wire${busClass}" d="${d}" />${target ? `<circle class="snap-halo" cx="${a.x}" cy="${a.y}" r="11" />` : ''}`;
+  }
+  function findRewireTarget(wire, end, x=currentPointer.x, y=currentPointer.y) {
+    // Die Richtung des gegriffenen Kabelendes ist verbindlich:
+    // - Kabelstart (from) bleibt ein Ausgang und darf nur zu einem Ausgang.
+    // - Kabelende (to) bleibt ein Eingang und darf nur zu einem Eingang.
+    // Ein Drag vom belegten Eingang zu einem Ausgang würde sonst ungewollt
+    // die QUELLE des Kabels ändern. Eine neue Leitung vom Eingang aus ist
+    // ausschließlich über Shift + Ziehen (wire-from-input) möglich.
+    if (end === 'from') return nearestOutputPin(x,y,wire.to.id,wire.to.id,wire.to.port);
+    if (end === 'to') return nearestInputPin(x,y,wire.from.id,wire.id,wire.from,true);
+    return null;
   }
   function updateRewirePreview() {
     if (!gesture || gesture.kind !== 'rewire') { tempLayer.innerHTML = ''; return; }
     const wire = wires.find(w => w.id === gesture.wireId);
     if (!wire) { tempLayer.innerHTML = ''; return; }
-    const fixed = gesture.end === 'from'
-      ? portPos(wire.to.id, 'in', wire.to.port)
-      : portPos(wire.from.id, 'out', 0);
-    const target = gesture.end === 'from'
-      ? nearestOutputPin(currentPointer.x, currentPointer.y, wire.to.id)
-      : nearestInputPin(currentPointer.x, currentPointer.y, wire.from.id, wire.id);
+    const target = findRewireTarget(wire,gesture.end);
     clearSnapHighlight();
     if (target) {
-      gesture.snapTarget = { id:target.id, dir:target.dir, port:target.port };
+      gesture.snapTarget = { id:target.id, dir:target.dir, port:target.port, occupiedWireId:target.occupiedWireId||null };
       const selector = `.pin[data-node="${CSS.escape(target.id)}"][data-pin="${target.dir}"][data-port="${target.port}"]`;
-      const pinEl = nodeLayer.querySelector(selector);
-      if (pinEl) pinEl.classList.add('snap-target');
+      nodeLayer.querySelector(selector)?.classList.add('snap-target');
+      if (target.occupiedWireId) markWireReplacementPreview(target.occupiedWireId);
     }
-    const cursor = target ? {x:target.x,y:target.y} : worldPoint(currentPointer.x,currentPointer.y);
-    const a = gesture.end === 'from' ? cursor : fixed;
-    const b = gesture.end === 'from' ? fixed : cursor;
-    const d = pathBetween(a,b);
-    tempLayer.innerHTML = `<path class="temp-wire" d="${d}" />${target ? `<circle class="snap-halo" cx="${cursor.x}" cy="${cursor.y}" r="11" />` : ''}`;
+    // Ein Eingangsende kann hier nur an einen anderen Eingangs-Pin andocken.
+    // Neue Verbindungen vom Eingang zu einem Ausgang laufen ausschließlich
+    // über die separate Shift-Geste (wire-from-input).
+    const targetPoint = target ? {x:target.x,y:target.y} : worldPoint(currentPointer.x,currentPointer.y);
+    let a,b,wireSource,wirePort;
+    if (gesture.end==='from') {
+      const fixed=portPos(wire.to.id,'in',wire.to.port);
+      a=targetPoint; b=fixed;
+      wireSource=target || byId(wire.from.id); wirePort=target ? target.port : wire.from.port||0;
+    } else if (target?.dir==='out') {
+      const fixed=portPos(wire.to.id,'in',wire.to.port);
+      a=targetPoint; b=fixed;
+      wireSource=target; wirePort=target.port||0;
+    } else {
+      const fixed=portPos(wire.from.id,'out',wire.from.port||0);
+      a=fixed; b=targetPoint;
+      wireSource=byId(wire.from.id); wirePort=wire.from.port||0;
+    }
+    const d=pathBetween(a,b), busClass=outputPortWidth(wireSource,wirePort)>1?' bus-wire':'';
+    tempLayer.innerHTML=`<path class="temp-wire${busClass}" d="${d}" />${target?`<circle class="snap-halo" cx="${target.x}" cy="${target.y}" r="11" />`:''}`;
   }
   function positionInlineLabelEditor() {
     if (!inlineLabelEditor || !inlineLabelEditor.input.isConnected) return;
@@ -1234,6 +1971,9 @@
   }, true);
 
   function saveLocal(trackHistory = true, persist = true) {
+    // Solange eine kollidierende Einfügegruppe nur als rote Vorschau existiert,
+    // ist sie noch kein Schaltungszustand: weder persistieren noch historisieren.
+    if (pendingPaste) return;
     if (persist) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(makeConfig())); } catch (_) { /* private browsing / quota */ } }
     if (!trackHistory) return;
     const snapshot = historySnapshot();
@@ -1248,31 +1988,39 @@
     updateHistoryButtons();
   }
   function makeConfig() {
-    return { version: 1, nodes: nodes.map(n => ({ id:n.id,type:n.type,x:n.x,y:n.y,label:n.type==='LABEL'?'Textlabel':n.label,text:n.type==='LABEL'?labelText(n):undefined,state:!!n.state,q:!!n.q,clockWasHigh:!!n.clockWasHigh,frequency:n.type==='CLOCK'?normalizeClockFrequency(n.frequency):undefined })), wires: wires.map(w => ({ id:w.id,from:{...w.from},to:{...w.to} })), camera: { ...camera, z:snapZoom(camera.z) }, gridVisible };
+    return { version: 1, nodes: nodes.map(n => ({ id:n.id,type:n.type,x:n.x,y:n.y,label:n.type==='LABEL'?'Textlabel':n.label,text:n.type==='LABEL'?labelText(n):undefined,state:!!n.state,q:!!n.q,clockWasHigh:!!n.clockWasHigh,frequency:n.type==='CLOCK'?normalizeClockFrequency(n.frequency):undefined,phaseOffset:n.type==='CLOCK'?normalizeClockOffset(n.phaseOffset):undefined,busWidth:(n.type==='BUS_COMBINER'||n.type==='BUS_SPLITTER')?normalizeBusWidth(n.busWidth):undefined })), nodeDrawOrder:[...nodeDrawOrder], wires: wires.map(w => ({ id:w.id,from:{...w.from},to:{...w.to} })), wireDrawOrder:[...wireDrawOrder], camera: { ...camera, z:snapZoom(camera.z) }, gridVisible };
   }
   function applyConfig(raw, fit = false) {
     if (!raw || raw.version !== 1 || !Array.isArray(raw.nodes) || !Array.isArray(raw.wires)) throw new Error('Ungültige Konfiguration');
     nodes = raw.nodes.filter(n => n && TYPES[n.type] && Number.isFinite(Number(n.x)) && Number.isFinite(Number(n.y))).map(n => {
       const state=n.type==='HIGH' ? true : !!n.state;
       const frequency=n.type==='CLOCK' ? normalizeClockFrequency(n.frequency ?? 1) : undefined;
+      const phaseOffset=n.type==='CLOCK' ? normalizeClockOffset(n.phaseOffset ?? 0) : undefined;
       const legacyLabel = (n.type==='INPUT' && n.label==='Toggle Switch') ? 'Schalter' : (n.type==='PUSH' && n.label==='Push Button') ? 'Taster' : n.label;
       const componentLabel = (n.type==='HIGH' || n.type==='LOW') ? TYPES[n.type].label : n.type==='LABEL' ? TYPES.LABEL.label : String((!legacyLabel || (n.type==='INPUT' && legacyLabel==='Eingang') || (n.type==='OUTPUT' && legacyLabel==='Ausgang')) ? TYPES[n.type].label : legacyLabel);
       const text = n.type==='LABEL' ? String(n.text ?? n.label ?? TYPES.LABEL.label) : undefined;
-      return { id:String(n.id || uid('n')), type:n.type, x:snap(Number(n.x)), y:snap(Number(n.y)), label:componentLabel, text, state, q:!!n.q, clockWasHigh:!!n.clockWasHigh, frequency, clockEpoch:n.type==='CLOCK'?clockEpochForState(frequency,state):undefined, value:false };
+      const migratedNode={ id:String(n.id || uid('n')), type:n.type, x:snap(Number(n.x)), y:snap(Number(n.y)), label:componentLabel, text, state, q:!!n.q, clockWasHigh:!!n.clockWasHigh, frequency, phaseOffset, busWidth:(n.type==='BUS_COMBINER'||n.type==='BUS_SPLITTER')?normalizeBusWidth(n.busWidth):undefined, value:false };
+      if (n.type==='CLOCK') migratedNode.state=clockStateAt(migratedNode);
+      return migratedNode;
     });
     const ids = new Set(nodes.map(n => n.id));
-    wires = raw.wires.filter(w => w && w.from && w.to && ids.has(w.from.id) && ids.has(w.to.id)).filter(w => {
-      const a=byId(w.from.id), b=byId(w.to.id); return a && b && !['output','label'].includes(meta(a).kind) && meta(b).kind !== 'input' && meta(b).kind !== 'label' && Number(w.to.port) >= 0 && Number(w.to.port) < meta(b).inputs;
-    }).map(w => ({ id:String(w.id || uid('w')), from:{id:w.from.id,port:0}, to:{id:w.to.id,port:Number(w.to.port)} }));
+    const requestedOrder = Array.isArray(raw.nodeDrawOrder) ? raw.nodeDrawOrder.filter(id=>ids.has(id)) : [];
+    nodeDrawOrder = [...new Set(requestedOrder), ...nodes.map(n=>n.id).filter(id=>!requestedOrder.includes(id))];
+    wires = raw.wires.filter(w => w && w.from && w.to && ids.has(w.from.id) && ids.has(w.to.id)).map(w => ({ id:String(w.id || uid('w')), from:{id:w.from.id,port:Math.max(0,Number(w.from.port)||0)}, to:{id:w.to.id,port:Math.max(0,Number(w.to.port)||0)} })).filter(w => canConnectPorts({...w.from,dir:'out'}, {...w.to,dir:'in'}));
     const seen = new Set(); wires = wires.filter(w => { const k=w.to.id+':'+w.to.port; if(seen.has(k)) return false; seen.add(k); return true; });
+    const wireIds = new Set(wires.map(w=>w.id));
+    const requestedWireOrder = Array.isArray(raw.wireDrawOrder) ? raw.wireDrawOrder.filter(id=>wireIds.has(id)) : [];
+    wireDrawOrder = [...new Set(requestedWireOrder), ...wires.map(w=>w.id).filter(id=>!requestedWireOrder.includes(id))];
     if (raw.camera && !fit) camera = { x:Number(raw.camera.x)||0, y:Number(raw.camera.y)||0, z:snapZoom(Number(raw.camera.z)||1) };
     gridVisible = raw.gridVisible !== false; $('gridBg').style.display = gridVisible ? '' : 'none'; $('gridBtn').classList.toggle('active',gridVisible);
     clearSelection(); armedFrom = null; render(); if (fit) fitView();
   }
   function encodeConfig(config) {
-    const bytes = new TextEncoder().encode(JSON.stringify(config)); let binary = '';
-    bytes.forEach(b => binary += String.fromCharCode(b));
-    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const bytes = new TextEncoder().encode(JSON.stringify(config));
+    const chunks = [];
+    const chunkSize = 0x8000; // Unter der Argumentgrenze von String.fromCharCode bleiben.
+    for (let i=0;i<bytes.length;i+=chunkSize) chunks.push(String.fromCharCode(...bytes.subarray(i,i+chunkSize)));
+    return btoa(chunks.join('')).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   }
   function decodeConfig(value) {
     const base = value.replace(/-/g,'+').replace(/_/g,'/');
@@ -1327,7 +2075,7 @@
       const b=nodeBounds(n); points.push({x:b.left,y:b.top},{x:b.right,y:b.bottom});
     });
     wires.filter(w=>selectedWires.has(w.id)).forEach(w => {
-      points.push(portPos(w.from.id,'out',0),portPos(w.to.id,'in',w.to.port));
+      points.push(portPos(w.from.id,'out',w.from.port||0),portPos(w.to.id,'in',w.to.port));
     });
     if (!points.length) return;
     fitBounds(Math.min(...points.map(p=>p.x)),Math.min(...points.map(p=>p.y)),Math.max(...points.map(p=>p.x)),Math.max(...points.map(p=>p.y)),2.5);
@@ -1448,10 +2196,99 @@
     updateCamera(); updateStatus(); saveLocal();
   }
 
+  // Hauptmenüs: Datei, Bearbeiten und Ansicht wie in klassischen Desktop-Editoren.
+  function closeMenus() {
+    document.querySelectorAll('.menu.open').forEach(menu=>{
+      menu.classList.remove('open');
+      menu.querySelector('.menu-trigger')?.setAttribute('aria-expanded','false');
+    });
+  }
+  document.querySelectorAll('.menu-trigger').forEach(trigger=>{
+    trigger.addEventListener('click',e=>{
+      const menu=trigger.closest('.menu'), wasOpen=menu.classList.contains('open');
+      closeMenus();
+      if (!wasOpen) { menu.classList.add('open'); trigger.setAttribute('aria-expanded','true'); }
+      e.stopPropagation();
+    });
+  });
+  document.addEventListener('pointerdown',e=>{
+    if (!e.target.closest('.menu')) closeMenus();
+    if (pendingPaste && !e.target.closest('#newCircuitModal')) {
+      const nodeEl=e.target.closest && e.target.closest('[data-node]');
+      const wireEl=e.target.closest && e.target.closest('[data-wire-select]');
+      const endpointEl=e.target.closest && e.target.closest('[data-wire-id]');
+      const inside=(nodeEl && pendingPaste.ids.has(nodeEl.dataset.node)) || (wireEl && pendingPaste.wireIds?.has(wireEl.dataset.wireSelect)) || (endpointEl && pendingPaste.wireIds?.has(endpointEl.dataset.wireId));
+      if (!inside) cancelPendingPaste();
+    }
+  }, true);
+  function resetCircuit() {
+    pendingPaste=null; collisionPreviewNodeIds.clear();
+    nodes=[]; wires=[]; nodeDrawOrder=[]; wireDrawOrder=[]; clearSelection(); armedFrom=null; selectedPaletteType=null;
+    document.querySelectorAll('.palette-item.selected').forEach(btn=>btn.classList.remove('selected'));
+    camera={x:stage.clientWidth/2,y:stage.clientHeight/2,z:1};
+    render(); showToast('Neue Schaltung erstellt');
+    $('newCircuitModal').classList.remove('show');
+  }
+  function createNewCircuit() {
+    if(nodes.length || wires.length) { $('newCircuitModal').classList.add('show'); $('cancelNewCircuit').focus(); return; }
+    resetCircuit();
+  }
+  $('cancelNewCircuit').addEventListener('click',()=> $('newCircuitModal').classList.remove('show'));
+  $('confirmNewCircuit').addEventListener('click',resetCircuit);
+  $('newCircuitModal').addEventListener('click',e=>{ if(e.target===$('newCircuitModal')) $('newCircuitModal').classList.remove('show'); });
+  document.querySelectorAll('[data-menu-action]').forEach(item=>item.addEventListener('click',()=>{
+    const action=item.dataset.menuAction;
+    closeMenus();
+    switch(action) {
+      case 'new': createNewCircuit(); break;
+      case 'import': $('importFile').click(); break;
+      case 'export': exportConfig(); break;
+      case 'share': shareConfig(); break;
+      case 'undo': undo(); break;
+      case 'redo': redo(); break;
+      case 'selectAll': selectAllObjects(); break;
+      case 'cut': if(copySelection()) deleteSelection(); break;
+      case 'copy': copySelection(); break;
+      case 'paste': pasteSelection(); break;
+      case 'duplicate': duplicateSelection(); break;
+      case 'delete': deleteSelection(); break;
+      case 'grid': $('gridBtn').click(); $('menuGridCheck').textContent=gridVisible?'✓':''; break;
+      case 'zoomIn': zoomAt(camera.z+.05,stage.getBoundingClientRect().left+stage.clientWidth/2,stage.getBoundingClientRect().top+stage.clientHeight/2); break;
+      case 'zoomOut': zoomAt(camera.z-.05,stage.getBoundingClientRect().left+stage.clientWidth/2,stage.getBoundingClientRect().top+stage.clientHeight/2); break;
+      case 'fit': fitView(); break;
+      case 'fitSelection': fitSelection(); break;
+      case 'minimap': setMinimapVisible(!minimapVisible); break;
+    }
+  }));
+  $('allowOverlapsBtn').addEventListener('click',()=>{
+    setAllowNodeOverlaps(!allowNodeOverlaps);
+    showToast(allowNodeOverlaps ? 'Objektüberschneidungen sind erlaubt' : 'Objektüberschneidungen werden verhindert');
+    closeMenus();
+  });
+  setAllowNodeOverlaps(allowNodeOverlaps,false);
+  $('menuGridCheck').textContent=gridVisible?'✓':'';
+
   // Bauteile werden per Drag-and-drop aus der durchsuchbaren Bibliothek platziert.
+  // Delegierte Listener bleiben beim Filtern der Bibliothek bestehen und vermeiden
+  // das wiederholte Anlegen von Listenern auf jeder einzelnen Bauteilkarte.
+  const paletteRoot = $('paletteCategories');
+  paletteRoot.addEventListener('click', e => {
+    const button = e.target.closest && e.target.closest('.palette-item');
+    if (button && e.detail === 0) selectPaletteItem(button.dataset.type);
+  });
+  paletteRoot.addEventListener('dragstart', e => {
+    if (e.target.closest && e.target.closest('.palette-item')) e.preventDefault();
+  });
+  paletteRoot.addEventListener('pointerdown', e => {
+    const button = e.target.closest && e.target.closest('.palette-item');
+    if (!button || e.button !== 0) return;
+    e.preventDefault();
+    gesture = {kind:'palette', type:button.dataset.type, startX:e.clientX, startY:e.clientY, moved:false};
+    try { button.setPointerCapture(e.pointerId); } catch (_) {}
+  });
   renderPalette();
   $('paletteSearch').addEventListener('input', renderPalette);
-  $('gridBtn').addEventListener('click', () => { gridVisible=!gridVisible; $('gridBg').style.display=gridVisible?'':'none'; $('gridBtn').classList.toggle('active',gridVisible); saveLocal(); });
+  $('gridBtn').addEventListener('click', () => { gridVisible=!gridVisible; $('gridBg').style.display=gridVisible?'':'none'; $('gridBtn').classList.toggle('active',gridVisible); $('menuGridCheck').textContent=gridVisible?'✓':''; saveLocal(); });
   $('zoomIn').addEventListener('click', () => zoomAt(camera.z + .05, stage.getBoundingClientRect().left+stage.clientWidth/2, stage.getBoundingClientRect().top+stage.clientHeight/2));
   $('zoomOut').addEventListener('click', () => zoomAt(camera.z - .05, stage.getBoundingClientRect().left+stage.clientWidth/2, stage.getBoundingClientRect().top+stage.clientHeight/2));
   $('fitBtn').addEventListener('click', fitView);
@@ -1463,10 +2300,7 @@
   $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
   $('closeShare').addEventListener('click', () => $('shareModal').classList.remove('show'));
   $('shareModal').addEventListener('click', e => { if (e.target === $('shareModal')) $('shareModal').classList.remove('show'); });
-  $('importBtn').addEventListener('click', () => $('importFile').click());
-  $('exportBtn').addEventListener('click', exportConfig);
   $('importFile').addEventListener('change', e => { importConfigFile(e.target.files[0]); e.target.value=''; });
-  $('exportBtn').addEventListener('contextmenu', e => { e.preventDefault(); $('importFile').click(); });
 
   scene.addEventListener('wheel', e => {
     e.preventDefault(); zoomAt(camera.z + (e.deltaY < 0 ? .05 : -.05), e.clientX, e.clientY);
@@ -1492,12 +2326,19 @@
       e.preventDefault(); return;
     }
     if (e.button !== 0) return;
+    if(pendingPaste) {
+      const pendingNodeEl=e.target.closest && e.target.closest('[data-node]');
+      const pendingWireEl=e.target.closest && e.target.closest('[data-wire-select]');
+      const insidePending=(pendingNodeEl && pendingPaste.ids.has(pendingNodeEl.dataset.node)) || (pendingWireEl && pendingPaste.wireIds?.has(pendingWireEl.dataset.wireSelect));
+      if(!insidePending) cancelPendingPaste();
+    }
     const labelUnderPointer=e.target.closest && e.target.closest('[data-node]');
     if (!labelUnderPointer || byId(labelUnderPointer.dataset.node)?.type!=='LABEL') lastLabelClick=null;
 
     const pushEl = e.target.closest && e.target.closest('[data-push]');
     if (pushEl) {
       const id=pushEl.dataset.push, n=byId(id); if(!n) return;
+      promoteNode(id);
       if (e.shiftKey) selectedNodes.add(id); else if (!selectedNodes.has(id)) selectOnlyNode(id);
       n.state=true;
       gesture={kind:'push',id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY};
@@ -1509,6 +2350,7 @@
     const toggleEl = e.target.closest && e.target.closest('[data-toggle]');
     if (toggleEl) {
       const id = toggleEl.dataset.toggle, n = byId(id); if (!n) return;
+      promoteNode(id);
       if (e.shiftKey) selectedNodes.add(id); else if (!selectedNodes.has(id)) selectOnlyNode(id);
       renderNodes(); renderInspector(); updateStatus();
       gesture = {kind:'toggle', id, startX:e.clientX, startY:e.clientY, moved:false};
@@ -1517,21 +2359,34 @@
     }
 
     const wireEndEl = e.target.closest && e.target.closest('[data-wire-end]');
+    let pinEl = null;
     if (wireEndEl) {
       const wireId = wireEndEl.dataset.wireId;
       const end = wireEndEl.dataset.wireEnd;
       const wire = wires.find(w => w.id === wireId);
       if (wire && (end === 'from' || end === 'to')) {
-        // Shift + Ziehen am Kabelstart legt eine zusätzliche Verbindung vom selben Ausgang an.
+        promoteWire(wireId);
+        // Das sichtbare Kabelende hat Vorrang vor dem darunterliegenden Gatter-Pin:
+        // normal ziehen = bestehende Verbindung umstöpseln; Shift + Ziehen am Start = Abzweig.
         if (e.shiftKey && end === 'from') {
-          const sourcePin = {id:wire.from.id,dir:'out',port:0};
-          gesture = {kind:'wire',from:sourcePin,snapTarget:null}; armedFrom = sourcePin;
-          clearSelection(); renderNodes(); renderInspector(); updateStatus();
+          const sourcePin = {id:wire.from.id,dir:'out',port:wire.from.port||0};
+          gesture = {kind:'wire',from:sourcePin,snapTarget:null,pointerId:e.pointerId}; armedFrom = sourcePin;
+          clearSelection(); renderWires(); renderNodes(); renderInspector(); updateStatus();
+          try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+          updateTempWire();
+        } else if (e.shiftKey && end === 'to') {
+          // Shift + Ziehen vom bereits belegten Eingang startet ausdrücklich
+          // eine neue Verbindung. Die bestehende Leitung wird erst beim
+          // Loslassen an einem gültigen Ausgang ersetzt.
+          const targetPin={id:wire.to.id,dir:'in',port:wire.to.port};
+          gesture={kind:'wire-from-input',to:targetPin,existingWireId:wire.id,snapTarget:null,pointerId:e.pointerId};
+          armedFrom=null; clearSelection();
+          renderWires(); renderNodes(); renderInspector(); updateStatus();
           try { scene.setPointerCapture(e.pointerId); } catch(_) {}
           updateTempWire();
         } else {
           selectedNodes.clear(); selectedWires.clear(); selectedWires.add(wireId);
-          gesture = {kind:'rewire', wireId, end, snapTarget:null};
+          gesture = {kind:'rewire', wireId, end, snapTarget:null,pointerId:e.pointerId};
           renderWires(); renderNodes(); renderInspector(); updateStatus();
           try { scene.setPointerCapture(e.pointerId); } catch(_) {}
           updateRewirePreview();
@@ -1539,10 +2394,10 @@
       }
       e.preventDefault(); e.stopPropagation(); return;
     }
-
-    const pinEl = e.target.closest && e.target.closest('.pin');
+    if (!pinEl) pinEl = e.target.closest && (e.target.closest('[data-pin-hit]') || e.target.closest('.pin'));
     if (pinEl) {
       const pin = {id:pinEl.dataset.node,dir:pinEl.dataset.pin,port:Number(pinEl.dataset.port||0)};
+      promoteNode(pin.id);
       if (pin.dir === 'out') {
         gesture = {kind:'wire',from:pin,snapTarget:null}; armedFrom = pin;
         clearSelection(); renderNodes(); renderInspector(); updateStatus();
@@ -1550,20 +2405,44 @@
         updateTempWire();
       } else if (armedFrom) {
         connect(armedFrom,pin);
-      } else {
-        const id=pin.id;
-        if (e.shiftKey) selectedNodes.add(id); else selectOnlyNode(id);
+      } else if (e.shiftKey) {
+        // Shift macht den Eingang explizit zum Start einer NEUEN Verbindung.
+        // Ist er bereits belegt, bleibt die alte Leitung bis zum Loslassen
+        // erhalten und wird während des Hoverns als Ersatzkandidat markiert.
+        const existing=incomingWire(pin.id,pin.port);
+        gesture={kind:'wire-from-input',to:pin,existingWireId:existing?.id||null,snapTarget:null,pointerId:e.pointerId};
+        clearSelection();
         renderNodes(); renderInspector(); updateStatus();
-        const n=byId(id);
-        const origins = new Map([...selectedNodes].map(nodeId => { const item=byId(nodeId); return [nodeId,{x:item.x,y:item.y}]; }).filter(([,v])=>!!v));
-        gesture={kind:'node',id,startX:e.clientX,startY:e.clientY,origins,moved:false,toggleCandidate:false};
         try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+        updateTempWire();
+      } else {
+        const existing=incomingWire(pin.id,pin.port);
+        if (existing) {
+          // Ohne Shift bedeutet ein Drag von einem belegten Eingang IMMER:
+          // das bestehende Kabelende umstecken. Die Eingangsseite bleibt
+          // erhalten; ein Ausgang kann hier niemals als Ziel dienen.
+          promoteWire(existing.id);
+          selectedNodes.clear(); selectedWires.clear(); selectedWires.add(existing.id);
+          gesture={kind:'rewire',wireId:existing.id,end:'to',snapTarget:null,pointerId:e.pointerId};
+          renderWires(); renderNodes(); renderInspector(); updateStatus();
+          try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+          updateRewirePreview();
+        } else {
+          const id=pin.id;
+          selectOnlyNode(id);
+          renderNodes(); renderInspector(); updateStatus();
+          // Ein unverbundener Eingangspin kann direkt als Ziehstart dienen.
+          // Ohne tatsächliche Bewegung bleibt es bei der normalen Objektauswahl.
+          gesture={kind:'input-wire-candidate',to:pin,startX:e.clientX,startY:e.clientY,moved:false,pointerId:e.pointerId};
+          try { scene.setPointerCapture(e.pointerId); } catch(_) {}
+        }
       }
       e.preventDefault(); e.stopPropagation(); return;
     }
     const wireEl = e.target.closest && e.target.closest('[data-wire-select]');
     if (wireEl) {
       const id=wireEl.dataset.wireSelect;
+      promoteWire(id);
       if (e.shiftKey) selectedWires.add(id);
       else if (!selectedWires.has(id) || selectedNodes.size) selectOnlyWire(id);
       renderWires(); renderNodes(); renderInspector(); updateStatus();
@@ -1574,11 +2453,12 @@
     const nodeEl = e.target.closest && e.target.closest('[data-node]');
     if (nodeEl) {
       const id=nodeEl.dataset.node, n=byId(id); if (!n) return;
+      promoteNode(id);
       if (e.shiftKey) selectedNodes.add(id);
       else if (!selectedNodes.has(id)) selectOnlyNode(id);
       renderNodes(); renderInspector(); updateStatus();
       const origins = new Map([...selectedNodes].map(nodeId => { const item=byId(nodeId); return [nodeId,{x:item.x,y:item.y}]; }).filter(([,v])=>!!v));
-      gesture={kind:'node',id,startX:e.clientX,startY:e.clientY,origins,moved:false,toggleCandidate:false};
+      gesture={kind:'node',id,startX:e.clientX,startY:e.clientY,origins,moved:false};
       try { scene.setPointerCapture(e.pointerId); } catch(_) {}
       e.preventDefault(); return;
     }
@@ -1595,6 +2475,10 @@
   function cancelActiveGesture() {
     const active=gesture;
     gesture=null; lastLabelClick=null;
+    if (active?.kind==='node' && active.moved && active.origins) {
+      active.origins.forEach((origin,id)=>{ const n=byId(id); if(n){n.x=origin.x;n.y=origin.y;} });
+      render(false,false);
+    }
     if (active?.kind==='push') {
       const n=byId(active.id);
       if (n && n.state) { n.state=false; renderLiveSimulation(); saveLocal(); }
@@ -1618,7 +2502,8 @@
       const r=stage.getBoundingClientRect();
       if (gesture.moved && e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom) {
         const p=worldPoint(e.clientX,e.clientY);
-        const preview={id:'__palette_preview__',type:gesture.type,x:snap(p.x),y:snap(p.y),label:TYPES[gesture.type].label,state:false,value:false};
+        const preview={id:'__palette_preview__',type:gesture.type,x:snap(p.x),y:snap(p.y),label:TYPES[gesture.type].label,state:false,value:false,busWidth:4};
+        preview.invalidPlacement=!allowNodeOverlaps && !!findPlacementCollision([preview],nodes);
         tempLayer.innerHTML=nodeMarkup(preview,true);
       } else tempLayer.innerHTML='';
       return;
@@ -1632,7 +2517,16 @@
       if (n && n.state!==pressed) { n.state=pressed; renderLiveSimulation(); }
       return;
     }
-    if (gesture.kind==='wire') { updateTempWire(); return; }
+    if (gesture.kind==='input-wire-candidate') {
+      if (Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)>4) {
+        const to=gesture.to;
+        const existing=incomingWire(to.id,to.port);
+        gesture={kind:'wire-from-input',to,existingWireId:existing?.id||null,pointerId:e.pointerId};
+        updateTempWire();
+      }
+      return;
+    }
+    if (gesture.kind==='wire' || gesture.kind==='wire-from-input') { updateTempWire(); return; }
     if (gesture.kind==='rewire') { updateRewirePreview(); return; }
     if (gesture.kind==='pan') {
       const dx=e.clientX-gesture.startX, dy=e.clientY-gesture.startY;
@@ -1656,7 +2550,8 @@
           n.x=origin.x+gx; n.y=origin.y+gy;
           const el=nodeLayer.querySelector(`[data-node="${CSS.escape(n.id)}"]`); if(el) el.setAttribute('transform',`translate(${n.x} ${n.y})`);
         });
-        renderWires(); updateMinimap();
+        renderWires();
+        updateCollisionPreviewForMove(new Set(gesture.origins.keys()));
       }
     }
   });
@@ -1690,7 +2585,7 @@
       return;
     }
     if (done.kind==='wire') {
-      const snapped = nearestInputPin(e.clientX,e.clientY,done.from.id);
+      const snapped = nearestInputPin(e.clientX,e.clientY,done.from.id,null,done.from,true);
       const dest = snapped ? {id:snapped.id,dir:'in',port:snapped.port} : clientPinAt(e.clientX,e.clientY);
       clearSnapHighlight();
       if (dest && dest.dir==='in') connect(done.from,dest);
@@ -1698,24 +2593,68 @@
       else { armedFrom=done.from; showToast('Ausgang gewählt – zu einem Eingang ziehen oder Eingang anklicken'); }
       tempLayer.innerHTML=''; return;
     }
+    if (done.kind==='input-wire-candidate') return;
+    if (done.kind==='wire-from-input') {
+      const target=nearestOutputPin(e.clientX,e.clientY,done.to.id,done.to.id,done.to.port);
+      clearSnapHighlight(); tempLayer.innerHTML='';
+      if (target) {
+        // connect() entfernt eine eventuell vorhandene Eingangsverbindung und
+        // fügt die neue in einem einzigen historisierten Schritt ein. Identische
+        // Verbindungen werden intern als No-op erkannt.
+        connect(target,{id:done.to.id,dir:'in',port:done.to.port});
+      } else showToast('Kein passender Ausgangs-Pin getroffen');
+      return;
+    }
     if (done.kind==='rewire') {
       const wire = wires.find(w => w.id === done.wireId);
-      const target = done.end === 'from'
-        ? nearestOutputPin(e.clientX,e.clientY,wire?.to.id)
-        : nearestInputPin(e.clientX,e.clientY,wire?.from.id,done.wireId);
+      const target = wire ? findRewireTarget(wire,done.end,e.clientX,e.clientY) : null;
       clearSnapHighlight(); tempLayer.innerHTML='';
       if (wire && target) {
-        if (done.end === 'from' && target.dir === 'out') wire.from = {id:target.id,port:0};
-        else if (done.end === 'to' && target.dir === 'in') wire.to = {id:target.id,port:target.port};
-        else { render(); showToast('Dieser Pin ist kein passendes Kabelende'); return; }
-        render(); showToast('Kabelende umplatziert');
+        if (done.end==='from' && target.dir==='out') {
+          const same=target.id===wire.from.id && (target.port||0)===(wire.from.port||0);
+          if (same) { render(false,false); return; }
+          wire.from = {id:target.id,port:target.port||0};
+          render(); showToast('Kabelstart umplatziert');
+        } else if (done.end==='to' && target.dir==='in') {
+          const same=target.id===wire.to.id && target.port===wire.to.port;
+          if (same) { render(false,false); return; }
+          const occupied=incomingWire(target.id,target.port);
+          const displaced=occupied && occupied.id!==wire.id ? occupied.id : null;
+          if (displaced) { wires=wires.filter(item=>item.id!==displaced); wireDrawOrder=wireDrawOrder.filter(id=>id!==displaced); }
+          wire.to = {id:target.id,port:target.port};
+          render(); showToast(displaced ? 'Vorherige Verbindung ersetzt · Kabel umgesteckt' : 'Kabelende umplatziert');
+        } else {
+          // Sicherheitsnetz: selbst bei einem veralteten/unerwarteten
+          // Hit-Test darf niemals das falsche Kabelende verändert werden.
+          render(false,false); showToast('Dieser Pin ist kein passendes Kabelende');
+        }
       } else {
-        render(); showToast('Kein passender freier Ziel-Pin getroffen');
+        render(); showToast('Kein passender Ziel-Pin getroffen');
       }
       return;
     }
     if (done.kind==='node') {
-      if (done.moved) { lastLabelClick=null; render(); return; }
+      if (done.moved) {
+        lastLabelClick=null;
+        const movedIds=new Set(done.origins.keys());
+        const movedNodes=nodes.filter(n=>movedIds.has(n.id));
+        const collisions=allowNodeOverlaps?new Set():collisionCandidateIds(movedNodes,nodes.filter(n=>!movedIds.has(n.id)));
+        if(collisions.size) {
+          if (pendingPaste && [...pendingPaste.ids].every(id=>movedIds.has(id))) {
+            cancelPendingPaste();
+            showToast('Einfügen abgelehnt: Die Einfügegruppe würde Bauteile überschneiden');
+            return;
+          }
+          done.origins.forEach((origin,id)=>{ const n=byId(id); if(n){n.x=origin.x;n.y=origin.y;} });
+          collisionPreviewNodeIds=new Set();
+          render();
+          showToast('Bewegung abgelehnt: Bauteile würden sich überschneiden');
+          return;
+        }
+        if(pendingPaste && [...pendingPaste.ids].every(id=>movedIds.has(id))) { pendingPaste=null; collisionPreviewNodeIds.clear(); showToast('Einfügegruppe an freier Stelle platziert'); }
+        else collisionPreviewNodeIds.clear();
+        render(); return;
+      }
       const clickedNode=byId(done.id);
       if (clickedNode?.type==='LABEL') {
         const now=performance.now();
@@ -1751,10 +2690,18 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) cancelActiveGesture(); });
 
   window.addEventListener('keydown', e => {
-    if (e.key==='Escape') { cancelActiveGesture(); armedFrom=null; $('shareModal').classList.remove('show'); }
+    if (e.key==='Escape') { cancelActiveGesture(); if(pendingPaste) cancelPendingPaste(); armedFrom=null; $('shareModal').classList.remove('show'); $('newCircuitModal').classList.remove('show'); closeMenus(); }
+    if ($('shareModal').classList.contains('show') || $('newCircuitModal').classList.contains('show')) return;
     if (editingTarget()) return;
     const mod=e.ctrlKey||e.metaKey;
-    if (mod && e.key.toLowerCase()==='s') { e.preventDefault(); shareConfig(); }
+    if (e.altKey && !mod && e.key.toLowerCase()==='n') { e.preventDefault(); createNewCircuit(); return; }
+    // Strg+N ist in Browsern global für ein neues Browserfenster reserviert und kann
+    // von einer Webseite nicht zuverlässig überschrieben werden. Alt+N ist die App-Alternative.
+    if (mod && e.key.toLowerCase()==='n') { e.preventDefault(); showToast('Neue Schaltung: Alt + N oder Datei → Neue Schaltung'); return; }
+    if (!mod && !e.altKey && (e.key==='+' || e.code==='NumpadAdd' || (e.key==='=' && e.shiftKey))) { e.preventDefault(); zoomAt(camera.z+.05,stage.getBoundingClientRect().left+stage.clientWidth/2,stage.getBoundingClientRect().top+stage.clientHeight/2); return; }
+    if (!mod && !e.altKey && (e.key==='-' || e.key==='−' || e.code==='NumpadSubtract')) { e.preventDefault(); zoomAt(camera.z-.05,stage.getBoundingClientRect().left+stage.clientWidth/2,stage.getBoundingClientRect().top+stage.clientHeight/2); return; }
+    if (mod && e.key.toLowerCase()==='a') { e.preventDefault(); selectAllObjects(); return; }
+    if (mod && e.key.toLowerCase()==='s') { e.preventDefault(); if(pendingPaste) cancelPendingPaste(); shareConfig(); }
     if (mod && e.key.toLowerCase()==='z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
     if (mod && e.key.toLowerCase()==='y') { e.preventDefault(); redo(); return; }
     if (mod && e.key.toLowerCase()==='c') { e.preventDefault(); copySelection(); }
@@ -1764,21 +2711,25 @@
     if (e.key==='Delete' || e.key==='Backspace') { e.preventDefault(); deleteSelection(); }
   });
   window.addEventListener('blur', () => { cancelActiveGesture(); });
+  window.addEventListener('storage', event => {
+    if (event.key !== SHARED_CLIPBOARD_KEY || !event.newValue) return;
+    const data = parseClipboardPayload(event.newValue);
+    if (data) clipboard = data;
+  });
+  // Bereits vor dem ersten Ctrl+V eine vorhandene gemeinsame Kopie verfügbar machen.
+  readSharedClipboard();
   window.addEventListener('resize', () => { applyMinimapLayout(); renderEmpty(); updateMinimap(); if(inlineLabelEditor) positionInlineLabelEditor(); });
+  setMinimapVisible(minimapVisible,false);
   function tickSimulation() {
     const now=performance.now();
     let changed=false;
     for (const n of nodes) {
       if (n.type!=='CLOCK') continue;
-      const frequency=normalizeClockFrequency(n.frequency);
-      if (!Number.isFinite(n.clockEpoch)) n.clockEpoch=clockEpochForState(frequency,!!n.state,now);
-      const period=1000/frequency;
-      const phase=((now-n.clockEpoch)%period+period)%period;
-      const nextState=phase >= period/2;
+      const nextState=clockStateAt(n,now);
       if (!!n.state!==nextState) { n.state=nextState; changed=true; }
     }
-    if (changed) renderLiveSimulation();
-    updateClockNeedles(now);
+    if (changed) renderLiveSimulation(now);
+    else updateClockNeedles(now);
   }
   window.setInterval(tickSimulation, 10);
   window.addEventListener('hashchange', () => { try { const cfg=configFromHash(); if(cfg) { applyConfig(cfg); showToast('Schaltung aus URL geladen'); } } catch(e) { showToast('Der Link enthält keine gültige Schaltung'); } });
@@ -1791,7 +2742,7 @@
       if (saved) applyConfig(JSON.parse(saved));
       else { camera={x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}; render(); }
     }
-  } catch(e) { nodes=[]; wires=[]; camera={x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}; render(); showToast('Gespeicherte Konfiguration konnte nicht geladen werden'); }
+  } catch(e) { nodes=[]; wires=[]; nodeDrawOrder=[]; wireDrawOrder=[]; camera={x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}; render(); showToast('Gespeicherte Konfiguration konnte nicht geladen werden'); }
 })();
 
 </script>
