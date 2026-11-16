@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
-<title>GatterLab V084</title>
+<title>GatterLab V089</title>
 <style>
   :root {
     color-scheme: dark;
@@ -70,9 +70,34 @@
   .palette-search { width:100%; border:1px solid #304359; border-radius:8px; background:#0f1925; color:#e4eef8; padding:9px 10px; font:inherit; font-size:11px; outline:none; }
   .palette-search:focus { border-color:#5b9bd0; box-shadow:0 0 0 2px #5b9bd022; }
   .palette-search::placeholder { color:#74879d; }
-  .palette-section { padding: 5px 12px 10px; }
+  /* Der Kategorie-Klickbereich liegt ohne zusätzlichen Leerraum über den Karten.
+     Der Abstand zwischen Karten und der nächsten Kategorie entspricht damit dem Kartenraster. */
+  .palette-section { padding: 0 12px 7px; }
   .section-label { color: #788ba2; font-weight: 700; text-transform: uppercase; letter-spacing: .9px; font-size: 10px; padding: 8px 5px; }
-  .palette-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .palette-section-toggle { width:100%; height:24px; min-height:24px; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 6px; border:0; border-radius:6px; background:transparent; color:#788ba2; text-align:left; font-family:inherit; font-size:10px; line-height:16px; font-weight:700; letter-spacing:.9px; text-transform:uppercase; cursor:pointer; }
+  .palette-section-toggle:hover { background:#1c2a39; color:#c1d1e2; }
+  .palette-section-toggle:focus-visible { outline:2px solid var(--accent-2); outline-offset:1px; }
+  .palette-section-chevron { flex:0 0 14px; width:14px; height:14px; display:grid; place-items:center; color:#8fa4ba; font-size:13px; line-height:1; transform:translateY(-2px); transition:transform .14s ease,color .14s ease; }
+  /* Der geschlossene Chevron behält seine bereits passende Position; das offene Zeichen sitzt optisch auf der Textmitte. */
+  .palette-section-toggle[aria-expanded="true"] .palette-section-chevron { transform:translateY(-4px); }
+  .palette-section-toggle[aria-expanded="false"] .palette-section-chevron { transform:translateY(0) rotate(-90deg); }
+  .palette-section-toggle:hover .palette-section-chevron { color:#e2edf8; }
+  /* Der Inhalt jeder Kategorie bleibt im DOM. Ein animiertes Grid-Track-Paar
+     klappt unterschiedlich hohe Bauteilgruppen weich und ohne feste Höhen ein. */
+  .palette-section-content {
+    display:grid; grid-template-rows:1fr; min-height:0;
+    opacity:1; transform:translateY(0);
+    transition:grid-template-rows .24s cubic-bezier(.2,.75,.25,1),opacity .18s ease,transform .24s cubic-bezier(.2,.75,.25,1);
+    will-change:grid-template-rows,opacity;
+  }
+  .palette-section-content.is-collapsed {
+    grid-template-rows:0fr; opacity:0; transform:translateY(-3px); pointer-events:none;
+  }
+  .palette-section-content-inner { min-height:0; overflow:hidden; }
+  @media (prefers-reduced-motion:reduce) {
+    .palette-section-content,.palette-section-chevron { transition:none !important; }
+  }
+  .palette-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top:4px; }
   .palette-item { height: 78px; min-height: 78px; width:100%; border: 1px solid #2b3b50; border-radius: 9px; background: #192535; padding: 8px 7px 7px; text-align: left; cursor: grab; display: flex; flex-direction: column; justify-content: space-between; overflow:hidden; transition: border-color .15s,background .15s,transform .15s; touch-action:none; }
   .palette-item:hover { background: #223349; border-color: #4a6888; transform: translateY(-1px); }
   .palette-item.selected { background:#20364d; border-color:#67b7ff; box-shadow:inset 0 0 0 1px #67b7ff55; }
@@ -357,11 +382,14 @@
   .status-right { margin-left: auto; }
   .inspector-empty { padding: 17px 15px; color: #8294a8; font-size: 11px; line-height: 1.55; }
   .inspector-card { margin: 8px 12px; padding: 12px; border: 1px solid #2a3b50; border-radius: 10px; background: #192535; }
-  .inspector-title { display:block; box-sizing:border-box; font-size:14px; line-height:20px; min-height:20px; font-weight:750; margin:0 0 2px; padding:0; }
+  .inspector-title { display:block; box-sizing:border-box; font-size:14px; line-height:20px; min-height:20px; font-weight:750; margin:0 0 2px; padding:0; white-space:pre-wrap; overflow-wrap:anywhere; }
   .inspector-title.editable-name { cursor:text; border-radius:5px; padding:0 4px; margin-left:-4px; }
+  .inspector-title.editing-name { position:relative; color:transparent; user-select:none; }
   .inspector-multi-count { display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:0; margin:0 0 7px; color:#8297af; font-size:10px; line-height:14px; text-align:left; text-transform:uppercase; letter-spacing:.9px; }
   .inspector-title.editable-name:hover { background:#223449; outline:1px solid #38536d; }
-  .inspector-name-input { width:100%; min-width:0; padding:4px 6px; margin:-2px 0 1px; border:1px solid #5ba9e8; border-radius:6px; outline:2px solid #5ba9e833; background:#0f1925; color:#eaf4ff; font-family:inherit; font-size:14px; font-weight:700; line-height:1.35; }
+  .inspector-title.editing-name:hover { background:transparent; outline:none; }
+  /* Das Feld liegt über dem unveränderten Titelplatz und verändert dessen Layoutmaße nicht. */
+  .inspector-name-input { position:absolute; inset:0; display:block; box-sizing:border-box; width:100%; height:100%; min-width:0; min-height:0; margin:0; padding:0 3px; border:1px solid #5ba9e8; border-radius:5px; outline:2px solid #5ba9e833; background:#0f1925; color:#eaf4ff; font-family:inherit; font-size:inherit; font-weight:inherit; line-height:inherit; letter-spacing:inherit; appearance:none; -webkit-appearance:none; }
   .led-color-section { margin-top:10px; }
   .led-color-property { width:100%; font-size:11px; }
   .led-color-property .prop-value { margin-left:auto; text-align:right; }
@@ -407,7 +435,12 @@
   .modal { width:min(520px,100%); background:#172332; border:1px solid #3a5069; border-radius:14px; box-shadow:var(--shadow); padding:18px; text-align:justify; text-justify:inter-word; }
   .modal h2 { font-size:16px; margin:0 0 5px; text-align:left; }
   .modal p { color:#9aadc2; font-size:11px; margin:0 0 12px; text-align:justify; text-justify:inter-word; }
-  .share-url { width:100%; padding:10px; background:#0e1722; border:1px solid #34485e; color:#cde4f8; border-radius:8px; font:11px ui-monospace,monospace; }
+  .share-modal { width:min(680px,100%); max-height:calc(100% - 24px); display:flex; flex-direction:column; }
+  .modal.share-modal { overflow:hidden; }
+  .share-modal .modal-actions { flex:0 0 auto; }
+  /* Das native Resize-Griffchen bleibt erhalten. Als nicht schrumpfendes Flex-Element
+     entspricht die tatsächlich sichtbare Höhe direkt der vom Browser gesetzten Textarea-Höhe. */
+  .share-url { display:block; flex:0 0 auto; width:100%; height:108px; min-height:78px; max-height:min(55vh,420px); padding:7px 10px; background:#0e1722; border:1px solid #34485e; color:#cde4f8; border-radius:8px; font:11px/1.5 ui-monospace,monospace; white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word; overflow-x:hidden; overflow-y:auto; scrollbar-gutter:stable; resize:vertical; }
   .modal-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:12px; text-align:left; }
   .confirm-backdrop { position:fixed; }
   .confirm-modal { width:min(430px,100%); }
@@ -518,7 +551,7 @@
   .label-font-size-input::-webkit-inner-spin-button, .label-font-size-input::-webkit-outer-spin-button { opacity:1; width:11px; height:22px; margin:0; }
   .label-align-icon path { fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; }
   .inline-label-editor::selection { background:#67b7ff66; color:transparent; }
-  .inline-label-editor { position:absolute; z-index:8; box-sizing:border-box; min-width:0; min-height:36px; padding:7px 11px; border:1px dashed #72849a; border-radius:7px; outline:2px solid #4da6ff55; background:#1b2836; color:#e6eef8; font-family:Inter,ui-sans-serif,system-ui,sans-serif; font-size:12px; font-weight:400; font-style:normal; text-decoration:none; letter-spacing:.3px; text-align:center; white-space:pre; overflow:hidden; resize:none; box-shadow:0 4px 16px #0005; }
+  .inline-label-editor { position:absolute; z-index:8; box-sizing:border-box; min-width:0; min-height:0; padding:7px 11px; border:1px dashed #72849a; border-radius:7px; outline:2px solid #4da6ff55; background:#1b2836; color:#e6eef8; font-family:Inter,ui-sans-serif,system-ui,sans-serif; font-size:12px; font-weight:400; font-style:normal; text-decoration:none; letter-spacing:.3px; text-align:center; white-space:pre; overflow:hidden; resize:none; box-shadow:0 4px 16px #0005; }
 
   @media (max-width: 980px) {
     .workspace { --left-panel-width:190px; --right-panel-width:210px; }
@@ -556,7 +589,8 @@
     .palette-top { gap:5px; }
     .palette-desc, .sidebar-note { display:none; }
     .side-head { padding:12px 9px 7px; }
-    .palette-section { padding:2px 7px 8px; }
+    .palette-section { padding:0 7px 7px; }
+    .palette-section-toggle { height:23px; min-height:23px; padding:3px 4px; font-size:9px; line-height:15px; }
     .palette-search-wrap { padding:0 7px 7px; }
     .palette-search { padding:7px 6px; font-size:10px; }
     .section-label { padding:7px 3px; font-size:9px; }
@@ -630,6 +664,8 @@
       <div class="menu" data-menu="help">
         <button class="menu-trigger" type="button" aria-haspopup="true" aria-expanded="false">Hilfe</button>
         <div class="menu-popover" role="menu">
+          <button class="menu-item" type="button" data-menu-action="helpAbout"><span class="menu-check">ⓘ</span><span>Über GatterLab</span></button>
+          <div class="menu-divider"></div>
           <button class="menu-item" type="button" data-menu-action="helpGuide"><span class="menu-check">⌂</span><span>Kurzanleitung</span></button>
           <button class="menu-item" type="button" data-menu-action="helpComponents"><span class="menu-check">◇</span><span>Bauteile &amp; Signale</span></button>
           <button class="menu-item" type="button" data-menu-action="helpShortcuts"><span class="menu-check">⌨</span><span>Tastenkürzel</span></button>
@@ -645,6 +681,7 @@
       <button class="menu-item danger" type="button" role="menuitem" data-board-tab-action="delete"><span class="menu-check">×</span><span>Löschen</span></button>
     </div>
     <div id="objectContextMenu" class="object-context-menu" role="menu" aria-label="Bauteil bearbeiten" hidden>
+      <button class="menu-item" type="button" role="menuitem" data-object-action="rename"><span class="menu-check">✎</span><span>Umbenennen</span></button>
       <button class="menu-item" type="button" role="menuitem" data-object-action="duplicate"><span class="menu-check">⧉</span><span>Duplizieren</span><span class="menu-shortcut">Strg + D</span></button>
       <button class="menu-item danger" type="button" role="menuitem" data-object-action="delete"><span class="menu-check">×</span><span>Löschen</span><span class="menu-shortcut">Entf</span></button>
     </div>
@@ -716,10 +753,10 @@
         </div>
         <div class="toast" id="toast" role="status" aria-live="polite"></div>
         <div class="modal-backdrop" id="shareModal">
-          <div class="modal">
+          <div class="modal share-modal">
             <h2>Link anzeigen</h2>
             <p>Die komplette Schaltung steckt im Link. Wer ihn öffnet, erhält denselben Aufbau inklusive aktueller Eingangszustände.</p>
-            <input class="share-url" id="shareUrl" readonly aria-label="Freigabelink" />
+            <textarea class="share-url" id="shareUrl" readonly rows="3" spellcheck="false" aria-label="Freigabelink"></textarea>
             <div class="modal-actions">
               <button class="btn" id="closeShare">Schließen</button>
               <button class="btn primary" id="copyShare">Link kopieren</button>
@@ -741,6 +778,11 @@
             <div class="help-modal-header"><h2 id="helpTitle">GatterLab – Hilfe</h2><button class="btn" id="closeHelp" type="button">Schließen</button></div>
             <p class="help-intro">Hier findest du eine Einführung in die wichtigsten Arbeitsabläufe, Bauteile und Tastenkürzel.</p>
             <div class="help-content" id="helpContent">
+              <section class="help-section" id="help-about">
+                <h3>Über GatterLab</h3>
+                <p>GatterLab ist eine interaktive Umgebung zum Entwerfen und Simulieren digitaler Logikschaltungen. Eingänge, Logikgatter, Flip-Flops und Anzeigen lassen sich auf einer Rasterfläche platzieren und über Leitungen miteinander verbinden. Die Simulation macht direkt sichtbar, wie sich Signale durch die Schaltung bewegen und welche Zustände an den Ausgängen entstehen.</p>
+                <p>GatterLab eignet sich, um Grundlagen der Digitaltechnik anschaulich zu lernen, logische Zusammenhänge auszuprobieren, Schaltungen zu testen und mit wiederverwendbaren Unterfunktionen auch größere Schaltungen übersichtlich aufzubauen.</p>
+              </section>
               <section class="help-section" id="help-guide">
                 <h3>Kurzanleitung</h3>
                 <ol>
@@ -899,7 +941,7 @@
     HIGH:     { label:'HIGH', category:'Eingabeelemente', inputs:0, kind:'input', glyph:'1', description:'Konstante logische 1 (HIGH). Die Quelle ist dauerhaft aktiv.' },
     LOW:      { label:'LOW', category:'Eingabeelemente', inputs:0, kind:'input', glyph:'0', description:'Konstante logische 0 (LOW). Die Quelle bleibt dauerhaft inaktiv.' },
     OUTPUT:   { label:'LED', category:'Ausgabeelemente', inputs:1, kind:'output', glyph:'LED', description:'Ein-Bit-Ausgang. Zeigt HIGH als leuchtende LED und LOW als dunkle LED.' },
-    DISPLAY:  { label:'n-Bit', category:'Ausgabeelemente', inputs:2, kind:'output', glyph:'nB', displayBits:2, description:'Einstellbare Mehrbit-Anzeige mit 2, 4 oder 8 Eingangsbits. Der obere Pin ist das höchstwertige Bit.' },
+    DISPLAY:  { label:'n-Bit-Anzeige', category:'Ausgabeelemente', inputs:2, kind:'output', glyph:'nB', displayBits:2, description:'Einstellbare Mehrbit-Anzeige mit 2, 4 oder 8 Eingangsbits. Der obere Pin ist das höchstwertige Bit.' },
     // Rückwärtskompatible Typen für ältere gespeicherte Schaltungen; die Palette verwendet nur DISPLAY.
     DISPLAY2: { label:'2-Bit-Digit', category:'Ausgabeelemente', inputs:2, kind:'output', glyph:'2b', displayBits:2, description:'Zwei Eingangsbits werden als Binärzahl und Dezimalwert von 0 bis 3 dargestellt. Oberer Pin ist das höchstwertige Bit.' },
     DISPLAY4: { label:'4-Bit-Digit', category:'Ausgabeelemente', inputs:4, kind:'output', glyph:'4b', displayBits:4, description:'Vier Eingangsbits werden als Binärzahl und Dezimalwert von 0 bis 15 dargestellt. Oberer Pin ist das höchstwertige Bit.' },
@@ -927,7 +969,7 @@
     DEMUX:    { label:'Demultiplexer', category:'Kombinationslogik', inputs:2, kind:'demux', glyph:'DEMUX', dataOutputs:2, description:'Wählt über die Auswahlleitungen genau einen von n Datenausgängen und leitet ihn zum gemeinsamen Eingang.' }
   };
   const LED_COLORS = [
-    {id:'green',label:'Grün',fill:'#5ce4a7',stroke:'#b9ffdc'},
+    {id:'green',label:'Grün',fill:'#42c98f',stroke:'#91e8bc'},
     {id:'red',label:'Rot',fill:'#ff6475',stroke:'#ffd0d6'},
     {id:'blue',label:'Blau',fill:'#2463eb',stroke:'#a9c4ff'},
     {id:'yellow',label:'Gelb',fill:'#fff200',stroke:'#fffca8'},
@@ -939,7 +981,7 @@
     {id:'amber',label:'Amber',fill:'#a85b00',stroke:'#ffd29a'}
   ];
   const DEFAULT_LED_COLOR = 'green';
-  const DEFAULT_ARROW_COLOR = 'blue';
+  const DEFAULT_ARROW_COLOR = 'green';
   const ledColorById = id => LED_COLORS.find(color=>color.id===id) || LED_COLORS[0];
   const normalizeLedColor = id => LED_COLORS.some(color=>color.id===id) ? id : DEFAULT_LED_COLOR;
   const CATEGORY_ORDER = ['Eingabeelemente','Ausgabeelemente','Logikgatter','Kombinationslogik','Flip-Flops','Sonstiges'];
@@ -956,6 +998,13 @@
   const PALETTE_ENTRIES = CATEGORY_ORDER.flatMap(category =>
     (CATEGORY_TYPE_ORDER[category] || []).filter(type => TYPES[type]).map(type => ({type, ...TYPES[type]}))
   );
+  const PALETTE_COLLAPSED_KEY='gatterlab-palette-collapsed-v1';
+  let collapsedPaletteCategories=new Set();
+  try {
+    const stored=JSON.parse(localStorage.getItem(PALETTE_COLLAPSED_KEY)||'[]');
+    if(Array.isArray(stored))collapsedPaletteCategories=new Set(stored.filter(value=>typeof value==='string'));
+  } catch(_) {}
+  function savePaletteCollapseState(){try{localStorage.setItem(PALETTE_COLLAPSED_KEY,JSON.stringify([...collapsedPaletteCategories]));}catch(_) {}}
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const $ = id => document.getElementById(id);
   const workspace=$('workspace');
@@ -994,7 +1043,9 @@
   let undoHistory = [], undoIndex = -1, minimapTransform = { scale: 1, offsetX: 8, offsetY: 8 }, minimapGesture = null;
   let minimapUiGesture = null, inlineLabelEditor = null, lastLabelClick = null, selectedPaletteType = null;
   let wireRouteCache = new Map(), insertPreviewWireId = null, shiftKeyHeld = false;
-  let suppressObjectContextMenuUntil=0;
+  let suppressObjectContextMenuUntil=0,objectContextNodeId=null;
+  const activeTouchPointers=new Map();
+  let touchLongPress=null,touchPinch=null;
   const MINIMAP_LAYOUT_KEY = 'gatterlab-minimap-layout-v1';
   const MINIMAP_VISIBLE_KEY = 'gatterlab-minimap-visible-v1';
   // Tabübergreifende Zwischenablage: localStorage/BroadcastChannel für Tabs
@@ -1039,6 +1090,16 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const byId = id => nodes.find(n => n.id === id);
   const normalizeDisplayBits = value => [2,4,8].includes(Number(value)) ? Number(value) : 2;
+  function isDefaultDisplayNodeName(node){
+    if(node?.type!=='DISPLAY')return false;
+    const width=normalizeDisplayBits(node.displayBits),label=node.label;
+    return label==null || label==='n-Bit' || label==='n-Bit-Anzeige' || label===`${width}-Bit` || label===`${width}-Bit-Anzeige`;
+  }
+  function displayNodeName(node){
+    const width=normalizeDisplayBits(node?.displayBits);
+    const defaultName=`${width}-Bit-Anzeige`;
+    return isDefaultDisplayNodeName(node)?defaultName:String(node?.label??defaultName);
+  }
   const normalizeBufferDelay = value => { const n=Number(value); return Math.round(Math.max(.1,Math.min(2,Number.isFinite(n)?n:1))*10)/10; };
   const formatBufferDelay = value => `${normalizeBufferDelay(value).toFixed(1).replace('.',',')} s`;
   const meta = n => {
@@ -1115,12 +1176,13 @@
     menu.style.top=`${Math.max(8,Math.min(clientY,window.innerHeight-rect.height-8))}px`;
     if(focusSelector)menu.querySelector(focusSelector)?.focus({preventScroll:true});
   }
-  function closeObjectContextMenu(){const menu=$('objectContextMenu');if(menu)menu.hidden=true;}
+  function closeObjectContextMenu(){const menu=$('objectContextMenu');if(menu)menu.hidden=true;objectContextNodeId=null;}
   function openObjectContextMenu(nodeId,clientX,clientY){
     if(!byId(nodeId))return;
     closeBoardTabContextMenu();closeMinimapContextMenu();
+    objectContextNodeId=nodeId;
     if(!selectedNodes.has(nodeId)||selectedWires.size){selectOnlyNode(nodeId);render(false,false);}
-    const menu=$('objectContextMenu');placeFloatingContextMenu(menu,clientX,clientY,'[data-object-action="duplicate"]');
+    const menu=$('objectContextMenu');placeFloatingContextMenu(menu,clientX,clientY,'[data-object-action="rename"]');
   }
   function closeMinimapContextMenu(){const menu=$('minimapContextMenu');if(menu)menu.hidden=true;}
   function openMinimapContextMenu(clientX,clientY){
@@ -1243,7 +1305,9 @@
       const items=filtered.filter(item=>item.category===category);
       const showModuleGhost=category==='Unterfunktionen'&&showEmptyModulePlaceholder;
       if(!items.length&&!showModuleGhost)return;
-      html+=`<section class="palette-section"><div class="section-label">${esc(category)}</div><div class="palette-grid">`;
+      const collapsed=!query&&collapsedPaletteCategories.has(category);
+      html+=`<section class="palette-section"><button class="palette-section-toggle" type="button" data-palette-collapse="${esc(category)}" aria-expanded="${!collapsed}" title="Bereich ${collapsed?'ausklappen':'einklappen'}"><span>${esc(category)}</span><span class="palette-section-chevron" aria-hidden="true">⌄</span></button>`;
+      html+=`<div class="palette-section-content${collapsed?' is-collapsed':''}" aria-hidden="${collapsed}"${collapsed?' inert':''}><div class="palette-section-content-inner"><div class="palette-grid">`;
       if(showModuleGhost) html+='<div class="module-empty-ghost" aria-disabled="true">Es sind noch keine Unterfunktionen definiert</div>';
       items.forEach(item=>{
         const isLogicGate=item.kind==='gate';
@@ -1265,7 +1329,8 @@
         const moduleHeadClass=item.kind==='custom'?' palette-module-head':'';
         html+=`<button class="palette-item palette-item-standard${moduleCardClass}${selectedPaletteType===item.type?' selected':''}" type="button" data-type="${esc(item.type)}" title="${esc(item.description)}" ${disabled?'disabled':''}><span class="palette-standard-head${moduleHeadClass}"><span class="palette-standard-name" title="${esc(item.label)}">${esc(item.label)}</span>${countMarkup}</span><span class="palette-standard-symbol">${iconMarkup}</span><span class="palette-standard-desc" title="${esc(shortDescription)}">${esc(shortDescription)}</span></button>`;
       });
-      html+='</div></section>';
+      html+='</div></div></div>';
+      html+='</section>';
     });
     if(!html) html='<div class="palette-empty">Keine passenden Bauteile gefunden.</div>';
     $('paletteCategories').innerHTML=html; $('paletteCount').textContent=`${filtered.length} / ${entries.length}`;
@@ -2436,13 +2501,13 @@
     const previewClass = preview ? ' preview-node' : '';
     const collisionClass = (collisionPreviewNodeIds.has(n.id) || n.invalidPlacement) ? ' collision-preview' : '';
     const nodeAttrs = preview ? '' : `data-node="${esc(n.id)}"`;
-    const safeLabel = kind === 'label' ? esc(labelText(n)) : esc(n.label || m.label);
+    const safeLabel = kind === 'label' ? esc(labelText(n)) : esc(n.label??m.label);
     if(n.type==='MODULE_INPUT'){
-      return `<g class="node input-node module-terminal module-input-node${n.state?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" x="0" y="-4">${esc(n.label||'Eingang')}</text><text class="node-sub" x="0" y="13">MODUL-EINGANG</text><circle class="pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="5"/></g>`;
+      return `<g class="node input-node module-terminal module-input-node${n.state?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" xml:space="preserve" x="0" y="-4">${esc(n.label??'Eingang')}</text><text class="node-sub" x="0" y="13">MODUL-EINGANG</text><circle class="pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="5"/></g>`;
     }
     if(n.type==='MODULE_OUTPUT'){
       const wire=incomingWire(n.id,0),source=wire&&byId(wire.from.id),hot=source&&outputSignalActive(source,wire.from.port||0);
-      return `<g class="node output-node module-terminal module-output-node${hot?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" x="0" y="-4">${esc(n.label||'Ausgang')}</text><text class="node-sub" x="0" y="13">MODUL-AUSGANG</text><circle class="pin ${wire?'connected':''}" ${preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="0"`} cx="-58" cy="0" r="5"/></g>`;
+      return `<g class="node output-node module-terminal module-output-node${hot?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" xml:space="preserve" x="0" y="-4">${esc(n.label??'Ausgang')}</text><text class="node-sub" x="0" y="13">MODUL-AUSGANG</text><circle class="pin ${wire?'connected':''}" ${preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="0"`} cx="-58" cy="0" r="5"/></g>`;
     }
     if(kind==='custom'){
       const count=Math.max(m.inputs,m.outputs,1),halfH=Math.max(44,Math.abs(modulePortOffset(count,0))+30);
@@ -2459,11 +2524,11 @@
       const outputs=Array.from({length:m.outputs},(_,i)=>{const y=modulePortOffset(m.outputs,i);return `<circle class="pin ${n.portValues?.[i]?'hot':''} ${isConnected(n.id,'out',i,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="${i}"`} cx="58" cy="${y}" r="5"/>`;}).join('');
       const portDotsIn=Array.from({length:m.inputs},(_,i)=>`<circle class="module-symbol-port" cx="-22" cy="${symbolPortY(m.inputs,i)}" r="1.7"/>`).join('');
       const portDotsOut=Array.from({length:m.outputs},(_,i)=>`<circle class="module-symbol-port" cx="22" cy="${symbolPortY(m.outputs,i)}" r="1.7"/>`).join('');
-      const fullModuleName=String(n.label||m.label||'Unterfunktion');
+      const fullModuleName=String(n.label??m.label??'Unterfunktion');
       const shortModuleName=Array.from(fullModuleName).length>18?Array.from(fullModuleName).slice(0,17).join('')+'…':fullModuleName;
       return `<g class="node custom-module-node${selectedClass}${marqueeClass}${activeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-52" y="${-halfH}" width="104" height="${halfH*2}" rx="11"/>
-        <text class="node-title module-instance-title" x="0" y="${-halfH+13}" style="font-size:9px">${esc(shortModuleName)}</text><title>${esc(fullModuleName)}</title>
+        <text class="node-title module-instance-title" xml:space="preserve" x="0" y="${-halfH+13}" style="font-size:9px">${esc(shortModuleName)}</text><title>${esc(fullModuleName)}</title>
         <g class="module-symbol-routes">${inputRoutes}${outputRoutes}</g>
         <rect class="module-symbol-window" x="-22" y="-18" width="44" height="36" rx="5"/>
         <path class="module-symbol-window-head" d="M -22 -9 H 22"/>
@@ -2477,7 +2542,7 @@
       const count=isMux?normalizeMuxInputs(n.muxInputs):normalizeDemuxOutputs(n.demuxOutputs);
       const selectBits=selectBitCount(count),halfH=muxNodeHalfHeight(n),selected=Math.max(0,Math.min(count-1,Number(n.selectedChannel)||0));
       const selectedInputValue=isMux?n.value:(n.portValues?.[selected]??false);
-      const title=isMux?'MUX':'DEMUX';
+      const title=(n.label!=null&&n.label!==meta(n).label)?String(n.label):(isMux?'MUX':'DEMUX');
       const channelOffsets=Array.from({length:count},(_,i)=>channelPortOffset(count,i));
       // Die einzelnen Kanäle enden am gemeinsamen Knoten. Der überlappende
       // Ein-/Ausgangsabschnitt wird nur einmal gezeichnet und bleibt dadurch
@@ -2503,7 +2568,7 @@
       }).join('');
       return `<g class="node ${isMux?'mux-node':'demux-node'}${selectedClass}${marqueeClass}${activeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-44" y="${-halfH}" width="88" height="${halfH*2}" rx="8"/>
-        <text class="node-title mux-title" x="0" y="${-halfH+13}">${title} · ${count}:1</text>
+        <text class="node-title mux-title" xml:space="preserve" x="0" y="${-halfH+13}">${title} · ${count}:1</text>
         <g class="mux-routes">${routes}${commonRoute}</g>
         ${dataPins}${outputPins}${selectPins}
         <text class="node-sub mux-state" x="0" y="${halfH-8}">${selectedInputValue===true?'HIGH':'LOW'}</text>
@@ -2560,7 +2625,7 @@
       }
       return `<g class="${cls}${marqueeClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-52" y="-31" width="104" height="62" rx="11" />
-        <text class="node-title" x="-24" y="-12" style="font-size:10px">${safeLabel}</text>
+        <text class="node-title" xml:space="preserve" x="-24" y="-12" style="font-size:10px">${safeLabel}</text>
         ${face}
         <circle class="pin ${isConnected(n.id,'out',0,connectionIndex) ? 'connected' : ''} ${n.value === true ? 'hot' : ''}" ${outputAttrs} cx="58" cy="0" r="5" />
       </g>`;
@@ -2580,7 +2645,7 @@
           <rect class="body" x="-52" y="${top}" width="104" height="${bottom-top}" rx="10" />
           ${pinMarkup}
           <rect class="display-readout" x="-36" y="-18" width="72" height="36" rx="5" />
-          <text class="node-title display-bit-title" x="0" y="${top+11}" style="font-size:9px">${m.displayBits}-Bit-Anzeige</text>
+          <text class="node-title display-bit-title" xml:space="preserve" x="0" y="${top+11}" style="font-size:9px"${displayNodeName(n).length>12?' textLength="68" lengthAdjust="spacingAndGlyphs"':''}>${esc(displayNodeName(n))}</text>
           <text class="display-value" x="0" y="-4">${bitText}</text>
           <text class="node-sub display-decimal" x="0" y="11">${decimal} dez.</text>
         </g>`;
@@ -2590,7 +2655,7 @@
       return `<g class="node output-node${n.value ? ' on' : ''}${selectedClass}${marqueeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-52" y="-31" width="104" height="62" rx="11" />
         <circle class="led-indicator" cx="0" cy="-5" r="9" fill="${n.value ? ledColorById(n.ledColor).fill : '#46586b'}" stroke="${n.value ? ledColorById(n.ledColor).stroke : '#8395a9'}" stroke-width="1.5" />
-        <text class="node-title" x="0" y="16">${safeLabel}</text>
+        <text class="node-title" xml:space="preserve" x="0" y="16">${safeLabel}</text>
         <text class="node-sub led-status" x="0" y="-20">${n.value ? 'HIGH' : 'LOW'}</text>
         <circle class="pin ${incoming ? 'connected' : ''}" ${inputAttrs} cx="-58" cy="0" r="5" />
       </g>`;
@@ -2605,13 +2670,13 @@
         ? `<circle class="pin bus-pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="6" />`
         : Array.from({length:width},(_,i)=>{ const attrs=preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="${i}"`; const y=inputOffset(width,i); return `<circle class="pin ${n.portValues?.[i]?'hot':''} ${isConnected(n.id,'out',i,connectionIndex)?'connected':''}" ${attrs} cx="58" cy="${y}" r="5" /><text class="port-label" x="40" y="${y+3}">${width-1-i}</text>`; }).join('');
       const title=n.type==='BUS_COMBINER'?'Bus-Combiner':'Bus-Splitter';
-      const stateLine=`${width} BIT · ${busBits}`;
+      const stateLine=busBits;
       const busPaths=n.type==='BUS_COMBINER'
         ? Array.from({length:width},(_,i)=>{const y=inputOffset(width,i);return `<path class="bus-symbol-route" d="M -34 ${y} C -22 ${y} -18 0 -5 0"/>`;}).join('')+`<path class="bus-symbol-trunk" d="M -5 0 H 37"/>`
         : `<path class="bus-symbol-trunk" d="M -37 0 H -5"/>`+Array.from({length:width},(_,i)=>{const y=inputOffset(width,i);return `<path class="bus-symbol-route" d="M -5 0 C 9 0 12 ${y} 29 ${y}"/>`;}).join('');
       return `<g class="node bus-node${selectedClass}${marqueeClass}${activeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-50" y="${top}" width="100" height="${height}" rx="10" />
-        <text class="node-title" x="0" y="${top+15}" style="font-size:10px">${title}</text>
+        <text class="node-title" xml:space="preserve" x="0" y="${top+15}" style="font-size:10px">${safeLabel}</text>
         <g class="bus-symbol-diagram">${busPaths}</g>
         <text class="node-sub bus-live-value" x="0" y="${halfH-9}">${stateLine}</text>
         ${pins}${outputs}
@@ -2631,7 +2696,7 @@
     return `<g class="node${gateClass}${selectedClass}${marqueeClass}${activeClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
       <rect class="body" x="-50" y="${-height/2}" width="100" height="${height}" rx="10" />
       ${visualSymbol}
-      <text class="node-title" x="0" y="${isStyledLogicGate?-26:14}" ${isStyledLogicGate?'style="font-size:9px"':''}>${safeLabel}</text>
+      <text class="node-title" xml:space="preserve" x="0" y="${isStyledLogicGate?-26:14}" ${isStyledLogicGate?'style="font-size:9px"':''}>${safeLabel}</text>
       ${pinMarkup}
       <circle class="pin ${isConnected(n.id,'out',0,connectionIndex) ? 'connected' : ''}${outputHot}" ${outputAttrs} cx="58" cy="0" r="5" />
       <text class="node-sub state-line" x="0" y="${isStyledLogicGate?28.5:height/2-7}" ${isStyledLogicGate?'style="font-size:7px"':''}>${stateLine}</text>
@@ -3040,7 +3105,7 @@
           const bits = n.type === 'BUS_COMBINER'
             ? (isBusSignal(n.value) ? n.value.bits.map(v=>v?'1':'0').join('') : '0'.repeat(normalizeBusWidth(n.busWidth)))
             : (n.portValues || []).map(v=>v?'1':'0').join('');
-          value.textContent = `${normalizeBusWidth(n.busWidth)} BIT · ${bits}`;
+          value.textContent = bits;
         }
       } else {
         const stateLine = el.querySelector('.state-line');
@@ -3132,26 +3197,80 @@
     if (!node) return;
     const title=$('inspectorNodeName');
     if (!title || title.dataset.editing==='true') return;
+    const ownerNodes=nodes;
+    const originalModelLabel=node.label;
+    const originalDisplay=node.type==='DISPLAY'?displayNodeName(node):String(node.label??meta(node).label);
     const input=document.createElement('input');
     input.type='text'; input.className='inspector-name-input';
-    input.value=String(node.label || meta(node).label);
+    input.value=originalDisplay;
     input.maxLength=120; input.setAttribute('aria-label','Bauteilnamen bearbeiten');
-    title.dataset.editing='true'; title.replaceWith(input); input.focus(); input.select();
-    let finished=false;
-    const finish=commit=>{
-      if(finished) return; finished=true;
-      if(commit) {
-        const value=input.value.trim();
-        node.label=value || meta(node).label;
-        render();
-        showToast('Bauteilname geändert');
-      } else renderInspector();
+    title.dataset.editing='true'; title.classList.add('editing-name');
+    title.appendChild(input);
+    let finished=false,finishTimer=null,pendingPointerId=null;
+    const removeOutsideListeners=()=>{
+      document.removeEventListener('pointerdown',onOutsidePointerDown,true);
+      document.removeEventListener('pointerup',onOutsidePointerUp,true);
+      document.removeEventListener('pointercancel',onOutsidePointerCancel,true);
+      window.removeEventListener('blur',onWindowBlur);
     };
+    const finish=commit=>{
+      if(finished)return;
+      finished=true;
+      if(finishTimer!==null){clearTimeout(finishTimer);finishTimer=null;}
+      removeOutsideListeners();
+      const value=input.value;
+      input.remove();
+      title.classList.remove('editing-name');
+      delete title.dataset.editing;
+      if(!ownerNodes.includes(node)){
+        renderInspector();
+        return;
+      }
+      if(!commit){
+        node.label=originalModelLabel;
+        renderInspector();
+        return;
+      }
+      // Ein unveränderter Standardname bleibt weiterhin ein Metadaten-Standardwert.
+      node.label=value===originalDisplay?originalModelLabel:value;
+      render();
+      if(value!==originalDisplay)showToast('Bauteilname geändert');
+    };
+    const scheduleCommit=()=>{
+      if(finished||finishTimer!==null)return;
+      // Nicht direkt beim Blur rendern: Das Ziel des gerade ausgeführten Klicks
+      // (Schaltkreisboden, anderes Objekt, Inspector-Aktion usw.) muss erst arbeiten.
+      finishTimer=window.setTimeout(()=>{finishTimer=null;finish(true);},0);
+    };
+    const onOutsidePointerDown=event=>{
+      if(input.contains(event.target))return;
+      // Auf pointerup warten: So kann auch der anschließende Klick-Handler sein Ziel
+      // vollständig bearbeiten, bevor das Neurendern das Ziel-Element ersetzt.
+      if(pendingPointerId===null)pendingPointerId=event.pointerId;
+    };
+    const onOutsidePointerUp=event=>{
+      if(pendingPointerId!==event.pointerId)return;
+      pendingPointerId=null;
+      scheduleCommit();
+    };
+    const onOutsidePointerCancel=event=>{
+      if(pendingPointerId!==event.pointerId)return;
+      pendingPointerId=null;
+      scheduleCommit();
+    };
+    const onWindowBlur=()=>{pendingPointerId=null;scheduleCommit();};
+    document.addEventListener('pointerdown',onOutsidePointerDown,true);
+    document.addEventListener('pointerup',onOutsidePointerUp,true);
+    document.addEventListener('pointercancel',onOutsidePointerCancel,true);
+    window.addEventListener('blur',onWindowBlur);
+    input.addEventListener('input',()=>{node.label=input.value;});
     input.addEventListener('keydown',event=>{
-      if(event.key==='Enter'){event.preventDefault();event.stopPropagation();finish(true);}
+      if(event.key==='Enter'&&!event.isComposing){event.preventDefault();event.stopPropagation();finish(true);}
       else if(event.key==='Escape'){event.preventDefault();event.stopPropagation();finish(false);}
     });
-    input.addEventListener('blur',()=>finish(true));
+    input.addEventListener('blur',()=>{if(pendingPointerId===null)scheduleCommit();});
+    input.focus({preventScroll:true});
+    input.select();
   }
   function bindPushInspectorButton(button,targetNodes) {
     if(!button)return;
@@ -3498,7 +3617,7 @@
       }
       if(n.type==='OUTPUT') extra += ledColorControls([n]);
       const valueText = n.value === null ? 'Z · hochohmig' : (n.value ? '1 · HIGH' : '0 · LOW');
-      const inspectorNodeTitle=n.type==='DISPLAY'&&(!n.label||n.label==='n-Bit')?`${normalizeDisplayBits(n.displayBits)}-Bit`:String(n.label||m.label);
+      const inspectorNodeTitle=n.type==='DISPLAY'?displayNodeName(n):String(n.label??m.label);
       const inspectorSubhead=m.kind==='custom'?m.category:`${m.category} · ${m.label}`;
       const inspectorDescription=m.kind==='custom'?'Selbstdefinierte Unterfunktion':m.description;
       const showOutputRow = m.kind !== 'label' && m.kind !== 'custom' && m.kind !== 'annotation' && !(m.kind === 'output' && m.displayBits) && !['BUS_COMBINER','BUS_SPLITTER','DEMUX'].includes(n.type);
@@ -3615,7 +3734,7 @@
     const targets=(targetNodes||[]).filter(node=>node?.type==='DISPLAY');
     const changed=targets.filter(node=>normalizeDisplayBits(node.displayBits)!==nextWidth);
     if(!changed.length)return;
-    changed.forEach(node=>{node.displayBits=nextWidth;});
+    changed.forEach(node=>{node.displayBits=nextWidth;node.label=null;});
     const removed=pruneInvalidPortConnections();
     render();
     showToast(removed?`n-Bit-Anzeigen für ${changed.length} Bauteile auf ${nextWidth} Bit eingestellt · ${removed} ungültige Verbindungen entfernt`:`n-Bit-Anzeigen für ${changed.length} Bauteile auf ${nextWidth} Bit eingestellt`);
@@ -4179,6 +4298,9 @@
     input.style.lineHeight = `${labelLineHeight(node) * camera.z}px`;
     input.style.padding = `${7*camera.z}px ${11*camera.z}px`;
     input.style.borderRadius = `${7 * camera.z}px`;
+    input.style.borderWidth = `${Math.max(.35,1.6*camera.z)}px`;
+    input.style.outlineWidth = `${Math.max(.35,2*camera.z)}px`;
+    input.style.boxShadow = `0 ${4*camera.z}px ${16*camera.z}px #0005`;
   }
   function finishInlineLabelEdit(commit=true) {
     if (!inlineLabelEditor) return;
@@ -4544,6 +4666,7 @@
       case 'fitSelection': fitSelection(); break;
       case 'minimap': setMinimapVisible(!minimapVisible); break;
       case 'minimapReset': resetMinimapLayout(true); break;
+      case 'helpAbout': openHelp('help-about'); break;
       case 'helpGuide': openHelp('help-guide'); break;
       case 'helpComponents': openHelp('help-components'); break;
       case 'helpShortcuts': openHelp('help-shortcuts'); break;
@@ -4611,7 +4734,7 @@
   function createNodeRecord(type,x,y){
     const m=TYPES[type],frequency=type==='CLOCK'?1:undefined,phaseOffset=type==='CLOCK'?0:undefined;
     const initialClockState=type==='CLOCK'?clockStateAt({frequency,phaseOffset}):false;
-    const record={id:uid('n'),type,x:snap(x),y:snap(y),label:m.label,text:type==='LABEL'?m.label:undefined,state:type==='HIGH'?true:initialClockState,q:false,clockWasHigh:false,frequency,phaseOffset,arrowDirection:type==='ARROW'?'right':undefined,arrowLength:type==='ARROW'?96:undefined,arrowScale:type==='ARROW'?1.25:undefined,arrowColor:type==='ARROW'?DEFAULT_ARROW_COLOR:undefined,bufferDelay:type==='BUFFER'?1:undefined,bufferOutput:type==='BUFFER'?false:undefined,bufferLastInput:type==='BUFFER'?null:undefined,bufferQueue:type==='BUFFER'?[]:undefined,busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?4:undefined,displayBits:type==='DISPLAY'?2:undefined,muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,selectedChannel:0,portValues:type==='DEMUX'?[false,false]:undefined,ledColor:type==='OUTPUT'?DEFAULT_LED_COLOR:undefined,value:type==='HIGH'};
+    const record={id:uid('n'),type,x:snap(x),y:snap(y),label:type==='DISPLAY'?null:m.label,text:type==='LABEL'?m.label:undefined,state:type==='HIGH'?true:initialClockState,q:false,clockWasHigh:false,frequency,phaseOffset,arrowDirection:type==='ARROW'?'right':undefined,arrowLength:type==='ARROW'?96:undefined,arrowScale:type==='ARROW'?1.25:undefined,arrowColor:type==='ARROW'?DEFAULT_ARROW_COLOR:undefined,bufferDelay:type==='BUFFER'?1:undefined,bufferOutput:type==='BUFFER'?false:undefined,bufferLastInput:type==='BUFFER'?null:undefined,bufferQueue:type==='BUFFER'?[]:undefined,busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?4:undefined,displayBits:type==='DISPLAY'?2:undefined,muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,selectedChannel:0,portValues:type==='DEMUX'?[false,false]:undefined,ledColor:type==='OUTPUT'?DEFAULT_LED_COLOR:undefined,value:type==='HIGH'};
     if(m.kind==='custom'){record.moduleId=m.moduleId;record.moduleState={};record.label=m.label;}
     if(type==='MODULE_INPUT'||type==='MODULE_OUTPUT'){
       const same=nodes.filter(node=>node.type===type);record.portOrder=same.reduce((max,node)=>Math.max(max,Number(node.portOrder)||0),-1)+1;
@@ -4726,6 +4849,25 @@
   renderPalette();
   renderBoardTabs();
   $('paletteSearch').addEventListener('input', renderPalette);
+  $('paletteCategories').addEventListener('click',event=>{
+    const button=event.target.closest('[data-palette-collapse]');if(!button)return;
+    // Während einer Suche bleiben Trefferkategorien sichtbar und automatisch geöffnet.
+    if(($('paletteSearch')?.value||'').trim())return;
+    const category=button.dataset.paletteCollapse;
+    const collapsed=!collapsedPaletteCategories.has(category);
+    if(collapsed)collapsedPaletteCategories.add(category);
+    else collapsedPaletteCategories.delete(category);
+    const section=button.closest('.palette-section');
+    const content=section?.querySelector('.palette-section-content');
+    button.setAttribute('aria-expanded',String(!collapsed));
+    button.title=`Bereich ${collapsed?'ausklappen':'einklappen'}`;
+    if(content){
+      content.classList.toggle('is-collapsed',collapsed);
+      content.setAttribute('aria-hidden',String(collapsed));
+      content.toggleAttribute('inert',collapsed);
+    }
+    savePaletteCollapseState();
+  });
   $('addModuleBtn').addEventListener('click',event=>{
     createModule();
     // Der Knopf darf nach einem Mausklick nicht fokussiert bleiben:
@@ -4871,8 +5013,16 @@
   document.addEventListener('scroll',()=>{closeObjectContextMenu();closeMinimapContextMenu();},true);
   $('objectContextMenu').addEventListener('click',e=>{
     const button=e.target.closest('[data-object-action]');if(!button)return;
-    const action=button.dataset.objectAction;closeObjectContextMenu();
-    if(action==='duplicate')duplicateSelection();else if(action==='delete')deleteSelection();
+    const action=button.dataset.objectAction,targetNodeId=objectContextNodeId;closeObjectContextMenu();
+    if(action==='rename'){
+      const node=byId(targetNodeId);
+      if(node){
+        selectOnlyNode(node.id);render(false,false);
+        if(!panelVisibility.right)togglePanelVisibility('right');
+        renderInspector();
+        requestAnimationFrame(()=>beginNodeRename(node));
+      }
+    } else if(action==='duplicate')duplicateSelection();else if(action==='delete')deleteSelection();
   });
   $('minimapContextMenu').addEventListener('click',e=>{
     const button=e.target.closest('[data-minimap-action]');if(!button)return;
@@ -4966,6 +5116,38 @@
   $('shareBtn').addEventListener('click', shareConfig);
   $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
   const PATCH_LOG = [
+    {version:'V089',title:'Animierte Bauteilgruppen und Über-GatterLab-Bereich',items:[
+      'Die Bauteilkategorien in der linken Palette klappen jetzt mit einer weichen Höhen- und Transparenzanimation ein und aus. Die Animation passt sich der tatsächlichen Höhe jeder Gruppe an; der Inhalt bleibt währenddessen im DOM und wird im eingeklappten Zustand für Tastaturbedienung und Screenreader deaktiviert. Bei aktivierter Systemeinstellung „Bewegungen reduzieren“ wird die Animation abgeschaltet.',
+      'Im Menü Hilfe gibt es jetzt den Eintrag „Über GatterLab“. Der neue Abschnitt beschreibt kurz GatterLab als Umgebung zum Entwerfen und Simulieren digitaler Logikschaltungen und nennt typische Lern-, Test- und Aufbauzwecke.'
+    ]},
+    {version:'V088',title:'n-Bit-Anzeigenamen und Linkfeld-Größenänderung',items:[
+      'Der Standardname einer platzierten n-Bit-Anzeige enthält jetzt überall die vollständige Bezeichnung mit „Anzeige“: „2-Bit-Anzeige“, „4-Bit-Anzeige“ oder „8-Bit-Anzeige“. Eigenschaftenbereich, Startwert der Umbenennung und Beschriftung oben im Schaltsymbol verwenden dieselbe Namensfunktion; benutzerdefinierte Namen bleiben erhalten.',
+      'Die eigens gestaltete Ziehgriff-Lösung im Linkfenster wurde entfernt. Das Linkfeld verwendet wieder den nativen Größenänderungsgriff des Textfeldes. Es ist als nicht schrumpfendes Flex-Element eingebunden, damit die sichtbare Höhenänderung nicht durch Flex-Shrinking abgeschwächt wird.'
+    ]},
+    {version:'V087',title:'n-Bit-Anzeige, Beschriftung und Paletten-Feinschliff',items:[
+      'Das Namensfeld im Eigenschaftenbereich verwendet jetzt einen um ein Pixel angepassten Innenabstand. Dadurch liegt der Text beim Starten und Beenden der Umbenennung auf derselben horizontalen Position wie der normale Titel.',
+      'Der Bauteilname in der Palette und im Eigenschaftenbereich bei ausgewähltem Paletteneintrag lautet jetzt „n-Bit-Anzeige“.',
+      'Die Überschrift im platzierten n-Bit-Symbol zeigt jetzt denselben Objektnamen wie der Eigenschaftenbereich. Standardnamen lauten abhängig von der Breite „2-Bit“, „4-Bit“ oder „8-Bit“; individuelle Namen werden auch im Symbol angezeigt.',
+      'Beim Öffnen der Namensbearbeitung wird bei n-Bit-Anzeigen stets der aktuelle, breitenabhängige Standardname eingesetzt. Wird die Eingangsbitbreite geändert, wird ein zuvor individuell vergebener Name auf den passenden Standardnamen der neuen Breite zurückgesetzt.',
+      'Das Linkfeld besitzt jetzt einen eigenen Ziehgriff für die Höhenänderung. Die neue Höhe folgt der vertikalen Mausbewegung im Verhältnis 1:1; die native Browser-Resize-Funktion ist deaktiviert.',
+      'Der eingeklappte Kategoriepfeil verwendet wieder die vorherige, passende Position ohne vertikalen Zusatzversatz. Der nach unten zeigende Pfeil ausgeklappter Bereiche wurde separat nach oben auf die Textmitte ausgerichtet.',
+      'Zwischen der Überschrift einer Bauteilgruppe und den ersten Bauteilkarten liegt jetzt ein zusätzlicher, gleichmäßiger Abstand.'
+    ]},
+    {version:'V086',title:'Objektbenennung, Linkdialog und Zoomdarstellung verfeinert',items:[
+      'Die Namenseingabe im Eigenschaftenbereich liegt jetzt über dem bestehenden Titelplatz. Schrift- und Feldwechsel verändern die Höhe oder Position des Inspektors nicht mehr; das Eingabefeld springt beim Öffnen nicht.',
+      'Ein Klick außerhalb des Namensfeldes übernimmt die Eingabe zuverlässig, auch bei Klicks auf den leeren Schaltkreisbereich oder andere Objekte. Das Speichern wird bis nach der Zielaktion aufgeschoben, damit deren Klickbehandlung nicht verloren geht. Enter bestätigt, Escape verwirft; unveränderte Standardnamen bleiben unverändert gespeichert.',
+      'Der Dialog „Link anzeigen“ ist breiter. Das mehrzeilige Linkfeld hat geringere Innenabstände und ist der einzige scrollbare Bereich im Dialog; seine vertikale Größenänderung erzeugt keine zusätzliche Modal-Scrollbar.',
+      'Die Klickfläche der Palettenkategorien wurde vertikal kompakter gestaltet. Der Abstand zwischen Kategorie-Klickfläche und den Bauteilkarten bzw. zwischen Bereichen orientiert sich jetzt am Abstand des Kartenrasters. Der nach unten zeigende Pfeil ist optisch auf die Textmitte ausgerichtet.',
+      'Die Mindesthöhe des Textlabel-Inline-Editors wurde entfernt. Rahmen, Kontur und Schatten skalieren jetzt mit dem Zoom, damit beim starken Herauszoomen keine überstehenden Umrandungen unterhalb des tatsächlichen Textfeldes erscheinen.'
+    ]},
+    {version:'V085',title:'Farben, Objektbenennung und Touch-Bedienung',items:[
+      'Das Grün für LEDs und Pfeile wurde etwas dunkler abgestimmt. Neu eingefügte Pfeile verwenden standardmäßig Grün; vorhandene, gespeicherte Pfeilfarben bleiben erhalten.',
+      'Das Objekt-Kontextmenü enthält jetzt „Umbenennen“. Dadurch wird der Name im Eigenschaftenbereich direkt bearbeitbar. Die Eingabe übernimmt Leerzeichen und übrige Zeichen unverändert; Enter und ein Klick außerhalb übernehmen den Namen, Escape verwirft ihn.',
+      'Auf Touchgeräten öffnet ein längeres Gedrückthalten auf einem Objekt dessen Kontextmenü. Zwei Finger zoomen die Arbeitsfläche stufenlos um den Mittelpunkt der Geste.',
+      'Bus-Combiner und Bus-Splitter zeigen unter ihrem Schaltsymbol nur noch die aktuelle Bitfolge, ohne zusätzliche Bitbreitenangabe.',
+      'Der Freigabelink wird im Dialog in einem mehrzeiligen, umbrechenden Feld angezeigt. Der Linkwert selbst bleibt eine einzige Zeichenfolge und lässt sich unverändert kopieren.',
+      'Die Bauteilkategorien in der linken Palette können einzeln ein- und ausgeklappt werden. Der Zustand bleibt lokal gespeichert; während einer Suche werden passende Kategorien automatisch aufgeklappt.'
+    ]},
     {version:'V084',title:'Pfeilsymbol mit dunkler Innenfläche',items:[
       'Die ursprüngliche, gefüllte Pfeilform im Bauteilmenü wurde wiederhergestellt. Ihre Geometrie bleibt unverändert; statt der blauen Füllung verwendet sie jetzt die gemeinsame icon-fill-Darstellung der schematischen Symbole: eine dunklere Innenfläche und eine Kontur in der normalen Symbolfarbe.',
       'Das Pfeilsymbol entspricht damit in der Farbgebung dem Textlabel-Symbol. Darstellung und Eigenschaften platzierter Pfeile bleiben unverändert.'
@@ -5507,6 +5689,61 @@
     const node=nodeEl ? byId(nodeEl.dataset.node) : null;
     if (node && node.type==='LABEL') { e.preventDefault(); e.stopPropagation(); beginInlineLabelEdit(node); }
   });
+
+  function clearTouchLongPress(pointerId=null){
+    if(!touchLongPress||(pointerId!==null&&touchLongPress.pointerId!==pointerId))return;
+    clearTimeout(touchLongPress.timer);touchLongPress=null;
+  }
+  function updateTouchPinch(){
+    if(!touchPinch)return;
+    const first=activeTouchPointers.get(touchPinch.ids[0]),second=activeTouchPointers.get(touchPinch.ids[1]);
+    if(!first||!second)return;
+    const distance=Math.max(1,Math.hypot(second.x-first.x,second.y-first.y));
+    const midpoint={x:(first.x+second.x)/2,y:(first.y+second.y)/2};
+    const rect=stage.getBoundingClientRect(),z=snapZoom(touchPinch.startZoom*distance/touchPinch.startDistance);
+    camera.z=z;camera.x=midpoint.x-rect.left-touchPinch.anchorWorld.x*z;camera.y=midpoint.y-rect.top-touchPinch.anchorWorld.y*z;
+    updateCamera();updateStatus();
+  }
+  // Touch long-press opens the same object menu as a desktop right-click.
+  // A second touch interrupts the single-pointer edit and starts anchored pinch zoom.
+  scene.addEventListener('pointerdown',e=>{
+    if(e.pointerType!=='touch')return;
+    activeTouchPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(activeTouchPointers.size>=2){
+      clearTouchLongPress();
+      const ids=[...activeTouchPointers.keys()].slice(-2),a=activeTouchPointers.get(ids[0]),b=activeTouchPointers.get(ids[1]);
+      const distance=Math.max(1,Math.hypot(b.x-a.x,b.y-a.y)),midpoint={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+      touchPinch={ids,startDistance:distance,startZoom:camera.z,anchorWorld:worldPoint(midpoint.x,midpoint.y)};
+      cancelActiveGesture();closeObjectContextMenu();
+      ids.forEach(id=>{try{scene.setPointerCapture(id);}catch(_){}});
+      e.preventDefault();e.stopImmediatePropagation();return;
+    }
+    const nodeEl=e.target.closest&&e.target.closest('[data-node]');
+    if(nodeEl){
+      const nodeId=nodeEl.dataset.node,clientX=e.clientX,clientY=e.clientY,pointerId=e.pointerId;
+      touchLongPress={pointerId,nodeId,startX:clientX,startY:clientY,timer:setTimeout(()=>{
+        if(!activeTouchPointers.has(pointerId)||touchPinch)return;
+        touchLongPress=null;cancelActiveGesture();
+        suppressObjectContextMenuUntil=performance.now()+1100;
+        openObjectContextMenu(nodeId,clientX,clientY);
+      },560)};
+    }
+  },true);
+  scene.addEventListener('pointermove',e=>{
+    if(e.pointerType!=='touch'||!activeTouchPointers.has(e.pointerId))return;
+    activeTouchPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(touchLongPress&&touchLongPress.pointerId===e.pointerId&&Math.hypot(e.clientX-touchLongPress.startX,e.clientY-touchLongPress.startY)>10)clearTouchLongPress(e.pointerId);
+    if(touchPinch&&touchPinch.ids.includes(e.pointerId)){updateTouchPinch();e.preventDefault();e.stopImmediatePropagation();}
+  },true);
+  const finishTouchPointer=e=>{
+    if(e.pointerType!=='touch')return;
+    clearTouchLongPress(e.pointerId);activeTouchPointers.delete(e.pointerId);
+    if(touchPinch&&touchPinch.ids.includes(e.pointerId)){
+      touchPinch=null;saveLocal();
+    }
+  };
+  scene.addEventListener('pointerup',finishTouchPointer,true);
+  scene.addEventListener('pointercancel',finishTouchPointer,true);
 
   scene.addEventListener('pointerdown', e => {
     currentPointer = {x:e.clientX,y:e.clientY};
