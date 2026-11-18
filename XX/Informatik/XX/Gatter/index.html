@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
-<title>GatterLab V095</title>
+<title>GatterLab V111</title>
 <style>
   :root {
     color-scheme: dark;
@@ -203,6 +203,7 @@
   .board-tab.drop-after { position:relative; }
   .board-tab.drop-after::after { content:''; position:absolute; right:-4px; top:3px; bottom:3px; width:3px; border-radius:3px; background:#79c9ff; box-shadow:0 0 8px #65bfffaa; }
   .board-tab.active { color:#e5f4ff; background:#1e3c58; border-color:#37678f; }
+  .board-tab.simulating { color:#bcffe3; background:#17493b; border-color:#46c79a; box-shadow:0 0 0 1px #46c79a20; }
 .board-tab.renaming { position:relative; z-index:2; background:#263d53; border-color:#405a73; box-shadow:inset 0 0 0 1px #67b7ff66,0 0 0 1px #67b7ff22; }
 .board-tab.active.renaming { background:#2a4a66; border-color:#37678f; box-shadow:inset 0 0 0 1px #8acbfa99,0 0 0 1px #8acbfa22; }
   .board-tab-label { display:inline-block; overflow:hidden; text-overflow:ellipsis; max-width:160px; cursor:pointer; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
@@ -322,6 +323,7 @@
   .node.active-node .body { stroke: #50dba2; filter: drop-shadow(0 0 6px #45dc9c66); }
   .node.logic-unknown .body { stroke:#e6bd68 !important; stroke-dasharray:4 2; filter:drop-shadow(0 0 6px #e6bd6877); }
   .wire-base.logic-unknown { stroke:#b99758 !important; stroke-dasharray:5 4; opacity:.95; filter:drop-shadow(0 0 3px #d9b56b55); }
+  .wire-base.feedback-highlight { stroke:#ffce6f; stroke-width:3.6; filter:drop-shadow(0 0 6px #f5b95a99); }
   .node.selected .body { fill:#66502a !important; stroke:#ffd36e !important; stroke-width:2.5 !important; filter:drop-shadow(0 0 6px #ffd36e88); }
   .node.active-node.selected .body { filter:drop-shadow(0 0 4px #45dc9c55) drop-shadow(0 0 5px #ffd36e77); }
   /* Kollisionswarnung hat stets Vorrang vor der gelben Auswahlmarkierung. */
@@ -394,6 +396,20 @@
   .empty-hint-overlay .empty-hint-big { color:#92a6bc; font-size:16px; font-weight:700; line-height:1.35; }
   .empty-hint-overlay .empty-hint-small { color:#667b92; font-size:11px; line-height:1.4; }
   .statusbar { height: 29px; flex: 0 0 29px; display: flex; align-items: center; gap: 16px; padding: 0 13px; border-top: 1px solid #273547; background: #131d29; font-size: 10px; color: #8498af; }
+  .feedback-panel[hidden] { display:none !important; }
+  .feedback-list { display:flex; flex-direction:column; gap:7px; margin-top:9px; }
+  .feedback-card { display:block; width:100%; margin:0; padding:8px 9px; border:2px solid #34536c; border-radius:8px; background:#1b3042; color:#caddeb; font:inherit; text-align:left; cursor:pointer; transition:border-color .15s,background .15s; }
+  .feedback-card:hover,.feedback-card:focus-visible { border-color:#c7a86b; background:#263b4c; outline:none; }
+  .feedback-card.active { border-color:#e3bd6f; background:#253e4e; }
+  .feedback-card-title { display:block; margin-bottom:5px; color:#e2f0fb; font-size:11px; font-weight:800; line-height:1.5; }
+  .feedback-card-row { display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:1px 0; font-size:10px; line-height:1.5; }
+  .feedback-card-value { min-width:0; color:#d9e9f6; font-weight:700; text-align:right; overflow-wrap:anywhere; }
+  .feedback-card-value.warning { color:#ffe09c; }
+  .feedback-empty { padding:6px 0; color:#aec1d2; font-size:10px; line-height:1.5; }
+  .feedback-inspector { margin:11px 0 5px; padding:9px; border:1px solid #997846; border-radius:7px; background:#352f27; color:#f5d9a2; font-size:10px; line-height:1.45; text-align:center; }
+  .feedback-inspector strong,.feedback-inspector-cause { display:block; }
+  .feedback-inspector-cause { margin-top:4px; }
+  .node.feedback-highlight .body { stroke:#ffce6f !important; stroke-width:3.6px !important; filter:drop-shadow(0 0 8px #f5b95a99); }
   .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 6px; box-shadow: 0 0 7px #55e5a477; }
   .status-right { margin-left: auto; }
   .inspector-empty { padding: 17px 15px; color: #8294a8; font-size: 11px; line-height: 1.55; }
@@ -431,6 +447,12 @@
   .value-chip.logic-unknown { color:#f2d99b; background:#51452e; }
   .inspector-actions { display: flex; gap: 6px; margin-top: 12px; }
   .inspector-actions .btn { flex: 1; justify-content: center; font-size: 10px; padding: 7px 6px; }
+  /* Derselbe breite Aktionsknopf wie in V102; sein Inhalt klappt unmittelbar darunter auf. */
+  .truth-inspector-button { position:relative; display:flex; align-items:center; justify-content:center; gap:7px; width:100%; margin:11px 0 0; padding:8px 21px; border:1px solid #5484a9; border-radius:7px; background:#213d56; color:#d5eeff; font-family:inherit; font-size:11px; font-weight:700; line-height:1.3; cursor:pointer; }
+  .truth-inspector-button:hover { background:#2a526f; border-color:#84c5ed; }
+  .truth-inspector-button:focus-visible { outline:2px solid var(--accent-2); outline-offset:2px; }
+  .truth-inspector-button[aria-expanded="true"] { background:#264a63; border-color:#72b9e1; border-radius:7px; }
+  .truth-inspector-button .truth-section-chevron { position:absolute; right:7px; top:50%; margin-top:-7px; }
   .toggle-row { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#a7b7c9; font-size:11px; margin-top: 10px; }
   .switch { width: 39px; height: 22px; border: 1px solid #455a71; background: #263648; border-radius: 99px; position: relative; cursor: pointer; padding: 0; }
   .switch::after { content:""; position:absolute; width:14px; height:14px; top:3px; left:3px; border-radius:50%; background:#9aabba; transition:transform .16s,background .16s; }
@@ -443,18 +465,66 @@
      Die Höhe selbst wird per gemessenem Pixelwert animiert; flex-basis bleibt auto, damit sie nicht springt. */
   .tips.is-collapsed { height:29px; min-height:29px; flex:0 0 auto; display:flex; align-items:center; padding:0 12px; }
   .tips-toggle { width:100%; min-height:23px; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:2px 0; border:0; border-radius:5px; background:transparent; color:#c4d3e3; font-family:inherit; font-size:10px; font-weight:750; line-height:1.3; letter-spacing:.45px; text-align:left; cursor:pointer; }
+  .tips-toggle > span:first-child { white-space:nowrap; flex:0 0 auto; }
   .tips.is-collapsed .tips-toggle { height:28px; min-height:28px; align-self:stretch; padding:0; }
   .tips-toggle:hover { color:#f0f6fc; }
+  .object-context-menu [hidden] { display:none !important; }
+  [data-board-tab-action][hidden] { display:none !important; }
+  .module-sim-banner { --sim-tile-width:120px; position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:7; box-sizing:border-box; container-type:inline-size; width:min(478px,calc(100% - 28px)); max-width:calc(100% - 28px); max-height:calc(100% - 24px); overflow-x:hidden; overflow-y:auto; padding:11px 12px; border:1px solid #63dcb5; border-radius:12px; background:linear-gradient(125deg,#143b35f5,#142a37f7); box-shadow:0 8px 30px #06151ddd,0 0 0 3px #53dbad19; color:#e3fff4; font-size:11px; scrollbar-width:none; }
+  .module-sim-banner::-webkit-scrollbar { display:none; }
+  .module-sim-banner[hidden] { display:none !important; }
+  .module-sim-top { display:flex; align-items:center; gap:10px; justify-content:space-between; }
+  .module-sim-heading { display:flex; flex:1 1 auto; align-items:center; gap:7px; min-width:0; font-weight:800; letter-spacing:.2px; }
+  .module-sim-heading::before { content:''; width:8px; height:8px; flex:0 0 8px; border-radius:50%; background:#64f7b9; box-shadow:0 0 12px #64f7b9; }
+  .module-sim-title { display:block; min-width:0; max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .module-sim-controls { display:flex; align-items:center; flex:0 0 auto; gap:5px; }
+  .module-sim-icon-button { display:grid; place-items:center; box-sizing:border-box; width:27px; height:27px; padding:0; background:#245948; border:1px solid #5abb94; border-radius:7px; color:#e5fff5; cursor:pointer; font:inherit; font-size:16px; line-height:1; font-weight:800; }
+  .module-sim-icon-button:hover, .module-sim-icon-button[aria-expanded="true"] { background:#32785d; border-color:#94e9ba; }
+  .module-sim-icon-button:focus-visible { outline:2px solid #b8ffe1; outline-offset:2px; }
+  .module-sim-help { margin-top:9px; padding:9px 11px; background:#183b3b; border:1px solid #518e83; border-radius:8px; color:#d4f5ed; font-size:10px; line-height:1.5; }
+  .module-sim-help[hidden] { display:none !important; }
+  .module-sim-help strong { color:#eafff7; }
+  .module-sim-help p { margin:5px 0 0; }
+  .module-sim-ports { display:grid; grid-template-columns:minmax(0,1fr); gap:7px; padding-top:10px; }
+  .module-sim-port-row { display:grid; grid-template-columns:72px minmax(0,1fr); align-items:start; gap:8px; min-width:0; }
+  .module-sim-port-label { padding-top:7px; color:#a9d2c7; font-size:10px; font-weight:700; }
+  .module-sim-port-tiles { display:flex; flex-wrap:wrap; align-items:flex-start; gap:6px; min-width:0; }
+  /* Eingänge (anklickbar) und Ausgänge (Anzeige) benutzen dieselbe Status-Kachel. */
+  .module-sim-signal { display:inline-flex; flex:0 0 var(--sim-tile-width); width:var(--sim-tile-width); max-width:100%; min-width:0; align-items:center; justify-content:space-between; gap:7px; height:29px; box-sizing:border-box; padding:5px 8px; border:1px solid #596778; border-radius:7px; background:#2b3643; color:#d4deea; font:inherit; font-size:10px; line-height:15px; white-space:nowrap; appearance:none; }
+  .module-sim-name { display:block; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+  .module-sim-signal strong { font-size:11px; font-weight:800; color:inherit; }
+  .module-sim-signal.is-on { background:#1b5842; border-color:#5ed7a0; color:#baffdc; }
+  .module-sim-signal.is-unknown { background:#514122; border-color:#edc467; color:#ffe2a0; box-shadow:inset 0 0 0 1px #eab94f18; }
+  .module-sim-input { cursor:pointer; }
+  .module-sim-input:hover { border-color:#a6ddc5; }
+  .module-sim-output { cursor:default; }
+  .workspace.module-simulation-mode .sidebar.left .palette-item, .workspace.module-simulation-mode #inspector, .workspace.module-simulation-mode .truth-sidebar-panel { pointer-events:none; opacity:.55; }
+  .workspace.module-simulation-mode .wire-endpoint-hit, .workspace.module-simulation-mode .wire-hit, .workspace.module-simulation-mode .wire-segment-handle { pointer-events:none; }
+  .workspace.module-simulation-mode .node { cursor:default; }
+  .workspace.module-simulation-mode .node.module-input-node { cursor:pointer; }
+  /* Im Aus-Zustand behalten Modulports ihre normalen Körperfarben. Die
+     orange Kontur dient allein der Orientierung im Testmodus. */
+  .workspace.module-simulation-mode .node.module-terminal .body { stroke:#f4ad62; stroke-width:2.5; filter:drop-shadow(0 0 4px #ed9a4d55); }
+  .workspace.module-simulation-mode .node.module-input-node.on .body,
+  .workspace.module-simulation-mode .node.module-output-node.on .body { fill:#206047; }
+  @container (max-width:330px){.module-sim-port-row{grid-template-columns:minmax(0,1fr);gap:2px}.module-sim-port-label{padding-top:0}}
+  @media(max-width:660px){.module-sim-banner{top:7px;left:8px;transform:none;max-width:calc(100% - 16px);max-height:calc(100% - 14px)}.module-sim-title{max-width:140px}}
   .tips-toggle:focus-visible { outline:2px solid var(--accent-2); outline-offset:2px; }
   /* Beide Pfeilzustände sind optisch auf die Textmitte der Überschrift abgestimmt.
      Das nach unten offene Zeichen benötigt wegen seiner Glyphenform einen stärkeren
      optischen Ausgleich nach oben; das seitliche Chevron bleibt ohne Versatz. */
-  .tips-chevron { flex:0 0 14px; width:14px; height:14px; display:grid; place-items:center; color:#91a7bd; font-size:13px; line-height:1; transform:translateY(-4px); transition:transform .16s ease,color .16s ease; }
+  .tips-chevron { flex:0 0 14px; width:14px; height:14px; margin-left:auto; display:grid; place-items:center; color:#91a7bd; font-size:13px; line-height:1; transform:translateY(-4px); transition:transform .16s ease,color .16s ease; }
   .tips-toggle[aria-expanded="false"] .tips-chevron { transform:translateY(0) rotate(-90deg); }
   .tips-toggle:hover .tips-chevron { color:#e2edf8; }
   .tips-content { display:grid; grid-template-rows:1fr; opacity:1; transform:translateY(0); transition:grid-template-rows .2s cubic-bezier(.2,.75,.25,1),opacity .16s ease,transform .2s ease; }
   .tips-content.is-collapsed { grid-template-rows:0fr; opacity:0; transform:translateY(-3px); pointer-events:none; }
   .tips-content-inner { min-height:0; overflow:hidden; }
+  .feedback-panel { flex:0 0 auto; background:#141d29; }
+  /* Der Pfeil wird relativ zum Klappknopf positioniert; seine exakte
+     X-Position wird am Pfeil der Tastenkürzel gemessen. */
+  #toggleFeedbackDiagnostics { position:relative; }
+  #toggleFeedbackDiagnostics .tips-chevron { position:absolute; right:0; top:50%; margin-left:0; margin-top:-7px; }
+  .feedback-panel .tips-content-inner { max-height:min(34vh,320px); padding-bottom:3px; overflow-x:hidden; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#536f86 transparent; }
   @media (prefers-reduced-motion:reduce) { .tips,.tips-content,.tips-chevron { transition:none !important; } }
   .shortcut-table { width:100%; border-collapse:collapse; table-layout:fixed; }
   .shortcut-table td { padding:2px 0; vertical-align:middle; }
@@ -522,6 +592,47 @@
   .help-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .help-note { padding:8px 10px; border-left:2px solid #67b7ff; background:#192a3b; border-radius:0 6px 6px 0; }
   .help-modal .shortcut-table td { padding:4px 0; }
+  /* Der Abschnitt wird direkt unter dem Button innerhalb der Eigenschaftenkarte eingesetzt. */
+  .truth-sidebar-panel { display:block; width:100%; min-height:0; overflow:hidden; padding:0; border:0; background:transparent; }
+  .truth-sidebar-panel[hidden] { display:none !important; }
+  .truth-section-chevron { flex:0 0 14px; width:14px; height:14px; display:grid; place-items:center; color:#8fa4ba; font-size:13px; line-height:1; transform:translateY(-4px); transition:transform .16s ease,color .16s ease; }
+  .truth-inspector-button[aria-expanded="false"] .truth-section-chevron { transform:translateY(0) rotate(-90deg); }
+  .truth-inspector-button:hover .truth-section-chevron { color:#e2edf8; }
+  .truth-section-content { display:grid; grid-template-rows:minmax(0,1fr); opacity:1; transform:translateY(0); transition:grid-template-rows .24s cubic-bezier(.2,.75,.25,1),opacity .18s ease,transform .24s cubic-bezier(.2,.75,.25,1); }
+  .truth-section-content.is-collapsed { grid-template-rows:minmax(0,0fr); opacity:0; transform:translateY(-3px); pointer-events:none; }
+  .truth-section-content-inner { min-height:0; overflow:hidden; padding:0 1px 2px; }
+  @media (prefers-reduced-motion:reduce) { .truth-section-content,.truth-section-chevron { transition:none !important; } }
+  .truth-modal { width:100%; text-align:left; }
+  .truth-sidebar-panel .truth-switches { gap:4px; margin:9px 0 7px; }
+  .truth-sidebar-panel .truth-switch { gap:5px; padding:5px 6px; font-size:10px; }
+  .truth-sidebar-panel .truth-switch strong { width:16px; height:16px; }
+  .truth-sidebar-panel .truth-preview { margin:7px 0; padding:7px 8px; font-size:10px; }
+  .truth-sidebar-panel .truth-table-wrap { max-height:260px; }
+  .truth-sidebar-panel .truth-table th,.truth-sidebar-panel .truth-table td { min-width:31px; padding:5px 6px; font-size:10px; }
+  .truth-sidebar-panel .truth-legend { font-size:10px; }
+  .truth-modal-head { display:flex; gap:12px; align-items:center; justify-content:space-between; }
+  .truth-modal-head h2 { min-width:0; margin:0; overflow-wrap:anywhere; font-size:17px; }
+  .truth-switches { display:flex; flex-wrap:wrap; gap:7px; margin:12px 0; }
+  .truth-switch { display:inline-flex; align-items:center; gap:12px; padding:7px 10px; border:1px solid #455970; border-radius:8px; background:#243243; color:#d5e5f2; cursor:pointer; font-family:inherit; font-size:12px; font-weight:700; line-height:1.2; }
+  .truth-switch strong { display:inline-grid; place-items:center; width:19px; height:19px; border-radius:5px; background:#344558; color:#c8d6e5; }
+  .truth-switch.on { border-color:#64d7a7; background:#1a4a3b; }
+  .truth-switch.on strong { background:#26805a; color:#fff; }
+  .truth-preview { margin:10px 0; padding:10px 12px; border:1px solid #37566d; border-radius:8px; background:#142b3a; color:#e2f2ff; line-height:1.65; font-size:12px; }
+  .truth-preview strong { color:#a6ddff; }
+  .truth-table-wrap { max-height:min(43vh,380px); overflow:auto; border:1px solid #314b60; border-radius:9px; }
+  .truth-table { width:100%; border-collapse:collapse; font-size:12px; font-variant-numeric:tabular-nums; }
+  .truth-table th,.truth-table td { min-width:42px; padding:7px 8px; border-right:1px solid #263d50; border-bottom:1px solid #263d50; text-align:center; }
+  .truth-table th:last-child,.truth-table td:last-child { border-right:0; }
+  .truth-table thead th { position:sticky; top:0; z-index:1; background:#26394b; color:#e7f5ff; font-weight:800; }
+  .truth-table thead th.truth-out { background:#26394b; color:#9be8c3; }
+  .truth-table tbody tr { cursor:pointer; background:#1a2a3b; }
+  .truth-table tbody tr:hover { background:#263d50; }
+  .truth-table tbody tr.selected { background:#264b4b; box-shadow:inset 3px 0 #73dcb2; }
+  .truth-bit.on { color:#72f0b1; font-weight:800; }
+  .truth-bit.off { color:#a6b4c5; }
+  .truth-bit.unknown { color:#f8ca82; font-weight:800; }
+  .truth-legend { margin:10px 0 0; color:#9eb7c9; font-size:11px; line-height:1.5; }
+  .truth-message { margin:12px 0; padding:13px; border:1px solid #806a3b; border-radius:8px; background:#3c3426; color:#f4dfb4; font-size:12px; line-height:1.6; }
   @media (max-width:650px) {
     .help-grid { grid-template-columns:1fr; }
     .help-section { padding:10px 11px; }
@@ -564,9 +675,14 @@
   .mini-wire.mini-wire-bus-4.selected, .mini-wire.mini-wire-bus-4.marquee-preview { stroke-width:3.2; }
   .mini-wire.mini-wire-bus-8.selected, .mini-wire.mini-wire-bus-8.marquee-preview { stroke-width:3.7; }
   .mini-wire.partial-preview { stroke:#e9b978; stroke-width:2.5; stroke-dasharray:1.5 2.8; stroke-linecap:butt; }
+  .mini-wire.logic-unknown { stroke:#b99758; stroke-dasharray:4 3; }
+  .mini-wire.feedback-highlight { stroke:#ffce6f; stroke-width:2.8; filter:drop-shadow(0 0 3px #f5b95a99); }
+  .mini-wire.logic-unknown.feedback-highlight { stroke-dasharray:4 3; }
   .mini-node { fill:#25384d; stroke:#607b98; stroke-width:1.2; vector-effect:non-scaling-stroke; }
   .mini-node.hot { fill:#205942; stroke:#5ce5ae; }
   .mini-node.selected, .mini-node.marquee-preview { fill:#66502a; stroke:#ffd36e; stroke-width:1.8; filter:drop-shadow(0 0 2px #ffd36e88); }
+  .mini-node.logic-unknown { stroke:#e6bd68; stroke-dasharray:4 2; }
+  .mini-node.feedback-highlight { fill:#66502a; stroke:#ffce6f; stroke-width:2.2; filter:drop-shadow(0 0 3px #f5b95a99); }
   .mini-node.collision-preview { fill:#572832; stroke:#ff6578; stroke-width:2.2; filter:drop-shadow(0 0 3px #ff657899); }
   .minimap-viewport { fill:#70bfff18; stroke:#84caff; stroke-width:1.4; vector-effect:non-scaling-stroke; pointer-events:none; }
   .minimap-empty { fill:#8295aa; font-size:9px; text-anchor:middle; pointer-events:none; }
@@ -708,12 +824,17 @@
       </div>
     </nav>
     <div id="boardTabContextMenu" class="board-tab-context-menu" role="menu" aria-label="Schaltung bearbeiten" hidden>
+      <button class="menu-item" type="button" role="menuitem" data-board-tab-action="simulate-default"><span class="menu-check">▶</span><span>Simulieren</span></button>
       <button class="menu-item" type="button" role="menuitem" data-board-tab-action="rename"><span class="menu-check">✎</span><span>Umbenennen</span></button>
       <button class="menu-item" type="button" role="menuitem" data-board-tab-action="duplicate"><span class="menu-check">⧉</span><span>Als Unterfunktion duplizieren</span></button>
       <div class="menu-divider"></div>
       <button class="menu-item danger" type="button" role="menuitem" data-board-tab-action="delete"><span class="menu-check">×</span><span>Löschen</span></button>
     </div>
     <div id="objectContextMenu" class="object-context-menu" role="menu" aria-label="Bauteil bearbeiten" hidden>
+      <button class="menu-item" type="button" role="menuitem" data-object-action="simulate-current" hidden><span class="menu-check">▶</span><span>Simulieren · Aktuelle Belegung</span></button>
+      <button class="menu-item" type="button" role="menuitem" data-object-action="simulate-default" hidden><span class="menu-check">○</span><span>Simulieren · Leere Belegung</span></button>
+      <div class="menu-divider" data-object-sim-divider hidden></div>
+      <button class="menu-item" type="button" role="menuitem" data-object-action="truth-table" hidden><span class="menu-check">▦</span><span>Wahrheitstabelle</span></button>
       <button class="menu-item" type="button" role="menuitem" data-object-action="rename"><span class="menu-check">✎</span><span>Umbenennen</span></button>
       <button class="menu-item" type="button" role="menuitem" data-object-action="duplicate"><span class="menu-check">⧉</span><span>Duplizieren</span><span class="menu-shortcut">Strg + D</span></button>
       <button class="menu-item danger" type="button" role="menuitem" data-object-action="delete"><span class="menu-check">×</span><span>Löschen</span><span class="menu-shortcut">Entf</span></button>
@@ -752,6 +873,11 @@
         </div>
       </div>
       <div class="stage" id="stage">
+        <section class="module-sim-banner" id="moduleSimulationBanner" aria-live="polite" aria-label="Unterfunktions-Simulation" hidden>
+          <div class="module-sim-top"><div class="module-sim-heading"><span class="module-sim-title" id="moduleSimulationTitle">Simulation</span></div><div class="module-sim-controls"><button type="button" class="module-sim-icon-button" id="moduleSimulationHelpToggle" aria-label="Hilfe zum Testmodus" aria-controls="moduleSimulationHelp" aria-expanded="false" title="Wie funktioniert der Testmodus?">?</button><button type="button" class="module-sim-icon-button" id="moduleSimulationExit" aria-label="Simulation beenden" title="Simulation beenden">×</button></div></div>
+          <div class="module-sim-help" id="moduleSimulationHelp" hidden><strong>So funktioniert der Testmodus</strong><p>Klicke auf einen Eingang oder seine Kachel, um zwischen 0 und 1 zu wechseln. Die Ausgangskacheln zeigen sofort das Ergebnis.</p><p>Der Test verändert deine gespeicherte Schaltung nicht. Über ×, Esc oder einen Klick auf die freie Arbeitsfläche kehrst du zurück.</p></div>
+          <div class="module-sim-ports" id="moduleSimulationPorts"></div>
+        </section>
         <svg id="scene" xmlns="http://www.w3.org/2000/svg" aria-label="Schaltungsarbeitsfläche">
           <defs>
             <pattern id="gridPattern" width="24" height="24" patternUnits="userSpaceOnUse">
@@ -786,7 +912,7 @@
         </div>
         <div id="minimapContextMenu" class="minimap-context-menu" role="menu" aria-label="Minimap-Einstellungen" hidden>
           <button class="menu-item" type="button" role="menuitem" data-minimap-action="hide"><span class="menu-check">◌</span><span>Minimap verbergen</span></button>
-          <button class="menu-item" type="button" role="menuitem" data-minimap-action="reset"><span class="menu-check">↺</span><span>Position und Größe zurücksetzen</span></button>
+          <button class="menu-item" type="button" role="menuitem" data-minimap-action="reset"><span class="menu-check">↺</span><span>Minimap zurücksetzen</span></button>
         </div>
         <div class="toast" id="toast" role="status" aria-live="polite"></div>
         <div class="modal-backdrop" id="shareModal">
@@ -828,6 +954,8 @@
                   <li><strong>Kabel verbinden:</strong> Ziehe einen Ausgangs-Pin auf einen Eingangs-Pin. Ein gültiges Ziel wird während des Ziehens hervorgehoben. Bestehende Kabel können an ihren Endpunkten umgesteckt werden.</li>
                   <li><strong>Schaltung testen:</strong> Die Simulation läuft laufend. Schalter ändern ihren Zustand per Klick, Taster werden durch Drücken aktiviert und Clock-Bauteile erzeugen periodische Signale.</li>
                   <li><strong>Eigenschaften ansehen:</strong> Wähle ein Bauteil oder Kabel aus. Rechts erscheinen die verfügbaren Einstellungen, Zustände und Informationen.</li>
+                  <li><strong>Wahrheitstabellen lernen:</strong> Wähle ein Logikgatter aus und klicke rechts auf „Wahrheitstabelle ansehen“. Du kannst die Eingangswerte ausprobieren, ohne den Schaltkreis zu verändern. Unterfunktionen testest du stattdessen per Rechtsklick → Simulieren.</li>
+                  <li><strong>Rückkopplungen untersuchen:</strong> Sobald ein Rückkopplungskreis existiert, erscheint rechts oberhalb der essenziellen Tastenkürzel der einklappbare Bereich „Rückkopplungsdiagnose“. Ein Klick auf eine der Rückkopplungen hebt ihre Bauteile und Verbindungsleitungen auch in der Minimap hervor. Escape beendet die Untersuchung.</li>
                   <li><strong>Ansicht anpassen:</strong> Mausrad oder Plus/Minus ändern den Zoom. Ziehen mit rechter oder mittlerer Maustaste verschiebt die Arbeitsfläche. Die Minimap bietet eine zusätzliche Navigation.</li>
                   <li><strong>Schaltungen sichern:</strong> Über Datei kannst du JSON importieren oder exportieren. „Link anzeigen“ erstellt einen teilbaren Link mit dem aktuellen Schaltungsaufbau.</li>
                 </ol>
@@ -930,6 +1058,17 @@
     <aside class="sidebar right">
       <div class="side-head"><span class="side-title">Eigenschaften</span></div>
       <div id="inspector"><div class="inspector-empty">Wähle ein Bauteil oder ein Kabel auf der Arbeitsfläche aus, um Beschreibung und Signale zu sehen.</div></div>
+      <section id="truthTableModal" class="truth-sidebar-panel" role="region" aria-label="Wahrheitstabelle" hidden>
+        <div class="truth-section-content is-collapsed" id="truthTableContent" aria-hidden="true"><div class="truth-section-content-inner">
+          <div class="truth-modal"><div id="truthTableBody"></div></div>
+        </div></div>
+      </section>
+      <section id="feedbackDiagnosticsPanel" class="tips feedback-panel is-collapsed" role="region" aria-label="Rückkopplungsdiagnose" hidden>
+        <button class="tips-toggle" id="toggleFeedbackDiagnostics" type="button" aria-expanded="false" aria-controls="feedbackDiagnosticsContent"><span>Rückkopplungsdiagnose</span><span class="tips-chevron" aria-hidden="true">⌄</span></button>
+        <div class="tips-content is-collapsed" id="feedbackDiagnosticsContent" aria-hidden="true" inert><div class="tips-content-inner">
+          <div id="feedbackDiagnosticsList" class="feedback-list"></div>
+        </div></div>
+      </section>
       <div class="tips" id="essentialShortcutsPanel" aria-label="Essenzielle Tastenkürzel">
         <button class="tips-toggle" id="toggleEssentialShortcuts" type="button" aria-expanded="true" aria-controls="essentialShortcutsContent"><span>Essenzielle Tastenkürzel</span><span class="tips-chevron" aria-hidden="true">⌄</span></button>
         <div class="tips-content" id="essentialShortcutsContent" aria-hidden="false"><div class="tips-content-inner">
@@ -971,6 +1110,7 @@
   };
   const logicSignalToken = value => isLogicUnknown(value)?'X':value===null?'Z':value===true?'1':value===false?'0':isBusSignal(value)?`B${value.width}:${value.bits.map(logicSignalToken).join('')}`:String(value);
   const logicSignalText = value => isBusSignal(value)?`BUS ${value.bits.map(logicBitText).join('')}`:isLogicUnknown(value)?'? · unbestimmt':value===null?'Z · hochohmig':value===true?'1 · HIGH':value===false?'0 · LOW':'? · unbestimmt';
+  const inspectorOutputText = value => isLogicUnknown(value)?'?':logicSignalText(value);
   const logicBitText = value => isLogicUnknown(value)?'?':value===null?'Z':value===true?'1':value===false?'0':'?';
   const logicLevelText = value => isLogicUnknown(value)?'?':value===null?'Z':value===true?'HIGH':'LOW';
   const encodeLogicSignal = value => isLogicUnknown(value)?{__gatterlabLogicUnknown:true}:isBusSignal(value)?{__busSignal:true,width:value.width,bits:value.bits.map(encodeLogicSignal),value:isLogicUnknown(value.value)?{__gatterlabLogicUnknown:true}:value.value}:value;
@@ -979,6 +1119,7 @@
   const OVERLAP_STORAGE_KEY = 'gatterlab-allow-overlaps-v1';
   const WIRE_CROSS_STORAGE_KEY='gatterlab-allow-wire-object-crossings-v1';
   const GATE_SYMBOL_STYLE_STORAGE_KEY='gatterlab-gate-symbol-style-v1';
+  const TRUTH_EXPANDED_STORAGE_KEY='gatterlab-truth-tables-expanded-v1';
   const GATE_SYMBOL_STYLE_IDS=new Set(['international','english','german']);
   let gateSymbolStyle='international';
   try {
@@ -1082,6 +1223,9 @@
   const minimapWireLayer = $('minimapWireLayer'), minimapNodeLayer = $('minimapNodeLayer'), minimapViewport = $('minimapViewport');
   let nodes = [], wires = [], nodeDrawOrder = [], wireDrawOrder = [], camera = { x: 0, y: 0, z: 1 };
   let projectName='Hauptschaltkreis', activeModuleId=null, moduleDefinitions=[], pendingDeleteModuleId=null;
+  // Testläufe verwenden ausschließlich eine temporäre Kopie des Modulboards.
+  // Der Entwurf und die Instanzzustände des aufrufenden Schaltkreises bleiben unverändert.
+  let moduleSimulation=null;
   let boardTabContextId=null;
   let mainBoardState={nodes:[],wires:[],nodeDrawOrder:[],wireDrawOrder:[],camera:{x:0,y:0,z:1}};
   let selectedNodes = new Set(), selectedWires = new Set();
@@ -1185,6 +1329,7 @@
   const cloneJson=value=>value==null?value:JSON.parse(JSON.stringify(value));
   function activeBoardRef(){ return activeModuleId ? moduleDefinitions.find(item=>item.id===activeModuleId) || mainBoardState : mainBoardState; }
   function saveActiveBoardState(){
+    if(moduleSimulation)return;
     const target=activeBoardRef();
     target.nodes=nodes; target.wires=wires; target.nodeDrawOrder=nodeDrawOrder; target.wireDrawOrder=wireDrawOrder; target.camera={...camera};
   }
@@ -1233,23 +1378,45 @@
   function serializeBoard(board){
     return {nodes:(board?.nodes||[]).map(serializeNode),nodeDrawOrder:[...(board?.nodeDrawOrder||[])],wires:(board?.wires||[]).map(w=>{const route=sanitizeWireRoutePoints(w.routePoints);return {id:w.id,from:{...w.from},to:{...w.to},...(route?{routePoints:route.map(point=>({...point}))}:{})};}),wireDrawOrder:[...(board?.wireDrawOrder||[])],camera:{...(board?.camera||camera),z:snapZoom((board?.camera||camera).z||1)}};
   }
+  // Nach einem Rechtsklick soll kein zuvor programmatisch fokussierter Menüpunkt
+  // einen Tastatur-Fokusrahmen erhalten. Beim Öffnen über die Tastatur dagegen schon.
+  let contextMenuFromKeyboard=false;
+  document.addEventListener('pointerdown',()=>{contextMenuFromKeyboard=false;},true);
+  document.addEventListener('keydown',e=>{
+    contextMenuFromKeyboard=e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10');
+  },true);
+  function hideFloatingContextMenu(menu){
+    if(!menu)return;
+    if(menu.contains(document.activeElement))document.activeElement.blur();
+    menu.hidden=true;
+  }
   function placeFloatingContextMenu(menu,clientX,clientY,focusSelector) {
     if(!menu)return;
     menu.hidden=false;menu.style.left='0px';menu.style.top='0px';
     const rect=menu.getBoundingClientRect();
     menu.style.left=`${Math.max(8,Math.min(clientX,window.innerWidth-rect.width-8))}px`;
     menu.style.top=`${Math.max(8,Math.min(clientY,window.innerHeight-rect.height-8))}px`;
-    if(focusSelector)menu.querySelector(focusSelector)?.focus({preventScroll:true});
+    if(contextMenuFromKeyboard&&focusSelector){
+      const preferred=menu.querySelector(focusSelector);
+      const target=preferred&&!preferred.disabled&&!preferred.hidden?preferred:menu.querySelector('.menu-item:not(:disabled):not([hidden])');
+      target?.focus({preventScroll:true});
+    }
+    contextMenuFromKeyboard=false;
   }
-  function closeObjectContextMenu(){const menu=$('objectContextMenu');if(menu)menu.hidden=true;objectContextNodeId=null;}
+  function closeObjectContextMenu(){hideFloatingContextMenu($('objectContextMenu'));objectContextNodeId=null;}
   function openObjectContextMenu(nodeId,clientX,clientY){
+    if(moduleSimulation)return;
     if(!byId(nodeId))return;
     closeWireContextMenu();closeBoardTabContextMenu();closeMinimapContextMenu();
     objectContextNodeId=nodeId;
     if(!selectedNodes.has(nodeId)||selectedWires.size){selectOnlyNode(nodeId);render(false,false);}
-    const menu=$('objectContextMenu');placeFloatingContextMenu(menu,clientX,clientY,'[data-object-action="rename"]');
+    const menu=$('objectContextMenu'),custom=meta(byId(nodeId)).kind==='custom';
+    menu.querySelectorAll('[data-object-action^="simulate-"]').forEach(button=>button.hidden=!custom);
+    menu.querySelector('[data-object-sim-divider]').hidden=!custom;
+    menu.querySelector('[data-object-action="truth-table"]').hidden=!TRUTH_GATE_TYPES.has(byId(nodeId).type);
+    placeFloatingContextMenu(menu,clientX,clientY,custom?'[data-object-action="simulate-current"]':'[data-object-action="rename"]');
   }
-  function closeWireContextMenu(){const menu=$('wireContextMenu');if(menu)menu.hidden=true;wireContextId=null;}
+  function closeWireContextMenu(){hideFloatingContextMenu($('wireContextMenu'));wireContextId=null;}
   function openWireContextMenu(wireId,clientX,clientY){
     const wire=wires.find(item=>item.id===wireId);if(!wire)return;
     closeObjectContextMenu();closeBoardTabContextMenu();closeMinimapContextMenu();
@@ -1260,37 +1427,34 @@
     if(reset){reset.disabled=!Array.isArray(wire.routePoints);reset.title=reset.disabled?'Dieses Kabel verwendet bereits die automatische Route':'Manuell verlegte Route auf automatische Führung zurücksetzen';}
     placeFloatingContextMenu(menu,clientX,clientY,'[data-wire-action="reset"]');
   }
-  function closeMinimapContextMenu(){const menu=$('minimapContextMenu');if(menu)menu.hidden=true;}
+  function closeMinimapContextMenu(){hideFloatingContextMenu($('minimapContextMenu'));}
   function openMinimapContextMenu(clientX,clientY){
     closeBoardTabContextMenu();closeObjectContextMenu();closeWireContextMenu();
     placeFloatingContextMenu($('minimapContextMenu'),clientX,clientY,'[data-minimap-action="hide"]');
   }
   function closeBoardTabContextMenu(){
-    const menu=$('boardTabContextMenu');
-    if(menu)menu.hidden=true;
+    hideFloatingContextMenu($('boardTabContextMenu'));
     boardTabContextId=null;
   }
   function openBoardTabContextMenu(boardId,clientX,clientY){
+    if(moduleSimulation)return;
     closeObjectContextMenu();closeWireContextMenu();closeMinimapContextMenu();
     if(boardId!=='main'&&!moduleDefinitions.some(def=>def.id===boardId))return;
     const menu=$('boardTabContextMenu');
     const deleteButton=menu.querySelector('[data-board-tab-action="delete"]');
     boardTabContextId=boardId;
     deleteButton.disabled=boardId==='main';
+    menu.querySelector('[data-board-tab-action="simulate-default"]').hidden=boardId==='main';
     deleteButton.title=boardId==='main'?'Die Hauptschaltung kann nicht gelöscht werden':'Unterfunktion löschen';
-    menu.hidden=false;
-    menu.style.left='0px';menu.style.top='0px';
-    const rect=menu.getBoundingClientRect();
-    menu.style.left=`${Math.max(8,Math.min(clientX,window.innerWidth-rect.width-8))}px`;
-    menu.style.top=`${Math.max(8,Math.min(clientY,window.innerHeight-rect.height-8))}px`;
-    menu.querySelector('[data-board-tab-action="rename"]').focus({preventScroll:true});
+    placeFloatingContextMenu(menu,clientX,clientY,'[data-board-tab-action="rename"]');
   }
   function renderBoardTabs(){
     const tabs=$('boardTabs'); if(!tabs) return;
     tabs.classList.toggle('has-modules',moduleDefinitions.length>0);
     if(boardTabContextId!==null)closeBoardTabContextMenu();
     const items=[{id:'main',name:projectName,isMain:true},...moduleDefinitions.map(def=>({id:def.id,name:def.name,isMain:false}))];
-    tabs.innerHTML=items.map(item=>`<button type="button" draggable="${item.isMain?'false':'true'}" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis · bleibt immer ganz links':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" title="Doppelklicken zum Umbenennen">${esc(item.name)}</span>${item.isMain?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
+    tabs.innerHTML=items.map(item=>`<button type="button" draggable="${item.isMain||moduleSimulation?'false':'true'}" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}${moduleSimulation&&item.id===moduleSimulation.moduleId?' simulating':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis · bleibt immer ganz links':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" title="Doppelklicken zum Umbenennen">${esc(item.name)}</span>${item.isMain?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
+    $('addModuleBtn').disabled=!!moduleSimulation;
   }
   function paletteTypeIconSvg(item){
     const type=String(item?.type||'');
@@ -1450,7 +1614,9 @@
     return {nodes:graphNodes,wires:graphWires,nodeDrawOrder:[...new Set(requestedNodes),...graphNodes.map(n=>n.id).filter(id=>!requestedNodes.includes(id))],wireDrawOrder:[...new Set(requestedWires),...graphWires.map(w=>w.id).filter(id=>!requestedWires.includes(id))],camera:raw?.camera&&Number.isFinite(Number(raw.camera.x))&&Number.isFinite(Number(raw.camera.y))?{x:Number(raw.camera.x),y:Number(raw.camera.y),z:snapZoom(Number(raw.camera.z)||1)}:null};
   }
   function switchBoard(id,trackHistory=false){
+    if(moduleSimulation)endModuleSimulation();
     if(id!=='main'&&!moduleDefinitions.some(def=>def.id===id))return false;
+    clearFocusedFeedback();
     closeBoardTabContextMenu();
     if(pendingPaste)cancelPendingPaste();
     if(inlineLabelEditor)finishInlineLabelEdit(true);
@@ -1462,6 +1628,150 @@
     clearSelection();armedFrom=null;selectedPaletteType=null;pendingPaste=null;collisionPreviewNodeIds.clear();
     renderBoardTabs();renderPalette();wireRouteCache.clear();render(trackHistory,true);
     return true;
+  }
+  function beginModuleSimulation(moduleId,mode='default',instanceId=null){
+    if(moduleSimulation)endModuleSimulation();
+    const def=moduleDefinitions.find(item=>item.id===moduleId);
+    if(!def){showToast('Unterfunktion nicht gefunden');return false;}
+    if(pendingPaste)cancelPendingPaste();
+    if(inlineLabelEditor)finishInlineLabelEdit(true);
+    saveActiveBoardState();
+    // Bei einem Rechtsklick auf die Instanz stammen die Testsignale von den
+    // tatsächlichen vorgeschalteten Pins. Unverbundene Eingänge beginnen mit 0.
+    const instance=instanceId?byId(instanceId):null;
+    const current=mode==='current'&&instance?.moduleId===moduleId;
+    const ports=moduleInterface(def);
+    const inputs=ports.inputs.map((_,index)=>{
+      if(!current)return false;
+      const connection=incomingWire(instance.id,index);
+      const source=connection&&byId(connection.from.id);
+      if(!source)return false;
+      const signal=outputPortSignal(source,connection.from.port||0);
+      return signal===null?null:logicValue(signal);
+    });
+    const trial=normalizeBoard(serializeBoard(def));
+    if(!current){
+      trial.nodes.forEach(node=>{
+        if(node.type==='MODULE_INPUT'||node.type==='INPUT'||node.type==='PUSH')node.state=false;
+        node.q=false;node.clockWasHigh=false;node.value=false;
+        if(Array.isArray(node.portValues))node.portValues=node.portValues.map(()=>false);
+        if(meta(node).kind==='custom')node.moduleState={};
+        if(node.type==='BUFFER'){
+          node.bufferOutput=false;node.bufferLastInput=null;node.bufferQueue=[];
+        }
+      });
+    }
+    if(current&&instance.moduleState&&typeof instance.moduleState==='object'){
+      trial.nodes.forEach(node=>{
+        const saved=instance.moduleState[node.id];if(!saved)return;
+        if(typeof saved.q==='boolean')node.q=saved.q;
+        if(saved.clockWasHigh===null||typeof saved.clockWasHigh==='boolean')node.clockWasHigh=saved.clockWasHigh;
+        if(saved.value!==undefined)node.value=decodeLogicSignal(saved.value);
+        if(Array.isArray(saved.portValues))node.portValues=saved.portValues.map(decodeLogicSignal);
+        if(saved.moduleState)node.moduleState=cloneJson(saved.moduleState);
+        if(node.type==='BUFFER'){
+          if(typeof saved.bufferOutput==='boolean')node.bufferOutput=saved.bufferOutput;
+          if(typeof saved.bufferLastInput==='boolean'||saved.bufferLastInput===null)node.bufferLastInput=saved.bufferLastInput;
+          if(Array.isArray(saved.bufferQueue))node.bufferQueue=cloneJson(saved.bufferQueue);
+        }
+      });
+    }
+    const originId=activeModuleId,originName=originId?moduleDefinitions.find(item=>item.id===originId)?.name:projectName;
+    moduleSimulation={moduleId,originId,originName,instanceId:current?instanceId:null,mode:current?'current':'default',inputs,outputValues:[]};
+    activeModuleId=moduleId;
+    nodes=trial.nodes;wires=trial.wires;nodeDrawOrder=trial.nodeDrawOrder;wireDrawOrder=trial.wireDrawOrder;
+    camera=trial.camera?{...trial.camera}:{x:stage.clientWidth/2,y:stage.clientHeight/2,z:1};
+    ports.inputs.forEach((port,index)=>{const input=byId(port.id);if(input)input.state=inputs[index]===true;});
+    selectedPaletteType=null;clearSelection();armedFrom=null;gesture=null;
+    closeObjectContextMenu();closeWireContextMenu();closeBoardTabContextMenu();
+    workspace.classList.add('module-simulation-mode');
+    $('moduleSimulationBanner').hidden=false;
+    setModuleSimulationHelpOpen(false);
+    renderBoardTabs();renderPalette();wireRouteCache.clear();render(false,false);
+    showToast(`Testmodus: ${def.name} · ${current?'Aktuelle Eingänge':'Alle Eingänge aus'}`);
+    return true;
+  }
+  function endModuleSimulation(){
+    if(!moduleSimulation)return false;
+    const session=moduleSimulation;
+    moduleSimulation=null;
+    workspace.classList.remove('module-simulation-mode');
+    $('moduleSimulationBanner').hidden=true;
+    setModuleSimulationHelpOpen(false);
+    activeModuleId=session.originId&&moduleDefinitions.some(def=>def.id===session.originId)?session.originId:null;
+    const origin=activeBoardRef();
+    nodes=origin.nodes||[];wires=origin.wires||[];nodeDrawOrder=origin.nodeDrawOrder||[];wireDrawOrder=origin.wireDrawOrder||[];
+    camera=origin.camera?{...origin.camera}:{x:stage.clientWidth/2,y:stage.clientHeight/2,z:1};
+    gesture=null;clearSelection();armedFrom=null;wireRouteCache.clear();
+    renderBoardTabs();renderPalette();render(false,false);
+    showToast('Testmodus beendet · Entwurf unverändert');
+    return true;
+  }
+  function setModuleSimulationInput(index,value){
+    if(!moduleSimulation||index<0||index>=moduleSimulation.inputs.length)return;
+    moduleSimulation.inputs[index]=value;
+    const port=modulePortNodes({nodes},'MODULE_INPUT')[index];
+    const node=port&&byId(port.id);if(node)node.state=value===true;
+    render(false,false);
+  }
+  function setModuleSimulationHelpOpen(open){
+    $('moduleSimulationHelp').hidden=!open;
+    $('moduleSimulationHelpToggle').setAttribute('aria-expanded',String(!!open));
+  }
+  // Sichtbare Beschriftung kürzen, bevor die SVG-/HTML-Kachel gezeichnet wird.
+  // Die volle Bezeichnung bleibt im Tooltip und im zugänglichen Namen erhalten.
+  function truncateModuleSimulationName(label,measure){
+    const full=String(label??'');
+    if(measure(full)<=79)return full;
+    const chars=Array.from(full);
+    while(chars.length&&measure(chars.join('')+'...')>79)chars.pop();
+    return chars.join('')+'...';
+  }
+  function renderModuleSimulationUI(){
+    const banner=$('moduleSimulationBanner');
+    if(!moduleSimulation){banner.hidden=true;$('runStatus').textContent='Simulation aktiv';return;}
+    const def=moduleDefinitions.find(item=>item.id===moduleSimulation.moduleId);
+    if(!def){endModuleSimulation();return;}
+    banner.hidden=false;
+    $('runStatus').textContent='Testmodus · '+def.name;
+    $('moduleSimulationTitle').textContent=`TESTMODUS · ${def.name}`;
+    const inputs=modulePortNodes({nodes},'MODULE_INPUT'),outputs=modulePortNodes({nodes},'MODULE_OUTPUT');
+    // Nur die Werte aktualisieren, nicht die Knöpfe bei jedem Clock-Tick
+    // neu erstellen: sonst ginge ein Klick genau beim DOM-Ersatz verloren.
+    if(!moduleSimulation.uiBuilt){
+      const tileWidth=120;
+      const columns=Math.max(3,Math.min(5,Math.max(inputs.length,outputs.length,1)));
+      // Genaue Außenbreite aus Rahmen, Innenabstand und Kacheln. Die rechte
+      // Kachel endet damit bündig unter der rechten Kante des ×-Knopfs.
+      // Ein Scrollbar ohne Layoutbreite verhindert vorzeitige Umbrüche.
+      const naturalWidth=2+24+72+8+columns*tileWidth+(columns-1)*6;
+      banner.style.setProperty('--sim-tile-width',`${tileWidth}px`);
+      // Auch bei nur einem Port Platz für drei Kacheln lassen. Nur wenn der
+      // sichtbare Zeichenbereich zu schmal ist, muss responsive umgebrochen werden.
+      banner.style.width=`min(${naturalWidth}px,calc(100% - 28px))`;
+      const canvas=document.createElement('canvas'),context=canvas.getContext('2d');
+      if(context)context.font=`10px ${getComputedStyle(banner).fontFamily}`;
+      const measure=value=>context?context.measureText(value).width:Array.from(value).length*6;
+      const inputButtons=inputs.map((port,index)=>`<button class="module-sim-signal module-sim-input" data-module-sim-input="${index}" type="button" title="${esc(port.label)}"><span class="module-sim-name">${esc(truncateModuleSimulationName(port.label,measure))}</span><strong>0</strong></button>`).join('');
+      const outputBadges=outputs.map((port,index)=>`<span class="module-sim-signal module-sim-output" data-module-sim-output="${index}" title="${esc(port.label)}"><span class="module-sim-name">${esc(truncateModuleSimulationName(port.label,measure))}</span><strong>0</strong></span>`).join('');
+      $('moduleSimulationPorts').innerHTML=`<div class="module-sim-port-row"><span class="module-sim-port-label">EINGÄNGE</span><div class="module-sim-port-tiles">${inputButtons||'<span class="module-sim-port-label">keine</span>'}</div></div><div class="module-sim-port-row"><span class="module-sim-port-label">AUSGÄNGE</span><div class="module-sim-port-tiles">${outputBadges||'<span class="module-sim-port-label">keine</span>'}</div></div>`;
+      moduleSimulation.uiBuilt=true;
+    }
+    $('moduleSimulationPorts').querySelectorAll('[data-module-sim-input]').forEach(button=>{
+      const index=Number(button.dataset.moduleSimInput),value=moduleSimulation.inputs[index],active=value===true;
+      button.setAttribute('aria-pressed',String(active));
+      button.classList.toggle('is-on',active);
+      button.title=`${inputs[index]?.label||'Eingang'}: Auf ${active?'0':'1'} schalten`;
+      button.setAttribute('aria-label',`${inputs[index]?.label||'Eingang'}, ${logicBitText(value)}; umschalten`);
+      const signal=button.querySelector('strong');if(signal)signal.textContent=logicBitText(value);
+    });
+    $('moduleSimulationPorts').querySelectorAll('[data-module-sim-output]').forEach(badge=>{
+      const raw=moduleSimulation.outputValues[Number(badge.dataset.moduleSimOutput)],value=raw===undefined?false:raw;
+      const signal=badge.querySelector('strong');if(signal)signal.textContent=logicBitText(value);
+      badge.classList.toggle('is-on',value===true);
+      badge.classList.toggle('is-unknown',logicBitText(value)==='?');
+      badge.setAttribute('aria-label',`${outputs[Number(badge.dataset.moduleSimOutput)]?.label||'Ausgang'}: ${logicSignalText(value)}`);
+    });
   }
   function createModule(){
     if(pendingPaste)cancelPendingPaste();
@@ -1763,6 +2073,7 @@
   }
 
   function setMinimapVisible(visible, persist=true) {
+    const changed=minimapVisible!==!!visible;
     minimapVisible=!!visible;
     if (minimapPanel) minimapPanel.hidden=!minimapVisible;
     const item=$('menuMinimapToggle'), check=$('menuMinimapCheck');
@@ -1770,6 +2081,7 @@
     if (check) check.textContent=minimapVisible?'✓':'';
     if (persist) { try { localStorage.setItem(MINIMAP_VISIBLE_KEY,String(minimapVisible)); } catch (_) {} }
     if (minimapVisible) updateMinimap();
+    if (persist&&changed) showToast(minimapVisible?'Minimap angezeigt':'Minimap verborgen');
   }
 
 
@@ -2318,8 +2630,11 @@
     );
     const minX=Math.floor((Math.min(start.x,goal.x,...relevant.map(r=>r.left))/step))-8;
     const maxX=Math.ceil((Math.max(start.x,goal.x,...relevant.map(r=>r.right))/step))+8;
-    const minY=Math.floor((Math.min(start.y,goal.y,...relevant.map(r=>r.top))/step))-8;
-    const maxY=Math.ceil((Math.max(start.y,goal.y,...relevant.map(r=>r.bottom))/step))+8;
+    // Die Suchknoten speichern Y relativ zu y0 (= Start-Y). Zuvor wurden
+    // absolute Y-Grenzen dagegen verglichen: sobald ein Kabel weit oberhalb
+    // oder unterhalb des Weltursprungs lag, konnte A* keinen Schritt gehen.
+    const minY=Math.floor((Math.min(start.y,goal.y,...relevant.map(r=>r.top))-y0)/step)-8;
+    const maxY=Math.ceil((Math.max(start.y,goal.y,...relevant.map(r=>r.bottom))-y0)/step)+8;
     const blocked=(x,y)=>{
       if(x===sx&&y===sy) return false;
       const point={x:x*step,y:y0+y*step};
@@ -2368,7 +2683,17 @@
         push({x:nx,y:ny,d,g:ng,f:ng+heuristic});
       }
     }
-    if(!found){
+    let routed=null;
+    if(found){
+      const grid=[];let current=key(found.x,found.y,found.d);
+      while(current){const [x,y]=current.split(',').map(Number);grid.push({x:x*step,y:y0+y*step});current=parents.get(current);}
+      grid.reverse();
+      routed=simplifyOrthogonal([a,start,...grid,{x:goal.x,y:grid[grid.length-1].y},goal,b]);
+      // Auch den fertigen Pfad gegen alle Hindernisse prüfen, nicht nur die
+      // beim Rasteraufbau berücksichtigten Rechtecke (z. B. sehr weite Umwege).
+      if(clearPath(routed))return routed;
+    }
+    {
       // Äußerer Sicherheitskorridor: jede Variante wird erneut gegen sämtliche
       // zwingenden Endobjekt-Hindernisse geprüft. Es gibt keinen ungeprüften
       // Rückfall mehr, der im Extremfall durch ein verbundenes Bauteil liefe.
@@ -2389,10 +2714,6 @@
       // nicht routbaren Sonderfall, statt eine falsche Linie zu zeichnen.
       return [];
     }
-    const grid=[];let current=key(found.x,found.y,found.d);
-    while(current){const [x,y]=current.split(',').map(Number);grid.push({x:x*step,y:y0+y*step});current=parents.get(current);}
-    grid.reverse();
-    return simplifyOrthogonal([a,start,...grid,{x:goal.x,y:grid[grid.length-1].y},goal,b]);
   }
   function pointsToPath(points) {
     if(!points||points.length<2) return '';
@@ -2439,6 +2760,7 @@
     const horizontal=Math.abs(points[segmentIndex].y-points[segmentIndex+1].y)<.01;
     const activeCoord=horizontal?points[segmentIndex].y:points[segmentIndex].x;
     gesture={kind:'wire-segment',wireId:wire.id,segmentIndex,horizontal,baseCoordinate:activeCoord,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,startWorld:worldPoint(event.clientX,event.clientY),originalPoints:points,originalHadRoute:Array.isArray(wire.routePoints),originalRoutePoints:copyRoutePoints(wire.routePoints),moved:false};
+    clearNearestPinHover();
     try{scene.setPointerCapture(event.pointerId);}catch(_){}
     return true;
   }
@@ -2501,6 +2823,108 @@
       node.bufferOutput=!!event.value;
     }
     return node.bufferOutput;
+  }
+
+  // Kompakter, vollständiger CDCL-SAT-Kern für die Boolesche Fixpunktprüfung.
+  // Zwei beobachtete Literale pro Klausel, Unit-Propagation, 1-UIP-Klausellernen,
+  // nichtchronologisches Backtracking und Aktivitätsheuristik (MiniSat-Prinzip).
+  // Jede Anfrage verwendet eigene Root-Annahmen; gelernte Klauseln aus einer
+  // anderen Anfrage werden deshalb bewusst NICHT ungeprüft übernommen.
+  function solveBooleanCnf(variableCount,sourceClauses,assumptions=[],deadline=Infinity,conflictLimit=200000){
+    const assignments=new Int8Array(variableCount+1),levels=new Int32Array(variableCount+1),
+      reasons=new Int32Array(variableCount+1);reasons.fill(-1);
+    const activity=new Float64Array(variableCount+1),clauses=[],watches=Array.from({length:(variableCount+1)*2+2},()=>[]);
+    const trail=[],limits=[],seen=new Uint8Array(variableCount+1);
+    let head=0,conflicts=0,steps=0,increment=1;
+    const watchIndex=literal=>literal>0?literal*2:(-literal)*2+1;
+    const litValue=literal=>{const value=assignments[Math.abs(literal)];return literal>0?value:-value;};
+    const addClause=raw=>{
+      const index=clauses.length,clause=raw.slice();clauses.push(clause);
+      for(const literal of clause)activity[Math.abs(literal)]+=0.03;
+      if(clause.length>=2){watches[watchIndex(clause[0])].push(index);watches[watchIndex(clause[1])].push(index);}
+      return index;
+    };
+    const enqueue=(literal,reason)=>{
+      const variable=Math.abs(literal),value=literal>0?1:-1;
+      if(assignments[variable]!==0)return assignments[variable]===value;
+      assignments[variable]=value;levels[variable]=limits.length;reasons[variable]=reason;trail.push(literal);return true;
+    };
+    const timeout=()=>((typeof performance!=='undefined'?performance.now():Date.now())>deadline);
+    const propagate=()=>{
+      while(head<trail.length){
+        const falsified=-trail[head++],watched=watches[watchIndex(falsified)];
+        let position=0;
+        while(position<watched.length){
+          if((++steps&1023)===0&&timeout())return -2;
+          const clauseIndex=watched[position],clause=clauses[clauseIndex];
+          if(clause[0]!==falsified){const swap=clause[0];clause[0]=clause[1];clause[1]=swap;}
+          const other=clause[1];
+          if(litValue(other)===1){position++;continue;}
+          let replacement=-1;
+          for(let i=2;i<clause.length;i++)if(litValue(clause[i])!==-1){replacement=i;break;}
+          if(replacement>=0){
+            const next=clause[replacement];clause[replacement]=clause[0];clause[0]=next;
+            watched[position]=watched[watched.length-1];watched.pop();
+            watches[watchIndex(next)].push(clauseIndex);continue;
+          }
+          if(litValue(other)===-1||!enqueue(other,clauseIndex))return clauseIndex;
+          position++;
+        }
+      }
+      return -1;
+    };
+    const backtrack=target=>{
+      if(limits.length<=target)return;
+      const start=limits[target];
+      for(let i=trail.length-1;i>=start;i--){const variable=Math.abs(trail[i]);assignments[variable]=0;reasons[variable]=-1;levels[variable]=0;}
+      trail.length=start;limits.length=target;head=Math.min(head,start);
+    };
+    const analyze=conflictIndex=>{
+      const learned=[0];let pending=0,last=0,trailIndex=trail.length-1,clause=clauses[conflictIndex];
+      do{
+        for(const literal of clause){
+          const variable=Math.abs(literal);
+          if(variable===Math.abs(last)||seen[variable]||levels[variable]===0)continue;
+          seen[variable]=1;activity[variable]+=increment;
+          if(levels[variable]===limits.length)pending++;
+          else learned.push(literal);
+        }
+        while(trailIndex>=0&&!seen[Math.abs(trail[trailIndex])])trailIndex--;
+        if(trailIndex<0)return null;
+        last=trail[trailIndex--];seen[Math.abs(last)]=0;pending--;
+        clause=reasons[Math.abs(last)]>=0?clauses[reasons[Math.abs(last)]]:[];
+      }while(pending>0);
+      learned[0]=-last;
+      let backLevel=0;
+      for(let i=1;i<learned.length;i++)backLevel=Math.max(backLevel,levels[Math.abs(learned[i])]);
+      seen.fill(0);increment*=1.04;
+      if(increment>1e90){for(let i=1;i<activity.length;i++)activity[i]*=1e-90;increment*=1e-90;}
+      return {learned,backLevel};
+    };
+    for(const original of [...sourceClauses,...assumptions.map(literal=>[literal])]){
+      if(!original.length)return {status:'unsat',conflicts};
+      const index=addClause(original);
+      if(original.length===1&&!enqueue(original[0],index))return {status:'unsat',conflicts};
+    }
+    while(true){
+      if(timeout()||conflicts>=conflictLimit)return {status:'budget',conflicts};
+      const conflict=propagate();
+      if(conflict===-2)return {status:'budget',conflicts};
+      if(conflict>=0){
+        conflicts++;
+        if(!limits.length)return {status:'unsat',conflicts};
+        const info=analyze(conflict);if(!info)return {status:'budget',conflicts};
+        backtrack(info.backLevel);
+        const index=addClause(info.learned);
+        if(!enqueue(info.learned[0],index))return {status:'unsat',conflicts};
+        if(conflicts%160===0)backtrack(0);
+        continue;
+      }
+      let chosen=0,best=-Infinity;
+      for(let variable=1;variable<=variableCount;variable++)if(assignments[variable]===0&&activity[variable]>best){best=activity[variable];chosen=variable;}
+      if(!chosen)return {status:'sat',model:assignments.slice(),conflicts};
+      limits.push(trail.length);enqueue(chosen,-1);
+    }
   }
 
   function evaluateGraph(graphNodes,graphWires,externalInputs=[],moduleStack=[],evaluationOptions={}){
@@ -2602,10 +3026,13 @@
     }
     function evaluateModuleInstance(instance,inputValues,advanceModuleState=false,persist=true){
       const definition=moduleDefinitions.find(item=>item.id===instance.moduleId),count=outputPortCount(instance);
-      if(!definition||moduleStack.includes(definition.id))return Array(count).fill(LOGIC_UNKNOWN);
+      if(!definition||moduleStack.includes(definition.id)){
+        if(persist)instance.moduleFeedbackDiagnostics=[];
+        return Array(count).fill(LOGIC_UNKNOWN);
+      }
       const runtimeNodes=makeRuntimeNodes(instance,definition);
       const result=evaluateGraph(runtimeNodes,definition.wires,inputValues,[...moduleStack,definition.id],{advanceState:advanceModuleState});
-      if(persist)saveRuntimeNodes(instance,runtimeNodes);
+      if(persist){saveRuntimeNodes(instance,runtimeNodes);instance.moduleFeedbackDiagnostics=result.feedback||[];}
       const outputs=definition.nodes.filter(node=>node.type==='MODULE_OUTPUT').sort((a,b)=>(Number(a.portOrder)||0)-(Number(b.portOrder)||0)||String(a.id).localeCompare(String(b.id))).map((template,index)=>{
         const runtimeNode=runtimeNodes.find(node=>node.id===template.id);
         return runtimeNode?decodeLogicSignal(runtimeNode.value===undefined?false:runtimeNode.value):(result.outputs[index]===undefined?false:result.outputs[index]);
@@ -2714,7 +3141,7 @@
             if(node.type==='BUS_SPLITTER'||node.type==='DEMUX'||meta(node).kind==='custom'){
               raw=Array.isArray(node.portValues)&&node.portValues[port]!==undefined?node.portValues[port]:(port===0?node.value:undefined);
             }
-            const previous=width>1?(isBusSignal(raw)&&raw.width===width?raw.bits[bit]:false):raw;
+            const previous=width>1?(isBusSignal(raw)&&raw.width===width?raw.bits[bit]:isLogicUnknown(raw)?LOGIC_UNKNOWN:false):raw;
             const allowHighImpedance=width===1&&(node.type==='TRISTATE'||meta(node).kind==='custom');
             const preferred=isLogicUnknown(previous)?LOGIC_UNKNOWN:
               (previous===true||previous===false||(allowHighImpedance&&previous===null))?previous:false;
@@ -2787,7 +3214,268 @@
 
       // Ein noch gültiger Zustand ist die wichtigste Speicherinformation eines
       // rückgekoppelten Netzes. Er wird ohne jede Neuberechnung bevorzugt bewahrt.
-      if(fixedAssignment(preferred))return outputResult(preferred,true);
+      if(fixedAssignment(preferred)){
+        const result=outputResult(preferred,true);
+        result.diagnostic={reason:'stable',engine:'Vorzustand',examples:[preferred.slice()],queries:0};
+        return result;
+      }
+
+      // Jede Bit-Leitung wird für die SAT-Suche symbolisch als LOW/HIGH/Z
+      // modelliert. X ist gerade KEIN frei wählbarer stabiler Pegel; ein
+      // unbestimmter Eingang kann daher nur dort eine definierte Ausgabe
+      // ergeben, wo die Gatterlogik den unbekannten Wert wirklich maskiert.
+      // Tseitin-Klauseln bewahren die Gatterstruktur und verhindern das
+      // exponentielle Ausschreiben kompletter Schaltungs-Wahrheitstabellen.
+      function solveWithSat(relaxUnknownInputs=false,existenceOnly=false){
+        const started=typeof performance!=='undefined'?performance.now():Date.now();
+        const deadline=started+(existenceOnly?55:110); // pro schwieriger SCC, inkl. aller Beweise
+        if(slots.length>4096)return {status:'budget',reason:'Die Rückkopplung enthält mehr als 4096 Signalbits.'};
+        const FALSE=-1,TRUE=1,clauses=[[TRUE]];
+        let variableCount=1;
+        const variable=()=>++variableCount;
+        const clause=literals=>clauses.push(literals);
+        const and2=(a,b)=>{
+          if(a===FALSE||b===FALSE||a===-b)return FALSE;
+          if(a===TRUE)return b;if(b===TRUE||a===b)return a;
+          const v=variable();clause([-v,a]);clause([-v,b]);clause([v,-a,-b]);return v;
+        };
+        const or2=(a,b)=>-and2(-a,-b);
+        const andAll=items=>items.reduce(and2,TRUE);
+        const orAll=items=>items.reduce(or2,FALSE);
+        const xor2=(a,b)=>or2(and2(a,-b),and2(-a,b));
+        const equivalent=(v,expression)=>{clause([-v,expression]);clause([v,-expression]);};
+        const ZERO={t:FALSE,f:TRUE,z:FALSE},UNKNOWN={t:FALSE,f:FALSE,z:FALSE};
+        const asSignal=value=>({t:value===true?TRUE:FALSE,f:value===false?TRUE:FALSE,z:value===null?TRUE:FALSE});
+        const symbolic=slots.map(slot=>{
+          const t=variable(),f=variable(),z=slot.allowHighImpedance?variable():FALSE;
+          clause(slot.allowHighImpedance?[t,f,z]:[t,f]);clause([-t,-f]);
+          if(slot.allowHighImpedance){clause([-t,-z]);clause([-f,-z]);}
+          return {t,f,z};
+        });
+        const relaxedUnknownSources=new Map();
+        const sourceSignal=(id,port=0,bit=null)=>{
+          const descriptor=byOutput.get(valueKey(id,port));
+          if(descriptor){
+            if(descriptor.width>1)return bit===null||bit>=descriptor.width?UNKNOWN:symbolic[descriptor.slots[bit].index];
+            return bit===null||bit===0?symbolic[descriptor.slots[0].index]:UNKNOWN;
+          }
+          let raw=readMap(values,id,port);
+          if(bit!==null){
+            if(isBusSignal(raw))raw=raw.width>bit?raw.bits[bit]:LOGIC_UNKNOWN;
+            else if(bit!==0)return UNKNOWN;
+          }else if(isBusSignal(raw))return UNKNOWN;
+          if(relaxUnknownInputs&&(isLogicUnknown(raw)||raw===null)){
+            const key=`${id}:${port}:${bit===null?'':bit}`;
+            if(!relaxedUnknownSources.has(key)){
+              const t=variable(),f=variable();clause([t,f]);clause([-t,-f]);
+              relaxedUnknownSources.set(key,{t,f,z:FALSE});
+            }
+            return relaxedUnknownSources.get(key);
+          }
+          return isLogicUnknown(raw)?UNKNOWN:asSignal(raw);
+        };
+        const inputSignal=(node,port,bit=null)=>{
+          const wire=inputWire(node.id,port);
+          return wire?sourceSignal(wire.from.id,wire.from.port||0,bit):ZERO;
+        };
+        const logicGate=(type,inputs)=>{
+          const a=inputs[0]||ZERO,b=inputs[1]||ZERO;
+          let t=FALSE,f=FALSE,z=FALSE;
+          if(type==='AND'||type==='NAND'){t=and2(a.t,b.t);f=or2(a.f,b.f);if(type==='NAND')[t,f]=[f,t];}
+          else if(type==='OR'||type==='NOR'){t=or2(a.t,b.t);f=and2(a.f,b.f);if(type==='NOR')[t,f]=[f,t];}
+          else if(type==='NOT'){t=a.f;f=a.t;}
+          else if(type==='XOR'||type==='XNOR'){
+            t=or2(and2(a.t,b.f),and2(a.f,b.t));f=or2(and2(a.t,b.t),and2(a.f,b.f));
+            if(type==='XNOR')[t,f]=[f,t];
+          }else if(type==='TRISTATE'){t=and2(b.t,a.t);f=and2(b.t,a.f);z=b.f;}
+          else return null;
+          return {t,f,z};
+        };
+        const selectorPossibility=(selectBits,channel,strict=false)=>andAll(selectBits.map((signal,bit)=>{
+          const requiredHigh=!!(channel&(1<<bit));
+          return strict?(requiredHigh?signal.t:signal.f):(requiredHigh?-signal.f:-signal.t);
+        }));
+        let unsupported=null,sawUnknownCustomResult=false;
+        for(const node of componentNodes){
+          if((typeof performance!=='undefined'?performance.now():Date.now())>deadline){unsupported='budget';break;}
+          const kind=meta(node).kind,portCount=outputPortCount(node);
+          let results=[];
+          if(kind==='gate')results=[logicGate(node.type,Array.from({length:meta(node).inputs},(_,port)=>inputSignal(node,port)))];
+          else if(node.type==='BUS_COMBINER'){
+            const width=normalizeBusWidth(node.busWidth);
+            results=[Array.from({length:width},(_,bit)=>inputSignal(node,bit))];
+          }else if(node.type==='BUS_SPLITTER'){
+            const width=normalizeBusWidth(node.busWidth),wire=inputWire(node.id,0);
+            const raw=wire?(byOutput.get(valueKey(wire.from.id,wire.from.port||0))||{}):null;
+            const sourceWidth=raw?.width||((wire&&isBusSignal(readMap(values,wire.from.id,wire.from.port||0)))?readMap(values,wire.from.id,wire.from.port||0).width:0);
+            results=Array.from({length:width},(_,bit)=>!wire?ZERO:sourceWidth===width?sourceSignal(wire.from.id,wire.from.port||0,bit):isLogicUnknown(readMap(values,wire.from.id,wire.from.port||0))?UNKNOWN:ZERO);
+          }else if(node.type==='MUX'){
+            const count=normalizeMuxInputs(node.muxInputs),select=Array.from({length:selectBitCount(count)},(_,bit)=>inputSignal(node,count+bit));
+            const channels=Array.from({length:count},(_,channel)=>inputSignal(node,channel));
+            const possible=channels.map((_,channel)=>selectorPossibility(select,channel));
+            results=[{t:andAll(channels.map((signal,i)=>or2(-possible[i],signal.t))),f:andAll(channels.map((signal,i)=>or2(-possible[i],signal.f))),z:FALSE}];
+          }else if(node.type==='DEMUX'){
+            const count=normalizeDemuxOutputs(node.demuxOutputs),select=Array.from({length:selectBitCount(count)},(_,bit)=>inputSignal(node,bit+1)),data=inputSignal(node,0);
+            results=Array.from({length:count},(_,channel)=>({
+              t:and2(selectorPossibility(select,channel,true),data.t),
+              f:or2(-selectorPossibility(select,channel),data.f),z:FALSE
+            }));
+          }else if(kind==='custom'){
+            const definition=moduleDefinitions.find(item=>item.id===node.moduleId);
+            const inputCount=definition?moduleInterface(definition).inputs.length:Infinity;
+            if(!definition||moduleStack.includes(definition.id)||inputCount>7||portCount>8||Array.from({length:portCount},(_,p)=>outputPortWidth(node,p)).some(width=>width!==1)){
+              unsupported='custom-size';break;
+            }
+            const inputs=Array.from({length:inputCount},(_,port)=>inputSignal(node,port));
+            const cases=[];
+            for(let bits=0;bits<(1<<inputCount);bits++){
+              if((bits&7)===0&&(typeof performance!=='undefined'?performance.now():Date.now())>deadline){unsupported='budget';break;}
+              const combination=inputs.map((_,index)=>!!(bits&(1<<index)));
+              const raw=evaluateModuleInstance(node,combination,false,false);
+              if(raw.some(value=>isLogicUnknown(value)))sawUnknownCustomResult=true;
+              cases.push({possible:andAll(inputs.map((signal,index)=>combination[index]?-signal.f:-signal.t)),outputs:raw.map(decodeLogicSignal)});
+            }
+            if(unsupported)break;
+            results=Array.from({length:portCount},(_,port)=>({
+              t:andAll(cases.map(row=>row.outputs[port]===true?TRUE:-row.possible)),
+              f:andAll(cases.map(row=>row.outputs[port]===false?TRUE:-row.possible)),
+              z:andAll(cases.map(row=>row.outputs[port]===null?TRUE:-row.possible))
+            }));
+          }else {unsupported='component';break;}
+          if(results.length!==portCount||results.some(value=>!value)){unsupported='component';break;}
+          for(let port=0;port<portCount;port++){
+            const descriptor=byOutput.get(valueKey(node.id,port));if(!descriptor)continue;
+            const expected=descriptor.width===1?[results[port]]:results[port];
+            if(!Array.isArray(expected)||expected.length!==descriptor.slots.length){unsupported='port-width';break;}
+            expected.forEach((expression,index)=>{
+              if(!expression||typeof expression.t!=='number'){unsupported='port-width';return;}
+              const actual=symbolic[descriptor.slots[index].index];
+              equivalent(actual.t,expression.t);equivalent(actual.f,expression.f);
+              if(descriptor.slots[index].allowHighImpedance)equivalent(actual.z,expression.z||FALSE);
+            });
+            if(unsupported)break;
+          }
+          if(unsupported)break;
+        }
+        if(unsupported)return {status:unsupported==='budget'?'budget':'unsupported',reason:
+          unsupported==='custom-size'?'Verschachtelte Unterfunktionen mit mehr als sieben Eingängen, acht Ausgängen oder mehrbitigen Ausgängen sind noch nicht exakt kodiert.':
+          unsupported==='budget'?'Zeitbudget während der Erstellung der SAT-Bedingungen erreicht.':
+          'Dieser Bauteiltyp lässt sich noch nicht vollständig als SAT-Bedingungen darstellen.'};
+        const penalties=[];
+        slots.forEach((slot,index)=>{
+          if(isLogicUnknown(slot.previous))return;
+          const current=symbolic[index];
+          penalties.push(slot.previous===true?-current.t:slot.previous===false?-current.f:-current.z);
+        });
+        // Binärer Addierer + wiederverwendbare Schranke: minimale Änderungen
+        // gegenüber vorher eindeutig bekannten Zuständen (Latch-Gedächtnis).
+        let sumBits=[];
+        for(const penalty of penalties){
+          if((typeof performance!=='undefined'?performance.now():Date.now())>deadline)return {status:'budget',reason:'Zeitbudget beim Erstellen der Optimierungsbedingungen erreicht.'};
+          let carry=penalty;
+          for(let bit=0;bit<sumBits.length;bit++){
+            const existing=sumBits[bit];sumBits[bit]=xor2(existing,carry);carry=and2(existing,carry);
+          }
+          if(carry!==FALSE)sumBits.push(carry);
+        }
+        const atMost=limit=>{
+          if(limit>=penalties.length)return TRUE;
+          let greater=FALSE,equal=TRUE;
+          for(let bit=sumBits.length-1;bit>=0;bit--){
+            const value=sumBits[bit];
+            if(!(limit&(2**bit)))greater=or2(greater,and2(equal,value));
+            equal=and2(equal,(limit&(2**bit))?value:-value);
+          }
+          return -greater;
+        };
+        let queries=0,totalConflicts=0;
+        const query=assumptions=>{
+          queries++;
+          const result=solveBooleanCnf(variableCount,clauses,assumptions,deadline);
+          totalConflicts+=result.conflicts||0;return result;
+        };
+        const first=query([]);
+        // Nur bei nachgewiesen fehlendem Fixpunkt und externem X/Z wird
+        // zusätzlich mit allen zulässigen 0/1-Ergänzungen nachgeprüft. So
+        // ist "unbekannter Eingang" keine bloße Vermutung aufgrund eines
+        // irgendwo angeschlossenen X, sondern ein Existenznachweis.
+        if(existenceOnly)return {status:first.status,queries,totalConflicts,variableCount,clauseCount:clauses.length};
+        if(first.status==='unsat'&&sawUnknownCustomResult)return {status:'unsupported',reason:'Eine verschachtelte Unterfunktion kann bei bestimmten Eingängen selbst X liefern. Daher lässt sich hier das Fehlen eines stabilen Zustands nicht exakt beweisen.'};
+        if(first.status!=='sat')return {status:first.status,queries,totalConflicts,variableCount,clauseCount:clauses.length};
+        let low=0,high=penalties.length,witness=first.model;
+        while(low<high){
+          const middle=Math.floor((low+high)/2),bound=atMost(middle),result=query([bound]);
+          if(result.status==='budget')return {status:'budget',queries,totalConflicts};
+          if(result.status==='sat'){high=middle;witness=result.model;}
+          else low=middle+1;
+        }
+        const bound=atMost(low);
+        const decode=model=>symbolic.map(signal=>model[signal.t]===1?true:model[signal.f]===1?false:null);
+        const reference=decode(witness),consensus=reference.slice(),examples=[reference];
+        const different=slots.map((_,index)=>{
+          const signal=symbolic[index],value=reference[index];
+          return value===true?-signal.t:value===false?-signal.f:-signal.z;
+        });
+        let incomplete=false,ambiguities=0;
+        // Ein einziges alternatives Modell kann bereits Dutzende Signale als
+        // mehrdeutig beweisen. Nach jedem SAT-Zeugen müssen nur die noch nicht
+        // nachweislich veränderbaren Stellen erneut untersucht werden.
+        let unresolved=slots.map((_,index)=>index);
+        while(unresolved.length){
+          const witnessDiff=orAll(unresolved.map(index=>different[index]));
+          const result=query([bound,witnessDiff]);
+          if(result.status==='unsat')break;
+          if(result.status==='budget'){incomplete=true;break;}
+          const alternative=decode(result.model);
+          if(examples.length<4)examples.push(alternative);
+          const rest=[];
+          for(const index of unresolved){
+            if(!logicSignalEquals(alternative[index],reference[index])){consensus[index]=LOGIC_UNKNOWN;ambiguities++;}
+            else rest.push(index);
+          }
+          if(rest.length===unresolved.length){incomplete=true;break;}
+          unresolved=rest;
+        }
+        // Eine abgebrochene Eindeutigkeitsprüfung wird nie als exakt ausgegeben.
+        if(incomplete)consensus.fill(LOGIC_UNKNOWN);
+        const used=(typeof performance!=='undefined'?performance.now():Date.now())-started;
+        return {status:incomplete?'budget':'sat',assignment:consensus,examples,ambiguities,minimumChanges:low,
+          queries,totalConflicts,variableCount,clauseCount:clauses.length,elapsedMs:used};
+      }
+
+      const satResult=solveWithSat();
+      if(satResult.status==='sat'){
+        const ambiguous=satResult.assignment.some(isLogicUnknown);
+        const result=outputResult(satResult.assignment,!ambiguous);
+        result.diagnostic={reason:ambiguous?'ambiguous':'stable',engine:'SAT',...satResult};
+        return result;
+      }
+      if(satResult.status==='unsat'){
+        const result=outputResult(Array(slots.length).fill(LOGIC_UNKNOWN),false);
+        const externalUnknown=graphWires.some(wire=>component.includes(wire.to.id)&&!component.includes(wire.from.id)&&(
+          isLogicUnknown(readMap(values,wire.from.id,wire.from.port||0))||readMap(values,wire.from.id,wire.from.port||0)===null||
+          (isBusSignal(readMap(values,wire.from.id,wire.from.port||0))&&readMap(values,wire.from.id,wire.from.port||0).bits.some(isLogicUnknown))));
+        let reason='no-fixpoint',detail=null;
+        if(externalUnknown){
+          const relaxed=solveWithSat(true,true);
+          if(relaxed.status==='sat')reason='unknown-input';
+          else if(relaxed.status==='budget'||relaxed.status==='unsupported'){
+            reason='budget';detail='Ein X/Z-Eingang liegt an. Ob die Rückkopplung auch bei festgelegten Eingängen instabil wäre, konnte nicht abschließend geprüft werden.';
+          }
+        }
+        result.diagnostic={reason,engine:'SAT',...satResult,detail};
+        return result;
+      }
+      if(slots.length>4096){
+        const result=outputResult(Array(slots.length).fill(LOGIC_UNKNOWN),false);
+        result.diagnostic={reason:'budget',engine:'Grenzwert',examples:[],detail:satResult.reason};
+        return result;
+      }
+
+      // Zeitlich begrenzte Rückfallebene für nicht unterstützte Komponenten
+      // und echte SAT-Budgetüberschreitungen. Sie darf keine langen UI-Freezes
+      // oder fälschliche Eindeutigkeitsbehauptungen verursachen.
+      const fallbackDeadline=(typeof performance!=='undefined'?performance.now():Date.now())+(satResult.status==='unsupported'?80:35);
 
       const domains=slots.map(slot=>{
         const values=[...(isLogicUnknown(slot.previous)?[]:[slot.previous]),false,true];
@@ -2836,7 +3524,7 @@
         }
         function search(assignment){
           explored++;
-          if(explored>MAX_SEARCH_STEPS){budgetExceeded=true;return;}
+          if(explored>MAX_SEARCH_STEPS||((explored&255)===0&&(typeof performance!=='undefined'?performance.now():Date.now())>fallbackDeadline)){budgetExceeded=true;return;}
           if(!propagate(assignment))return;
           const cost=assignmentCost(assignment);
           if(cost>bestCost)return;
@@ -2865,7 +3553,9 @@
         // unten die konservative Stabilisierung/ X-Auswertung verwendet.
         if(bestAssignment&&!budgetExceeded){
           const ambiguous=bestConsensus.some(isLogicUnknown);
-          return outputResult(bestConsensus,!ambiguous);
+          const result=outputResult(bestConsensus,!ambiguous);
+          result.diagnostic={reason:ambiguous?'ambiguous':'stable',engine:'Constraint-Backup',examples:[bestAssignment.slice()],queries:explored};
+          return result;
         }
       }else budgetExceeded=true;
 
@@ -2886,6 +3576,7 @@
         };
         const orderedNodes=reverseOrder?componentNodes.slice().reverse():componentNodes;
         for(let round=0;round<limit;round++){
+          if((typeof performance!=='undefined'?performance.now():Date.now())>fallbackDeadline)return null;
           const moduleCache=new Map();
           for(const node of orderedNodes){
             const outputs=computeCombinationalOutputs(node,read,moduleCache,false,false);
@@ -2943,7 +3634,10 @@
           consensus=consensus.map((value,index)=>logicSignalEquals(value,equallyNear[candidate][index])?value:LOGIC_UNKNOWN);
         }
         const ambiguous=consensus.some(isLogicUnknown);
-        return outputResult(consensus,!ambiguous);
+        const result=outputResult(consensus,!ambiguous);
+        result.diagnostic={reason:'budget',engine:'Heuristik',examples:equallyNear.slice(0,4).map(candidate=>candidate.slice()),queries:explored,
+          detail:satResult.status==='unsupported'?'SAT-Kodierung für diese Komponente noch nicht verfügbar':'SAT-Suche vorzeitig beendet'};
+        return result;
       }
 
       // Ohne konkreten stabilen Zustand wird die Schleife mit dreiwertiger
@@ -2953,6 +3647,7 @@
         let current=Array(slots.length).fill(LOGIC_UNKNOWN);
         const seen=new Set(),limit=Math.min(2048,Math.max(32,component.length*8));
         for(let round=0;round<limit;round++){
+          if((typeof performance!=='undefined'?performance.now():Date.now())>fallbackDeadline)return current;
           const next=computeExpected(current);
           if(next.every((value,index)=>logicSignalEquals(value,current[index])))return next;
           const signature=next.map(value=>isLogicUnknown(value)?'X':value===null?'Z':value===true?'1':'0').join('');
@@ -2961,13 +3656,18 @@
         return Array(slots.length).fill(LOGIC_UNKNOWN);
       }
       const abstract=abstractFeedback();
-      if(abstract.every(value=>!isLogicUnknown(value))&&fixedAssignment(abstract))return outputResult(abstract,true);
-      return outputResult(abstract,false);
+      if(abstract.every(value=>!isLogicUnknown(value))&&fixedAssignment(abstract)){
+        const result=outputResult(abstract,true);
+        result.diagnostic={reason:'budget',engine:'Heuristik',examples:[abstract.slice()],detail:'Nur heuristisch stabilisiert – keine vollständige Eindeutigkeitsprüfung.'};return result;
+      }
+      const result=outputResult(abstract,false);
+      result.diagnostic={reason:satResult.status==='unsupported'?'unsupported':'budget',engine:'Heuristik',examples:[],detail:satResult.reason||null};
+      return result;
     }
 
     function settleGraph(){
       const values=new Map();seedSourceValues(values);
-      const logicFaults=new Set();
+      const logicFaults=new Set(),feedback=[];
       for(const component of components){
         const cyclic=componentIsCyclic(component);
         if(!cyclic){
@@ -2978,6 +3678,14 @@
         }
         const moduleCache=new Map();
         const solution=solveFeedbackComponent(component,values);
+        const info=solution.diagnostic||{reason:solution.solved?'stable':'budget',engine:'Unbekannt',examples:[]};
+        const feedbackSlots=createFeedbackSlots(component).slots;
+        const record={id:component[0],nodeIds:component.slice(),reason:info.reason,engine:info.engine||'Unbekannt',
+          slots:feedbackSlots.map(slot=>({id:slot.id,port:slot.port,bit:slot.bit})),
+          examples:(info.examples||[]).slice(0,4).map(row=>row.map(value=>isLogicUnknown(value)?'?':value===true?'1':value===false?'0':value===null?'Z':'?')),
+          minimumChanges:info.minimumChanges,queries:info.queries||0,variableCount:info.variableCount||0,
+          ambiguousSlots:info.ambiguities||0,elapsedMs:info.elapsedMs||0,detail:info.detail||null};
+        feedback.push(record);
         for(const [key,value] of solution.outputs)values.set(key,value);
         if(!solution.solved)component.forEach(id=>logicFaults.add(id));
         else {
@@ -2994,6 +3702,7 @@
             if(!verified)break;
           }
           if(!verified){
+            record.reason='verification';record.detail='Der berechnete Zustand war bei der unabhängigen Nachprüfung nicht konsistent.';
             component.forEach(id=>{logicFaults.add(id);for(let port=0;port<outputPortCount(nodeById.get(id));port++)values.set(valueKey(id,port),LOGIC_UNKNOWN);});
           }else{
             const finalModuleCache=new Map();
@@ -3023,14 +3732,55 @@
         }
         values.set(valueKey(node.id,0),value);
       }
+      // Verborgene Rückkopplungen in platzierten Unterfunktionen bleiben
+      // diagnostizierbar. Auf diesem Board wird die Modulinstanz markiert;
+      // nach dem Öffnen der Unterfunktion stehen die inneren Gatter einzeln
+      // mit ihren konkreten Zustandsbeispielen zur Verfügung.
+      for(const node of graphNodes)if(meta(node).kind==='custom'){
+        const internal=Array.isArray(node.moduleFeedbackDiagnostics)?node.moduleFeedbackDiagnostics:[];
+        for(const inner of internal){
+          feedback.push({id:`${node.id}/${inner.id}`,nodeIds:[node.id],reason:inner.reason,
+            engine:inner.engine,slots:[],examples:[],queries:inner.queries||0,
+            variableCount:inner.variableCount||0,nested:true,
+            detail:`Innerhalb von „${node.label||meta(node).label||node.type}“. Öffne die Unterfunktion, um die betroffenen Gatter und ihre stabilen Zustandsbeispiele direkt zu untersuchen.${inner.detail?` ${inner.detail}`:''}`});
+        }
+      }
+      // Ursachenkette über unbekannte Signale weitergeben, ohne eine neue
+      // Schaltungsauswertung auszulösen oder fälschlich bekannte 0/1 zu markieren.
+      const causes=new Map(),forward=new Map();
+      for(const wire of graphWires){
+        if(!forward.has(wire.from.id))forward.set(wire.from.id,[]);
+        forward.get(wire.from.id).push(wire.to.id);
+      }
+      const isUnknownNode=id=>{
+        const node=nodeById.get(id);if(!node)return false;
+        const signal=values.get(valueKey(id,0));
+        return isLogicUnknown(signal)||(isBusSignal(signal)&&signal.bits.some(isLogicUnknown))||
+          Array.from({length:Math.max(0,outputPortCount(node)-1)},(_,i)=>values.get(valueKey(id,i+1))).some(isLogicUnknown);
+      };
+      const queue=[];
+      for(const record of feedback)if(record.reason!=='stable')for(const id of record.nodeIds){
+        const cause={reason:record.reason,componentId:record.id,sourceId:id};
+        if(!causes.has(id)){causes.set(id,cause);queue.push(id);}
+      }
+      for(const node of graphNodes)if(meta(node).kind==='input'&&isUnknownNode(node.id)&&!causes.has(node.id)){
+        causes.set(node.id,{reason:'unknown-input',sourceId:node.id});queue.push(node.id);
+      }
+      for(let at=0;at<queue.length;at++){
+        const source=queue[at];
+        for(const target of forward.get(source)||[])if(!causes.has(target)&&isUnknownNode(target)){
+          causes.set(target,{...causes.get(source),propagated:true});queue.push(target);
+        }
+      }
       for(const node of graphNodes){
         node.logicFault=logicFaults.has(node.id)?'unstable-feedback':null;
-        if(outputPortCount(node)>0){
+        if(outputPortCount(node)>0||meta(node).kind==='output'){
           node.value=decodeLogicSignal(read(node.id,0));
           if(node.type==='BUS_SPLITTER'||node.type==='DEMUX'||meta(node).kind==='custom')node.portValues=Array.from({length:outputPortCount(node)},(_,port)=>decodeLogicSignal(read(node.id,port)));
         }
+        node.logicDiagnostic=causes.get(node.id)||(isUnknownNode(node.id)?{reason:'unknown-input',sourceId:node.id}:null);
       }
-      return {values,logicFaults};
+      return {values,logicFaults,feedback};
     }
 
     // Erste stabile Auswertung bei unveränderten Speicherzuständen.
@@ -3076,9 +3826,292 @@
       // Neue Speicherwerte bis zu einem stabilen kombinatorischen Ergebnis fortpflanzen.
       settled=settleGraph();
     }
-    return {outputs:outputInterfaces.map(node=>{const runtime=nodeById.get(node.id);return runtime?decodeLogicSignal(runtime.value===undefined?false:runtime.value):false;}),logicFaults:[...settled.logicFaults]};
+    return {outputs:outputInterfaces.map(node=>{const runtime=nodeById.get(node.id);return runtime?decodeLogicSignal(runtime.value===undefined?false:runtime.value):false;}),logicFaults:[...settled.logicFaults],feedback:settled.feedback};
   }
-  function evaluate(){ evaluateGraph(nodes,wires,[],[]); }
+  let feedbackDiagnostics=[];
+  function evaluate(){
+    const result=evaluateGraph(nodes,wires,moduleSimulation?.inputs||[],[]);
+    feedbackDiagnostics=result.feedback||[];
+    updateFeedbackVisibility();
+    if(moduleSimulation)moduleSimulation.outputValues=result.outputs;
+    return result;
+  }
+
+  const FEEDBACK_DESCRIPTIONS={
+    stable:['Stabil','Ein konsistenter Zustand wurde nachgewiesen. Ein vorhandener stabiler Vorzustand bleibt erhalten.'],
+    ambiguous:['Mehrdeutig','Mehrere gleich nahe, stabile Zustände sind möglich. Abweichende Signale erhalten X; ein beliebiger Zustand wird nicht erfunden.'],
+    'no-fixpoint':['Kein Fixpunkt','Für die aktuellen Eingänge existiert keine konsistente stabile Belegung. Das kann eine Oszillation bedeuten; ohne Zeitmodell lässt sich daraus keine Schwingungsfrequenz ableiten.'],
+    'unknown-input':['Unbekannter Eingang','Ein unbekannter oder hochohmiger Eingang beeinflusst diese Rückkopplung. Ohne definierte Eingangssignale lässt sich kein vollständig konkreter Zustand nachweisen.'],
+    budget:['Suchgrenze','Die Untersuchung wurde aus Zeit-/Komplexitätsgründen nicht vollständig bewiesen. Gezeigte Ergebnisse sind nicht als eindeutig garantiert.'],
+    unsupported:['Nicht exakt geprüft','Eine Sonderkomponente konnte noch nicht vollständig in SAT-Klauseln übersetzt werden; GatterLab verwendet eine konservative Rückfallebene.'],
+    verification:['Prüfung fehlgeschlagen','Ein berechneter Kandidat bestand die unabhängige Prüfung nicht und wurde deshalb verworfen.']
+  };
+  const feedbackReasonText=reason=>(FEEDBACK_DESCRIPTIONS[reason]||FEEDBACK_DESCRIPTIONS.unsupported)[0];
+  let focusedFeedbackId=null,feedbackPanelSignature='',feedbackCollapsed=true;
+  let feedbackPanelAnimationTimer=null,feedbackPanelTransitionEnd=null,feedbackPanelAnimationToken=0;
+  function focusedFeedbackNodes(){
+    if($('feedbackDiagnosticsPanel').hidden||feedbackCollapsed)return new Set();
+    const active=feedbackDiagnostics.find(record=>record.id===focusedFeedbackId);
+    return new Set(active?.nodeIds||[]);
+  }
+  function applyFeedbackHighlights(){
+    nodeLayer.querySelectorAll('.node.feedback-highlight').forEach(element=>element.classList.remove('feedback-highlight'));
+    wireLayer.querySelectorAll('.wire-base.feedback-highlight').forEach(element=>element.classList.remove('feedback-highlight'));
+    const highlighted=focusedFeedbackNodes();
+    for(const id of highlighted){
+      nodeLayer.querySelector(`.node[data-node="${CSS.escape(id)}"]`)?.classList.add('feedback-highlight');
+    }
+    for(const wire of wires)if(highlighted.has(wire.from.id)&&highlighted.has(wire.to.id)){
+      wireLayer.querySelector(`g[data-wire="${CSS.escape(wire.id)}"] .wire-base`)?.classList.add('feedback-highlight');
+    }
+  }
+  function renderFeedbackDiagnosticsPanel(){
+    const panel=$('feedbackDiagnosticsPanel');if(panel.hidden)return;
+    if(!feedbackDiagnostics.some(record=>record.id===focusedFeedbackId))focusedFeedbackId=null;
+    const signature=JSON.stringify(feedbackDiagnostics.map(record=>[record.id,record.reason,record.nodeIds]))+'|'+focusedFeedbackId;
+    if(signature===feedbackPanelSignature)return;
+    feedbackPanelSignature=signature;
+    const root=$('feedbackDiagnosticsList');
+    if(!feedbackDiagnostics.length){root.innerHTML='<div class="feedback-empty">Im aktuellen Schaltkreis sind keine kombinatorischen Rückkopplungen vorhanden.</div>';return;}
+    root.innerHTML=feedbackDiagnostics.map((record,index)=>{
+      const label=feedbackReasonText(record.reason),warning=record.reason!=='stable';
+      const active=record.id===focusedFeedbackId;
+      return `<button class="feedback-card${active?' active':''}" type="button" data-feedback-component="${esc(record.id)}" aria-pressed="${active}" title="Bauteile und zugehörige Kabel auf der Arbeitsfläche und in der Minimap hervorheben"><span class="feedback-card-title">Rückkopplung ${index+1}</span><span class="feedback-card-row"><span>Diagnose:</span><span class="feedback-card-value${warning?' warning':''}">${esc(label)}</span></span><span class="feedback-card-row"><span>Bauteile:</span><span class="feedback-card-value">${record.nodeIds.length}</span></span></button>`;
+    }).join('');
+  }
+  function clearFocusedFeedback(){
+    if(!focusedFeedbackId)return;
+    focusedFeedbackId=null;
+    feedbackPanelSignature='';
+    renderFeedbackDiagnosticsPanel();
+    applyFeedbackHighlights();
+    updateMinimap();
+  }
+  function alignFeedbackChevron(){
+    const panel=$('feedbackDiagnosticsPanel');
+    if(panel.hidden)return;
+    const feedbackToggle=$('toggleFeedbackDiagnostics');
+    const feedbackArrow=feedbackToggle?.querySelector('.tips-chevron');
+    const shortcutArrow=$('toggleEssentialShortcuts')?.querySelector('.tips-chevron');
+    if(!feedbackArrow||!shortcutArrow)return;
+    const toggleRect=feedbackToggle.getBoundingClientRect();
+    const shortcutRect=shortcutArrow.getBoundingClientRect();
+    if(!toggleRect.width||!shortcutRect.width)return;
+    // Auch bei verschiedenen tatsächlichen Breiten beider Klappbereiche
+    // liegen die rechten Kanten der Pfeile anschließend exakt übereinander.
+    feedbackArrow.style.right=`${toggleRect.right-shortcutRect.right}px`;
+  }
+  function updateFeedbackVisibility(){
+    const panel=$('feedbackDiagnosticsPanel');
+    if(!feedbackDiagnostics.length){
+      if(!panel.hidden||!feedbackCollapsed||focusedFeedbackId)setFeedbackCollapsed(true,false);
+      panel.hidden=true;
+      return;
+    }
+    const wasHidden=panel.hidden;
+    panel.hidden=false;
+    if(wasHidden)alignFeedbackChevron();
+    if(focusedFeedbackId&&!feedbackDiagnostics.some(record=>record.id===focusedFeedbackId))clearFocusedFeedback();
+    renderFeedbackDiagnosticsPanel();
+  }
+  function setFeedbackCollapsed(collapsed,animate=true){
+    const next=!!collapsed,previous=feedbackCollapsed;
+    feedbackCollapsed=next;
+    const panel=$('feedbackDiagnosticsPanel'),button=$('toggleFeedbackDiagnostics'),content=$('feedbackDiagnosticsContent');
+    const updateState=value=>{
+      panel.classList.toggle('is-collapsed',value);
+      button.setAttribute('aria-expanded',String(!value));
+      button.title=value?'Rückkopplungsdiagnose anzeigen':'Rückkopplungsdiagnose ausblenden';
+      content.classList.toggle('is-collapsed',value);
+      content.setAttribute('aria-hidden',String(value));
+      content.toggleAttribute('inert',value);
+    };
+    const token=++feedbackPanelAnimationToken;
+    if(feedbackPanelAnimationTimer!==null){clearTimeout(feedbackPanelAnimationTimer);feedbackPanelAnimationTimer=null;}
+    if(feedbackPanelTransitionEnd){panel.removeEventListener('transitionend',feedbackPanelTransitionEnd);feedbackPanelTransitionEnd=null;}
+    let reduceMotion=false;
+    try{reduceMotion=!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;}catch(_){}
+    if(animate&&!panel.hidden&&previous!==next&&!reduceMotion){
+      const currentHeight=Math.max(29,panel.getBoundingClientRect().height);
+      panel.style.height=`${currentHeight}px`;
+      if(next){
+        void panel.offsetHeight;
+        updateState(true);
+        panel.style.height='29px';
+      }else{
+        const panelTransition=panel.style.transition,contentTransition=content.style.transition;
+        panel.style.transition='none';content.style.transition='none';
+        updateState(false);
+        panel.style.height='auto';
+        const targetHeight=Math.max(29,panel.getBoundingClientRect().height);
+        updateState(true);
+        panel.style.height=`${currentHeight}px`;
+        void panel.offsetHeight;
+        panel.style.transition=panelTransition;content.style.transition=contentTransition;
+        updateState(false);
+        panel.style.height=`${targetHeight}px`;
+      }
+      const finish=event=>{
+        if(event&&(event.target!==panel||event.propertyName!=='height'))return;
+        if(token!==feedbackPanelAnimationToken)return;
+        if(feedbackPanelAnimationTimer!==null){clearTimeout(feedbackPanelAnimationTimer);feedbackPanelAnimationTimer=null;}
+        panel.removeEventListener('transitionend',finish);
+        if(feedbackPanelTransitionEnd===finish)feedbackPanelTransitionEnd=null;
+        panel.style.height='';
+      };
+      feedbackPanelTransitionEnd=finish;
+      panel.addEventListener('transitionend',finish);
+      feedbackPanelAnimationTimer=setTimeout(()=>finish(),360);
+    }else{
+      updateState(next);
+      panel.style.height='';
+    }
+    if(next&&focusedFeedbackId){focusedFeedbackId=null;feedbackPanelSignature='';renderFeedbackDiagnosticsPanel();}
+    if(previous!==next){applyFeedbackHighlights();updateMinimap();}
+    alignFeedbackChevron();
+  }
+
+  // Wahrheitstabellen sind auf einzelne kombinatorische Gatter begrenzt.
+  // Unterfunktionen werden stattdessen über ihren interaktiven Testmodus geprüft.
+  const TRUTH_GATE_TYPES=new Set(['AND','OR','NOT','NAND','NOR','XOR','XNOR','BUFFER','TRISTATE']);
+  let activeTruthTable=null;
+  let activeTruthTableKey=null;
+  // Ein einziger Zustand für ALLE Gatter, unabhängig von Auswahl oder Board.
+  // Beim allerersten Aufruf ist die Tabelle offen; danach gilt die letzte
+  // bewusste Entscheidung des Nutzers auch nach einem Neuladen der Seite.
+  let truthTableCollapsed=false;
+  try {
+    const savedTruthExpanded=localStorage.getItem(TRUTH_EXPANDED_STORAGE_KEY);
+    if(savedTruthExpanded!==null)truthTableCollapsed=savedTruthExpanded!=='true';
+  } catch(_) {}
+  function truthGateOutput(type,bits){
+    const a=bits[0]??false,b=bits[1]??false;
+    switch(type){
+      case 'AND':return logicAnd(a,b);
+      case 'OR':return logicOr(a,b);
+      case 'NOT':return logicNot(a);
+      case 'NAND':return logicNot(logicAnd(a,b));
+      case 'NOR':return logicNot(logicOr(a,b));
+      case 'XOR':return logicXor(a,b);
+      case 'XNOR':return logicNot(logicXor(a,b));
+      case 'BUFFER':return a;
+      case 'TRISTATE':return b?a:null;
+      default:return LOGIC_UNKNOWN;
+    }
+  }
+  function truthRows(inputCount,compute){
+    return Array.from({length:2**inputCount},(_,index)=>{
+      const inputs=Array.from({length:inputCount},(_,bit)=>!!(index&(1<<(inputCount-bit-1))));
+      return {inputs,outputs:compute(inputs)};
+    });
+  }
+  function truthInitialIndex(node,inputCount){
+    if(!node)return 0;
+    let index=0;
+    for(let port=0;port<inputCount;port++){
+      const wire=incomingWire(node.id,port),from=wire&&byId(wire.from.id);
+      if(from&&outputPortSignal(from,wire.from.port||0)===true)index|=1<<(inputCount-port-1);
+    }
+    return index;
+  }
+  function truthTableForGate(type,node=null){
+    if(!TRUTH_GATE_TYPES.has(type))return null;
+    const m=TYPES[type],count=m.inputs;
+    const names=type==='TRISTATE'?['DATA','ENABLE']:count===1?['A']:['A','B'];
+    const note=type==='BUFFER'?'Beim Buffer zeigt die Tabelle die logische Wirkung. Eine eingestellte Verzögerung wirkt erst nach der Wartezeit.':
+      type==='TRISTATE'?'Bei ENABLE = 0 liefert TriState Z (hochohmig) statt 0.':null;
+    return {title:`${m.label} · Wahrheitstabelle`,inputs:names,outputs:['Q'],
+      rows:truthRows(count,bits=>[truthGateOutput(type,bits)]),selected:truthInitialIndex(node,count),note};
+  }
+  function truthBitCell(value){
+    const text=logicBitText(value),state=text==='1'?'on':text==='0'?'off':'unknown';
+    return `<span class="truth-bit ${state}">${text}</span>`;
+  }
+  function updateTruthTableSelection(){
+    const table=activeTruthTable,root=$('truthTableBody');if(!table)return;
+    const current=table.rows[table.selected];if(!current)return;
+    root.querySelectorAll('[data-truth-row]').forEach(row=>{
+      const active=Number(row.dataset.truthRow)===table.selected;
+      row.classList.toggle('selected',active);row.setAttribute('aria-selected',String(active));
+    });
+    root.querySelectorAll('[data-truth-toggle]').forEach(button=>{
+      const active=current.inputs[Number(button.dataset.truthToggle)];
+      button.classList.toggle('on',active);button.setAttribute('aria-pressed',String(active));
+      button.querySelector('strong').textContent=active?'1':'0';
+    });
+    // ∧ verbindet hier gleichzeitig geltende Belegungsbedingungen – unabhängig
+    // vom gewählten Gattertyp (bei OR ist es also kein behauptetes UND-Gatter).
+    const inputText=current.inputs.length?current.inputs.map((bit,index)=>`${esc(table.inputs[index])} = <b>${bit?'1':'0'}</b>`).join(' ∧ '):'Keine Eingänge';
+    const outputText=current.outputs.map((value,index)=>`${esc(table.outputs[index])} = ${truthBitCell(value)}`).join(' ∧ ');
+    $('truthTablePreview').innerHTML=`<strong>Ausprobieren</strong><div>${inputText} &nbsp; → &nbsp; ${outputText}</div>`;
+  }
+  function setTruthTableCollapsed(collapsed,animate=true,persist=true){
+    truthTableCollapsed=!!collapsed;
+    const button=$('inspectorTruthTable'),content=$('truthTableContent');
+    if(!animate)content.style.transition='none';
+    button?.setAttribute('aria-expanded',String(!truthTableCollapsed));
+    content.setAttribute('aria-hidden',String(truthTableCollapsed));
+    content.inert=truthTableCollapsed;
+    content.classList.toggle('is-collapsed',truthTableCollapsed);
+    if(!animate){void content.offsetHeight;content.style.transition='';}
+    if(persist){try{localStorage.setItem(TRUTH_EXPANDED_STORAGE_KEY,String(!truthTableCollapsed));}catch(_) {}}
+  }
+  function selectedTruthTableTarget(){
+    // Bauteile haben Vorrang vor etwaigen gleichzeitig markierten Kabeln.
+    if(selectedNodes.size===1){
+      const node=byId([...selectedNodes][0]);
+      if(node&&TRUTH_GATE_TYPES.has(node.type))return {key:`node:${activeModuleId||'main'}:${node.id}`,type:node.type,node};
+    }
+    if(selectionEmpty()&&selectedPaletteType&&TRUTH_GATE_TYPES.has(selectedPaletteType))
+      return {key:`palette:${selectedPaletteType}`,type:selectedPaletteType,node:null};
+    return null;
+  }
+  function syncTruthTableForSelection(){
+    const target=selectedTruthTableTarget();
+    if(!target){if(activeTruthTable)closeTruthTable();return;}
+    if(activeTruthTableKey===target.key)return;
+    activeTruthTableKey=target.key;
+    showTruthTable(truthTableForGate(target.type,target.node),{expand:!truthTableCollapsed,revealPanel:false,animate:false});
+  }
+  function showTruthTable(table,{expand=true,revealPanel=true,animate=true,rememberExpanded=false}={}){
+    if(!table)return;
+    const sidebar=$('truthTableModal');
+    activeTruthTable=table;
+    if(revealPanel&&!panelVisibility.right)togglePanelVisibility('right');
+    if($('inspectorTruthTable'))$('inspectorTruthTable').title=table.title;
+    const root=$('truthTableBody');
+    const head=[...table.inputs,...table.outputs].map((name,index)=>`<th scope="col" class="${index>=table.inputs.length?'truth-out':''}" title="${esc(name)}">${esc(name)}</th>`).join('');
+    const body=table.rows.map((row,index)=>`<tr data-truth-row="${index}" aria-selected="false" title="Diese Belegung auswählen">${[...row.inputs,...row.outputs].map(value=>`<td>${truthBitCell(value)}</td>`).join('')}</tr>`).join('');
+    root.innerHTML=`${table.inputs.length?`<div class="truth-switches" role="group" aria-label="Eingänge ausprobieren">${table.inputs.map((name,index)=>`<button class="truth-switch" type="button" data-truth-toggle="${index}" title="${esc(name)} umschalten"><span>${esc(name)}</span><strong>0</strong></button>`).join('')}</div>`:''}<div class="truth-preview" id="truthTablePreview" aria-live="polite"></div><div class="truth-table-wrap"><table class="truth-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${table.note?`<p class="truth-legend">Hinweis: ${esc(table.note)}</p>`:''}`;
+    updateTruthTableSelection();
+    sidebar.hidden=false;
+    setTruthTableCollapsed(!expand,animate,rememberExpanded);
+  }
+  function openTruthTableForNode(node){
+    if(!node||!TRUTH_GATE_TYPES.has(node.type))return;
+    activeTruthTableKey=`node:${activeModuleId||'main'}:${node.id}`;
+    showTruthTable(truthTableForGate(node.type,node),{rememberExpanded:true});
+  }
+  function closeTruthTable(){ $('truthTableModal').hidden=true;activeTruthTable=null;activeTruthTableKey=null; }
+
+  // Die Tabelle selbst bleibt beim Neuzeichnen des Eigenschafteninspektors
+  // erhalten. Wir parken sie kurz außerhalb, bevor dessen HTML ersetzt wird,
+  // und setzen sie direkt unter den neu gezeichneten Öffnen-Knopf zurück.
+  function parkTruthTableForInspector(){
+    const region=$('truthTableModal'),root=$('inspector');
+    if(root.contains(region))$('essentialShortcutsPanel').before(region);
+    syncTruthTableForSelection();
+  }
+  function attachTruthTableToInspector(){
+    const dock=$('truthTableDock'),button=$('inspectorTruthTable');
+    if(!dock||!button||!activeTruthTable)return;
+    dock.appendChild($('truthTableModal'));
+    button.title=activeTruthTable.title;
+    setTruthTableCollapsed(truthTableCollapsed,false,false);
+  }
+  function truthTableInspectorButton(){
+    return '<button class="truth-inspector-button" id="inspectorTruthTable" type="button" aria-expanded="false" aria-controls="truthTableContent"><span>Wahrheitstabelle ansehen</span><span class="truth-section-chevron" aria-hidden="true">⌄</span></button><div id="truthTableDock"></div>';
+  }
 
 
   function clockNeedleAngle(n, now = performance.now()) {
@@ -3186,7 +4219,7 @@
     const nodeAttrs = preview ? '' : `data-node="${esc(n.id)}"`;
     const safeLabel = kind === 'label' ? esc(labelText(n)) : esc(n.label??m.label);
     if(n.type==='MODULE_INPUT'){
-      return `<g class="node input-node module-terminal module-input-node${n.state?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" xml:space="preserve" x="0" y="-4">${esc(n.label??'Eingang')}</text><text class="node-sub" x="0" y="13">MODUL-EINGANG</text><circle class="pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="5"/></g>`;
+      return `<g class="node input-node module-terminal module-input-node${n.state?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" xml:space="preserve" x="0" y="-7">${esc(n.label??'Eingang')}</text><text class="node-sub" x="0" y="13">${moduleSimulation&&!preview?`TEST · ${logicBitText(n.value)}`:'MODUL-EINGANG'}</text><circle class="pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="5"/></g>`;
     }
     if(n.type==='MODULE_OUTPUT'){
       const wire=incomingWire(n.id,0),source=wire&&byId(wire.from.id),hot=source&&outputSignalActive(source,wire.from.port||0);
@@ -3398,6 +4431,16 @@
     nodeDrawOrder = ordered.map(n=>n.id);
     const connectionIndex = buildConnectionIndex();
     nodeLayer.innerHTML = ordered.map(n => nodeMarkup(n, false, connectionIndex)).join('');
+    // Die Ursache eines X erscheint zusätzlich als nativer SVG-Tooltip.
+    for(const n of ordered)if(n.logicDiagnostic){
+      const element=nodeLayer.querySelector(`.node[data-node="${CSS.escape(n.id)}"]`);
+      if(!element)continue;
+      const label=feedbackReasonText(n.logicDiagnostic.reason);
+      const title=document.createElementNS('http://www.w3.org/2000/svg','title');
+      title.textContent=`${n.label||meta(n).label||n.type}: ${label}${n.logicDiagnostic.propagated?' (aus einer vorgelagerten Verbindung)':''}`;
+      element.insertBefore(title,element.firstChild);
+    }
+    applyFeedbackHighlights();
   }
 
   function normalizedRect(a,b) {
@@ -3469,6 +4512,7 @@
 
   function renderWires() {
     wireRouteCache.clear();
+    const focusedNodes=focusedFeedbackNodes();
     const handles = [];
     const map = new Map(wires.map(w=>[w.id,w]));
     const nodeMap = new Map(nodes.map(n=>[n.id,n]));
@@ -3485,7 +4529,8 @@
     wireDrawOrder = ordered.map(w=>w.id);
     const renderOrder = [...ordered.filter(w=>!selectedWires.has(w.id)), ...ordered.filter(w=>selectedWires.has(w.id))];
     wireLayer.innerHTML = renderOrder.map(w => {
-      const source = nodeMap.get(w.from.id), active = outputSignalActive(source,w.from.port||0), busClass=busWireClass(source,w.from.port||0);
+      const source = nodeMap.get(w.from.id), active = outputSignalActive(source,w.from.port||0), unknown = outputSignalUnknown(source,w.from.port||0), busClass=busWireClass(source,w.from.port||0);
+      const feedbackHighlight=focusedNodes.has(w.from.id)&&focusedNodes.has(w.to.id);
       const routePoints=routePointsForWire(w,nodeMap);
       const d = pointsToPath(routePoints), chosen = selectedWires.has(w.id), marqueePreview = marqueePreviewWires.has(w.id) && !chosen, partialPreview = marqueePartialWires.has(w.id) && !marqueePreview && !chosen;
       const manualPreview=gesture?.kind==='wire-segment'&&gesture.wireId===w.id;
@@ -3512,10 +4557,10 @@
       }
       // Recreated SVG paths must join the same global animation phase, rather than
       // restarting the pulse after selection previews or live clock updates.
-      const flowDelay = active ? ` style="animation-delay:-${(performance.now() % 650).toFixed(1)}ms"` : '';
+      const flowDelay = active&&!unknown ? ` style="animation-delay:-${(performance.now() % 650).toFixed(1)}ms"` : '';
       return `<g data-wire="${esc(w.id)}">
-        <path class="wire-base${busClass}${active ? ' energized' : ''}${chosen ? ' selected' : ''}${marqueePreview ? ' marquee-preview' : ''}${partialPreview ? ' partial-preview' : ''}${manualInvalid ? ' manual-route-invalid' : ''}" d="${d}" />
-        <path class="wire-flow${busClass}${active ? ' energized' : ''}${manualInvalid ? ' manual-route-invalid' : ''}"${flowDelay} d="${d}" />
+        <path class="wire-base${busClass}${active ? ' energized' : ''}${unknown ? ' logic-unknown' : ''}${feedbackHighlight ? ' feedback-highlight' : ''}${chosen ? ' selected' : ''}${marqueePreview ? ' marquee-preview' : ''}${partialPreview ? ' partial-preview' : ''}${manualInvalid ? ' manual-route-invalid' : ''}" d="${d}" />
+        <path class="wire-flow${busClass}${active&&!unknown ? ' energized' : ''}${manualInvalid ? ' manual-route-invalid' : ''}"${flowDelay} d="${d}" />
         <path class="wire-hit" d="${d}" data-wire-select="${esc(w.id)}" />
       </g>`;
     }).join('');
@@ -3630,8 +4675,8 @@
     if (inlineLabelEditor) positionInlineLabelEditor();
   }
   function updateHistoryButtons() {
-    const canUndo = undoIndex > 0;
-    const canRedo = undoIndex >= 0 && undoIndex < undoHistory.length - 1;
+    const canUndo = !moduleSimulation && undoIndex > 0;
+    const canRedo = !moduleSimulation && undoIndex >= 0 && undoIndex < undoHistory.length - 1;
     $('undoBtn').disabled = !canUndo;
     $('redoBtn').disabled = !canRedo;
     const menuUndo=$('menuUndo'), menuRedo=$('menuRedo');
@@ -3642,11 +4687,12 @@
     $('nodeCount').textContent = `${nodes.length} ${nodes.length === 1 ? 'Bauteil' : 'Bauteile'}`;
     $('wireCount').textContent = `${wires.length} Kabel`;
     const count = selectedNodes.size + selectedWires.size;
-    $('selectionStatus').textContent = count ? `${selectedNodes.size} Bauteile · ${selectedWires.size} Kabel ausgewählt` : 'Nichts ausgewählt';
+    $('selectionStatus').textContent = moduleSimulation?'Testmodus · Eingänge anklicken':count ? `${selectedNodes.size} Bauteile · ${selectedWires.size} Kabel ausgewählt` : 'Nichts ausgewählt';
     $('coordStatus').textContent = `Zoom ${Math.round(camera.z * 100)}%`;
     $('minimapSelectionFit').disabled = selectionEmpty();
     updateMinimap();
     updateHistoryButtons();
+    renderModuleSimulationUI();
   }
 
   function updateMinimap() {
@@ -3684,19 +4730,21 @@
     minimapContent.setAttribute('transform', `translate(${offsetX} ${offsetY}) scale(${scale})`);
     const nodeById = new Map(nodes.map(n=>[n.id,n]));
     const wireById = new Map(wires.map(w=>[w.id,w]));
+    const focusedNodes=focusedFeedbackNodes();
     const orderedWireIds = new Set(wireDrawOrder);
     const miniWireOrder = wireDrawOrder.map(id=>wireById.get(id)).filter(Boolean).concat(wires.filter(w=>!orderedWireIds.has(w.id)));
     minimapWireLayer.innerHTML = miniWireOrder.map(w => {
-      const source=nodeById.get(w.from.id), active = outputSignalActive(source,w.from.port||0);
+      const source=nodeById.get(w.from.id), active = outputSignalActive(source,w.from.port||0), unknown = outputSignalUnknown(source,w.from.port||0);
       const miniBusClass=busWireClass(source,w.from.port||0).replace(/\bbus-wire/g,'mini-wire-bus');
-      const cls = `mini-wire${miniBusClass ? ` ${miniBusClass.trim()}` : ''}${active ? ' hot' : ''}${selectedWires.has(w.id) ? ' selected' : ''}${marqueePreviewWires.has(w.id) && !selectedWires.has(w.id) ? ' marquee-preview' : ''}${marqueePartialWires.has(w.id) && !marqueePreviewWires.has(w.id) && !selectedWires.has(w.id) ? ' partial-preview' : ''}`;
+      const cls = `mini-wire${miniBusClass ? ` ${miniBusClass.trim()}` : ''}${active ? ' hot' : ''}${unknown ? ' logic-unknown' : ''}${focusedNodes.has(w.from.id)&&focusedNodes.has(w.to.id) ? ' feedback-highlight' : ''}${selectedWires.has(w.id) ? ' selected' : ''}${marqueePreviewWires.has(w.id) && !selectedWires.has(w.id) ? ' marquee-preview' : ''}${marqueePartialWires.has(w.id) && !marqueePreviewWires.has(w.id) && !selectedWires.has(w.id) ? ' partial-preview' : ''}`;
       return `<path class="${cls}" d="${pathForWire(w,nodeById)}" />`;
     }).join('');
     const orderedNodeIds = new Set(nodeDrawOrder);
     const miniOrder = nodeDrawOrder.map(id=>nodeById.get(id)).filter(Boolean).concat(nodes.filter(n=>!orderedNodeIds.has(n.id)));
     minimapNodeLayer.innerHTML = miniOrder.map(n => {
       const b = nodeBounds(n), width=b.right-b.left, height=b.bottom-b.top;
-      const cls = `mini-node${(n.value === true || (isBusSignal(n.value)&&n.value.bits.some(bit=>bit===true))) ? ' hot' : ''}${selectedNodes.has(n.id) ? ' selected' : ''}${marqueePreviewNodes.has(n.id) && !selectedNodes.has(n.id) ? ' marquee-preview' : ''}${collisionPreviewNodeIds.has(n.id) ? ' collision-preview' : ''}`;
+      const unknown=isLogicUnknown(n.value)||(isBusSignal(n.value)&&n.value.bits.some(isLogicUnknown))||n.portValues?.some(isLogicUnknown)||!!n.logicFault;
+      const cls = `mini-node${(n.value === true || (isBusSignal(n.value)&&n.value.bits.some(bit=>bit===true))) ? ' hot' : ''}${unknown ? ' logic-unknown' : ''}${focusedNodes.has(n.id) ? ' feedback-highlight' : ''}${selectedNodes.has(n.id) ? ' selected' : ''}${marqueePreviewNodes.has(n.id) && !selectedNodes.has(n.id) ? ' marquee-preview' : ''}${collisionPreviewNodeIds.has(n.id) ? ' collision-preview' : ''}`;
       return `<rect class="${cls}" x="${b.left}" y="${b.top}" width="${width}" height="${height}" rx="8" />`;
     }).join('');
     const vx = offsetX + view.left*scale, vy = offsetY + view.top*scale;
@@ -3754,14 +4802,14 @@
       const selected=$('demuxSelectedOutput');if(selected)selected.textContent=`Q${Number(n.selectedChannel)||0}`;
       const value=$('demuxSelectValue');if(value)value.textContent=Array.from({length:selectBitCount(normalizeDemuxOutputs(n.demuxOutputs))},(_,bit)=>logicBitText(liveInputValue(n,1+bit))).reverse().join('');
       n.portValues?.forEach((bit,index)=>{
-        const row=$('inspectorDemuxOutput'+index);if(row){row.textContent=logicSignalText(bit);row.classList.toggle('on',bit===true);row.classList.toggle('logic-unknown',isLogicUnknown(bit));}
+        const row=$('inspectorDemuxOutput'+index);if(row){row.textContent=inspectorOutputText(bit);row.classList.toggle('on',bit===true);row.classList.toggle('logic-unknown',isLogicUnknown(bit));}
       });
     }
     if (m.kind==='custom') {
       const outputs=$('inspector')?.querySelectorAll('[data-custom-output]');
       outputs?.forEach(el=>{
         const port=Number(el.dataset.customOutput),value=n.portValues&&port in n.portValues?n.portValues[port]:false;
-        el.textContent=logicSignalText(value);
+        el.textContent=inspectorOutputText(value);
         el.classList.toggle('on',value===true);
         el.classList.toggle('logic-unknown',isLogicUnknown(value));
       });
@@ -3792,7 +4840,7 @@
     }
     const out = $('inspectorOutputValue');
     if (out) {
-      const text = logicSignalText(n.value);
+      const text = inspectorOutputText(n.value);
       out.textContent = text; out.classList.toggle('on', n.value === true); out.classList.toggle('logic-unknown',isLogicUnknown(n.value));
     }
     const q = $('inspectorQValue');
@@ -4084,7 +5132,7 @@
   function groupOutputSummary(targetNodes) {
     const states=(targetNodes||[]).map(node=>node?.value);
     const token=value=>isBusSignal(value)?`BUS:${value.bits.map(logicBitText).join('')}`:isLogicUnknown(value)?'X':value===null?'Z':value===true?'HIGH':value===false?'LOW':'UNBEKANNT';
-    const describe=value=>isBusSignal(value)?`BUS ${value.bits.map(logicBitText).join('')}`:logicSignalText(value);
+    const describe=value=>isBusSignal(value)?`BUS ${value.bits.map(logicBitText).join('')}`:inspectorOutputText(value);
     const keys=new Set(states.map(token));
     if(keys.size!==1)return {text:'Gemischt',active:false};
     const value=states[0];
@@ -4093,6 +5141,7 @@
 
   function renderInspector() {
     const root = $('inspector');
+    parkTruthTableForInspector();
     if (selectionEmpty() && selectedPaletteType && TYPES[selectedPaletteType]) {
       const m = TYPES[selectedPaletteType];
       const isPaletteMux=m.kind==='mux';
@@ -4107,7 +5156,9 @@
         <div class="prop-row"><span>Eingänge</span><span class="prop-value">${paletteInputs}</span></div>
         ${(isPaletteMux||isPaletteDemux)?`<div class="prop-row mux-selection-formula"><span>Auswahl</span><span class="prop-value">log<sub>2</sub>(n)</span></div>`:''}
         <div class="prop-row"><span>Ausgänge</span><span class="prop-value">${paletteOutputs}</span></div>
+        ${TRUTH_GATE_TYPES.has(selectedPaletteType)?truthTableInspectorButton():''}
       </div>`;
+      attachTruthTableToInspector();
       return;
     }
     // Eine einzelne Bauteilauswahl behält ihren eigenen Eigenschafteninspektor,
@@ -4342,7 +5393,7 @@
       } else if(n.type==='DEMUX'){
         const width=normalizeDemuxOutputs(n.demuxOutputs),options=[2,4,8].map(value=>`<option value="${value}" ${value===width?'selected':''}>${value} Datenausgänge</option>`).join('');
         const selectValue=Array.from({length:selectBitCount(width)},(_,bit)=>{const wire=incomingWire(n.id,1+bit);return logicBitText(wire?outputPortSignal(byId(wire.from.id),wire.from.port||0):false);}).reverse().join('');
-        const rows=Array.from({length:width},(_,index)=>{const signal=n.portValues?.[index]??false;return `<div class="prop-row"><span>Q${index}</span><span class="value-chip ${signal===true?'on':''} ${isLogicUnknown(signal)?'logic-unknown':''}" id="inspectorDemuxOutput${index}">${logicSignalText(signal)}</span></div>`;}).join('');
+        const rows=Array.from({length:width},(_,index)=>{const signal=n.portValues?.[index]??false;return `<div class="prop-row"><span>Q${index}</span><span class="value-chip ${signal===true?'on':''} ${isLogicUnknown(signal)?'logic-unknown':''}" id="inspectorDemuxOutput${index}">${inspectorOutputText(signal)}</span></div>`;}).join('');
         extra=`<div class="prop-row"><span>Datenausgänge</span><select class="inspector-input" id="demuxOutputsSelect" aria-label="Anzahl der Demultiplexer-Datenausgänge">${options}</select></div><div class="prop-row"><span>Auswahl</span><span class="value-chip" id="demuxSelectedOutput">Q${Number(n.selectedChannel)||0}</span></div><div class="prop-row"><span>Steuerwert</span><span class="prop-value" id="demuxSelectValue">${selectValue}</span></div><div class="inspector-rule"></div>${rows}`;
       } else if (n.type==='BUS_COMBINER' || n.type==='BUS_SPLITTER') {
         const width=normalizeBusWidth(n.busWidth);
@@ -4360,7 +5411,7 @@
         }
       } else if (m.kind==='custom') {
         const def=moduleDefinitions.find(item=>item.id===n.moduleId),ports=moduleInterface(def);
-        const outputRows=ports.outputs.map((port,index)=>{const value=n.portValues&&index in n.portValues?n.portValues[index]:false;const label=port.label||`Ausgang ${index+1}`;const text=logicSignalText(value);return `<div class="prop-row"><span>${esc(label)}</span><span class="value-chip ${value===true?'on':''} ${isLogicUnknown(value)?'logic-unknown':''}" data-custom-output="${index}">${text}</span></div>`;}).join('');
+        const outputRows=ports.outputs.map((port,index)=>{const value=n.portValues&&index in n.portValues?n.portValues[index]:false;const label=port.label||`Ausgang ${index+1}`;const text=inspectorOutputText(value);return `<div class="prop-row"><span>${esc(label)}</span><span class="value-chip ${value===true?'on':''} ${isLogicUnknown(value)?'logic-unknown':''}" data-custom-output="${index}">${text}</span></div>`;}).join('');
         extra=`<div class="prop-row"><span>Eingänge</span><span class="prop-value">${m.inputs}</span></div><div class="prop-row"><span>Ausgänge</span><span class="prop-value">${m.outputs}</span></div>${outputRows?`<div class="inspector-rule"></div><div class="inspector-type">AUSGANGSSIGNALE</div>${outputRows}`:''}`;
       } else if (m.kind === 'gate' || m.kind === 'flipflop') {
         const occupiedInputs = wires.filter(w => w.to.id === n.id).length;
@@ -4389,18 +5440,23 @@
           ${arrowColorControls([n])}`;
       }
       if(n.type==='OUTPUT') extra += ledColorControls([n]);
-      const valueText = logicSignalText(n.value);
+      const valueText = inspectorOutputText(n.value);
       const inspectorNodeTitle=n.type==='DISPLAY'?displayNodeName(n):String(n.label??m.label);
       const inspectorSubhead=m.kind==='custom'?m.category:`${m.category} · ${m.label}`;
       const inspectorDescription=m.kind==='custom'?'Selbstdefinierte Unterfunktion':m.description;
       const showOutputRow = m.kind !== 'label' && m.kind !== 'custom' && m.kind !== 'annotation' && !(m.kind === 'output' && m.displayBits) && !['BUS_COMBINER','BUS_SPLITTER','DEMUX'].includes(n.type);
+      const feedbackInfo=n.logicDiagnostic;
+      const feedbackRow=feedbackInfo?`<div class="feedback-inspector"><strong>${esc(feedbackReasonText(feedbackInfo.reason))}</strong>${feedbackInfo.propagated?'<span class="feedback-inspector-cause">Ursache liegt signalaufwärts</span>':''}</div>`:'';
       root.innerHTML = `<div class="inspector-card">
         <div class="inspector-title editable-name" id="inspectorNodeName" title="Doppelklicken zum Umbenennen">${esc(inspectorNodeTitle)}</div><div class="inspector-type">${esc(inspectorSubhead)}</div>
         <div class="inspector-description">${esc(inspectorDescription)}</div>
         ${showOutputRow ? `<div class="inspector-rule"></div><div class="prop-row"><span>Ausgang</span><span class="value-chip ${n.value===true?'on':''} ${isLogicUnknown(n.value)?'logic-unknown':''}" id="inspectorOutputValue">${valueText}</span></div>` : (m.kind === 'label' ? '<div class="inspector-rule"></div>' : '')}
         ${extra}
+        ${feedbackRow}
+        ${TRUTH_GATE_TYPES.has(n.type)?truthTableInspectorButton():''}
         <div class="inspector-actions"><button class="btn" id="duplicateSelected">Duplizieren</button><button class="btn danger" id="deleteSelected">Löschen</button></div>
       </div>`;
+      attachTruthTableToInspector();
       const toggle = $('inspectorToggle'); if (toggle) toggle.addEventListener('click', () => { n.state = !n.state; render(); });
       if(n.type==='PUSH')bindPushInspectorButton($('inspectorPushButton'),[n]);
       const busWidthSelect=$('busWidthSelect');
@@ -4898,7 +5954,7 @@
   }
   function updateNearestPinHover(clientX,clientY) {
     nodeLayer.querySelectorAll('.pin.nearest-hover').forEach(element=>element.classList.remove('nearest-hover'));
-    if(gesture?.kind==='node'||gesture?.kind==='palette'){
+    if(moduleSimulation||gesture?.kind==='node'||gesture?.kind==='palette'||gesture?.kind==='wire-segment'){
       if(pinHoverLayer)pinHoverLayer.innerHTML='';
       return null;
     }
@@ -5138,6 +6194,7 @@
   }, true);
 
   function saveLocal(trackHistory = true, persist = true) {
+    if(moduleSimulation)return;
     // Solange eine kollidierende Einfügegruppe nur als rote Vorschau existiert,
     // ist sie noch kein Schaltungszustand: weder persistieren noch historisieren.
     if (pendingPaste) return;
@@ -5160,7 +6217,9 @@
     return {version:1,projectName,activeModuleId,mainBoard:serializeBoard(mainBoardState),modules:moduleDefinitions.map(def=>({id:def.id,name:def.name,...serializeBoard(def)})),nodes:active.nodes,nodeDrawOrder:active.nodeDrawOrder,wires:active.wires,wireDrawOrder:active.wireDrawOrder,camera:active.camera,gridVisible};
   }
   function applyConfig(raw,fit=false){
+    if(moduleSimulation){moduleSimulation=null;workspace.classList.remove('module-simulation-mode');$('moduleSimulationBanner').hidden=true;}
     if(!raw||raw.version!==1||(!Array.isArray(raw.nodes)&&!raw.mainBoard)||(!Array.isArray(raw.wires)&&!raw.mainBoard))throw new Error('Ungültige Konfiguration');
+    clearFocusedFeedback();
     const storedProjectName=String(raw.projectName??'').trim();
     projectName=safeBoardName(!storedProjectName||storedProjectName.toLocaleLowerCase('de')==='unbenannt'?'Hauptschaltkreis':storedProjectName,'Hauptschaltkreis');
     moduleDefinitions=Array.isArray(raw.modules)?raw.modules.filter(def=>def&&typeof def.id==='string'&&/^[a-z0-9_-]{1,48}$/i.test(def.id)).slice(0,100).map(def=>({id:def.id,name:safeBoardName(def.name||'Unterfunktion'),nodes:Array.isArray(def.nodes)?def.nodes:[],wires:Array.isArray(def.wires)?def.wires:[],nodeDrawOrder:Array.isArray(def.nodeDrawOrder)?def.nodeDrawOrder:[],wireDrawOrder:Array.isArray(def.wireDrawOrder)?def.wireDrawOrder:[],camera:def.camera||null})):[];
@@ -5718,6 +6777,95 @@
   }
   setShortcutsCollapsed(shortcutsCollapsed,false,false);
   $('toggleEssentialShortcuts').addEventListener('click',()=>setShortcutsCollapsed(!shortcutsCollapsed));
+  window.addEventListener('resize',alignFeedbackChevron);
+  if('ResizeObserver' in window){
+    const feedbackChevronObserver=new ResizeObserver(alignFeedbackChevron);
+    feedbackChevronObserver.observe($('toggleFeedbackDiagnostics'));
+    feedbackChevronObserver.observe($('toggleEssentialShortcuts'));
+  }
+  $('moduleSimulationExit').addEventListener('click',()=>endModuleSimulation());
+  $('moduleSimulationHelpToggle').addEventListener('click',()=>setModuleSimulationHelpOpen($('moduleSimulationHelp').hidden));
+  $('moduleSimulationPorts').addEventListener('click',e=>{
+    const button=e.target.closest('[data-module-sim-input]');
+    if(button&&moduleSimulation){const index=Number(button.dataset.moduleSimInput);setModuleSimulationInput(index,moduleSimulation.inputs[index]!==true);}
+  });
+  $('truthTableBody').addEventListener('click',e=>{
+    if(!activeTruthTable)return;
+    const toggle=e.target.closest('[data-truth-toggle]');
+    if(toggle){
+      const index=Number(toggle.dataset.truthToggle);
+      activeTruthTable.selected^=1<<(activeTruthTable.inputs.length-index-1);
+      updateTruthTableSelection();return;
+    }
+    const row=e.target.closest('[data-truth-row]');
+    if(row){activeTruthTable.selected=Number(row.dataset.truthRow);updateTruthTableSelection();}
+  });
+  $('toggleFeedbackDiagnostics').addEventListener('click',()=>setFeedbackCollapsed(!feedbackCollapsed));
+  $('feedbackDiagnosticsList').addEventListener('click',e=>{
+    const card=e.target.closest('[data-feedback-component]');if(!card)return;
+    focusedFeedbackId=card.dataset.feedbackComponent;
+    feedbackPanelSignature='';renderFeedbackDiagnosticsPanel();applyFeedbackHighlights();updateMinimap();
+  });
+  // Eine Diagnosekarte bleibt nur markiert, solange die Rückkopplung selbst
+  // untersucht wird. Jede andere Nutzeraktion hebt die Markierung wieder auf,
+  // ohne den Diagnosebereich einzuklappen oder die normale Aktion abzufangen.
+  document.addEventListener('pointerdown',e=>{
+    if(!e.target.closest?.('[data-feedback-component]'))clearFocusedFeedback();
+  },true);
+  document.addEventListener('wheel',e=>{
+    if(!e.target.closest?.('#feedbackDiagnosticsPanel'))clearFocusedFeedback();
+  },{capture:true,passive:true});
+  document.addEventListener('keydown',e=>{
+    if(!focusedFeedbackId||e.key==='Escape'||['Shift','Control','Alt','Meta'].includes(e.key))return;
+    if(e.target.closest?.('[data-feedback-component]')&&['Enter',' '].includes(e.key))return;
+    clearFocusedFeedback();
+  },true);
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape'||$('feedbackDiagnosticsPanel').hidden||feedbackCollapsed||editingTarget())return;
+    e.preventDefault();e.stopImmediatePropagation();setFeedbackCollapsed(true);
+  },true);
+  $('inspector').addEventListener('click',e=>{
+    if(e.target.closest('#inspectorTruthTable'))setTruthTableCollapsed(!truthTableCollapsed);
+  });
+  // Die Auswahl bestimmt die sichtbare Gatter-Tabelle. Beim Wechsel zu anderen
+  // Elementen wird sie vom Eigenschafteninspektor verborgen, ohne Klicks abzufangen.
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&!$('truthTableModal').hidden&&!truthTableCollapsed){
+      setTruthTableCollapsed(true);
+    }
+  },true);
+  // Auch außerhalb der Arbeitsfläche gilt: Nur ein kurzer Klick beendet den
+  // Test. Ziehen/Gedrückthalten aus der Seitenleiste darf ihn nicht abbrechen.
+  let consumeExitClick=false,outsideSimulationClick=null;
+  document.addEventListener('pointerdown',e=>{
+    if(!moduleSimulation||e.target.closest('#moduleSimulationBanner,#scene,#boardTabs'))return;
+    if(e.button!==0){
+      consumeExitClick=true;setTimeout(()=>{consumeExitClick=false;},0);
+      endModuleSimulation();e.preventDefault();e.stopImmediatePropagation();return;
+    }
+    outsideSimulationClick={pointerId:e.pointerId,x:e.clientX,y:e.clientY,started:performance.now(),moved:false};
+    e.preventDefault();e.stopImmediatePropagation();
+  },true);
+  document.addEventListener('pointermove',e=>{
+    const pending=outsideSimulationClick;
+    if(!pending||pending.pointerId!==e.pointerId)return;
+    if(Math.hypot(e.clientX-pending.x,e.clientY-pending.y)>5)pending.moved=true;
+    e.preventDefault();e.stopImmediatePropagation();
+  },true);
+  document.addEventListener('pointerup',e=>{
+    const pending=outsideSimulationClick;
+    if(!pending||pending.pointerId!==e.pointerId)return;
+    outsideSimulationClick=null;
+    e.preventDefault();e.stopImmediatePropagation();
+    consumeExitClick=true;
+    setTimeout(()=>{consumeExitClick=false;},0);
+    if(moduleSimulation&&!pending.moved&&performance.now()-pending.started<=350)endModuleSimulation();
+  },true);
+  document.addEventListener('pointercancel',e=>{if(outsideSimulationClick?.pointerId===e.pointerId)outsideSimulationClick=null;},true);
+  document.addEventListener('click',e=>{
+    if(!consumeExitClick)return;
+    consumeExitClick=false;e.preventDefault();e.stopImmediatePropagation();
+  },true);
   $('addModuleBtn').addEventListener('click',event=>{
     createModule();
     // Der Knopf darf nach einem Mausklick nicht fokussiert bleiben:
@@ -5788,6 +6936,7 @@
     boardTabDragId=null;boardTabDragMoved=false;boardTabDragOriginalOrder=null;boardTabDropCommitted=false;clearBoardTabDropHints();
   });
   $('boardTabs').addEventListener('dblclick',e=>{
+    if(moduleSimulation)return;
     const clickedTab=e.target.closest('[data-board-id]');
     if(!clickedTab||e.target.closest('.board-tab-close')||e.target.closest('.board-tab-rename-input'))return;
     e.preventDefault();e.stopPropagation();
@@ -5797,6 +6946,19 @@
   });
   $('boardTabs').addEventListener('click',e=>{
     if(Date.now()<ignoreBoardTabClickUntil)return;
+    if(moduleSimulation){
+      const close=e.target.closest('[data-close-module]');
+      if(close){
+        e.preventDefault();e.stopPropagation();
+        const moduleId=close.dataset.closeModule;
+        endModuleSimulation();
+        deleteModule(moduleId);
+        return;
+      }
+      const tab=e.target.closest('[data-board-id]');
+      if(tab){const target=tab.dataset.boardId;endModuleSimulation();if(target!==(activeModuleId||'main'))switchBoard(target,false);}
+      return;
+    }
     const close=e.target.closest('[data-close-module]');
     if(close){e.preventDefault();e.stopPropagation();deleteModule(close.dataset.closeModule);return;}
     const tab=e.target.closest('[data-board-id]');
@@ -5816,12 +6978,14 @@
     if(boardId!==(activeModuleId||'main'))switchBoard(boardId,false);
   });
   $('boardTabs').addEventListener('contextmenu',e=>{
+    if(moduleSimulation){e.preventDefault();return;}
     const tab=e.target.closest('[data-board-id]');
     if(!tab||e.target.closest('.board-tab-rename-input'))return;
     e.preventDefault();e.stopPropagation();
     openBoardTabContextMenu(tab.dataset.boardId,e.clientX,e.clientY);
   });
   $('boardTabs').addEventListener('auxclick',e=>{
+    if(moduleSimulation){e.preventDefault();return;}
     if(e.button!==1)return;
     const tab=e.target.closest('[data-board-id]');
     if(!tab)return;
@@ -5836,7 +7000,8 @@
     const action=button.dataset.boardTabAction,boardId=boardTabContextId;
     closeBoardTabContextMenu();
     if(!boardId)return;
-    if(action==='rename'){
+    if(action==='simulate-default')beginModuleSimulation(boardId,'default');
+    else if(action==='rename'){
       const tab=[...$('boardTabs').querySelectorAll('[data-board-id]')].find(item=>item.dataset.boardId===boardId);
       const label=tab?.querySelector('.board-tab-label');
       if(tab&&label)beginBoardTabRename(tab,label);
@@ -5865,7 +7030,12 @@
   $('objectContextMenu').addEventListener('click',e=>{
     const button=e.target.closest('[data-object-action]');if(!button)return;
     const action=button.dataset.objectAction,targetNodeId=objectContextNodeId;closeObjectContextMenu();
-    if(action==='rename'){
+    if(action==='simulate-current'||action==='simulate-default'){
+      const node=byId(targetNodeId);
+      if(node?.moduleId)beginModuleSimulation(node.moduleId,action==='simulate-current'?'current':'default',node.id);
+    }else if(action==='truth-table'){
+      openTruthTableForNode(byId(targetNodeId));
+    }else if(action==='rename'){
       const node=byId(targetNodeId);
       if(node){
         selectOnlyNode(node.id);render(false,false);
@@ -5978,6 +7148,99 @@
   $('shareBtn').addEventListener('click', shareConfig);
   $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
   const PATCH_LOG = [
+    {version:'V111',title:'Rückkopplungs-Klapppfeil exakt ausgerichtet',items:[
+      'Die horizontale Position des Rückkopplungs-Klapppfeils wird jetzt direkt am tatsächlichen rechten Rand des Tastenkürzel-Pfeils gemessen und bei Größenänderungen nachgeführt. Die übrige Anordnung bleibt unverändert.'
+    ]},
+    {version:'V110',title:'Klapppfeil der Rückkopplungsdiagnose ausgerichtet',items:[
+      'Der Klapppfeil der Rückkopplungsdiagnose ist rechts exakt am selben Abstand wie der Pfeil der essenziellen Tastenkürzel verankert. Alle übrigen Abstände und Bedienelemente bleiben unverändert.'
+    ]},
+    {version:'V109',title:'Konsistente Kontextmenüs und Rückkopplungsauswahl',items:[
+      'Das Verbergen und erneute Anzeigen der Minimap meldet die Änderung unten als Hinweis. Mausgeöffnete Kontextmenüs fokussieren keinen Eintrag mehr künstlich; die Tastaturfokussierung bleibt für Kontextmenütaste und Shift+F10 erhalten. Dies gilt für Minimap, Bauteile, Kabel und Schaltungstabs.',
+      'Im Eigenschaftenbereich zeigen unbekannte Ausgangssignale nur noch „?“ an. Ausführliche Signalbeschreibungen außerhalb der Ausgangsfelder bleiben unverändert.',
+      'Der Rückkopplungsdiagnose-Klapptitel hat kein linkes Symbol mehr; der rechte Pfeil folgt derselben Ausrichtung wie bei den essenziellen Tastenkürzeln. Beide Abschnitte verwenden dieselbe Hintergrundfarbe.',
+      'Rückkopplungskarten behalten beim Markieren exakt dieselben Außen- und Innenmaße. Ein Klick oder eine andere Nutzeraktion außerhalb der Diagnoseauswahl entfernt die konkrete Markierung, ohne den Bereich zuzuklappen.'
+    ]},
+    {version:'V108',title:'Einklappbare Rückkopplungsdiagnose und einheitliche Hervorhebung',items:[
+      'Das Rückkopplungsdiagnosefenster ist jetzt ein zunächst geschlossener Klappbereich in der rechten Eigenschaftenleiste, direkt oberhalb der essenziellen Tastenkürzel. Er erscheint ausschließlich, wenn Rückkopplungen vorhanden sind; der bisherige Statusleistenknopf entfällt.',
+      'Die Diagnose im Bauteileinspektor steht zentriert. Bei vorgeschalteten Ursachen folgt in einer eigenen zentrierten Zeile „Ursache liegt signalaufwärts“.',
+      'Eine ausgewählte Rückkopplung erhält eine etwas kräftigere Kontur an allen vier Seiten statt nur links. Escape klappt die Diagnose zu und beendet die Hervorhebung.',
+      'Das Rechtsklickmenü der Minimap verwendet nun die Beschriftung „Minimap zurücksetzen“.'
+    ]},
+    {version:'V107',title:'Kompakte Rückkopplungsübersicht und dauerhaft erkennbare X-Leitungen',items:[
+      'Die Untersuchung wird ausschließlich über den Rückkopplungsknopf in der unteren Statusleiste geöffnet. Der gleichnamige Knopf in den Bauteileigenschaften sowie der einleitende Erklärungstext entfallen.',
+      'Jede Rückkopplung erscheint als kompakte, vollständig anklickbare Karte mit Überschrift sowie rechtsbündigen Werten für Diagnose und Bauteilanzahl.',
+      'Ein Klick hebt die betroffenen Bauteile und die Verbindungsleitungen zwischen ihnen sowohl im Schaltkreis als auch in der Minimap hervor. Escape beendet die Untersuchung und schließt das Diagnosemenü.',
+      'Kabel mit unbekanntem Signalzustand erhalten ihre gelb gestrichelte Kennzeichnung jetzt auch beim normalen Neuzeichnen, etwa nach einem Klick auf die Arbeitsfläche. Die Minimap stellt unbekannte Zustände ebenfalls gestrichelt dar.'
+    ]},
+    {version:'V106',title:'SAT-Rückkopplungsanalyse und nachvollziehbare X-Zustände',items:[
+      'Ein integrierter CDCL-SAT-Solver prüft kombinatorische Rückkopplungen exakt: kompakte Tseitin-Klauseln, beobachtete Literale, Konfliktlernen und nichtchronologisches Zurückspringen ersetzen die starre Grenze bei kleinen und mittleren Komponenten.',
+      'Stabile Vorzustände werden erhalten. Andernfalls wird die Zahl der Zustandsänderungen minimiert; verschiedene gleich nahe Fixpunkte werden mit zusätzlichen SAT-Anfragen gesucht. Signale ohne eindeutigen Wert bleiben X.',
+      'Bei Rückkopplungen erscheint ein Diagnoseknopf in der unteren Leiste. Rechts lassen sich Ursachen wie Mehrdeutigkeit, fehlender Fixpunkt, unbekannte Eingänge und ausgeschöpftes Suchbudget unterscheiden, mögliche stabile Belegungen ansehen und die betroffenen Bauteile hervorheben.',
+      'Auch Rückkopplungen innerhalb platzierter Unterfunktionen werden auf der äußeren Platine angezeigt. Ihre Modulinstanz kann markiert werden; innerhalb der Unterfunktion lassen sich die einzelnen Gatter prüfen.',
+      'Die exakte Suche bleibt zum Schutz der Bedienbarkeit zeitlich begrenzt; nicht vollständig untersuchte Komponenten werden ausdrücklich als solche markiert. Auch mehr als 112 rückgekoppelte Signalbits lassen sich nun oftmals exakt analysieren.',
+      'Die Wertübernahme von Ausgängen verschachtelter Unterfunktionen wurde berichtigt, sodass deren Rückkopplungsergebnisse korrekt in die äußere Schaltung einfließen.'
+    ]},
+    {version:'V105',title:'Einheitlicher Klappzustand der Wahrheitstabellen',items:[
+      'Der Knopf „Wahrheitstabelle ansehen“ ist jetzt ohne das linke Quadratsymbol gestaltet; die Beschriftung bleibt mittig.',
+      'Der Eintrag „Wahrheitstabellen anzeigen“ wurde vollständig aus „Ansicht“ entfernt.',
+      'Beim ersten Benutzen sind Gatter-Wahrheitstabellen geöffnet. Ein manuelles Ein- oder Ausklappen gilt fortan global für alle Gatter – auch nach Auswahlwechseln, dem Öffnen anderer Bereiche und einem Neuladen der Seite.'
+    ]},
+    {version:'V104',title:'Wahrheitstabellen direkt in den Eigenschaften',items:[
+      'Der Ansicht-Menüpunkt heißt jetzt schlicht „Wahrheitstabellen anzeigen“. Die gespeicherte Einstellung zum automatischen Aufklappen bleibt erhalten.',
+      'Der vertraute Button „Wahrheitstabelle ansehen“ ist wieder da. Seine Ein- und Ausgangsknöpfe, die Belegungsvorschau und die Tabelle erscheinen beim Öffnen direkt darunter, innerhalb derselben Eigenschaftenkarte.',
+      'Die doppelt angezeigte Gatterbeschreibung wurde aus allen Wahrheitstabellen entfernt. Ein- und Ausklappen sowie Wechsel zwischen Gattern behalten ihren Zustand zuverlässig.'
+    ]},
+    {version:'V103',title:'Einklappbare Gatter-Wahrheitstabellen',items:[
+      'Unter „Ansicht“ lässt sich dauerhaft einstellen, ob die Wahrheitstabelle eines ausgewählten Gatters sofort geöffnet oder zunächst eingeklappt angezeigt wird.',
+      'Im Eigenschaftenbereich ist die Wahrheitstabelle jetzt ein animiert ein- und ausklappbarer Abschnitt, abgestimmt auf die übrigen Seitensektionen. Das separate Öffnen-Feld entfällt.',
+      'Für Unterfunktionen gibt es weder Wahrheitstabellen noch dazugehörige Kontextmenüpunkte mehr. Sie werden weiterhin über „Simulieren“ interaktiv getestet.'
+    ]},
+    {version:'V102',title:'Wahrheitstabellen im Eigenschaftenbereich',items:[
+      'Die Wahrheitstabelle erscheint direkt in der rechten Eigenschaftenleiste statt als schwebendes Fenster. Beim Wechsel des Bauteils aktualisiert sie sich weiter automatisch, und große Tabellen sind innerhalb des Bereichs scrollbar.',
+      'In der Belegungsvorschau werden gleichzeitige Eingangswerte durch ∧ verbunden: beispielsweise A = 0 ∧ B = 0 → Q = 1. Das Zeichen beschreibt dabei die Kombination der Bedingungen, nicht den Gattertyp.',
+      'Im Kontextmenü einer Unterfunktions-Instanz heißt die Standard-Simulation jetzt „Simulieren · Leere Belegung“. Die Rückkopplungs- und Simulationslogik bleibt unverändert.'
+    ]},
+    {version:'V101',title:'Sanfte Testinteraktion und kompakte Wahrheitstabellen',items:[
+      'Ziehen oder längeres Gedrückthalten beendet einen Unterfunktions-Test nicht und verändert keine Auswahl. Nur ein kurzer Klick schaltet einen Eingang um oder beendet den Test auf freier Fläche.',
+      'Wahrheitstabellen schweben kompakt über der Arbeitsfläche. Ein Klick auf ein anderes Gatter oder eine Unterfunktion wechselt unmittelbar zur entsprechenden Tabelle; ein Klick auf andere Elemente schließt sie.',
+      'Unnötige Hinweise unter den Tabellen entfallen. Falls ein zusätzlicher Hinweis nötig ist, beginnt er mit „Hinweis:“. Die Zeilen verwenden eine einheitliche Hintergrundfarbe ohne Schachbrettmuster.',
+      'Die Überschrift des Testmodus zeigt nur noch den Namen. Das Kontextmenü eines Unterfunktions-Tabs verwendet nur „Simulieren“.',
+      'Unbestimmte Ausgänge (?) werden oben im Testfenster gelb hervorgehoben; ein hochohmiger Zustand Z bleibt von 0 unterschieden.'
+    ]},
+    {version:'V100',title:'Präzise Testfensterbreite und interaktive Wahrheitstabellen',items:[
+      'Der Testrahmen ist genau so breit, dass seine rechte Innenkante mit der letzten Kachel der breiteren Anschlussgruppe abschließt. Die Einteilung in bis zu fünf Spalten bleibt unverändert; Scrollleisten nehmen dafür keine Kachelbreite weg.',
+      'Für AND, OR, NOT, NAND, NOR, XOR, XNOR, Buffer und TriState stehen einheitliche Wahrheitstabellen zur Verfügung – in der Bauteilpalette, im Eigenschafteninspektor und per Rechtsklick auf ein platziertes Gatter.',
+      'Unterfunktionen mit höchstens sechs Eingängen erhalten automatisch berechnete Wahrheitstabellen. Hierfür wird jede Eingangsbelegung getrennt und ohne Änderung am gespeicherten Entwurf ausgewertet.',
+      'Eingangs-Knöpfe und anklickbare Tabellenzeilen ermöglichen das Ausprobieren von Kombinationen. HIGH/LOW, Z und unbestimmte Ergebnisse sind verständlich gekennzeichnet.',
+      'Speicherhaltige, getaktete, zeitabhängige oder rückgekoppelte Unterfunktionen zeigen eine Erklärung statt einer irreführenden statischen Wahrheitstabelle.'
+    ]},
+    {version:'V099',title:'Gleich große Testkacheln und präzise Fensterbreite',items:[
+      'Alle Ein- und Ausgangskacheln besitzen die feste Größe 120 × 29 px. Lange Anschlussnamen werden anhand ihrer Textbreite mit ... gekürzt; der vollständige Name bleibt als Tooltip und zugängliche Beschriftung erhalten.',
+      'Die Testleiste hält bei ausreichend Platz mindestens drei Kachelspalten frei. Die Breitenberechnung berücksichtigt Rahmen, Innenabstände, Zeilenbezeichnung und eine Scrollbarreserve, sodass drei bis fünf Kacheln nicht vorzeitig umbrechen.',
+      'Die Erklärung zum unbestimmten Ausgangszustand wurde aus der Testmodus-Hilfe entfernt.',
+      'Die ×-Symbole an Unterfunktions-Tabs bleiben während des Testmodus sichtbar und funktionieren weiterhin mit der Löschbestätigung.'
+    ]},
+    {version:'V098',title:'Flexible Testleiste mit Hilfe und gleich großen Anschlusskacheln',items:[
+      'Eingangs- und Ausgangskacheln verwenden dieselbe dynamisch ermittelte Breite und feste Höhe. Lange Beschriftungen werden bei Bedarf gekürzt und bleiben als Tooltip vollständig zugänglich.',
+      'Die Testleiste passt ihre Breite an die Anschlussanzahl an, zeigt maximal fünf Kacheln nebeneinander und bricht weitere innerhalb der Eingangs- beziehungsweise Ausgangsgruppe um. Beide Gruppen starten exakt auf derselben Linie; auf schmalen Flächen stehen ihre Überschriften oberhalb.',
+      'Bei sehr vielen Ports wird die Testleiste bis zur verfügbaren Arbeitsflächenhöhe erweitert und kann intern gescrollt werden, ohne Anschlüsse auszublenden.',
+      'Der Schließen-Knopf zeigt nur noch ×. Daneben gibt es eine Schaltfläche ?, die die Bedienung und den unveränderten Entwurf erklärt.',
+      'Die dauerhafte Hinweiszeile unter den Testanschlüssen wurde entfernt.'
+    ]},
+    {version:'V097',title:'Klarere Statusanzeige für Unterfunktions-Simulationen',items:[
+      'Die Schaltfläche „Simulieren“ in der oberen Boardleiste wurde entfernt. Unterfunktionen lassen sich weiterhin per Rechtsklick auf ihre Instanz oder ihren Tab testen.',
+      'Modul-Eingänge und Modul-Ausgänge behalten im Testmodus ausgeschaltet ihre normalen Körperfarben und werden immer orange umrandet. Bei aktivem Signal wird der jeweilige Körper grün.',
+      'Eingangs- und Ausgangskacheln im Testbanner besitzen jetzt identische graue Aus- und grüne An-Zustände.',
+      'Eingänge und Ausgänge werden in zwei getrennten, bei Bedarf intern umbrechenden Zeilen angezeigt.'
+    ]},
+    {version:'V096',title:'Unterfunktions-Tests und zuverlässige Kabelführung',items:[
+      'Beim Verformen einer Kabelstrecke werden fremde Pins nicht mehr gelb hervorgehoben.',
+      'Die automatische Kabelführung verwendet für alle A*-Grenzen ein einheitliches Koordinatensystem. Damit verschwinden unnötige Ausrufezeichen bei räumlich freien Verbindungen – auch weit vom Weltursprung entfernt. Fertige Rasterrouten werden abschließend auf Kollisionen geprüft.',
+      'Rechtsklick auf eine platzierte Unterfunktion bietet Testen mit aktueller Eingangsbelegung oder mit allen Eingängen aus. Die Testansicht übernimmt bei aktueller Belegung außerdem den privaten Zustand der angeklickten Instanz.',
+      'Innerhalb einer Unterfunktion kann über „Simulieren“ ein isolierter Testlauf mit 0-belegten Eingängen gestartet werden. Die Eingangsknöpfe auf der Testleiste oder im Schaltkreis schalten zwischen 0 und 1. Ausgänge werden live angezeigt.',
+      'Ein gut sichtbares Testbanner, die Statusleiste sowie Beenden, Esc oder ein Klick auf freie Fläche kennzeichnen und verlassen den Testmodus. Der Originalschaltkreis und seine Speicherzustände bleiben unverändert.',
+      'Die Überschrift „Essenzielle Tastenkürzel“ bleibt auch in eingeklappter Darstellung einzeilig.'
+    ]},
     {version:'V095',title:'Pfeilausrichtung der Tastenkürzel korrigiert',items:[
       'Die beiden Zustände des Pfeils im Bereich „Essenzielle Tastenkürzel“ sind jetzt optisch auf die vertikale Mitte der Überschrift abgestimmt. Der ausgeklappte, nach unten offene Pfeil wurde wegen seiner Glyphenform etwas nach oben korrigiert; der eingeklappte, seitlich zeigende Pfeil erhielt den zuvor zu hohen vertikalen Versatz entfernt.'
     ]},
@@ -6572,6 +7835,7 @@
   scene.addEventListener('pointerleave',()=>clearNearestPinHover());
   scene.addEventListener('contextmenu',e=>{
     e.preventDefault();
+    if(moduleSimulation)return;
     const savedTarget=rightClickContextTarget;rightClickContextTarget=null;
     if(performance.now()<suppressObjectContextMenuUntil)return;
     const nodeEl=e.target.closest&&e.target.closest('[data-node]');
@@ -6584,6 +7848,7 @@
     else{closeObjectContextMenu();closeWireContextMenu();}
   });
   scene.addEventListener('dblclick',e=>{
+    if(moduleSimulation){e.preventDefault();return;}
     const nodeEl=e.target.closest && e.target.closest('[data-node]');
     const node=nodeEl ? byId(nodeEl.dataset.node) : null;
     if (node && node.type==='LABEL') { e.preventDefault(); e.stopPropagation(); beginInlineLabelEdit(node); }
@@ -6606,7 +7871,7 @@
   // Touch long-press opens the same object menu as a desktop right-click.
   // A second touch interrupts the single-pointer edit and starts anchored pinch zoom.
   scene.addEventListener('pointerdown',e=>{
-    if(e.pointerType!=='touch')return;
+    if(e.pointerType!=='touch'||moduleSimulation)return;
     activeTouchPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(activeTouchPointers.size>=2){
       clearTouchLongPress();
@@ -6647,8 +7912,42 @@
   scene.addEventListener('pointerup',finishTouchPointer,true);
   scene.addEventListener('pointercancel',finishTouchPointer,true);
 
+  // Im Testmodus gelten kurze Klicks als Umschalten/Beenden. Ein Ziehen oder
+  // längeres Gedrückthalten bewirkt hingegen weder Auswahl noch Testende.
+  let simulationClickGesture=null;
+  window.addEventListener('pointermove',e=>{
+    const pending=simulationClickGesture;
+    if(!pending||pending.pointerId!==e.pointerId)return;
+    if(Math.hypot(e.clientX-pending.x,e.clientY-pending.y)>5)pending.moved=true;
+    e.preventDefault();e.stopImmediatePropagation();
+  },true);
+  window.addEventListener('pointerup',e=>{
+    const pending=simulationClickGesture;
+    if(!pending||pending.pointerId!==e.pointerId)return;
+    simulationClickGesture=null;
+    e.preventDefault();e.stopImmediatePropagation();
+    if(!moduleSimulation||pending.moved)return;
+    const node=pending.nodeId&&byId(pending.nodeId);
+    if(node?.type==='MODULE_INPUT'){
+      const index=modulePortNodes({nodes},'MODULE_INPUT').findIndex(port=>port.id===node.id);
+      if(index>=0)setModuleSimulationInput(index,moduleSimulation.inputs[index]!==true);
+    }else if(node&&(node.type==='INPUT'||node.type==='PUSH')){
+      node.state=!node.state;render(false,false);
+    }else if(performance.now()-pending.started<=350)endModuleSimulation();
+  },true);
+  window.addEventListener('pointercancel',e=>{
+    if(simulationClickGesture?.pointerId===e.pointerId)simulationClickGesture=null;
+  },true);
+
   scene.addEventListener('pointerdown', e => {
     currentPointer = {x:e.clientX,y:e.clientY};
+    if(moduleSimulation&&e.button===0){
+      const nodeElement=e.target.closest&&e.target.closest('[data-node]');
+      const node=nodeElement&&byId(nodeElement.dataset.node);
+      simulationClickGesture={pointerId:e.pointerId,x:e.clientX,y:e.clientY,nodeId:node?.id||null,started:performance.now(),moved:false};
+      try{scene.setPointerCapture(e.pointerId);}catch(_){}
+      e.preventDefault();e.stopPropagation();return;
+    }
     if (e.button === 0 && selectedPaletteType) {
       selectedPaletteType = null;
       document.querySelectorAll('.palette-item.selected').forEach(btn => btn.classList.remove('selected'));
@@ -7215,6 +8514,15 @@
   }
 
   window.addEventListener('keydown', e => {
+    if(moduleSimulation){
+      if(e.key==='Escape'){e.preventDefault();clearArrowNavigation();endModuleSimulation();return;}
+      if(!editingTarget()){
+        if(e.key==='+'||e.key==='='||e.code==='NumpadAdd'){e.preventDefault();zoomBy(1,!!e.shiftKey);return;}
+        if(e.key==='-'||e.key==='−'||e.code==='NumpadSubtract'){e.preventDefault();zoomBy(-1,!!e.shiftKey);return;}
+        if(e.key==='Tab'||e.key==='Shift'||e.key==='Control'||e.key==='Alt'||e.key==='Meta')return;
+        e.preventDefault();return;
+      }
+    }
     const navigationKey=['Shift','Control','Meta','Alt','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-','−'].includes(e.key)||['NumpadAdd','NumpadSubtract'].includes(e.code);
     if (armedFrom && !navigationKey && e.key!=='Escape') clearArmedPin();
     if(e.key==='Shift'){
