@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
-<title>GatterLab V120</title>
+<title>GatterLab V126</title>
 <style>
   :root {
     color-scheme: dark;
@@ -26,7 +26,7 @@
   html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font: 14px/1.4 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   button { font: inherit; color: inherit; }
   .app { width: 100%; height: 100%; display: flex; flex-direction: column; min-width: 320px; }
-  .topbar { height: 43px; flex: 0 0 43px; min-height:43px; display: flex; align-items: center; gap: 0; padding: 0; background: #111a26; border-bottom: 1px solid #273547; z-index: 5; }
+  .topbar { position:relative; height: 43px; flex: 0 0 43px; min-height:43px; display: flex; align-items: center; gap: 0; padding: 0; background: #111a26; border-bottom: 1px solid #273547; z-index: 100; }
   .brand { display: flex; align-items: center; gap: 8px; flex:0 0 224px; width:224px; min-width:224px; height:100%; padding:0 14px; background:#0b141f; border-right:1px solid #273547; }
   .brand-mark { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient(145deg,#4b9cfa,#66e0bc); color: #081421; font-size: 18px; font-weight: 900; box-shadow: 0 4px 14px #4b9cfa33; }
   .brand-name { font-weight: 750; letter-spacing: .2px; font-size: 15px; }
@@ -55,12 +55,29 @@
   .btn.danger:hover { border-color: #a94f5b; background: #432631; }
   .btn:focus-visible, .palette-item:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
   .shortcut { color: #8495a9; font-size: 10px; margin-left: 3px; }
-  .workspace { flex: 1; min-height: 0; position:relative; display: grid; --left-panel-width:224px; --right-panel-width:230px; grid-template-columns:var(--left-panel-width) minmax(0,1fr) var(--right-panel-width); transition:grid-template-columns .24s cubic-bezier(.2,.75,.25,1); }
+  .workspace { flex: 1; min-height: 0; position:relative; display: grid; --left-panel-full-width:224px; --left-panel-width:var(--left-panel-full-width); --right-panel-width:230px; grid-template-columns:var(--left-panel-width) minmax(0,1fr) var(--right-panel-width); transition:grid-template-columns .24s cubic-bezier(.2,.75,.25,1); }
+  /* Der Griff kann die Palette in eine schmale Einspaltenansicht einrasten lassen. */
+  .workspace.left-narrow { --left-panel-width:min(118px,var(--left-panel-full-width)); }
+  .workspace.left-narrow .palette-grid { grid-template-columns:minmax(0,1fr); }
+  .workspace.left-narrow .side-head { padding-inline:9px; }
+  .workspace.left-narrow .side-hint { display:none; }
+  .workspace.left-narrow .palette-search-wrap { padding-inline:7px; }
+  .workspace.left-narrow .palette-search { padding-inline:6px; font-size:10px; }
+  .workspace.left-narrow .palette-section { padding-inline:7px; }
+  .workspace.left-narrow .palette-section-toggle { padding-inline:3px; gap:4px; font-size:9px; letter-spacing:.3px; }
+  .palette-category-name { flex:1 1 auto; min-width:0; text-align:left; white-space:nowrap; }
+  .palette-category-short { display:none; }
+  .workspace.left-narrow .palette-category-full { display:none; }
+  .workspace.left-narrow .palette-category-short { display:inline; }
+  .workspace.left-resizing { grid-template-columns:var(--left-panel-width) minmax(0,1fr) var(--right-panel-width) !important; transition:none !important; }
+  .workspace.left-resizing > .sidebar.left { opacity:1; pointer-events:auto; border-right-width:1px; }
   .workspace.left-collapsed { grid-template-columns:0 minmax(0,1fr) var(--right-panel-width); }
   .workspace.right-collapsed { grid-template-columns:var(--left-panel-width) minmax(0,1fr) 0; }
   .workspace.left-collapsed.right-collapsed { grid-template-columns:0 minmax(0,1fr) 0; }
   .sidebar { background: var(--panel); min-width:0; min-height: 0; overflow-y: auto; border-right: 1px solid #273547; transition:opacity .16s ease; }
+  .sidebar.left { overflow-x:hidden; }
   .workspace.left-collapsed > .sidebar.left, .workspace.right-collapsed > .sidebar.right { opacity:0; pointer-events:none; overflow:hidden; border-width:0; }
+  .workspace.left-collapsed.left-resizing > .sidebar.left { opacity:1; pointer-events:auto; border-right-width:1px; }
   .sidebar.right { border-right: 0; border-left: 1px solid #273547; padding-bottom: 0; display:flex; flex-direction:column; overflow:hidden; position:relative; }
   #inspector { flex:1 1 auto; min-height:0; overflow-y:auto; padding-bottom:8px; }
   /* Beide Spaltenüberschriften sitzen mittig auf derselben Höhe wie die Zoomsteuerung. */
@@ -177,7 +194,13 @@
   .panel-toggle:hover { opacity:1; background:#2b4660; box-shadow:0 7px 20px #0009; }
   .panel-toggle:focus-visible { outline:2px solid var(--accent-2); outline-offset:2px; }
   /* Die Griff-Außenkanten liegen bündig auf den Grenzen der Seitenleisten. */
-  .panel-toggle-left { left:0; transform:translateY(-50%); border-left:0; border-radius:0 10px 10px 0; }
+  .panel-toggle-left { left:0; transform:translateY(-50%); border-left:0; border-radius:0 10px 10px 0; touch-action:none; cursor:ew-resize; }
+  .panel-toggle-left:active { background:#305372; }
+  .panel-toggle-left::after { content:''; position:absolute; right:4px; top:50%; width:2px; height:19px; transform:translateY(-50%); border-radius:4px; background:#8eabc6; opacity:.5; pointer-events:none; }
+  .panel-toggle-left svg { transform:translateX(-3px); }
+  .panel-toggle-left.is-dragging { opacity:1; border-color:#78bff0; box-shadow:0 0 0 2px #63b9ec55,0 6px 24px #0009; }
+  .panel-width-hint { position:absolute; left:30px; top:50%; transform:translateY(-50%); z-index:12; padding:6px 9px; border:1px solid #5397c2; border-radius:7px; background:#183249; color:#d9eeff; font-size:10px; font-weight:650; white-space:nowrap; box-shadow:0 5px 16px #0008; pointer-events:none; }
+  .panel-width-hint[hidden] { display:none; }
   .panel-toggle-right { right:0; transform:translateY(-50%); border-right:0; border-radius:10px 0 0 10px; }
   .workspace.left-collapsed .panel-toggle-left { left:0; }
   .workspace.right-collapsed .panel-toggle-right { right:0; }
@@ -190,9 +213,9 @@
   .board-context { display:flex; align-items:center; gap:4px; min-width:0; flex:1 1 auto; overflow:hidden; height:100%; }
   .board-tabs { display:flex; flex:0 1 auto; width:max-content; align-items:center; gap:4px; min-width:0; max-width:calc(100% - 36px); height:100%; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
   .board-tabs::-webkit-scrollbar { display:none; }
-  /* Ohne Unterfunktionen darf der Trenner rechts aus dem Tab-Scrollbereich herausragen. */
-  .board-tabs:not(.has-modules) { overflow:visible; }
-  .board-tab { height:27px; flex:0 0 auto; display:inline-flex; align-items:center; gap:7px; max-width:205px; padding:4px 9px; border:1px solid transparent; border-radius:7px; background:transparent; color:#91a4b9; font-size:10px; cursor:pointer; white-space:nowrap; }
+  /* Lange Namen bleiben vollständig im Tab. Bei knapper Breite scrollt die Tab-Leiste. */
+  .board-tabs:not(.has-modules) { padding-right:6px; }
+  .board-tab { height:27px; flex:0 0 auto; display:inline-flex; align-items:center; gap:7px; max-width:none; padding:4px 9px; border:1px solid transparent; border-radius:7px; background:transparent; color:#91a4b9; font-size:10px; cursor:pointer; white-space:nowrap; }
   .board-tab:hover { color:#e3eef9; background:#1c2b3b; border-color:#30465e; }
   .board-tab.module-board-tab { cursor:pointer; gap:3px; }
   .board-tab.module-board-tab:active { cursor:grabbing; }
@@ -207,11 +230,11 @@
   .board-tab.simulating { color:#bcffe3; background:#17493b; border-color:#46c79a; box-shadow:0 0 0 1px #46c79a20; }
 .board-tab.renaming { position:relative; z-index:2; background:#263d53; border-color:#405a73; box-shadow:inset 0 0 0 1px #67b7ff66,0 0 0 1px #67b7ff22; }
 .board-tab.active.renaming { background:#2a4a66; border-color:#37678f; box-shadow:inset 0 0 0 1px #8acbfa99,0 0 0 1px #8acbfa22; }
-  .board-tab-label { display:inline-block; overflow:hidden; text-overflow:ellipsis; max-width:160px; cursor:pointer; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+  .board-tab-label { display:inline-block; overflow:visible; text-overflow:clip; max-width:none; cursor:pointer; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
   /* Der echte Tab-Text bleibt während der Eingabe sichtbar und ist die maßgebliche Glyphenebene.
      Das transparente Eingabefeld liegt exakt darüber; so bleibt der Text pixelgenau an derselben
      Stelle, während der echte Label-Inhalt die Tabbreite und damit Nachbartabs dynamisch anpasst. */
-  .board-tab-rename-input { position:absolute; z-index:4; display:block; flex:none; box-sizing:content-box; min-width:0; max-width:160px; margin:0; padding:0; height:14px; border:0; border-radius:4px; outline:1px solid #65c8ed; outline-offset:2px; background:rgba(16,112,138,.10); color:transparent !important; -webkit-text-fill-color:transparent; text-shadow:none; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:10px; font-weight:inherit; line-height:14px; letter-spacing:0; text-align:left; vertical-align:top; caret-color:#ffffff; box-shadow:0 0 0 1px #67c9ef22; appearance:none; }
+  .board-tab-rename-input { position:absolute; z-index:4; display:block; flex:none; box-sizing:content-box; min-width:0; max-width:none; margin:0; padding:0; height:14px; border:0; border-radius:4px; outline:1px solid #65c8ed; outline-offset:2px; background:rgba(16,112,138,.10); color:transparent !important; -webkit-text-fill-color:transparent; text-shadow:none; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:10px; font-weight:inherit; line-height:14px; letter-spacing:0; text-align:left; vertical-align:top; caret-color:#ffffff; box-shadow:0 0 0 1px #67c9ef22; appearance:none; }
   .board-tab-rename-input:focus { outline-color:#8cddfa; background:rgba(22,136,164,.16); color:transparent !important; -webkit-text-fill-color:transparent; box-shadow:0 0 0 1px #8cddfa55,0 0 7px #42b8e733; text-decoration:none; }
   .board-tab-rename-input::selection { color:transparent; background:rgba(103,183,255,.20); }
   .board-tab-rename-input.too-long { color:#ffedf0; outline-color:#ff8291; background:rgba(139,52,64,.5); box-shadow:0 0 0 1px #e36b7b66; }
@@ -393,7 +416,7 @@
   .node.output-node.on .body { stroke: #56e5a4; fill: #193d34; filter: drop-shadow(0 0 8px #46dca077); }
   .node.output-node.on .state-text { fill: #b7ffdc; }
   .pin { fill: #0e1722; stroke: #8da5bf; stroke-width: 1.5; cursor: crosshair; }
-  .pin:hover { fill: #75c6ff; stroke: #d7f1ff; stroke-width: 2.2; }
+  .stage:not(.placing) .pin:hover { fill: #75c6ff; stroke: #d7f1ff; stroke-width: 2.2; }
   .pin.logic-unknown { fill:#8c754d; stroke:#e6bd68; stroke-width:2; }
   .pin.nearest-hover:not(.snap-target) { fill:#ffd36e; stroke:#fff1c5; stroke-width:2; filter:drop-shadow(0 0 4px #ffd36eaa); }
   .pin.snap-target { fill:#52e6a4; stroke:#e0fff0; stroke-width:3; filter:drop-shadow(0 0 7px #52e6a4); }
@@ -718,7 +741,7 @@
   .inline-label-editor { position:absolute; z-index:8; box-sizing:border-box; min-width:0; min-height:0; padding:7px 11px; border:1px dashed #72849a; border-radius:7px; outline:2px solid #4da6ff55; background:#1b2836; color:#e6eef8; font-family:Inter,ui-sans-serif,system-ui,sans-serif; font-size:12px; font-weight:400; font-style:normal; text-decoration:none; letter-spacing:.3px; text-align:center; white-space:pre; overflow:hidden; resize:none; box-shadow:0 4px 16px #0005; }
 
   @media (max-width: 980px) {
-    .workspace { --left-panel-width:190px; --right-panel-width:210px; }
+    .workspace { --left-panel-full-width:190px; --right-panel-width:210px; }
     .brand { min-width: 170px; }
   }
   @media (max-width: 650px) {
@@ -729,7 +752,7 @@
     .menu-trigger { padding:4px 6px; font-size:10px; }
     .menu-popover { min-width:210px; }
       .topbar .btn .btn-text { display:none; }
-    .workspace { --left-panel-width:118px; --right-panel-width:200px; }
+    .workspace { --left-panel-full-width:118px; --right-panel-width:200px; }
     .palette-grid { grid-template-columns:1fr; }
     .palette-item { height:68px; min-height:68px; flex-direction:column; align-items:stretch; gap:4px; }
     .palette-item-standard { display:grid; height:68px; min-height:68px; grid-template-rows:17px minmax(0,1fr) 9px; gap:0; padding:4px 5px 3px; }
@@ -760,8 +783,8 @@
     .section-label { padding:7px 3px; font-size:9px; }
     .stage-caption { display:none; }
     .board-tab { padding:4px 6px; max-width:205px; }
-    .board-tab-label { max-width:160px; }
-    .board-tab-rename-input { max-width:172px; }
+    .board-tab-label { max-width:none; }
+    .board-tab-rename-input { max-width:none; }
     .board-tabs { max-width:calc(100% - 32px); }
     .add-board-btn { width:27px; padding:3px 0 !important; justify-content:center; }
     .add-board-btn .btn-text, .add-board-btn .add-board-space { display:none; }
@@ -769,6 +792,82 @@
     .stage-actions { gap:1px; }
     .stage-actions .btn { padding:4px 6px; }
   }
+  /* Unterrichtsmodus: eine ruhige Arbeitskarte direkt neben der Schaltung. */
+  .lesson-launch { margin-right:9px; font-size:12px; border-color:#3b6d78; color:#b5f4e0; background:#15313b; }
+  .lesson-launch:hover,.lesson-launch.active { background:#20505a; border-color:#54bba4; color:#e5fff7; }
+  .lesson-panel { position:absolute; left:12px; top:12px; bottom:12px; width:min(338px,calc(100% - 24px)); z-index:16; display:flex; flex-direction:column; border:1px solid #405b71; border-radius:13px; background:#142232f5; box-shadow:0 13px 35px #0009; overflow:hidden; backdrop-filter:blur(9px); touch-action:pan-y; }
+  .lesson-panel[hidden] { display:none !important; }
+  .lesson-panel button { cursor:pointer; }
+  .lesson-panel .lesson-top { display:flex; align-items:center; gap:9px; padding:10px 13px; border-bottom:1px solid #32485c; background:linear-gradient(115deg,#1b3947,#1b293a); }
+  .lesson-panel .lesson-icon { width:31px; height:31px; display:grid; place-items:center; border:1px solid #448a86; background:#214f57; border-radius:9px; font-size:16px; }
+  .lesson-panel button.lesson-icon { padding:0; cursor:pointer; color:#b8f4e0; flex:none; }
+  .lesson-panel button.lesson-icon:hover { background:#316675; border-color:#66cfba; color:#fff; }
+  .lesson-panel button.lesson-icon:focus-visible { outline:2px solid #a8f6e0; outline-offset:2px; }
+  .lesson-top-copy { flex:1; min-width:0; }
+  .lesson-eyebrow { color:#81cdb8; font-size:9px; font-weight:750; text-transform:uppercase; letter-spacing:1.25px; }
+  .lesson-header-progress { display:flex; align-items:center; gap:9px; margin-top:6px; }
+  .lesson-header-progress .lesson-progress-track { flex:1; margin:0; }
+  .lesson-header-progress-count { flex:none; color:#b4eed7; font-size:10px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .lesson-icon-btn { width:31px; height:31px; flex:none; display:grid; place-items:center; padding:0; background:transparent; border:1px solid #486276; border-radius:9px; font-size:18px; line-height:1; color:#baccda; }
+  .lesson-close-glyph { display:block; transform:translateY(-2px); pointer-events:none; }
+  .lesson-icon-btn:hover { border-color:#8bb3d0; background:#2b4257; color:white; }
+  .lesson-scroll { flex:1; min-height:0; overflow-y:auto; padding:13px; scrollbar-color:#527287 transparent; }
+  .lesson-lead { font-size:12px; line-height:1.6; color:#c5d5e3; margin:0 0 13px; }
+  .lesson-lead strong { display:block; color:#e3fff6; margin-bottom:4px; }
+  .lesson-progress { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 6px; color:#9baebf; font-size:10px; }
+  .lesson-progress strong { color:#acf6cf; }
+  .lesson-progress-track { width:100%; height:5px; border-radius:8px; background:#304052; overflow:hidden; margin-bottom:15px; }
+  .lesson-progress-track>span { display:block; height:100%; background:linear-gradient(90deg,#43a2c5,#65ddad); transition:width .22s; }
+  .lesson-unit-header { display:flex; align-items:center; gap:8px; margin:15px 0 7px; font-size:10px; font-weight:800; letter-spacing:.6px; color:#9cc6cd; text-transform:uppercase; }
+  .lesson-unit-header:after { content:''; flex:1; height:1px; background:#324b5e; }
+  .lesson-list { display:grid; gap:6px; }
+  .lesson-list-btn { text-align:left; display:flex; align-items:center; gap:9px; width:100%; padding:9px 10px; background:#1d3042; border:1px solid #334c60; border-radius:9px; color:#dbeaf4; font-size:11px; }
+  .lesson-list-btn:hover { background:#29465d; border-color:#568aa2; }
+  .lesson-list-btn.current { border-color:#64b7a3; background:#244b50; }
+  .lesson-list-btn:disabled { cursor:not-allowed; opacity:.53; background:#192837; border-color:#2b3e50; }
+  .lesson-list-btn:disabled:hover { background:#192837; border-color:#2b3e50; }
+  .lesson-step { width:24px; height:24px; flex:none; display:grid; place-items:center; border-radius:50%; border:1px solid #49677b; color:#a9c4d6; font-size:10px; font-weight:800; }
+  .lesson-step.done { background:#29634e; border-color:#46c994; color:#cbffeb; }
+  .lesson-list-name { flex:1; }
+  .lesson-done-mark { color:#73e5aa; font-weight:800; }
+  .lesson-back { background:transparent; border:0; color:#96d5d7; padding:0; font-size:11px; margin-bottom:11px; }
+  .lesson-back:hover { text-decoration:underline; color:#d9ffff; }
+  .lesson-kicker { color:#a2e7d2; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.75px; }
+  .lesson-name { font-size:19px; font-weight:800; line-height:1.25; margin:5px 0 12px; color:#f2fcff; }
+  .lesson-intro { padding:12px; margin:0 0 13px; background:#213d49; border:1px solid #416f76; border-radius:10px; }
+  .lesson-intro h3 { margin:0 0 7px; font-size:12px; color:#aff5d8; }
+  .lesson-intro p { margin:0; font-size:11px; line-height:1.65; color:#d0e7e6; }
+  .lesson-intro button { margin-top:9px; color:#91e5ca; border:0; background:transparent; padding:0; font-size:11px; }
+  .lesson-objective { color:#e4eefa; font-size:12px; line-height:1.6; margin:0 0 11px; }
+  .lesson-notice { font-size:11px; line-height:1.55; color:#a2b7c8; background:#192b3b; border-radius:9px; padding:10px 11px; margin-bottom:12px; }
+  .lesson-actions { display:flex; gap:7px; flex-wrap:wrap; margin:12px 0; }
+  .lesson-action { flex:1; min-width:90px; border-radius:8px; border:1px solid #436176; background:#24394c; color:#d9eff8; padding:9px 10px; font-size:11px; font-weight:650; }
+  .lesson-action:hover { background:#335068; }
+  .lesson-action.primary { background:#257965; border-color:#39bc99; color:#edfff6; }
+  .lesson-action.primary:hover { background:#32977a; }
+  .lesson-action:disabled { cursor:not-allowed; opacity:.45; }
+  .lesson-action:focus-visible,.lesson-list-btn:focus-visible,.lesson-icon-btn:focus-visible { outline:2px solid #9ae9d5; outline-offset:2px; }
+  .lesson-hint { background:#403826; border:1px solid #7a653a; border-radius:8px; color:#ffe2a5; padding:10px; margin-bottom:11px; font-size:11px; line-height:1.6; }
+  .lesson-result { margin-top:12px; border-radius:9px; border:1px solid #4f7183; padding:11px; background:#192f40; }
+  .lesson-result.passed { border-color:#4ab98f; background:#1b3b36; }
+  .lesson-result.failed { border-color:#9e7652; background:#342c2c; }
+  .lesson-result-head { display:flex; gap:7px; align-items:center; font-size:12px; font-weight:800; margin-bottom:6px; }
+  .lesson-result.passed .lesson-result-head { color:#95f2bd; }
+  .lesson-result.failed .lesson-result-head { color:#f5bf8e; }
+  .lesson-result p { color:#d5e5ed; font-size:11px; line-height:1.55; margin:0 0 9px; }
+  .lesson-truth { border-collapse:collapse; width:100%; font-size:10px; text-align:center; font-variant-numeric:tabular-nums; }
+  .lesson-truth th,.lesson-truth td { padding:5px 3px; border-bottom:1px solid #466074; }
+  .lesson-truth th { color:#a9c3d7; font-weight:750; }
+  .lesson-truth .mismatch { color:#ffb28e; font-weight:800; background:#633d343b; }
+  .lesson-truth .match { color:#a9f3ca; }
+  .lesson-bottom { border-top:1px solid #32485c; padding:9px 12px; background:#192b3c; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .lesson-bottom[hidden] { display:none !important; }
+  .lesson-bottom small { max-width:190px; font-size:10px; line-height:1.3; color:#8fa8ba; }
+  .lesson-exit { border:1px solid #486175; color:#c7d6e3; border-radius:7px; background:#23384c; padding:7px 9px; font-size:10px; white-space:nowrap; }
+  .lesson-exit:hover { background:#33506a; }
+  .stage .modal-backdrop.show { z-index:30; }
+  .stage .confirm-backdrop.show { z-index:220; }
+  @media(max-width:730px) { .lesson-launch .btn-text { display:none; } .lesson-panel { width:min(320px,calc(100% - 24px)); } }
 </style>
 </head>
 <body>
@@ -859,6 +958,7 @@
       <button class="menu-item danger" type="button" role="menuitem" data-wire-action="delete"><span class="menu-check">×</span><span>Kabel löschen</span><span class="menu-shortcut">Entf</span></button>
     </div>
     <div class="toolbar-spacer"></div>
+    <button class="btn lesson-launch" type="button" id="lessonLaunch" aria-expanded="false" aria-controls="lessonPanel" title="Aufgabenkatalog und Übungen öffnen">▤ <span class="btn-text">Aufgaben</span></button>
     <button class="btn primary" id="shareBtn" title="Konfiguration als Link anzeigen">↗ <span class="btn-text">Link anzeigen</span></button>
   </header>
 
@@ -873,6 +973,7 @@
 
     <main class="stage-wrap">
       <button class="panel-toggle panel-toggle-left" id="togglePalettePanel" type="button" aria-label="Bauteileleiste ausblenden" aria-expanded="true" title="Bauteileleiste ausblenden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <span class="panel-width-hint" id="paletteWidthHint" aria-hidden="true" hidden>1 Spalte</span>
       <button class="panel-toggle panel-toggle-right" id="toggleInspectorPanel" type="button" aria-label="Eigenschaftenleiste ausblenden" aria-expanded="true" title="Eigenschaftenleiste ausblenden"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="stage-toolbar">
         <div class="board-context">
@@ -888,6 +989,11 @@
         </div>
       </div>
       <div class="stage" id="stage">
+        <section id="lessonPanel" class="lesson-panel" aria-label="Aufgaben und Übungen" hidden>
+          <header class="lesson-top"><button class="lesson-icon" type="button" data-lesson-action="catalog" aria-label="Alle Aufgaben anzeigen" title="Alle Aufgaben anzeigen">▤</button><div class="lesson-top-copy"><div class="lesson-eyebrow">Digitaltechnik entdecken</div><div class="lesson-header-progress" id="lessonHeaderProgress" aria-label="Lernfortschritt"></div></div><button class="lesson-icon-btn" type="button" id="lessonClose" aria-label="Aufgabenbereich ausblenden" title="Aufgabenbereich ausblenden"><span class="lesson-close-glyph">×</span></button></header>
+          <div class="lesson-scroll" id="lessonContent" aria-live="polite"></div>
+          <footer class="lesson-bottom" id="lessonFooter" hidden><small id="lessonFooterInfo">Deine freie Schaltung ist gesichert.</small><button class="lesson-exit" type="button" id="lessonExit" hidden>Zum freien Modus</button></footer>
+        </section>
         <section class="module-sim-banner" id="moduleSimulationBanner" aria-live="polite" aria-label="Unterfunktions-Simulation" hidden>
           <div class="module-sim-top"><div class="module-sim-heading"><span class="module-sim-title" id="moduleSimulationTitle">Simulation</span></div><div class="module-sim-controls"><button type="button" class="module-sim-icon-button" id="moduleSimulationHelpToggle" aria-label="Hilfe zum Testmodus" aria-controls="moduleSimulationHelp" aria-expanded="false" title="Wie funktioniert der Testmodus?">?</button><button type="button" class="module-sim-icon-button" id="moduleSimulationExit" aria-label="Simulation beenden" title="Simulation beenden">×</button></div></div>
           <div class="module-sim-help" id="moduleSimulationHelp" hidden><strong>So funktioniert der Testmodus</strong><p>Klicke auf einen Eingang oder seine Kachel, um zwischen 0 und 1 zu wechseln. Die Ausgangskacheln zeigen sofort das Ergebnis.</p><p>Der Test verändert deine gespeicherte Schaltung nicht. Über ×, Esc oder einen Klick auf die freie Arbeitsfläche kehrst du zurück.</p></div>
@@ -1043,6 +1149,16 @@
             </div>
           </div>
         </div>
+        <div class="modal-backdrop confirm-backdrop" id="lessonResetModal" role="dialog" aria-modal="true" aria-labelledby="lessonResetTitle" aria-describedby="lessonResetMessage">
+          <div class="modal confirm-modal">
+            <h2 id="lessonResetTitle">Aufgabe neu starten?</h2>
+            <div class="confirm-warning"><span class="icon">!</span><span id="lessonResetMessage">Deine bisherige Schaltung in dieser Aufgabe wird zurückgesetzt. Bereits abgeschlossene andere Aufgaben und deine freie Schaltung bleiben erhalten.</span></div>
+            <div class="modal-actions">
+              <button class="btn" id="lessonResetCancel" type="button">Abbrechen</button>
+              <button class="btn danger-solid" id="lessonResetConfirm" type="button">Aufgabe neu starten</button>
+            </div>
+          </div>
+        </div>
         <div class="modal-backdrop confirm-backdrop" id="deleteModuleModal" role="dialog" aria-modal="true" aria-labelledby="deleteModuleTitle" aria-describedby="deleteModuleMessage">
           <div class="modal confirm-modal">
             <h2 id="deleteModuleTitle">Unterfunktion „Unterfunktion“ löschen?</h2>
@@ -1133,6 +1249,19 @@
   const encodeLogicSignal = value => isLogicUnknown(value)?{__gatterlabLogicUnknown:true}:isBusSignal(value)?{__busSignal:true,width:value.width,bits:value.bits.map(encodeLogicSignal),value:isLogicUnknown(value.value)?{__gatterlabLogicUnknown:true}:value.value}:value;
   const decodeLogicSignal = value => value&&typeof value==='object'&&value.__gatterlabLogicUnknown===true?LOGIC_UNKNOWN:value&&typeof value==='object'&&value.__busSignal===true&&Array.isArray(value.bits)?busSignal(value.width,value.bits.map(decodeLogicSignal)):value;
   const STORAGE_KEY = 'gatterlab-config-v1';
+  const LESSON_ACTIVE_KEY='gatterlab-lessons-active-v1';
+  const LESSON_FREE_KEY='gatterlab-lessons-free-backup-v1';
+  const LESSON_BOARDS_KEY='gatterlab-lessons-boards-v1';
+  const LESSON_DONE_KEY='gatterlab-lessons-completed-v1';
+  let lessonActiveId=null,lessonFreeBackup=null,lessonTaskBoards={},lessonCompleted=new Set();
+  let lessonResult=null,lessonResultFingerprint=null,lessonHintIndex=0,lessonPanelOpen=false,lessonShowCatalog=true,lessonIntroDismissed=new Set();
+  try {
+    lessonActiveId=localStorage.getItem(LESSON_ACTIVE_KEY)||null;
+    const storedBoards=JSON.parse(localStorage.getItem(LESSON_BOARDS_KEY)||'{}');
+    if(storedBoards&&typeof storedBoards==='object'&&!Array.isArray(storedBoards))lessonTaskBoards=storedBoards;
+    const storedDone=JSON.parse(localStorage.getItem(LESSON_DONE_KEY)||'[]');
+    if(Array.isArray(storedDone))lessonCompleted=new Set(storedDone.filter(id=>typeof id==='string'));
+  } catch(_) {}
   const OVERLAP_STORAGE_KEY = 'gatterlab-allow-overlaps-v1';
   const WIRE_CROSS_STORAGE_KEY='gatterlab-allow-wire-object-crossings-v1';
   const GATE_SYMBOL_STYLE_STORAGE_KEY='gatterlab-gate-symbol-style-v1';
@@ -1201,6 +1330,14 @@
   const ledColorById = id => LED_COLORS.find(color=>color.id===id) || LED_COLORS[0];
   const normalizeLedColor = id => LED_COLORS.some(color=>color.id===id) ? id : DEFAULT_LED_COLOR;
   const CATEGORY_ORDER = ['Eingabeelemente','Ausgabeelemente','Logikgatter','Kombinationslogik','Flip-Flops','Sonstiges'];
+  // Nur in der eingerasteten Einspaltenansicht abgekürzte Abschnittstitel.
+  // Die internen Kategorien und der sichtbare Text in der breiten Ansicht bleiben unverändert.
+  const PALETTE_NARROW_CATEGORY_LABELS = {
+    'Eingabeelemente':'Eingabe','Ausgabeelemente':'Ausgabe',
+    'Logikgatter':'Gatter','Kombinationslogik':'Kombination',
+    'Flip-Flops':'Flip-Flops','Sonstiges':'Sonstiges',
+    'Unterfunktionen':'Funktionen','Modulschnittstellen':'Anschlüsse'
+  };
   const CATEGORY_TYPE_ORDER = {
     'Eingabeelemente':['INPUT','PUSH','HIGH','LOW','CLOCK'],
     'Ausgabeelemente':['OUTPUT','DISPLAY'],
@@ -1227,10 +1364,15 @@
   const workspace=$('workspace');
   const PANEL_LAYOUT_KEY='gatterlab-panel-layout-v1';
   let panelVisibility={left:true,right:true};
+  let leftPanelMode='full',lastOpenLeftPanelMode='full';
   let panelLayoutTransition=null;
   try {
     const savedPanels=JSON.parse(localStorage.getItem(PANEL_LAYOUT_KEY)||'null');
-    if(savedPanels&&typeof savedPanels.left==='boolean'&&typeof savedPanels.right==='boolean')panelVisibility={left:savedPanels.left,right:savedPanels.right};
+    if(savedPanels&&typeof savedPanels.left==='boolean'&&typeof savedPanels.right==='boolean'){
+      panelVisibility={left:savedPanels.left,right:savedPanels.right};
+      lastOpenLeftPanelMode=savedPanels.leftMode==='narrow'?'narrow':'full';
+      leftPanelMode=panelVisibility.left?lastOpenLeftPanelMode:'hidden';
+    }
     else if(window.matchMedia&&window.matchMedia('(max-width: 980px)').matches)panelVisibility.right=false;
   } catch(_) { if(window.matchMedia&&window.matchMedia('(max-width: 980px)').matches)panelVisibility.right=false; }
   const stage = $('stage'), scene = $('scene'), world = $('world');
@@ -1344,7 +1486,8 @@
   const selectionEmpty = () => selectedNodes.size === 0 && selectedWires.size === 0;
 
   const MODULE_TYPE_PREFIX='CUSTOM_';
-  const safeBoardName=(value,fallback='Unbenannt')=>String(value||'').replace(/[\u0000-\u001f]/g,'').replace(/ {2,}/g,' ').trim().slice(0,80)||fallback;
+  const BOARD_NAME_MAX_LENGTH=50;
+  const safeBoardName=(value,fallback='Unbenannt')=>String(value||'').replace(/[\u0000-\u001f]/g,'').replace(/ {2,}/g,' ').trim().slice(0,BOARD_NAME_MAX_LENGTH)||fallback;
   const cloneJson=value=>value==null?value:JSON.parse(JSON.stringify(value));
   function activeBoardRef(){ return activeModuleId ? moduleDefinitions.find(item=>item.id===activeModuleId) || mainBoardState : mainBoardState; }
   function saveActiveBoardState(){
@@ -1455,6 +1598,16 @@
     hideFloatingContextMenu($('boardTabContextMenu'));
     boardTabContextId=null;
   }
+  function closeAllFloatingMenus(){
+    closeMenus();
+    closeBoardTabContextMenu();
+    closeObjectContextMenu();
+    closeWireContextMenu();
+    closeMinimapContextMenu();
+  }
+  // Vor sämtlichen Pin-, Kabel- und Objektgesten schließen, auch wenn deren
+  // eigene Pointer-Handler später die Weitergabe des Ereignisses stoppen.
+  scene.addEventListener('pointerdown',()=>closeAllFloatingMenus(),true);
   function openBoardTabContextMenu(boardId,clientX,clientY){
     if(moduleSimulation)return;
     closeObjectContextMenu();closeWireContextMenu();closeMinimapContextMenu();
@@ -1472,7 +1625,7 @@
     tabs.classList.toggle('has-modules',moduleDefinitions.length>0);
     if(boardTabContextId!==null)closeBoardTabContextMenu();
     const items=[{id:'main',name:projectName,isMain:true},...moduleDefinitions.map(def=>({id:def.id,name:def.name,isMain:false}))];
-    tabs.innerHTML=items.map(item=>`<button type="button" draggable="${item.isMain||moduleSimulation?'false':'true'}" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}${moduleSimulation&&item.id===moduleSimulation.moduleId?' simulating':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis · bleibt immer ganz links':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" title="Doppelklicken zum Umbenennen">${esc(item.name)}</span>${item.isMain?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
+    tabs.innerHTML=items.map(item=>`<button type="button" draggable="${item.isMain||moduleSimulation?'false':'true'}" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}${moduleSimulation&&item.id===moduleSimulation.moduleId?' simulating':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" ${item.isMain?'':'title="Doppelklicken zum Umbenennen"'}>${esc(item.name)}</span>${item.isMain?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
     $('addModuleBtn').disabled=!!moduleSimulation;
   }
   function paletteTypeIconSvg(item){
@@ -1568,7 +1721,7 @@
       const showModuleGhost=category==='Unterfunktionen'&&showEmptyModulePlaceholder;
       if(!items.length&&!showModuleGhost)return;
       const collapsed=!query&&collapsedPaletteCategories.has(category);
-      html+=`<section class="palette-section"><button class="palette-section-toggle" type="button" data-palette-collapse="${esc(category)}" aria-expanded="${!collapsed}" title="Bereich ${collapsed?'ausklappen':'einklappen'}"><span>${esc(category)}</span><span class="palette-section-chevron" aria-hidden="true">⌄</span></button>`;
+      html+=`<section class="palette-section"><button class="palette-section-toggle" type="button" data-palette-collapse="${esc(category)}" aria-expanded="${!collapsed}" aria-label="${esc(category)}: Bereich ${collapsed?'ausklappen':'einklappen'}" title="${esc(category)} · Bereich ${collapsed?'ausklappen':'einklappen'}"><span class="palette-category-name"><span class="palette-category-full">${esc(category)}</span><span class="palette-category-short" aria-hidden="true">${esc(PALETTE_NARROW_CATEGORY_LABELS[category]||category)}</span></span><span class="palette-section-chevron" aria-hidden="true">⌄</span></button>`;
       html+=`<div class="palette-section-content${collapsed?' is-collapsed':''}" aria-hidden="${collapsed}"${collapsed?' inert':''}><div class="palette-section-content-inner"><div class="palette-grid">`;
       if(showModuleGhost) html+='<div class="module-empty-ghost" aria-disabled="true">Es sind noch keine Unterfunktionen definiert</div>';
       items.forEach(item=>{
@@ -1924,16 +2077,16 @@
     moduleDefinitions.forEach(def=>{if(def.id!==excludedModuleId)taken.add(String(def.name).toLocaleLowerCase('de'));});
     if(!taken.has(base.toLocaleLowerCase('de')))return base;
     for(let index=2;index<1000;index++){
-      const suffix=` (${index})`,candidate=base.slice(0,80-suffix.length)+suffix;
+    const suffix=` (${index})`,candidate=base.slice(0,BOARD_NAME_MAX_LENGTH-suffix.length)+suffix;
       if(!taken.has(candidate.toLocaleLowerCase('de')))return candidate;
     }
-    return `${base.slice(0,68)} (${Date.now()%100000})`;
+    return `${base.slice(0,BOARD_NAME_MAX_LENGTH-12)} (${Date.now()%100000})`;
   }
   function renameBoardById(boardId,value,commit=false,refreshTabs=true,deferPalette=false){
     const isMain=boardId==='main';
     const def=isMain?null:moduleDefinitions.find(item=>item.id===boardId);
     if(!isMain&&!def)return null;
-    const raw=String(value??'').replace(/[\u0000-\u001f]/g,'').replace(/ {2,}/g,' ').slice(0,80);
+    const raw=String(value??'').replace(/[\u0000-\u001f]/g,'').replace(/ {2,}/g,' ').slice(0,BOARD_NAME_MAX_LENGTH);
     const next=commit?uniqueBoardName(raw,isMain?null:boardId,isMain):raw;
     const old=isMain?projectName:def.name;
     if(old!==next){
@@ -1967,7 +2120,7 @@
     // mitgeführt: Der Tab und alle Nachbartabs passen sich dadurch natürlich an die neue Textlänge an.
     tab.classList.add('renaming');
     const input=document.createElement('input');
-    input.type='text';input.className='board-tab-rename-input';input.maxLength=80;input.value=currentName;
+    input.type='text';input.className='board-tab-rename-input';input.maxLength=BOARD_NAME_MAX_LENGTH;input.value=currentName;
     input.setAttribute('aria-label',`Name von ${currentName} ändern`);
     input.autocomplete='off';input.spellcheck=false;
     // Exakte Typografie des fertigen Tab-Labels übernehmen. Keine Innenabstände
@@ -1983,7 +2136,7 @@
     input.style.left=`${labelRect.left-tabRect.left-tab.clientLeft}px`;
     input.style.top=`${labelRect.top-tabRect.top-tab.clientTop}px`;
     input.style.height=`${labelRect.height}px`;
-    input.style.maxWidth='160px';
+    input.style.maxWidth='none';
     input.style.width='1px';
     tab.append(input);
 
@@ -1996,14 +2149,21 @@
       const spacing=parseFloat(style.letterSpacing)||0;
       return context.measureText(String(value||'')).width+Math.max(0,String(value||'').length-1)*spacing;
     };
-    const maxAllowedWidth=160;
     const updateInputWidth=()=>{
-      const width=Math.max(1,Math.ceil(measureWidth(input.value)+1));
-      input.style.width=`${Math.min(maxAllowedWidth,width)}px`;
+      const width=Math.max(4,Math.ceil(measureWidth(input.value)+4));
+      input.style.width=`${width}px`;
       // Das Label ist die sichtbare Enddarstellung und zugleich das Flexmaß des Tabs.
       // Sein Text wird laufend synchronisiert, damit Tabs und Nachbarn live mitwachsen/-schrumpfen.
       if(label.textContent!==input.value)label.textContent=input.value;
       tab.title=input.value||currentName;
+      // Auf schmalen Bildschirmen den Eingabecursor beim Tippen im sichtbaren
+      // Ausschnitt halten; die tatsächliche Tabbreite wird nicht beschnitten.
+      const tabs=tab.closest('.board-tabs');
+      if(tabs){
+        const tabRight=tab.getBoundingClientRect().right;
+        const viewRight=tabs.getBoundingClientRect().right;
+        if(tabRight>viewRight)tabs.scrollLeft+=tabRight-viewRight+4;
+      }
     };
     updateInputWidth();
     let tooLongTimer=null;
@@ -2018,7 +2178,8 @@
       const end=input.selectionEnd??start;
       return input.value.slice(0,start)+inserted+input.value.slice(end);
     };
-    const fits=value=>measureWidth(value)<=maxAllowedWidth+0.25;
+    // Die Tabbreite folgt der Textlänge bis zur Namensgrenze (50 Zeichen).
+    const fits=value=>String(value).length<=BOARD_NAME_MAX_LENGTH;
     input.addEventListener('beforeinput',event=>{
       if(!event.inputType||!event.inputType.startsWith('insert')||event.data==null)return;
       const inserted=event.data;
@@ -2058,11 +2219,12 @@
       input.remove();
       label.classList.remove('rename-placeholder');
       label.textContent=next;
-      label.title='Doppelklicken zum Umbenennen';
+      if(boardId==='main')label.removeAttribute('title');
+      else label.title='Doppelklicken zum Umbenennen';
       tab.classList.remove('renaming');
       tab.style.removeProperty('width');
       tab.style.removeProperty('flex');
-      tab.title=next;
+      tab.title=boardId==='main'?'Hauptschaltkreis':next;
       input._finishBoardRename=null;
     };
     input._finishBoardRename=finish;
@@ -2209,6 +2371,7 @@
     selectedPaletteType = type;
     paletteDraft=createPaletteDraft(type);
     clearArmedPin();
+    clearNearestPinHover();
     clearSelection();
     syncPaletteHighlight();
     stage.classList.add('placing');
@@ -4825,6 +4988,9 @@
     overlay.setAttribute('aria-hidden','false');
   }
   function updateCamera() {
+    // Ein Kameraschritt (Zoom, Verschieben, Minimap, Pfeiltasten) beendet
+    // sichtbare Menüs. Reine Simulationstakte rufen diese Funktion nicht auf.
+    closeAllFloatingMenus();
     camera.z = snapZoom(camera.z);
     world.setAttribute('transform', `translate(${camera.x} ${camera.y}) scale(${camera.z})`);
     $('zoomLabel').textContent = `${Math.round(camera.z * 100)}%`;
@@ -6101,7 +6267,7 @@
   // darüber gezeichneten Bauteilkörper verdeckt wird. Damit können unsichtbare
   // Trefferkreise hinter einem Objekt weder Hover noch Klick auslösen.
   function nearestRenderedPinAt(clientX,clientY) {
-    if(gesture?.kind==='node'||gesture?.kind==='palette')return null;
+    if(selectedPaletteType||gesture?.kind==='node'||gesture?.kind==='palette')return null;
     const rect=stage.getBoundingClientRect();
     const pointerWorld=worldPoint(clientX,clientY);
     const ordered=nodesInRenderOrder();
@@ -6126,7 +6292,7 @@
   }
   function updateNearestPinHover(clientX,clientY) {
     nodeLayer.querySelectorAll('.pin.nearest-hover').forEach(element=>element.classList.remove('nearest-hover'));
-    if(moduleSimulation||gesture?.kind==='node'||gesture?.kind==='palette'||gesture?.kind==='wire-segment'){
+    if(moduleSimulation||selectedPaletteType||gesture?.kind==='node'||gesture?.kind==='palette'||gesture?.kind==='wire-segment'){
       if(pinHoverLayer)pinHoverLayer.innerHTML='';
       return null;
     }
@@ -6370,7 +6536,16 @@
     // Solange eine kollidierende Einfügegruppe nur als rote Vorschau existiert,
     // ist sie noch kein Schaltungszustand: weder persistieren noch historisieren.
     if (pendingPaste) return;
-    if (persist) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(makeConfig())); } catch (_) { /* private browsing / quota */ } }
+    if (persist) { try {
+      const config=makeConfig();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      if(lessonActiveId){lessonTaskBoards[lessonActiveId]=config;localStorage.setItem(LESSON_BOARDS_KEY,JSON.stringify(lessonTaskBoards));}
+    } catch (_) { /* private browsing / quota */ } }
+    // Die Prüftabelle bleibt bei Auswahl, Schalterklick und Kamerabewegung sichtbar.
+    // Nur eine geänderte Schaltungslogik macht den alten Befund ungültig.
+    if(lessonActiveId&&lessonResult&&lessonResultFingerprint!==lessonCircuitSignature()){
+      lessonResult=null;lessonResultFingerprint=null;renderLessonPanel();
+    }
     if (!trackHistory) return;
     const snapshot = historySnapshot();
     if (undoIndex < 0) {
@@ -6404,6 +6579,236 @@
     camera=fit?{x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}:active.camera?{...active.camera}:{x:stage.clientWidth/2,y:stage.clientHeight/2,z:1};
     gridVisible=raw.gridVisible!==false;$('gridBg').style.display=gridVisible?'':'none';$('menuGridCheck').textContent=gridVisible?'✓':'';
     clearSelection();armedFrom=null;pendingPaste=null;refreshCustomModuleTypes();renderBoardTabs();renderPalette();render(false,false);saveLocal(false,true);if(fit)fitView();
+  }
+
+  // Aufgaben werden ausschließlich lokal gespeichert. Das freie Projekt liegt
+  // während der Übungen in einer separaten Sicherung und bleibt unverändert.
+  const LESSON_UNITS=[
+    {id:'signale',name:'01 · Signale und Stromkreise',title:'Vom Schalter zum Licht',intro:'Stell dir eine Lampe vor, die du mit einem Lichtschalter steuerst. Im Computer gibt es ebenfalls nur zwei eindeutige Signalwerte: 0 (aus/LOW) und 1 (an/HIGH). Wir beginnen mit einem einzigen Kabel. Danach verändern wir ein Signal mit dem ersten Logikgatter, dem NOT.'},
+    {id:'entscheidungen',name:'02 · Logische Entscheidungen',title:'Wann soll das Licht leuchten?',intro:'An einer Maschine sollen manchmal zwei Bedingungen gleichzeitig erfüllt sein – etwa eine geschlossene Tür UND ein gedrückter Startknopf. In anderen Situationen reicht eine von zwei Bedingungen. Das sind die Grundideen von AND und OR. Wir prüfen sie mit einer Wahrheitstabelle.'},
+    {id:'kombinieren',name:'03 · Gatter kombinieren',title:'Kleine Bausteine, größere Ideen',intro:'Aus wenigen einfachen Gattern lassen sich schon überraschend viele Regeln bauen. Wie bei einem Baukasten verknüpfen wir Zwischenergebnisse: Zuerst kehren wir eine gemeinsame Bedingung um, danach entwickeln wir eine kleine Alarmanlage mit drei Sensoren.'},
+    {id:'werkstatt',name:'04 · Knobelwerkstatt',title:'Genau einer – und dann rechnen',intro:'Digitaltechnik kann mehr als Lampen schalten. Ein exklusives ODER erkennt unterschiedliche Eingänge. Kombinieren wir dieses Prinzip mit AND, können zwei einzelne Bits sogar addiert werden.'}
+  ];
+  const LESSON_TASKS=[
+    {id:'licht',unit:'signale',title:'Ein Schalter, eine LED',inputs:['A'],outputs:['Y'],expected:([a])=>[a],
+      goal:'Verbinde den Ausgang des Schalters A direkt mit dem Eingang der LED Y. Klicke anschließend auf den Schalter: Die LED soll seinem Zustand folgen.',
+      note:'Ein Kabel überträgt einen Zustand von links nach rechts. 0 bedeutet LOW, 1 bedeutet HIGH. Die Bauteile sind schon vorbereitet – du musst nur die Verbindung herstellen.',
+      hints:['Die kleinen Anschlusspunkte heißen Pins. Der Ausgang befindet sich rechts am Schalter, der Eingang links an der LED.','Ziehe mit gedrückter Maustaste vom rechten Pin des Schalters zum linken Pin der LED.'],success:'Geschafft! Eine Leitung überträgt das Eingangssignal unverändert.'},
+    {id:'not',unit:'signale',title:'Das Licht umkehren',inputs:['A'],outputs:['Y'],expected:([a])=>[!a],
+      goal:'Die LED soll leuchten, wenn der Schalter AUS ist – und ausgehen, wenn er AN ist. Baue ein NOT-Gatter zwischen A und Y ein.',
+      note:'NOT bedeutet NICHT. Dieses Gatter hat nur einen Eingang und kehrt 0 in 1 sowie 1 in 0 um. Du findest es links unter „Logikgatter“.',
+      hints:['Eine direkte Leitung reicht nicht mehr: Das Signal muss verändert werden.','Verbinde A → NOT → Y. Der Ausgang des NOT-Gatters liegt rechts.'],success:'Sehr gut! Du hast die erste logische Operation aufgebaut: NICHT A.'},
+    {id:'and',unit:'entscheidungen',title:'Beide müssen zustimmen',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a&&b],
+      goal:'Eine Maschine startet nur, wenn Schutzklappe A geschlossen UND Startknopf B gedrückt ist. Die LED Y soll ausschließlich bei A=1 und B=1 leuchten.',
+      note:'Ein AND-Gatter (UND) liefert nur dann 1, wenn beide Eingänge 1 sind. Prüfe die vier möglichen Kombinationen der beiden Schalter.',
+      hints:['Hier brauchst du ein Gatter mit zwei Eingängen: AND.','Führe beide Schalter auf verschiedene Eingänge des AND-Gatters und seinen Ausgang zur LED.'],success:'Richtig! AND ist die logische UND-Verknüpfung.'},
+    {id:'or',unit:'entscheidungen',title:'Ein Sensor genügt',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a||b],
+      goal:'Eine Warnleuchte soll angehen, wenn Tür A ODER Fenster B geöffnet wird. Sie bleibt nur aus, wenn beide Melder 0 liefern.',
+      note:'OR (ODER) bedeutet: Mindestens eine Bedingung trifft zu. Auch wenn beide Schalter 1 liefern, bleibt das Ergebnis 1.',
+      hints:['Erinnere dich: Bei nur einem eingeschalteten Eingang soll das Ergebnis bereits 1 sein.','Ein OR-Gatter mit zwei Eingängen leistet genau das. Verbinde A und B mit OR, dann OR mit Y.'],success:'Genau! OR reagiert auf mindestens einen aktiven Eingang.'},
+    {id:'nand',unit:'kombinieren',title:'Nur nicht beide',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[!(a&&b)],
+      goal:'Die LED soll nur dann AUS sein, wenn A und B gleichzeitig 1 sind. Versuche diese Regel mit einem AND-Gatter und einem NOT-Gatter zu bauen.',
+      note:'Denk in zwei Schritten: Zuerst feststellen, ob BEIDE 1 sind, danach das Ergebnis umkehren. Diese Funktion heißt NAND – NOT AND.',
+      hints:['Welche Schaltung liefert 1, wenn beide Schalter 1 sind?','Schalte den Ausgang eines AND-Gatters auf den Eingang eines NOT-Gatters. Dessen Ausgang führt zur LED.'],success:'Prima! Du hast eine mehrstufige logische Schaltung verstanden.'},
+    {id:'alarm',unit:'kombinieren',title:'Alarm in der Nacht',inputs:['N','T','F'],outputs:['Y'],expected:([n,t,f])=>[n&&(t||f)],
+      goal:'Eine Alarmanlage soll nur nachts (N=1) warnen – und auch dann nur, wenn Tür T ODER Fenster F offen ist. Baue die passende Schaltung.',
+      note:'Die Bedingung lautet: Nacht UND (Tür ODER Fenster). Löse zuerst die Klammer, dann verknüpfe dieses Zwischenergebnis mit dem Nachtsignal.',
+      hints:['Verbinde zunächst T und F über OR. So entsteht „mindestens eine Öffnung“.','Verbinde das OR-Ergebnis und N mit AND. Der AND-Ausgang führt zur LED.'],success:'Die Alarmregel ist korrekt für alle acht Sensorbelegungen!' },
+    {id:'xor',unit:'werkstatt',title:'Genau einer von zwei',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a!==b],
+      goal:'Eine LED soll leuchten, wenn genau einer der beiden Schalter A und B eingeschaltet ist. Bei 0/0 und 1/1 bleibt sie aus.',
+      note:'Diese Regel heißt exklusives ODER (XOR). „Exklusiv“ bedeutet hier: Beide Eingänge dürfen nicht denselben Wert haben.',
+      hints:['Probiere das XOR-Gatter in der linken Bauteileliste aus.','Verbinde A und B mit den beiden XOR-Eingängen und den Ausgang mit Y.'],success:'Richtig! Ein XOR erkennt unterschiedliche Bits.'},
+    {id:'halbaddierer',unit:'werkstatt',title:'Zwei Bits addieren',inputs:['A','B'],outputs:['S','Ü'],expected:([a,b])=>[a!==b,a&&b],
+      goal:'Addiere die Bits A und B. Die obere LED S zeigt die Summe an, die untere LED Ü den Übertrag. Bei 1+1 soll S=0 und Ü=1 sein.',
+      note:'Eine binäre Addition hat zwei Ergebnisse: Das Summenbit S entspricht XOR; der Übertrag Ü entsteht genau dann, wenn beide Eingänge 1 sind (AND). Verwende für beide Ausgänge dieselben Eingangsschalter.',
+      hints:['Überlege getrennt, wann das Summenbit und wann der Übertrag 1 ist.','Baue einen XOR-Zweig zu S und einen AND-Zweig zu Ü. Von einem Schalter dürfen mehrere Kabel abgehen.'],success:'Gratulation! Dein Halbaddierer berechnet 0+0, 0+1, 1+0 und 1+1 korrekt.'}
+  ];
+  const lessonTask=id=>LESSON_TASKS.find(task=>task.id===id)||null;
+  const lessonUnit=id=>LESSON_UNITS.find(unit=>unit.id===id)||null;
+  function lessonCanStart(id){
+    const index=LESSON_TASKS.findIndex(task=>task.id===id);
+    return index>=0&&LESSON_TASKS.slice(0,index).every(task=>lessonCompleted.has(task.id));
+  }
+  function lessonCircuitSignature(){
+    const partIds=nodes.map(n=>[n.id,n.type,n.moduleId||'',n.busWidth||'',n.displayBits||'',n.muxInputs||'',n.demuxOutputs||'']).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+    const connections=wires.map(w=>[w.from.id,w.from.port||0,w.to.id,w.to.port||0]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    return JSON.stringify([activeModuleId,partIds,connections]);
+  }
+  function lessonStore(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch(_) {}}
+  function lessonSaveProgress(){lessonStore(LESSON_DONE_KEY,[...lessonCompleted]);}
+  function lessonCreateBoard(task){
+    const inputSpacing=task.inputs.length===3?126:task.inputs.length===2?164:0;
+    const outputSpacing=task.outputs.length===2?164:0;
+    const panelWidth=Math.min(338,Math.max(0,stage.clientWidth-24));
+    const usableWidth=Math.max(160,stage.clientWidth-panelWidth-32);
+    const zoom=Math.max(.45,Math.min(1,usableWidth/360));
+    const inputScreenX=panelWidth+16+Math.max(8,(usableWidth-300*zoom)/2);
+    const allNodes=[];
+    task.inputs.forEach((label,index)=>{
+      const node=createNodeRecord('INPUT',-45,(index-(task.inputs.length-1)/2)*inputSpacing);
+      node.id=`lesson-${task.id}-in-${index}`;node.label=label;node.state=false;allNodes.push(node);
+    });
+    task.outputs.forEach((label,index)=>{
+      const node=createNodeRecord('OUTPUT',255,(index-(task.outputs.length-1)/2)*outputSpacing);
+      node.id=`lesson-${task.id}-out-${index}`;node.label=label;allNodes.push(node);
+    });
+    const board={nodes:allNodes,wires:[],nodeDrawOrder:allNodes.map(node=>node.id),wireDrawOrder:[],camera:{x:inputScreenX+45*zoom,y:stage.clientHeight/2,z:zoom}};
+    return {version:1,projectName:`Übung · ${task.title}`,activeModuleId:null,mainBoard:board,nodes:board.nodes,wires:board.wires,camera:board.camera,gridVisible};
+  }
+  function lessonPanelVisibility(open){
+    lessonPanelOpen=!!open;
+    $('lessonPanel').hidden=!lessonPanelOpen;
+    $('lessonLaunch').classList.toggle('active',lessonPanelOpen||!!lessonActiveId);
+    $('lessonLaunch').setAttribute('aria-expanded',String(lessonPanelOpen));
+    if(lessonPanelOpen)renderLessonPanel();
+  }
+  function lessonStart(id){
+    const task=lessonTask(id);if(!task)return;
+    if(lessonActiveId===id){
+      lessonShowCatalog=false;lessonPanelVisibility(true);
+      $('lessonContent').scrollTop=0;
+      return;
+    }
+    if(!lessonCanStart(id)){
+      showToast('Löse zuerst die vorherigen Aufgaben erfolgreich.');
+      return;
+    }
+    if(!lessonActiveId){
+      lessonFreeBackup=makeConfig();
+      lessonStore(LESSON_FREE_KEY,lessonFreeBackup);
+    }else saveLocal(false,true);
+    cancelActiveGesture();clearPalettePlacement();
+    lessonActiveId=task.id;lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;lessonShowCatalog=false;
+    try{localStorage.setItem(LESSON_ACTIVE_KEY,task.id);}catch(_){}
+    undoHistory=[];undoIndex=-1;
+    let config=lessonTaskBoards[task.id]||lessonCreateBoard(task);
+    try{applyConfig(config);}catch(_){config=lessonCreateBoard(task);applyConfig(config);}
+    saveLocal(true,false);
+    lessonPanelVisibility(true);
+    $('lessonContent').scrollTop=0;
+    showToast(`Aufgabe ${LESSON_TASKS.indexOf(task)+1}: ${task.title}`);
+  }
+  function lessonExit(){
+    if(!lessonActiveId)return;
+    saveLocal(false,true);
+    let original=lessonFreeBackup;
+    if(!original){try{original=JSON.parse(localStorage.getItem(LESSON_FREE_KEY)||'null');}catch(_){}}
+    if(!original){showToast('Die Sicherung der freien Schaltung ist nicht verfügbar');return;}
+    cancelActiveGesture();clearPalettePlacement();
+    lessonActiveId=null;lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;lessonShowCatalog=true;
+    try{localStorage.removeItem(LESSON_ACTIVE_KEY);localStorage.removeItem(LESSON_FREE_KEY);}catch(_){}
+    lessonFreeBackup=null;
+    undoHistory=[];undoIndex=-1;applyConfig(original);saveLocal(true,false);
+    lessonPanelVisibility(false);
+    showToast('Freie Schaltung wiederhergestellt – Übungsfortschritt bleibt erhalten');
+  }
+  function lessonReset(){
+    const task=lessonTask(lessonActiveId);if(!task)return;
+    $('lessonResetModal').classList.add('show');
+    $('lessonResetCancel').focus();
+  }
+  function lessonResetConfirmed(){
+    const task=lessonTask(lessonActiveId);if(!task)return;
+    $('lessonResetModal').classList.remove('show');
+    lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;undoHistory=[];undoIndex=-1;
+    applyConfig(lessonCreateBoard(task));saveLocal(true,false);renderLessonPanel();
+  }
+  function lessonCheck(){
+    const task=lessonTask(lessonActiveId);if(!task)return;
+    const inputNodes=task.inputs.map((_,index)=>nodes.find(n=>n.id===`lesson-${task.id}-in-${index}`&&n.type==='INPUT'));
+    const outputNodes=task.outputs.map((_,index)=>nodes.find(n=>n.id===`lesson-${task.id}-out-${index}`&&n.type==='OUTPUT'));
+    if(activeModuleId||inputNodes.some(n=>!n)||outputNodes.some(n=>!n)){
+      lessonResult={passed:false,reason:'Mindestens ein vorbereiteter Schalter oder eine LED fehlt. Setze die Aufgabe über „Neu starten“ zurück.',rows:[]};
+      lessonResultFingerprint=lessonCircuitSignature();
+      renderLessonPanel();return;
+    }
+    const ids=new Set(nodes.map(n=>n.id));
+    const connections=wires.filter(w=>ids.has(w.from.id)&&ids.has(w.to.id));
+    const unconnected=outputNodes.some(n=>!connections.some(w=>w.to.id===n.id&&w.to.port===0))||inputNodes.some(n=>!connections.some(w=>w.from.id===n.id));
+    const rows=[];let hasUnknown=false,hasFeedback=false;
+    for(let index=0;index<(1<<task.inputs.length);index++){
+      const bits=task.inputs.map((_,bit)=>!!(index&(1<<(task.inputs.length-bit-1))));
+      const graph=nodes.map(node=>typeof structuredClone==='function'?structuredClone(node):JSON.parse(JSON.stringify(node)));
+      const graphById=new Map(graph.map(node=>[node.id,node]));
+      inputNodes.forEach((node,i)=>{graphById.get(node.id).state=bits[i];});
+      let result;
+      try{result=evaluateGraph(graph,connections,[],[],{advanceState:false});}
+      catch(_){hasUnknown=true;result={feedback:[],logicFaults:[]};}
+      if(result.feedback?.length||result.logicFaults?.length)hasFeedback=true;
+      const expected=task.expected(bits).map(Boolean);
+      const actual=outputNodes.map(node=>{
+        const value=graphById.get(node.id)?.value;
+        if(value!==true&&value!==false){hasUnknown=true;return null;}
+        return value;
+      });
+      rows.push({bits,expected,actual,correct:expected.every((value,i)=>value===actual[i])});
+    }
+    const passed=!unconnected&&!hasUnknown&&!hasFeedback&&rows.every(row=>row.correct);
+    const firstError=rows.find(row=>!row.correct);
+    let reason=passed?task.success:unconnected?'Mindestens ein vorbereiteter Anschluss hat noch kein Kabel. Prüfe alle Schalter und LED-Eingänge.':
+      hasFeedback?'Die Schaltung enthält eine Rückkopplung. Für diese Aufgabe brauchen wir eine eindeutige Schaltung ohne Rückkopplung.':
+      hasUnknown?'Mindestens ein Signal ist unbestimmt. Prüfe Verbindungen und Bauteile.':
+      firstError?`Noch nicht ganz: Bei ${task.inputs.map((name,i)=>`${name}=${firstError.bits[i]?1:0}`).join(', ')} stimmt mindestens ein LED-Ergebnis nicht.`:
+      'Die Schaltung erfüllt noch nicht alle Bedingungen.';
+    lessonResult={passed,reason,rows};lessonResultFingerprint=lessonCircuitSignature();
+    if(passed){lessonCompleted.add(task.id);lessonSaveProgress();}
+    renderLessonPanel();
+    $('lessonContent').querySelector('.lesson-result')?.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+  function lessonTruthTable(task,result){
+    if(!result?.rows?.length)return '';
+    const headers=[...task.inputs,...task.outputs.map(name=>`${name} soll`),...task.outputs.map(name=>`${name} ist`)];
+    return `<table class="lesson-truth" aria-label="Automatische Wahrheitstabellenprüfung"><thead><tr>${headers.map(name=>`<th>${esc(name)}</th>`).join('')}</tr></thead><tbody>${result.rows.map(row=>`<tr>${row.bits.map(v=>`<td>${+v}</td>`).join('')}${row.expected.map(v=>`<td>${+v}</td>`).join('')}${row.actual.map((v,i)=>`<td class="${v===row.expected[i]?'match':'mismatch'}">${v===null?'?':+v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  }
+  function renderLessonPanel(){
+    if(!lessonPanelOpen)return;
+    const content=$('lessonContent'),task=lessonTask(lessonActiveId);
+    $('lessonFooter').hidden=!task;
+    $('lessonExit').hidden=!task;
+    $('lessonFooterInfo').textContent=task?'Deine freie Schaltung ist gesichert.':'';
+    // Historische Übungsstände können aus der frei anwählbaren V121 stammen.
+    // Der Balken zeigt nur die lückenlos hintereinander erreichten Schritte.
+    const firstOpen=LESSON_TASKS.findIndex(t=>!lessonCompleted.has(t.id));
+    const done=firstOpen<0?LESSON_TASKS.length:firstOpen;
+    $('lessonHeaderProgress').innerHTML=`<div class="lesson-progress-track"><span style="width:${100*done/LESSON_TASKS.length}%"></span></div><span class="lesson-header-progress-count">${done} / ${LESSON_TASKS.length}</span>`;
+    if(!task||lessonShowCatalog){
+      content.innerHTML=`<p class="lesson-lead"><strong>Digitale Schaltungen verstehen – Schritt für Schritt.</strong> Du startest mit genau einem Schalter und einer LED. Neue Ideen kommen nach und nach dazu. Jede Aufgabe kann überprüft werden.</p>${LESSON_UNITS.map(unit=>`<div class="lesson-unit-header">${esc(unit.name)}</div><div class="lesson-list">${LESSON_TASKS.filter(t=>t.unit===unit.id).map(t=>`<button class="lesson-list-btn${task?.id===t.id?' current':''}" type="button" data-lesson-action="start" data-lesson-id="${t.id}" ${lessonCanStart(t.id)?'':`disabled title="Zuerst die vorherigen Aufgaben erfolgreich lösen"`}><span class="lesson-step${lessonCompleted.has(t.id)?' done':''}">${LESSON_TASKS.indexOf(t)+1}</span><span class="lesson-list-name">${esc(t.title)}</span>${lessonCompleted.has(t.id)?'<span class="lesson-done-mark" aria-label="Abgeschlossen">✓</span>':lessonCanStart(t.id)?'':'<span aria-hidden="true">🔒</span>'}</button>`).join('')}</div>`).join('')}`;
+      return;
+    }
+    const unit=lessonUnit(task.unit),index=LESSON_TASKS.indexOf(task),next=LESSON_TASKS[index+1];
+    const introVisible=unit&&!lessonIntroDismissed.has(unit.id);
+    const intro=introVisible?`<aside class="lesson-intro"><h3>💡 ${esc(unit.title)}</h3><p>${esc(unit.intro)}</p><button type="button" data-lesson-action="intro-hide">Einführung verstanden ✓</button></aside>`:`<button class="lesson-back" type="button" data-lesson-action="intro-show">↳ Einführung zur Einheit lesen</button>`;
+    const hint=lessonHintIndex>0?`<div class="lesson-hint"><strong>Hinweis ${lessonHintIndex}/${task.hints.length}:</strong> ${esc(task.hints[lessonHintIndex-1])}</div>`:'';
+    const result=lessonResult?`<section class="lesson-result ${lessonResult.passed?'passed':'failed'}" aria-label="Prüfergebnis"><div class="lesson-result-head">${lessonResult.passed?'✓ Alle Kombinationen richtig':'↻ Noch einmal probieren'}</div><p>${esc(lessonResult.reason)}</p>${lessonTruthTable(task,lessonResult)}${lessonResult.passed&&next&&lessonCanStart(next.id)?`<div class="lesson-actions"><button class="lesson-action primary" type="button" data-lesson-action="start" data-lesson-id="${next.id}">Nächste Aufgabe →</button></div>`:''}</section>`:'';
+    content.innerHTML=`<div class="lesson-kicker">${esc(unit?.name||'Übung')} · Aufgabe ${index+1} von ${LESSON_TASKS.length}</div><h2 class="lesson-name">${esc(task.title)} ${lessonCompleted.has(task.id)?'<span style="color:#72deaa;font-size:14px" title="Schon einmal erfolgreich gelöst">✓</span>':''}</h2>${intro}<p class="lesson-objective">${esc(task.goal)}</p><div class="lesson-notice">${esc(task.note)}</div><div class="lesson-actions"><button class="lesson-action primary" type="button" data-lesson-action="check">✓ Schaltung prüfen</button><button class="lesson-action" type="button" data-lesson-action="hint" ${lessonHintIndex>=task.hints.length?'disabled':''}>${lessonHintIndex?'Weiterer Tipp':'Tipp anzeigen'}</button></div>${hint}${result}<div class="lesson-actions"><button class="lesson-action" type="button" data-lesson-action="reset">↺ Neu starten</button></div>`;
+  }
+  function initLessonUI(){
+    $('lessonLaunch').addEventListener('click',()=>lessonPanelVisibility(!lessonPanelOpen));
+    $('lessonClose').addEventListener('click',()=>lessonPanelVisibility(false));
+    $('lessonExit').addEventListener('click',lessonExit);
+    const resetModal=$('lessonResetModal');
+    const closeReset=()=>resetModal.classList.remove('show');
+    $('lessonResetCancel').addEventListener('click',closeReset);
+    $('lessonResetConfirm').addEventListener('click',lessonResetConfirmed);
+    resetModal.addEventListener('click',event=>{if(event.target===resetModal)closeReset();});
+    resetModal.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeReset();}
+    });
+    $('lessonPanel').addEventListener('click',event=>{
+      const button=event.target.closest('[data-lesson-action]');if(!button)return;
+      const action=button.dataset.lessonAction;
+      if(action==='start')lessonStart(button.dataset.lessonId);
+      else if(action==='catalog'){lessonShowCatalog=true;renderLessonPanel();$('lessonContent').scrollTop=0;}
+      else if(action==='check')lessonCheck();
+      else if(action==='hint'){const task=lessonTask(lessonActiveId);lessonHintIndex=Math.min(task?.hints.length||0,lessonHintIndex+1);renderLessonPanel();$('lessonContent').querySelector('.lesson-hint')?.scrollIntoView({block:'nearest',behavior:'smooth'});}
+      else if(action==='reset')lessonReset();
+      else if(action==='intro-hide'){const task=lessonTask(lessonActiveId);if(task)lessonIntroDismissed.add(task.unit);renderLessonPanel();}
+      else if(action==='intro-show'){const task=lessonTask(lessonActiveId);if(task)lessonIntroDismissed.delete(task.unit);renderLessonPanel();}
+    });
+    if(lessonActiveId&&!lessonTask(lessonActiveId)){
+      lessonActiveId=null;try{localStorage.removeItem(LESSON_ACTIVE_KEY);}catch(_){}
+    }
+    if(lessonActiveId){lessonShowCatalog=false;lessonPanelVisibility(true);}
   }
 
   function encodeConfig(config) {
@@ -6442,7 +6847,7 @@
   }
   function importConfigFile(file) {
     if (!file) return;
-    const reader = new FileReader(); reader.onload = () => { try { applyConfig(JSON.parse(reader.result), true); showToast('Konfiguration geladen'); } catch(e) { alert('Datei konnte nicht geladen werden: ' + e.message); } };
+    const reader = new FileReader(); reader.onload = () => { try { const config=JSON.parse(reader.result);if(lessonActiveId)lessonExit();applyConfig(config, true); showToast('Konfiguration geladen'); } catch(e) { alert('Datei konnte nicht geladen werden: ' + e.message); } };
     reader.readAsText(file);
   }
   function fitView() {
@@ -6893,9 +7298,10 @@
       // Auf dem Schaltkreisboden erst beim Loslassen entscheiden: ein kurzer
       // Rechtsklick bricht ab, Rechtsziehen verschiebt nur die Ansicht.
       if(scene.contains(e.target)){
-        // Ein neuer Rechtsklick darf nicht die Unterdrückung des vorigen
-        // Rechtsdrags erben.
-        suppressObjectContextMenuUntil=0;
+        // Auch wenn darunter ein Bauteil liegt, darf nach dem Beenden der
+        // Vorschau nicht im selben Rechtsklick dessen Kontextmenü erscheinen.
+        suppressObjectContextMenuUntil=performance.now()+1600;
+        rightClickContextTarget=null;
         return;
       }
       if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture();
@@ -6913,11 +7319,19 @@
   },true);
   // Auch per Tastatur geöffnete Kontextmenüs beenden die Vorschau.
   document.addEventListener('contextmenu',e=>{
+    if(performance.now()<suppressObjectContextMenuUntil){
+      if(scene.contains(e.target)){e.preventDefault();e.stopPropagation();}
+      if(selectedPaletteType&&gesture?.kind!=='pan'){
+        if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture();
+        clearPalettePlacement();
+      }
+      return;
+    }
     if(!selectedPaletteType)return;
     // Der Browser kann sein contextmenu-Ereignis erst NACH dem Loslassen eines
     // Rechtsdrags senden. Dies darf die gerade erhaltene Vorschau nicht
     // nachträglich löschen (genau dieselbe Sperre wie beim Objekt-Kontextmenü).
-    if(performance.now()<suppressObjectContextMenuUntil)return;
+    e.preventDefault();e.stopPropagation();
     if(gesture?.kind==='pan'&&gesture.button===2)return;
     if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture();
     clearPalettePlacement();
@@ -6981,7 +7395,8 @@
     const section=button.closest('.palette-section');
     const content=section?.querySelector('.palette-section-content');
     button.setAttribute('aria-expanded',String(!collapsed));
-    button.title=`Bereich ${collapsed?'ausklappen':'einklappen'}`;
+    button.title=`${category} · Bereich ${collapsed?'ausklappen':'einklappen'}`;
+    button.setAttribute('aria-label',`${category}: Bereich ${collapsed?'ausklappen':'einklappen'}`);
     if(content){
       content.classList.toggle('is-collapsed',collapsed);
       content.setAttribute('aria-hidden',String(collapsed));
@@ -7162,6 +7577,16 @@
   },true);
   let boardTabDragId=null,boardTabDragMoved=false,ignoreBoardTabClickUntil=0,boardTabDragOriginalOrder=null,boardTabDropCommitted=false;
   const boardTabsRoot=$('boardTabs');
+  // In der schmalen Tableiste das vertikale Mausrad horizontal übersetzen:
+  // nach unten = rechts, nach oben = links. Trackpad-Querbewegungen bleiben nutzbar.
+  boardTabsRoot.addEventListener('wheel',event=>{
+    if(boardTabsRoot.scrollWidth<=boardTabsRoot.clientWidth+1)return;
+    const rawDelta=Math.abs(event.deltaY)>=Math.abs(event.deltaX)?event.deltaY:event.deltaX;
+    if(!rawDelta)return;
+    const unit=event.deltaMode===1?18:event.deltaMode===2?boardTabsRoot.clientWidth:1;
+    event.preventDefault();
+    boardTabsRoot.scrollLeft+=rawDelta*unit;
+  },{passive:false});
   function clearBoardTabDropHints(){boardTabsRoot.querySelectorAll('.dragging,.drop-before,.drop-after').forEach(tab=>tab.classList.remove('dragging','drop-before','drop-after'));}
   boardTabsRoot.addEventListener('dragstart',event=>{
     const tab=event.target.closest('[data-board-id]');
@@ -7389,16 +7814,17 @@
   }
   function applyPanelVisibility(persist=true){
     workspace.classList.toggle('left-collapsed',!panelVisibility.left);
+    workspace.classList.toggle('left-narrow',panelVisibility.left&&leftPanelMode==='narrow');
     workspace.classList.toggle('right-collapsed',!panelVisibility.right);
     const left=$('togglePalettePanel'),right=$('toggleInspectorPanel');
     const chevronPath=(direction)=>direction==='left'?'M14.5 5.5 8 12l6.5 6.5':'M9.5 5.5 16 12l-6.5 6.5';
     left.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${chevronPath(panelVisibility.left?'left':'right')}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    left.title=panelVisibility.left?'Bauteileleiste ausblenden':'Bauteileleiste einblenden';
+    left.title=(panelVisibility.left?'Bauteileleiste ausblenden':'Bauteileleiste einblenden')+' · Ziehen für die Leistenbreite';
     left.setAttribute('aria-label',left.title);left.setAttribute('aria-expanded',String(panelVisibility.left));
     right.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${chevronPath(panelVisibility.right?'right':'left')}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     right.title=panelVisibility.right?'Eigenschaftenleiste ausblenden':'Eigenschaftenleiste einblenden';
     right.setAttribute('aria-label',right.title);right.setAttribute('aria-expanded',String(panelVisibility.right));
-    if(persist){try{localStorage.setItem(PANEL_LAYOUT_KEY,JSON.stringify(panelVisibility));}catch(_){}}
+    if(persist){try{localStorage.setItem(PANEL_LAYOUT_KEY,JSON.stringify({...panelVisibility,leftMode:lastOpenLeftPanelMode}));}catch(_){}}
     window.requestAnimationFrame(()=>{
       renderEmpty();updateMinimap();
       if(inlineLabelEditor)positionInlineLabelEditor();
@@ -7406,12 +7832,94 @@
   }
   function togglePanelVisibility(side){
     beginPanelLayoutTransition(side);
+    if(side==='left'){
+      if(panelVisibility.left){lastOpenLeftPanelMode=leftPanelMode;leftPanelMode='hidden';}
+      else leftPanelMode=lastOpenLeftPanelMode;
+    }
     panelVisibility[side]=!panelVisibility[side];
     applyPanelVisibility(true);
     const activeTransition=panelLayoutTransition;
     window.setTimeout(()=>{if(panelLayoutTransition===activeTransition)finishPanelLayoutTransition();},360);
   }
-  $('togglePalettePanel').addEventListener('click',()=>togglePanelVisibility('left'));
+  // Ziehen am linken Klappgriff: flüssige Breite mit drei Rastpunkten. Ein
+  // kurzer Klick verhält sich weiterhin wie der bisherige Auf-/Zuklappknopf.
+  const leftPanelHandle=$('togglePalettePanel'),paletteWidthHint=$('paletteWidthHint');
+  let leftPanelDrag=null,lastLeftPanelDragEnded=-Infinity;
+  let leftPanelSnapCleanupFrame=null;
+  const fullLeftPanelWidth=()=>parseFloat(getComputedStyle(workspace).getPropertyValue('--left-panel-full-width'))||224;
+  const narrowLeftPanelWidth=full=>Math.min(118,full);
+  const widthForLeftPanelMode=(mode,full)=>mode==='hidden'?0:mode==='narrow'?narrowLeftPanelWidth(full):full;
+  const nearestLeftPanelMode=(width,full)=>[
+    {mode:'hidden',width:0},{mode:'narrow',width:narrowLeftPanelWidth(full)},
+    {mode:'full',width:full}
+  ].reduce((closest,item)=>Math.abs(item.width-width)<Math.abs(closest.width-width)?item:closest).mode;
+  leftPanelHandle.addEventListener('pointerdown',e=>{
+    if(e.button!==0)return;
+    // Ein voriges Einrasten vor dem Beginn einer neuen Griffbewegung abschließen.
+    if(leftPanelSnapCleanupFrame!==null){
+      cancelAnimationFrame(leftPanelSnapCleanupFrame);leftPanelSnapCleanupFrame=null;
+      workspace.classList.remove('left-resizing');
+      workspace.style.removeProperty('--left-panel-width');
+    }
+    const full=fullLeftPanelWidth();
+    leftPanelDrag={pointerId:e.pointerId,startX:e.clientX,startWidth:widthForLeftPanelMode(leftPanelMode,full),currentWidth:widthForLeftPanelMode(leftPanelMode,full),full,moved:false};
+    try{leftPanelHandle.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  leftPanelHandle.addEventListener('pointermove',e=>{
+    const drag=leftPanelDrag;
+    if(!drag||drag.pointerId!==e.pointerId)return;
+    const delta=e.clientX-drag.startX;
+    if(!drag.moved&&Math.abs(delta)<5)return;
+    if(!drag.moved){
+      drag.moved=true;
+      beginPanelLayoutTransition('left');
+      workspace.classList.add('left-resizing');
+      leftPanelHandle.classList.add('is-dragging');
+      paletteWidthHint.hidden=false;
+    }
+    drag.currentWidth=Math.max(0,Math.min(drag.full,drag.startWidth+delta));
+    // Am vollen Anschlag bereits exakt die echte Endbreite verwenden.
+    // Dadurch wird der Griff nicht erst beim Loslassen ein Stück zurückgezogen.
+    if(drag.currentWidth>=drag.full-14)drag.currentWidth=drag.full;
+    else if(drag.currentWidth<=9)drag.currentWidth=0;
+    workspace.style.setProperty('--left-panel-width',`${Math.round(drag.currentWidth)}px`);
+    const target=nearestLeftPanelMode(drag.currentWidth,drag.full);
+    paletteWidthHint.textContent=target==='hidden'?'Geschlossen':target==='narrow'?'1 Spalte':drag.full<=130?'Breit · 1 Spalte':'2 Spalten';
+    e.preventDefault();
+  });
+  function finishLeftPanelDrag(e){
+    const drag=leftPanelDrag;
+    if(!drag||drag.pointerId!==e.pointerId)return;
+    leftPanelDrag=null;
+    try{if(leftPanelHandle.hasPointerCapture(e.pointerId))leftPanelHandle.releasePointerCapture(e.pointerId);}catch(_){}
+    paletteWidthHint.hidden=true;
+    leftPanelHandle.classList.remove('is-dragging');
+    if(!drag.moved)return;
+    lastLeftPanelDragEnded=performance.now();
+    const mode=nearestLeftPanelMode(drag.currentWidth,drag.full);
+    const settledWidth=widthForLeftPanelMode(mode,drag.full);
+    // Zuerst den sichtbaren Drag-Track auf die CSS-Rastbreite bringen; erst
+    // im nächsten Frame die temporäre Breitenüberschreibung entfernen.
+    // So stimmen Drag-Endposition und normale Panelgeometrie exakt überein.
+    workspace.style.setProperty('--left-panel-width',`${settledWidth}px`);
+    leftPanelMode=mode;
+    panelVisibility.left=mode!=='hidden';
+    if(mode!=='hidden')lastOpenLeftPanelMode=mode;
+    applyPanelVisibility(true);
+    leftPanelSnapCleanupFrame=requestAnimationFrame(()=>{
+      leftPanelSnapCleanupFrame=null;
+      workspace.classList.remove('left-resizing');
+      workspace.style.removeProperty('--left-panel-width');
+    });
+    const activeTransition=panelLayoutTransition;
+    window.setTimeout(()=>{if(panelLayoutTransition===activeTransition)finishPanelLayoutTransition();},360);
+  }
+  leftPanelHandle.addEventListener('pointerup',finishLeftPanelDrag);
+  leftPanelHandle.addEventListener('pointercancel',finishLeftPanelDrag);
+  leftPanelHandle.addEventListener('click',e=>{
+    if(performance.now()-lastLeftPanelDragEnded<120){e.preventDefault();return;}
+    togglePanelVisibility('left');
+  });
   $('toggleInspectorPanel').addEventListener('click',()=>togglePanelVisibility('right'));
   workspace.addEventListener('transitionend',e=>{
     if(e.target===workspace&&e.propertyName==='grid-template-columns')finishPanelLayoutTransition();
@@ -7428,6 +7936,39 @@
   $('shareBtn').addEventListener('click', shareConfig);
   $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
   const PATCH_LOG = [
+    {version:'V126',title:'Kompakte Kategorien und gleich große Aufgabenknöpfe',items:[
+      'Im schmalen Bauteilemenü heißen die Abschnitte Eingabe, Ausgabe, Gatter, Kombination, Flip-Flops, Sonstiges und Funktionen. Die Unterfunktionsanschlüsse heißen bei Bedarf Anschlüsse.',
+      'Der Schließen-Knopf im Aufgabenfenster besitzt dieselben Außenmaße und denselben Eckenradius wie der Knopf links zum Aufgabenkatalog.'
+    ]},
+    {version:'V125',title:'Sicherer Rechtsklick, Mausrad-Tabs und präzise Panelbreite',items:[
+      'Ein Rechtsklick während der Bauteilvorschau beendet das Einfügen, ohne anschließend das Kontextmenü des darunterliegenden Objekts zu öffnen.',
+      'Schaltungsnamen sind auf maximal 50 Zeichen begrenzt. Überlange Tableisten lassen sich mit dem Mausrad horizontal bewegen.',
+      'Die Bauteileleiste besitzt keine horizontale Scrollbar mehr. Beim Aufziehen aus dem geschlossenen Zustand stimmen Vorschau- und Rastbreite überein.'
+    ]},
+    {version:'V124',title:'Pin-Sperre, dynamische Tabs und schmale Bauteileleiste',items:[
+      'Pins können während einer aktiven Bauteil-Platzierungsvorschau keine Kabel- oder Pinaktionen mehr auslösen.',
+      'Schaltungs-Tabs wachsen mit ihrem Namen bis zur erlaubten Zeichenlänge; auch der Umbenennungsbereich wird nicht mehr auf 160 Pixel begrenzt.',
+      'Die linke Bauteileleiste lässt sich am Klappgriff stufenlos ziehen und rast bei geschlossen, einspaltig oder breit ein. Die gewählte Breite wird gespeichert.'
+    ]},
+    {version:'V123',title:'Aufgabentexte, Platzierungsvorschau und Schaltungsnamen',items:[
+      'Der Aufgabenkatalog verzichtet auf den Quellenhinweis und einen überflüssigen Navigationsknopf. Die einleitende Überschrift steht stets in einer eigenen Zeile; der Einführungstext wurde gekürzt.',
+      'Das × im Aufgabenfenster ist optisch etwas angehoben und damit vertikal zentriert.',
+      'Während der Bauteilvorschau leuchten nahe oder direkt überfahrene Pins nicht mehr als Hover-Ziele auf.',
+      'Der Tooltip des Hauptschaltkreis-Tabs lautet jetzt „Hauptschaltkreis“. Schaltungsnamen dürfen zehn weitere Zeichen enthalten (90 statt 80).'
+    ]},
+    {version:'V122',title:'Aufgabenführung und Menübedienung verbessert',items:[
+      'Der Lernfortschritt befindet sich direkt im Kopf des Aufgabenbereichs. Das linke Symbol führt zurück zum Katalog; überflüssige Titel- und Infotexte entfallen.',
+      'Übungen werden streng nacheinander freigeschaltet. Erst eine erfolgreich geprüfte Schaltung öffnet die folgende Aufgabe.',
+      '„Neu starten“ verwendet nun einen gestalteten Bestätigungsdialog. Prüfergebnisse bleiben bei Auswahl, Schalterbetätigung, Zoom und Ansichtsbewegung sichtbar.',
+      'Kontextmenüs stehen vor dem Aufgabenfenster und schließen bei Pinaktionen, Zoom oder Verschieben zuverlässig.',
+      'Eine Bauteilplatzierung per Ziehen endet nach dem Ablegen; ein Klick auf die Bauteilkarte aktiviert weiterhin beliebig viele Platzierungen.'
+    ]},
+    {version:'V121',title:'Schrittweiser Übungsmodus für den Informatikunterricht',items:[
+      'Der neue Bereich „Aufgaben“ enthält vier Lerneinheiten mit acht aufeinander aufbauenden Schaltungen – vom ersten Kabel zwischen Schalter und LED bis zum Halbaddierer.',
+      'Jede Einheit beginnt mit einer kurzen alltagsnahen Einführung. Zu jeder Aufgabe gehören ein konkreter Arbeitsauftrag, eine Erklärung und auf Wunsch gestufte Tipps.',
+      'Die automatische Prüfung nutzt die eigentliche GatterLab-Simulation und testet sämtliche möglichen Schalterkombinationen. Eine Wahrheitstabelle zeigt die erwarteten und die tatsächlich berechneten LED-Zustände an.',
+      'Aufgaben und abgeschlossene Schritte bleiben lokal gespeichert. Beim Start des Übungsmodus wird die freie Schaltung separat gesichert und nach dem Verlassen wiederhergestellt.'
+    ]},
     {version:'V120',title:'Einfügen ohne Zusatzdialog und verständliche Rückmeldung',items:[
       'Die Klickfläche des × im LED-Farbfenster sitzt 3 Pixel tiefer. Das sichtbare × bleibt unverändert an seiner bisherigen Position.',
       'Einfügen über Menü oder Schaltfläche verwendet die GatterLab-Zwischenablage unmittelbar, ohne eine Browser-Freigabe zum Lesen der Systemzwischenablage anzufordern.',
@@ -8167,7 +8708,7 @@
     e.preventDefault();
     if(moduleSimulation)return;
     const savedTarget=rightClickContextTarget;rightClickContextTarget=null;
-    if(performance.now()<suppressObjectContextMenuUntil)return;
+    if(selectedPaletteType||performance.now()<suppressObjectContextMenuUntil)return;
     const nodeEl=e.target.closest&&e.target.closest('[data-node]');
     const nodeId=nodeEl?.dataset.node||(savedTarget?.kind==='node'?savedTarget.id:null);
     const node=nodeId?byId(nodeId):null;
@@ -8282,8 +8823,13 @@
       e.preventDefault();e.stopPropagation();return;
     }
     if (e.button === 0 && selectedPaletteType) {
-      // Eine freie Stelle setzt das gewählte Bauteil. Bestehende Bauteile, Pins
-      // und Leitungen bleiben dagegen normal bedienbar und beenden das Werkzeug.
+      // Solange die Platzierungsvorschau aktiv ist, sind Pins weder Hover- noch
+      // Klick- oder Drag-Ziele. Ein Pin-Klick darf kein Kabel auslösen und auch
+      // nicht erst das Werkzeug beenden, um denselben Klick weiterzureichen.
+      const pinTarget=e.target.closest&&e.target.closest('.pin,[data-pin-hit],[data-wire-end]');
+      if(pinTarget){e.preventDefault();e.stopPropagation();return;}
+      // Eine freie Stelle setzt das gewählte Bauteil. Andere bestehende
+      // Objekte und Leitungen bleiben bedienbar und beenden das Werkzeug.
       const occupiedTarget=e.target.closest&&e.target.closest('[data-node],[data-wire-select],[data-wire-segment][data-wire-id],[data-wire-end][data-wire-id],.pin,[data-pin-hit]');
       const occupiedBody=topmostNodeBodyAtWorldPoint(worldPoint(e.clientX,e.clientY));
       if(!occupiedTarget&&!occupiedBody&&!pendingPaste){
@@ -8293,9 +8839,17 @@
       }
       clearPalettePlacement();
     }
+    if(e.button===2&&!selectedPaletteType)suppressObjectContextMenuUntil=0;
+    if(e.button===2&&selectedPaletteType){
+      suppressObjectContextMenuUntil=performance.now()+1600;
+      rightClickContextTarget=null;
+      // Eine gerade per Ziehen entstandene Ghost-Vorschau vollständig aufräumen,
+      // ohne die Rechtszieh-Geste zum Verschieben der Ansicht zu unterbinden.
+      if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture({preservePalette:true});
+    }
     // Das ursprüngliche Ziel des Rechtsklicks vor Pointer Capture sichern:
     // Nach setPointerCapture kann contextmenu sonst nur noch die SVG-Arbeitsfläche sehen.
-    if(e.button===2){
+    if(e.button===2&&!selectedPaletteType){
       const contextNode=e.target.closest&&e.target.closest('[data-node]');
       const contextWire=e.target.closest&&e.target.closest('[data-wire-select],[data-wire-segment][data-wire-id],[data-wire-end][data-wire-id]');
       const targetNodeId=contextNode?.dataset.node||null;
@@ -8682,7 +9236,9 @@
         clearPalettePlacement();
       }
       setInsertWirePreview(null);
-      if(placed)palettePlacementLayer.innerHTML='';
+      // Ein Drag aus der Palette ist ein einmaliger Einfügevorgang.
+      // Nur ein echter Klick auf die Kachel aktiviert die wiederholte Platzierung.
+      if(done.moved||placed)clearPalettePlacement();
       else updatePalettePlacementPreview(e.clientX,e.clientY);
       return;
     }
@@ -8834,7 +9390,11 @@
       stage.classList.remove('panning');
       if(done.button===2){
         if(done.moved){suppressObjectContextMenuUntil=performance.now()+1100;rightClickContextTarget=null;}
-        else clearPalettePlacement();
+        else if(selectedPaletteType){
+          suppressObjectContextMenuUntil=performance.now()+1100;
+          rightClickContextTarget=null;
+          clearPalettePlacement();
+        }
       }
       saveLocal(); return;
     }
@@ -8869,6 +9429,7 @@
   }
 
   function nudgeSelection(dx,dy) {
+    closeAllFloatingMenus();
     if (selectedNodes.size) {
       const moving=nodes.filter(node=>selectedNodes.has(node.id));
       const candidates=moving.map(node=>({...node,x:node.x+dx,y:node.y+dy}));
@@ -9063,8 +9624,14 @@
     else updateClockNeedles(now);
   }
   window.setInterval(tickSimulation, 10);
-  window.addEventListener('hashchange', () => { try { const cfg=configFromHash(); if(cfg) { applyConfig(cfg); showToast('Schaltung aus URL geladen'); } } catch(e) { showToast('Der Link enthält keine gültige Schaltung'); } });
+  window.addEventListener('hashchange', () => { try { const cfg=configFromHash(); if(cfg) { if(lessonActiveId)lessonExit();applyConfig(cfg); showToast('Schaltung aus URL geladen'); } } catch(e) { showToast('Der Link enthält keine gültige Schaltung'); } });
 
+  // Ein ausdrücklich geöffneter Schaltungslink hat Vorrang vor einer zuvor
+  // gespeicherten Übungssitzung. Die gesicherte freie Schaltung bleibt dabei erhalten.
+  if(location.hash.match(/(?:^#|&)c=/)&&lessonActiveId){
+    lessonActiveId=null;
+    try{localStorage.removeItem(LESSON_ACTIVE_KEY);}catch(_){}
+  }
   try {
     const linked=configFromHash();
     if (linked) applyConfig(linked);
@@ -9080,6 +9647,7 @@
   applyPanelVisibility(false);
   void workspace.offsetWidth;
   requestAnimationFrame(()=>{workspace.style.transition='';});
+  initLessonUI();
 })();
 
 </script>
