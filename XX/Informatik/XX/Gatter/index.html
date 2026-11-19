@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
-<title>GatterLab V111</title>
+<title>GatterLab V120</title>
 <style>
   :root {
     color-scheme: dark;
@@ -63,7 +63,8 @@
   .workspace.left-collapsed > .sidebar.left, .workspace.right-collapsed > .sidebar.right { opacity:0; pointer-events:none; overflow:hidden; border-width:0; }
   .sidebar.right { border-right: 0; border-left: 1px solid #273547; padding-bottom: 0; display:flex; flex-direction:column; overflow:hidden; position:relative; }
   #inspector { flex:1 1 auto; min-height:0; overflow-y:auto; padding-bottom:8px; }
-  .side-head { padding: 18px 16px 10px; display: flex; align-items: baseline; justify-content: space-between; }
+  /* Beide Spaltenüberschriften sitzen mittig auf derselben Höhe wie die Zoomsteuerung. */
+  .side-head { height:43px; min-height:43px; padding:0 16px; display:flex; align-items:center; justify-content:space-between; }
   .side-title { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1.1px; color: #aebed0; }
   .side-hint { color: #75869b; font-size: 10px; }
   .palette-search-wrap { padding: 0 12px 7px; }
@@ -244,6 +245,20 @@
   .stage { flex: 1; min-height: 0; position: relative; overflow: hidden; touch-action: none; cursor: default; }
   .stage.panning { cursor: grabbing; }
   .stage.selecting { cursor: crosshair; }
+  .stage.placing { cursor: crosshair; }
+  #palettePlacementLayer, #palettePlacementLayer * { pointer-events:none !important; }
+  .palette-led-picker { position:absolute; z-index:15; box-sizing:border-box; width:200px; max-width:calc(100% - 12px); padding:8px 9px 9px; border:1px solid #526c83; border-radius:10px; background:#172738; box-shadow:0 9px 25px #000a; color:#cbdbe9; }
+  .palette-led-picker[hidden] { display:none !important; }
+  .palette-led-picker-title { font-size:10px; font-weight:700; margin-bottom:7px; color:#dceaf6; text-align:center; }
+  .palette-led-picker-close { position:absolute; right:10px; top:6px; display:grid; place-items:center; width:19px; height:19px; padding:0; border:0; border-radius:5px; background:transparent; color:#9fb3c7; font-size:17px; line-height:1; cursor:pointer; }
+  /* Die Klickfläche rückt 3 px nach unten, das sichtbare × bleibt exakt stehen. */
+  .palette-led-picker-close-glyph { display:block; transform:translateY(-3px); pointer-events:none; }
+  .palette-led-picker-close:hover,.palette-led-picker-close:focus-visible { color:#fff; background:#34495d; outline:1px solid #7392ac; }
+  .palette-led-picker-colors { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
+  .palette-led-choice { display:grid; place-items:center; width:100%; height:30px; padding:0; background:#23384b; border:1px solid #445a6c; border-radius:7px; cursor:pointer; }
+  .palette-led-choice:hover,.palette-led-choice:focus-visible { border-color:#eaf7ff; outline:1px solid #94caff; outline-offset:1px; }
+  .palette-led-choice[aria-pressed="true"] { border-color:#f0f8ff; box-shadow:0 0 0 1px #f0f8ff; }
+  .palette-led-choice span { display:block; width:16px; height:16px; border-radius:50%; box-shadow:0 0 6px currentColor; }
   #scene { display: block; width: 100%; height: 100%; user-select: none; }
   #gridBg { fill: url(#gridPattern); }
   .wire-base { fill: none; stroke: #50657d; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: .95; }
@@ -294,7 +309,7 @@
   .wire-base.insert-target { stroke:#ffd36e !important; stroke-width:4.8 !important; filter:drop-shadow(0 0 8px #ffd36ecc); }
   .wire-flow.insert-target { stroke:#fff0b8 !important; opacity:1 !important; }
   .wire-flow.replacement-preview { stroke:#ffd1d7 !important; opacity:1 !important; filter:drop-shadow(0 0 5px #ff6475aa); }
-  .node.preview-node { opacity: .78; pointer-events: none; }
+  .node.preview-node { opacity: .5; pointer-events: none; }
   .pin.snap-target { fill: #52e6a4; stroke: #e0fff0; stroke-width: 3; filter: drop-shadow(0 0 7px #52e6a4); }
   .snap-halo { fill: #52e6a422; stroke: #6bf0b4; stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none; }
   .wire-endpoint-hit { fill: transparent; stroke: transparent; cursor: grab; pointer-events: all; }
@@ -737,7 +752,7 @@
     .palette-gate-desc { height:9px; line-height:9px; font-size:8px; }
     .palette-top { gap:5px; }
     .palette-desc, .sidebar-note { display:none; }
-    .side-head { padding:12px 9px 7px; }
+    .side-head { padding:0 9px; }
     .palette-section { padding:0 7px 7px; }
     .palette-section-toggle { height:23px; min-height:23px; padding:3px 4px; font-size:9px; line-height:15px; }
     .palette-search-wrap { padding:0 7px 7px; }
@@ -892,11 +907,13 @@
             <g id="wireHandleLayer"></g>
             <g id="pinHoverLayer"></g>
             <g id="tempLayer"></g>
+            <g id="palettePlacementLayer" aria-hidden="true"></g>
           </g>
           <g id="emptyLayer"></g>
           <g id="selectionLayer"></g>
         </svg>
         <div id="emptyHintOverlay" class="empty-hint-overlay" hidden aria-hidden="true"></div>
+        <div id="paletteLedPicker" class="palette-led-picker" role="group" aria-label="LED-Farbe für neue Bauteile auswählen" hidden></div>
         <div class="minimap" id="minimap" aria-label="Minimap">
           <div class="minimap-head" id="minimapDragHandle" title="Zum Verschieben am Kopfbereich ziehen"><span class="minimap-title">Minimap</span><span class="spacer"></span><button id="minimapSelectionFit" type="button" title="Auf Auswahl zoomen" disabled>Auswahl</button><button id="minimapAllFit" type="button" title="Gesamte Schaltung anzeigen">Gesamt</button></div>
           <svg id="minimapSvg" viewBox="0 0 214 130" role="img" aria-label="Minimap; anklicken oder ziehen zum Navigieren">
@@ -949,7 +966,7 @@
               <section class="help-section" id="help-guide">
                 <h3>Kurzanleitung</h3>
                 <ol>
-                  <li><strong>Bauteile platzieren:</strong> Ziehe ein Bauteil aus der linken Palette auf das Raster. Alternativ kannst du eine Palette-Karte anklicken und danach die gewünschte Stelle auf der Arbeitsfläche anklicken.</li>
+                  <li><strong>Bauteile platzieren:</strong> Ziehe ein Bauteil aus der linken Palette auf das Raster. Oder klicke seine Karte an und setze es mit beliebig vielen Klicks auf freie Stellen der Arbeitsfläche. Die halbtransparente Vorschau zeigt Einfügeposition und Kollisionen. Mit der Leertaste wechselst du in der Vorschau zwischen Schalterzuständen, HIGH/LOW und den verfügbaren Größen von Anzeige, MUX, DEMUX, Bus-Combiner und -Splitter; bei Pfeilen drehst du die Richtung jeweils um 90° im Uhrzeigersinn. Bei einer LED öffnet die Leertaste zehn Farben in einem kleinen festen Fenster mit zwei Reihen zu je fünf. Mehrere Farben lassen sich nacheinander wählen; das × oben rechts schließt nur die Farbauswahl. Die LED-Vorschau lässt sich weiterhin frei bewegen. Ein Taster bleibt nur während gedrückter Leertaste aktiv. Esc, Entf, ein kurzer Rechtsklick und Strg+S/A/C/X/V/D beenden den Einfügemodus. Ziehen über freie Schaltungsfläche, Rechtsziehen zum Verschieben der Ansicht, Zoom und Pfeiltasten beenden ihn nicht. Ein Klick auf eine bereits vorhandene Komponente oder eine andere Programmfunktion beendet ihn ebenfalls. Eigenschaftsregler können unmittelbar nach der Platzierung bedient werden.</li>
                   <li><strong>Bauteile bewegen:</strong> Ziehe ein Bauteil mit der linken Maustaste. Mehrere markierte Bauteile lassen sich gemeinsam verschieben.</li>
                   <li><strong>Kabel verbinden:</strong> Ziehe einen Ausgangs-Pin auf einen Eingangs-Pin. Ein gültiges Ziel wird während des Ziehens hervorgehoben. Bestehende Kabel können an ihren Endpunkten umgesteckt werden.</li>
                   <li><strong>Schaltung testen:</strong> Die Simulation läuft laufend. Schalter ändern ihren Zustand per Klick, Taster werden durch Drücken aktiviert und Clock-Bauteile erzeugen periodische Signale.</li>
@@ -1217,7 +1234,7 @@
     else if(window.matchMedia&&window.matchMedia('(max-width: 980px)').matches)panelVisibility.right=false;
   } catch(_) { if(window.matchMedia&&window.matchMedia('(max-width: 980px)').matches)panelVisibility.right=false; }
   const stage = $('stage'), scene = $('scene'), world = $('world');
-  const nodeLayer = $('nodeLayer'), wireLayer = $('wireLayer'), wireHandleLayer = $('wireHandleLayer'), pinHoverLayer=$('pinHoverLayer'), tempLayer = $('tempLayer');
+  const nodeLayer = $('nodeLayer'), wireLayer = $('wireLayer'), wireHandleLayer = $('wireHandleLayer'), pinHoverLayer=$('pinHoverLayer'), tempLayer = $('tempLayer'), palettePlacementLayer=$('palettePlacementLayer'), paletteLedPicker=$('paletteLedPicker');
   const selectionLayer = $('selectionLayer');
   const minimapPanel = $('minimap'), minimapSvg = $('minimapSvg'), minimapContent = $('minimapContent');
   const minimapWireLayer = $('minimapWireLayer'), minimapNodeLayer = $('minimapNodeLayer'), minimapViewport = $('minimapViewport');
@@ -1243,8 +1260,10 @@
   const pressedArrowKeys=new Set();
   let arrowRepeatTimer=null, arrowStepMultiplier=1;
   let currentPointer = { x: stage.getBoundingClientRect().left + stage.clientWidth/2, y: stage.getBoundingClientRect().top + stage.clientHeight/2 }, clipboard = null;
+  let pasteHotkeyFallbackToken=0;
+  let pasteHotkeyFallbackUsedToken=0,pasteHotkeyFallbackUsedAt=0;
   let undoHistory = [], undoIndex = -1, minimapTransform = { scale: 1, offsetX: 8, offsetY: 8 }, minimapGesture = null;
-  let minimapUiGesture = null, inlineLabelEditor = null, lastLabelClick = null, selectedPaletteType = null;
+  let minimapUiGesture = null, inlineLabelEditor = null, lastLabelClick = null, selectedPaletteType = null, paletteDraft = null, paletteLedPreviewLast=null;
   let wireRouteCache = new Map(), insertPreviewWireId = null, shiftKeyHeld = false;
   let suppressObjectContextMenuUntil=0,objectContextNodeId=null,wireContextId=null,rightClickContextTarget=null;
   let shortcutsCollapsed=false;
@@ -1529,6 +1548,9 @@
     return svg(R(22,8,28,28,6)+C(36,22,6));
   }
   function renderPalette(){
+    stage.classList.toggle('placing',!!selectedPaletteType&&!moduleSimulation);
+    if(!selectedPaletteType){paletteDraft=null;palettePlacementLayer.innerHTML='';}
+    const highlightedPaletteType=paletteDraft?.type||selectedPaletteType;
     const query=($('paletteSearch')?.value||'').trim().toLocaleLowerCase('de');
     const entries=[...PALETTE_ENTRIES];
     if(activeModuleId){entries.push({...TYPES.MODULE_INPUT,type:'MODULE_INPUT'},{...TYPES.MODULE_OUTPUT,type:'MODULE_OUTPUT'});}
@@ -1559,7 +1581,7 @@
           const gateOutputs=1;
           const gateIoMarkup=`<span class="palette-module-count"><span class="palette-module-count-line"><span class="palette-module-count-value">${gateInputs}</span><span class="palette-module-count-label">IN</span></span><span class="palette-module-count-line"><span class="palette-module-count-value">${gateOutputs}</span><span class="palette-module-count-label">OUT</span></span></span>`;
           const gateShortName=GATE_PALETTE_SHORT_NAMES[item.type]||'Logikgatter';
-          html+=`<button class="palette-item palette-item-gate${selectedPaletteType===item.type?' selected':''}" type="button" data-type="${esc(item.type)}" title="${esc(item.description)}" aria-label="${esc(item.label)} (${gateShortName}), ${gateInputs} IN, ${gateOutputs} OUT: ${esc(item.description)}" ${disabled?'disabled':''}><span class="palette-gate-head"><span class="palette-gate-name">${esc(item.label)}</span>${gateIoMarkup}</span><span class="palette-gate-symbol">${gateSymbolSvg(item.type,gateSymbolStyle,'palette')}</span><span class="palette-gate-desc" title="${esc(gateShortName)}">${esc(gateShortName)}</span></button>`;
+          html+=`<button class="palette-item palette-item-gate${highlightedPaletteType===item.type?' selected':''}" type="button" data-type="${esc(item.type)}" title="${esc(item.description)}" aria-pressed="${highlightedPaletteType===item.type}" aria-label="${esc(item.label)} (${gateShortName}), ${gateInputs} IN, ${gateOutputs} OUT: ${esc(item.description)}" ${disabled?'disabled':''}><span class="palette-gate-head"><span class="palette-gate-name">${esc(item.label)}</span>${gateIoMarkup}</span><span class="palette-gate-symbol">${gateSymbolSvg(item.type,gateSymbolStyle,'palette')}</span><span class="palette-gate-desc" title="${esc(gateShortName)}">${esc(gateShortName)}</span></button>`;
           return;
         }
         const countMarkup=item.kind==='custom'?`<span class="palette-module-count"><span class="palette-module-count-line"><span class="palette-module-count-value">${Math.max(0,Math.trunc(Number(item.inputs)||0))}</span><span class="palette-module-count-label">IN</span></span><span class="palette-module-count-line"><span class="palette-module-count-value">${Math.max(0,Math.trunc(Number(item.outputs)||0))}</span><span class="palette-module-count-label">OUT</span></span></span>`:'';
@@ -1567,7 +1589,7 @@
         const shortDescription=item.description.split(/[.!?]/)[0];
         const moduleCardClass=item.kind==='custom'?' palette-item-module':'';
         const moduleHeadClass=item.kind==='custom'?' palette-module-head':'';
-        html+=`<button class="palette-item palette-item-standard${moduleCardClass}${selectedPaletteType===item.type?' selected':''}" type="button" data-type="${esc(item.type)}" title="${esc(item.description)}" ${disabled?'disabled':''}><span class="palette-standard-head${moduleHeadClass}"><span class="palette-standard-name" title="${esc(item.label)}">${esc(item.label)}</span>${countMarkup}</span><span class="palette-standard-symbol">${iconMarkup}</span><span class="palette-standard-desc" title="${esc(shortDescription)}">${esc(shortDescription)}</span></button>`;
+        html+=`<button class="palette-item palette-item-standard${moduleCardClass}${highlightedPaletteType===item.type?' selected':''}" type="button" data-type="${esc(item.type)}" title="${esc(item.description)}" aria-pressed="${highlightedPaletteType===item.type}" ${disabled?'disabled':''}><span class="palette-standard-head${moduleHeadClass}"><span class="palette-standard-name" title="${esc(item.label)}">${esc(item.label)}</span>${countMarkup}</span><span class="palette-standard-symbol">${iconMarkup}</span><span class="palette-standard-desc" title="${esc(shortDescription)}">${esc(shortDescription)}</span></button>`;
       });
       html+='</div></div></div>';
       html+='</section>';
@@ -2085,12 +2107,145 @@
   }
 
 
+  // Der aktuelle Entwurf ist unabhängig vom markierten Paletteneintrag: HIGH
+  // kann z. B. per Leertaste vor dem Platzieren in LOW umgeschaltet werden.
+  function createPaletteDraft(type) {
+    return {type,label:type==='DISPLAY'?null:TYPES[type].label,state:type==='HIGH',value:type==='TRISTATE'?null:type==='HIGH',
+      displayBits:type==='DISPLAY'?2:undefined,
+      muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,
+      busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?4:undefined,
+      ledColor:type==='OUTPUT'?DEFAULT_LED_COLOR:undefined,
+      arrowDirection:type==='ARROW'?'right':undefined,
+      selectedChannel:0,portValues:type==='DEMUX'?[false,false]:undefined};
+  }
+  function closePaletteLedPicker(){
+    paletteLedPicker.hidden=true;
+  }
+  function positionPaletteLedPicker(clientX,clientY){
+    if(paletteLedPicker.hidden)return;
+    const rect=stage.getBoundingClientRect(),preview=palettePreviewNode(clientX,clientY);
+    // Die Mitte folgt dem tatsächlich am Raster eingerasteten LED-Bauteil,
+    // nicht der leicht abweichenden Position des Mauszeigers.
+    const centerX=camera.x+preview.x*camera.z,centerY=camera.y+preview.y*camera.z;
+    const width=paletteLedPicker.offsetWidth||200,height=paletteLedPicker.offsetHeight||106;
+    const desiredLeft=centerX-width/2;
+    paletteLedPicker.style.left=`${Math.max(6,Math.min(Math.max(6,rect.width-width-6),desiredLeft))}px`;
+    const below=centerY+31*camera.z+10;
+    const above=centerY-31*camera.z-height-10;
+    paletteLedPicker.style.top=`${below+height<=rect.height-6?below:Math.max(6,above)}px`;
+  }
+  function togglePaletteLedPicker(){
+    if(!paletteDraft||paletteDraft.type!=='OUTPUT')return;
+    if(!paletteLedPicker.hidden){closePaletteLedPicker();return;}
+    paletteLedPicker.innerHTML=`<div class="palette-led-picker-title">LED-Farbe wählen</div><button type="button" class="palette-led-picker-close" data-palette-led-close aria-label="Farbauswahl schließen" title="Schließen"><span class="palette-led-picker-close-glyph">×</span></button><div class="palette-led-picker-colors">${LED_COLORS.map(color=>`<button class="palette-led-choice" type="button" data-palette-led-color="${color.id}" title="${color.label}" aria-label="${color.label}" aria-pressed="${paletteDraft.ledColor===color.id}"><span style="background:${color.fill};color:${color.fill}"></span></button>`).join('')}</div>`;
+    paletteLedPicker.hidden=false;
+    positionPaletteLedPicker(currentPointer.x,currentPointer.y);
+  }
+  function syncPaletteHighlight() {
+    const current=paletteDraft?.type||selectedPaletteType;
+    document.querySelectorAll('.palette-item').forEach(btn=>{
+      const active=btn.dataset.type===current;
+      btn.classList.toggle('selected',active);
+      btn.setAttribute('aria-pressed',String(active));
+    });
+  }
+  function palettePreviewNode(x,y) {
+    const p=worldPoint(x,y);
+    const preview={...paletteDraft,id:'__palette_preview__',x:snap(p.x),y:snap(p.y)};
+    preview.invalidPlacement=!allowNodeOverlaps&&!!findPlacementCollision([preview],nodes);
+    return preview;
+  }
+  function applyPaletteDraft(node,draft) {
+    if(!draft||node.type!==draft.type)return node;
+    if(node.type==='INPUT') {node.state=!!draft.state;node.value=node.state;}
+    if(node.type==='DISPLAY') node.displayBits=normalizeDisplayBits(draft.displayBits);
+    if(node.type==='MUX') node.muxInputs=normalizeMuxInputs(draft.muxInputs);
+    if(node.type==='DEMUX') {
+      node.demuxOutputs=normalizeDemuxOutputs(draft.demuxOutputs);
+      node.portValues=Array(node.demuxOutputs).fill(false);
+    }
+    if(node.type==='BUS_COMBINER'||node.type==='BUS_SPLITTER')node.busWidth=normalizeBusWidth(draft.busWidth);
+    if(node.type==='OUTPUT')node.ledColor=normalizeLedColor(draft.ledColor);
+    if(node.type==='ARROW')node.arrowDirection=normalizeArrowDirection(draft.arrowDirection);
+    // Taster bleiben grundsätzlich losgelassen, unabhängig vom Vorschau-Zustand.
+    return node;
+  }
+  function cyclePaletteDraft() {
+    if(!paletteDraft)return false;
+    const draft=paletteDraft,type=draft.type;
+    const nextWidth=width=>({2:4,4:8,8:2})[width]||2;
+    if(type==='INPUT'){draft.state=!draft.state;draft.value=draft.state;}
+    else if(type==='HIGH'||type==='LOW'){
+      draft.type=type==='HIGH'?'LOW':'HIGH';draft.label=TYPES[draft.type].label;
+      draft.state=draft.type==='HIGH';draft.value=draft.state;
+      syncPaletteHighlight();
+      // Bei Tastaturauswahl darf der Fokusrahmen nicht am nun inaktiven
+      // HIGH-/LOW-Eintrag hängenbleiben.
+      const focused=document.activeElement;
+      if(focused?.classList?.contains('palette-item')&&focused.dataset.type!==draft.type)focused.blur();
+    }else if(type==='PUSH'){draft.state=true;draft.value=true;}
+    else if(type==='DISPLAY')draft.displayBits=nextWidth(draft.displayBits);
+    else if(type==='MUX')draft.muxInputs=nextWidth(draft.muxInputs);
+    else if(type==='DEMUX'){
+      draft.demuxOutputs=nextWidth(draft.demuxOutputs);
+      draft.portValues=Array(draft.demuxOutputs).fill(false);
+    }else if(type==='BUS_COMBINER'||type==='BUS_SPLITTER')draft.busWidth=nextWidth(draft.busWidth);
+    else if(type==='ARROW'){
+      const directions=['right','down','left','up'];
+      draft.arrowDirection=directions[(directions.indexOf(normalizeArrowDirection(draft.arrowDirection))+1)%directions.length];
+    }
+    else if(type==='OUTPUT')togglePaletteLedPicker();
+    else return false;
+    if(gesture?.kind==='palette')updatePaletteGesturePreview(currentPointer.x,currentPointer.y,!!shiftKeyHeld);
+    else updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
+    updateStatus();
+    return true;
+  }
+
   function selectPaletteItem(type) {
     if (!TYPES[type] || (TYPES[type].kind==='custom' && !canUseModuleOnActiveBoard(TYPES[type].moduleId))) return;
+    closePaletteLedPicker();
+    paletteLedPreviewLast=null;
     selectedPaletteType = type;
+    paletteDraft=createPaletteDraft(type);
+    clearArmedPin();
     clearSelection();
-    document.querySelectorAll('.palette-item').forEach(btn => btn.classList.toggle('selected', btn.dataset.type === type));
+    syncPaletteHighlight();
+    stage.classList.add('placing');
+    updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
     renderNodes(); renderWires(); renderInspector(); updateStatus();
+  }
+
+  function clearPalettePlacement({preserveInspector=false}={}) {
+    if (!selectedPaletteType) return;
+    closePaletteLedPicker();
+    paletteLedPreviewLast=null;
+    const hadSelection=!selectionEmpty();
+    selectedPaletteType=null;
+    paletteDraft=null;
+    document.querySelectorAll('.palette-item.selected').forEach(btn=>{btn.classList.remove('selected');btn.setAttribute('aria-pressed','false');});
+    // Auch eine ggf. fokussierte Palettenkarte darf keine zweite (Focus-)Kontur
+    // hinterlassen, nachdem der Einfügemodus beendet wurde.
+    if(document.activeElement?.classList?.contains('palette-item'))document.activeElement.blur();
+    stage.classList.remove('placing');
+    palettePlacementLayer.innerHTML='';
+    // Während pointerdown darf eine bereits sichtbare interaktive Eigenschaft
+    // nicht neu erzeugt werden: Sonst trifft der anschließende Klick ins Leere.
+    if(!preserveInspector&&!hadSelection)renderInspector();
+    updateStatus();
+  }
+
+  function updatePalettePlacementPreview(clientX,clientY) {
+    if (!selectedPaletteType || !paletteDraft || moduleSimulation || (gesture && !['place','pan'].includes(gesture.kind))) {
+      palettePlacementLayer.innerHTML='';return;
+    }
+    const target=document.elementFromPoint(clientX,clientY);
+    if (!target || !scene.contains(target)) {
+      if(!paletteLedPicker.hidden&&target&&paletteLedPicker.contains(target)&&paletteLedPreviewLast){
+        clientX=paletteLedPreviewLast.x;clientY=paletteLedPreviewLast.y;
+      }else{palettePlacementLayer.innerHTML='';return;}
+    }else if(paletteDraft.type==='OUTPUT')paletteLedPreviewLast={x:clientX,y:clientY};
+    palettePlacementLayer.innerHTML=nodeMarkup(palettePreviewNode(clientX,clientY),true);
   }
 
   function showToast(message) {
@@ -4127,11 +4282,13 @@
       const clock = clocksById.get(needle.dataset.clockNeedle);
       if (clock) needle.setAttribute('transform', `rotate(${clockNeedleAngle(clock, now).toFixed(2)} 20 7)`);
     });
-    // Die Uhr in der noch nicht platzierten Palette-Vorschau läuft ebenfalls
-    // zeitbasiert weiter, auch wenn der Mauszeiger vollkommen stillsteht.
-    if (gesture?.kind === 'palette' && gesture.type === 'CLOCK') {
-      const previewNeedle = tempLayer.querySelector('[data-clock-needle="__palette_preview__"]');
-      if (previewNeedle) previewNeedle.setAttribute('transform', `rotate(${clockNeedleAngle({frequency:1,phaseOffset:0}, now).toFixed(2)} 20 7)`);
+    // Beide Einfügevorschauen erhalten denselben Animationstakt. Die per
+    // Palettenklick aktivierte Vorschau braucht dafür keine Mausbewegung.
+    if (paletteDraft?.type==='CLOCK') {
+      for(const layer of [tempLayer,palettePlacementLayer]){
+        const previewNeedle=layer.querySelector('[data-clock-needle="__palette_preview__"]');
+        if(previewNeedle)previewNeedle.setAttribute('transform',`rotate(${clockNeedleAngle({frequency:1,phaseOffset:0},now).toFixed(2)} 20 7)`);
+      }
     }
   }
 
@@ -4370,7 +4527,7 @@
       const inputAttrs = preview ? '' : `data-pin="in" data-node="${esc(n.id)}" data-port="0"`;
       return `<g class="node output-node${n.value===true ? ' on' : ''}${selectedClass}${marqueeClass}${unknownClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-52" y="-31" width="104" height="62" rx="11" />
-        <circle class="led-indicator" cx="0" cy="-5" r="9" fill="${n.value===true ? ledColorById(n.ledColor).fill : isLogicUnknown(n.value) ? '#8c754d' : '#46586b'}" stroke="${n.value===true ? ledColorById(n.ledColor).stroke : isLogicUnknown(n.value) ? '#e6bd68' : '#8395a9'}" stroke-width="1.5" />
+        <circle class="led-indicator" cx="0" cy="-5" r="9" fill="${preview || n.value===true ? ledColorById(n.ledColor).fill : isLogicUnknown(n.value) ? '#8c754d' : '#46586b'}" stroke="${preview || n.value===true ? ledColorById(n.ledColor).stroke : isLogicUnknown(n.value) ? '#e6bd68' : '#8395a9'}" stroke-width="1.5" />
         <text class="node-title" xml:space="preserve" x="0" y="16">${safeLabel}</text>
         <text class="node-sub led-status" x="0" y="-20">${isLogicUnknown(n.value)?'?':n.value===true?'HIGH':'LOW'}</text>
         <circle class="pin ${incoming ? 'connected' : ''}" ${inputAttrs} cx="-58" cy="0" r="5" />
@@ -4672,6 +4829,15 @@
     world.setAttribute('transform', `translate(${camera.x} ${camera.y}) scale(${camera.z})`);
     $('zoomLabel').textContent = `${Math.round(camera.z * 100)}%`;
     updateMinimap();
+    // Die Vorschau bleibt unter dem Zeiger, wenn die Ansicht per Mausrad,
+    // Zoomtasten, Minimap oder Rechtsziehen verschoben bzw. skaliert wird.
+    if(selectedPaletteType){
+      // Pfeiltasten bewegen die Kamera auch während eines Drags aus der Palette.
+      // Das Ghost-Bauteil muss dann genauso nachgeführt werden wie bei der
+      // Klickvorschau, selbst wenn sich die Maus keinen Pixel bewegt.
+      if(gesture?.kind==='palette'&&gesture.moved)updatePaletteGesturePreview(currentPointer.x,currentPointer.y,!!shiftKeyHeld);
+      else updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
+    }
     if (inlineLabelEditor) positionInlineLabelEditor();
   }
   function updateHistoryButtons() {
@@ -4687,7 +4853,7 @@
     $('nodeCount').textContent = `${nodes.length} ${nodes.length === 1 ? 'Bauteil' : 'Bauteile'}`;
     $('wireCount').textContent = `${wires.length} Kabel`;
     const count = selectedNodes.size + selectedWires.size;
-    $('selectionStatus').textContent = moduleSimulation?'Testmodus · Eingänge anklicken':count ? `${selectedNodes.size} Bauteile · ${selectedWires.size} Kabel ausgewählt` : 'Nichts ausgewählt';
+    $('selectionStatus').textContent = moduleSimulation?'Testmodus · Eingänge anklicken':selectedPaletteType?`Einfügen: ${TYPES[paletteDraft?.type||selectedPaletteType]?.label||selectedPaletteType} · Esc beendet`:count ? `${selectedNodes.size} Bauteile · ${selectedWires.size} Kabel ausgewählt` : 'Nichts ausgewählt';
     $('coordStatus').textContent = `Zoom ${Math.round(camera.z * 100)}%`;
     $('minimapSelectionFit').disabled = selectionEmpty();
     updateMinimap();
@@ -5606,11 +5772,11 @@
     return true;
   }
 
-  function addNode(type,x,y){
+  function addNode(type,x,y,draft=null){
     if(!TYPES[type])return null;
     if((type==='MODULE_INPUT'||type==='MODULE_OUTPUT')&&!activeModuleId){showToast('Moduleingänge und -ausgänge können nur innerhalb einer Unterfunktion erstellt werden');return null;}
     if(TYPES[type].kind==='custom'&&!canUseModuleOnActiveBoard(TYPES[type].moduleId)){showToast('Diese Unterfunktion würde eine zyklische Verschachtelung erzeugen');return null;}
-    const n=createNodeRecord(type,x,y);
+    const n=applyPaletteDraft(createNodeRecord(type,x,y),draft);
     if(!allowNodeOverlaps){const collision=findPlacementCollision([n],nodes);if(collision){showToast(`Platzierung nicht möglich: ${meta(collision.b).label} liegt im Weg`);return null;}}
     nodes.push(n);nodeDrawOrder.push(n.id);clearSelection();selectedNodes.add(n.id);armedFrom=null;
     if(type==='MODULE_INPUT'||type==='MODULE_OUTPUT'){saveActiveBoardState();refreshCustomModuleTypes();renderPalette();}
@@ -5726,13 +5892,6 @@
     }
     return true;
   }
-  async function readNativeClipboardData() {
-    try {
-      if (!navigator.clipboard?.readText) return null;
-      const text = await navigator.clipboard.readText();
-      return parseClipboardPayload(text);
-    } catch (_) { return null; }
-  }
   function copySelection() {
     if (pendingPaste) { cancelPendingPaste(); showToast('Nicht bestätigtes Einfügen zuerst platzieren'); return false; }
     const data = buildClipboard();
@@ -5790,27 +5949,40 @@
     showToast(collisionIds.size?'Einfügegruppe überschneidet Bauteile – markierte Gruppe an eine freie Stelle ziehen':'Auswahl eingefügt');
     return true;
   }
-  async function pasteSelection() {
-    // file://-Tabs können getrennte Storage-Bereiche haben; dort hat die native
-    // Zwischenablage Vorrang, damit keine lokale alte Kopie eine neue überdeckt.
-    if (location.protocol === 'file:') {
-      const nativeData = await readNativeClipboardData();
-      if (nativeData) { clipboard=nativeData; return pasteClipboardData(nativeData); }
-    }
-    // Bei normalen Origins sind localStorage und BroadcastChannel tabübergreifend.
+  function pasteSelection() {
+    // Der Menüknopf fügt sofort aus der GatterLab-Zwischenablage ein. Der
+    // Ein direkter Systemzwischenablage-Leseaufruf konnte dagegen einen
+    // zusätzlichen Browser-Knopf „Einfügen“ zur Freigabe auslösen.
     const shared = readSharedClipboard();
     if (shared?.nodes?.length) return pasteClipboardData(shared);
     if (clipboard?.nodes?.length) return pasteClipboardData(clipboard);
-    // Letzter Fallback, wenn Storage/Channel nicht verfügbar oder blockiert sind.
-    const nativeData = await readNativeClipboardData();
-    if (nativeData) { clipboard=nativeData; return pasteClipboardData(nativeData); }
-    showToast('Keine GatterLab-Kopie in der Zwischenablage gefunden');
+    showToast('Keine interne GatterLab-Kopie – erst kopieren oder mit Strg+V aus einem anderen Tab einfügen');
     return false;
   }
 
+  // Strg+V nutzt das normale, vom Browser bereitgestellte Paste-Ereignis.
+  // Anders als ein expliziter System-Leseaufruf benötigt dies keinen zweiten
+  // Klick auf einen Berechtigungs- oder „Einfügen“-Knopf. So funktionieren
+  // auch Kopien zwischen verschiedenen file://-Tabs unmittelbar.
+  document.addEventListener('paste',event=>{
+    if(editingTarget()||moduleSimulation)return;
+    const alreadyPasted=pasteHotkeyFallbackUsedToken>0&&pasteHotkeyFallbackUsedToken===pasteHotkeyFallbackToken&&performance.now()-pasteHotkeyFallbackUsedAt<700;
+    // Der echte Einfügevorgang ist eingetroffen; der Tastatur-Fallback darf
+    // dieselbe Kopie nicht ein zweites Mal einsetzen.
+    ++pasteHotkeyFallbackToken;
+    event.preventDefault();
+    if(alreadyPasted)return;
+    const nativeData=parseClipboardPayload(event.clipboardData?.getData('text/plain')||'');
+    if(nativeData?.nodes?.length){
+      clipboard=nativeData;
+      pasteClipboardData(nativeData);
+    }else pasteSelection();
+  },true);
+
   function duplicateSelection() {
     if (pendingPaste) { cancelPendingPaste(); showToast('Nicht bestätigtes Einfügen zuerst platzieren'); return; }
-    const data = buildClipboard(); if (!data) return;
+    const data = buildClipboard();
+    if (!data){showToast('Duplizieren nicht möglich: Kein Bauteil oder Kabel ausgewählt');return;}
     clipboard = data; pasteClipboardData(data);
   }
   function connect(from, to) {
@@ -6586,14 +6758,14 @@
     return record;
   }
 
-  function insertNodeIntoWire(type,wireId,clientX,clientY) {
+  function insertNodeIntoWire(type,wireId,clientX,clientY,draft=null) {
     const wire=wires.find(item=>item.id===wireId);
     if(!wire||!TYPES[type]) return false;
     const source=byId(wire.from.id),dest=byId(wire.to.id);
     if(!source||!dest) return false;
     const probe=closestPointOnWire(wire,worldPoint(clientX,clientY));
     if(!probe) return false;
-    const node=createNodeRecord(type,probe.x,probe.y);
+    const node=applyPaletteDraft(createNodeRecord(type,probe.x,probe.y),draft);
     if(inputPortCount(node)<1||outputPortCount(node)<1){showToast('Dieses Bauteil besitzt keinen passenden Ein- und Ausgang');return false;}
     if(!allowNodeOverlaps&&findPlacementCollision([node],nodes)){showToast('Einsetzen nicht möglich: Am Kabel ist nicht genügend Platz für das Bauteil');return false;}
     nodes.push(node);
@@ -6657,22 +6829,23 @@
     if(!gesture||gesture.kind!=='palette'||!gesture.moved) return;
     const rect=stage.getBoundingClientRect(),inside=x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom;
     if(inside){
-      const p=worldPoint(x,y),preview={id:'__palette_preview__',type:gesture.type,x:snap(p.x),y:snap(p.y),label:TYPES[gesture.type].label,state:false,value:gesture.type==='TRISTATE'?null:false,busWidth:4,displayBits:gesture.type==='DISPLAY'?2:undefined};
-      preview.invalidPlacement=!allowNodeOverlaps&&!!findPlacementCollision([preview],nodes);
-      tempLayer.innerHTML=nodeMarkup(preview,true);
+      tempLayer.innerHTML=nodeMarkup(palettePreviewNode(x,y),true);
       const candidate=shift?wireAtClientPoint(x,y):null;
       gesture.insertWireId=candidate||null;gesture.insertMode=!!(shift&&candidate);
       setInsertWirePreview(candidate);
     }else{tempLayer.innerHTML='';gesture.insertWireId=null;gesture.insertMode=false;setInsertWirePreview(null);}
   }
 
-  // Bauteile werden per Drag-and-drop aus der durchsuchbaren Bibliothek platziert.
+  // Bauteile werden per Drag-and-drop oder durch wiederholtes Klicken platziert.
   // Delegierte Listener bleiben beim Filtern der Bibliothek bestehen und vermeiden
   // das wiederholte Anlegen von Listenern auf jeder einzelnen Bauteilkarte.
   const paletteRoot = $('paletteCategories');
   paletteRoot.addEventListener('click', e => {
     const button = e.target.closest && e.target.closest('.palette-item');
-    if (button && e.detail === 0) selectPaletteItem(button.dataset.type);
+    if (button && e.detail === 0) {
+      if((paletteDraft?.type||selectedPaletteType)===button.dataset.type)clearPalettePlacement();
+      else selectPaletteItem(button.dataset.type);
+    }
   });
   paletteRoot.addEventListener('dragstart', e => {
     if (e.target.closest && e.target.closest('.palette-item')) e.preventDefault();
@@ -6681,12 +6854,119 @@
     const button = e.target.closest && e.target.closest('.palette-item');
     if (!button || e.button !== 0) return;
     e.preventDefault();
+    // Kein programmgesteuerter Fokus auf der Maus-Kachel: :focus-visible würde
+    // sonst zusätzlich zur Auswahlkontur einen dicken Rahmen zeichnen.
+    // Lediglich ein zuvor aktives Textfeld verliert seinen Schreibfokus.
+    if(editingTarget())document.activeElement.blur();
     // Auswahloptik sofort beim Greifen aktivieren, nicht erst nach einem Klick ohne Drag.
+    const wasSelected=(paletteDraft?.type||selectedPaletteType)===button.dataset.type;
     selectPaletteItem(button.dataset.type);
     clearNearestPinHover();
-    gesture = {kind:'palette', type:button.dataset.type, startX:e.clientX, startY:e.clientY, moved:false, pointerId:e.pointerId};
+    gesture = {kind:'palette', type:button.dataset.type, wasSelected, startX:e.clientX, startY:e.clientY, moved:false, pointerId:e.pointerId};
     try { button.setPointerCapture(e.pointerId); } catch (_) {}
   });
+  // Die Farbauswahl ist Teil des Einfügewerkzeugs, kein Klick auf das Raster.
+  paletteLedPicker.addEventListener('pointerdown',e=>e.stopPropagation());
+  paletteLedPicker.addEventListener('click',e=>{
+    if(e.target.closest('[data-palette-led-close]')){
+      e.preventDefault();e.stopPropagation();
+      closePaletteLedPicker();
+      updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
+      return;
+    }
+    const button=e.target.closest('[data-palette-led-color]');
+    if(!button||paletteDraft?.type!=='OUTPUT')return;
+    e.preventDefault();e.stopPropagation();
+    paletteDraft.ledColor=normalizeLedColor(button.dataset.paletteLedColor);
+    // Die Auswahl bleibt geöffnet; nur die aktive Farbe und die LED-Vorschau
+    // werden aktualisiert. Weitere Farben lassen sich sofort anklicken.
+    paletteLedPicker.querySelectorAll('[data-palette-led-color]').forEach(choice=>{
+      choice.setAttribute('aria-pressed',String(choice.dataset.paletteLedColor===paletteDraft.ledColor));
+    });
+    updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
+  });
+  // Ansicht ändern, auf der Arbeitsfläche platzieren oder eine LED-Farbe
+  // wählen beendet die Vorschau nicht. Jeder Rechtsklick beendet sie.
+  document.addEventListener('pointerdown',e=>{
+    if(!selectedPaletteType)return;
+    if(e.button===2){
+      // Auf dem Schaltkreisboden erst beim Loslassen entscheiden: ein kurzer
+      // Rechtsklick bricht ab, Rechtsziehen verschiebt nur die Ansicht.
+      if(scene.contains(e.target)){
+        // Ein neuer Rechtsklick darf nicht die Unterdrückung des vorigen
+        // Rechtsdrags erben.
+        suppressObjectContextMenuUntil=0;
+        return;
+      }
+      if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture();
+      clearPalettePlacement();
+      return;
+    }
+    if(e.button!==0)return;
+    const onPaletteCard=e.target.closest&&e.target.closest('.palette-item');
+    const navigation=e.target.closest&&e.target.closest('#zoomIn,#zoomOut,#undoBtn,#redoBtn,#minimap,#togglePalettePanel,#toggleInspectorPanel');
+    if(onPaletteCard||scene.contains(e.target)||paletteLedPicker.contains(e.target))return;
+    if(navigation){closePaletteLedPicker();return;}
+    if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture();
+    const inspectorInteraction=!!e.target.closest?.('#inspector,#truthTableModal');
+    clearPalettePlacement({preserveInspector:inspectorInteraction});
+  },true);
+  // Auch per Tastatur geöffnete Kontextmenüs beenden die Vorschau.
+  document.addEventListener('contextmenu',e=>{
+    if(!selectedPaletteType)return;
+    // Der Browser kann sein contextmenu-Ereignis erst NACH dem Loslassen eines
+    // Rechtsdrags senden. Dies darf die gerade erhaltene Vorschau nicht
+    // nachträglich löschen (genau dieselbe Sperre wie beim Objekt-Kontextmenü).
+    if(performance.now()<suppressObjectContextMenuUntil)return;
+    if(gesture?.kind==='pan'&&gesture.button===2)return;
+    if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture();
+    clearPalettePlacement();
+  },true);
+  function palettePreviewUnderPointer(){
+    if(!selectedPaletteType||!paletteDraft||moduleSimulation)return false;
+    if(!paletteLedPicker.hidden)return true;
+    if(gesture?.kind==='palette'){
+      const rect=stage.getBoundingClientRect();
+      return !!gesture.moved&&currentPointer.x>=rect.left&&currentPointer.x<=rect.right&&currentPointer.y>=rect.top&&currentPointer.y<=rect.bottom;
+    }
+    if(gesture&&gesture.kind!=='place')return false;
+    const target=document.elementFromPoint(currentPointer.x,currentPointer.y);
+    return !!target&&scene.contains(target);
+  }
+  document.addEventListener('keydown',e=>{
+    if(!selectedPaletteType||moduleSimulation)return;
+    if(e.key==='Delete'&&!editingTarget()){
+      // Entf beendet nur das Einfügewerkzeug, ohne das zuletzt platzierte
+      // und deshalb noch ausgewählte Bauteil direkt wieder zu löschen.
+      if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture();
+      clearPalettePlacement();
+      e.preventDefault();e.stopPropagation();
+      return;
+    }
+    // Die sechs Bearbeitungs-/Freigabe-Hotkeys führen ihre eigentliche Aktion
+    // weiter aus, aber erst nachdem das Einfügewerkzeug beendet wurde.
+    if((e.ctrlKey||e.metaKey)&&!e.altKey&&!editingTarget()&&['s','a','c','x','v','d'].includes(e.key.toLowerCase())){
+      if(gesture?.kind==='palette'||gesture?.kind==='place')cancelActiveGesture();
+      clearPalettePlacement();
+      return;
+    }
+    const space=e.key===' '||e.code==='Space';
+    if(!space||e.ctrlKey||e.metaKey||e.altKey||editingTarget())return;
+    // Space ohne Zusatzfunktion bleibt folgenlos. Alle anderen Tasten dürfen
+    // ihre regulären Aktionen ausführen, ohne den Einfügemodus zu verlassen.
+    e.preventDefault();e.stopPropagation();
+    if(!e.repeat&&palettePreviewUnderPointer())cyclePaletteDraft();
+  },true);
+  window.addEventListener('keyup',e=>{
+    if(e.key!==' '&&e.code!=='Space')return;
+    if(paletteDraft?.type==='PUSH'&&paletteDraft.state){
+      paletteDraft.state=false;paletteDraft.value=false;
+      if(gesture?.kind==='palette')updatePaletteGesturePreview(currentPointer.x,currentPointer.y,!!shiftKeyHeld);
+      else updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
+    }
+    // Verhindert die sonst mögliche native Space-Klickaktivierung der Kachel.
+    if(selectedPaletteType&&!editingTarget()){e.preventDefault();e.stopPropagation();}
+  },true);
   renderPalette();
   renderBoardTabs();
   $('paletteSearch').addEventListener('input', renderPalette);
@@ -7148,6 +7428,56 @@
   $('shareBtn').addEventListener('click', shareConfig);
   $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
   const PATCH_LOG = [
+    {version:'V120',title:'Einfügen ohne Zusatzdialog und verständliche Rückmeldung',items:[
+      'Die Klickfläche des × im LED-Farbfenster sitzt 3 Pixel tiefer. Das sichtbare × bleibt unverändert an seiner bisherigen Position.',
+      'Einfügen über Menü oder Schaltfläche verwendet die GatterLab-Zwischenablage unmittelbar, ohne eine Browser-Freigabe zum Lesen der Systemzwischenablage anzufordern.',
+      'Strg+V verarbeitet das gewöhnliche Einfügeereignis direkt. Zwischenablagedaten aus anderen GatterLab-Tabs können so ohne zusätzlichen „Einfügen“-Knopf übernommen werden.',
+      'Duplizieren ohne Auswahl zeigt unten den Hinweis, dass kein Bauteil oder Kabel ausgewählt ist.'
+    ]},
+    {version:'V119',title:'Schließen-Symbol im LED-Farbfenster zentriert',items:[
+      'Das × ist innerhalb seiner Schaltfläche jetzt horizontal und vertikal zentriert. Die Position der Schaltfläche relativ zu den Farbfeldern bleibt unverändert.'
+    ]},
+    {version:'V118',title:'Ansichtsnavigation ohne Vorschauverlust',items:[
+      'Die Schaltflächen Rückgängig und Wiederherstellen neben der Zoomanzeige beenden das aktive Einfügewerkzeug nicht.',
+      'Das verzögert eintreffende Kontextmenü-Ereignis nach dem Loslassen eines Rechtsdrags wird ebenso unterdrückt wie das Objekt-Kontextmenü. Die Vorschau bleibt bei Rechtsziehen auf freier Fläche erhalten; ein echter Rechtsklick beendet sie weiterhin.',
+      'Pfeiltasten und andere Kamerabewegungen aktualisieren die Dragvorschau jetzt unmittelbar, auch wenn der Mauszeiger stillsteht.',
+      'Das × der LED-Farbpalette sitzt mit seiner rechten Seite bündig zum rechten Rand der Farbfelder.'
+    ]},
+    {version:'V117',title:'Feste LED-Farbpalette und verlässlicher Vorschauabbruch',items:[
+      'Ziehen über den freien Schaltkreisboden lässt das Einfügewerkzeug aktiv. Auch Rechtsziehen zum Verschieben der Ansicht beendet die Vorschau nicht; ein kurzer Rechtsklick weiterhin schon.',
+      'Entf beendet die Einfügevorschau, ohne das zuletzt platzierte und noch ausgewählte Bauteil mitzulöschen.',
+      'Das LED-Farbfenster bleibt nach dem Öffnen stehen und ist auf die ungefähre Größe der Farbauswahl im Eigenschaftenbereich verkleinert.',
+      'Ein × rechts oben schließt die Farbauswahl. Farbwechsel lassen sie geöffnet und aktualisieren die ausgewählte Farbe sowie die Vorschau.'
+    ]},
+    {version:'V116',title:'Abbruchkürzel und bewegliche LED-Farbvorschau',items:[
+      'Jeder Rechtsklick und Escape beenden wieder das aktive Einfügewerkzeug, auch wenn eine LED-Farbauswahl geöffnet ist.',
+      'Strg+S, Strg+A, Strg+C, Strg+X, Strg+V und Strg+D beenden die Einfügevorschau, bevor ihre reguläre Aktion ausgeführt wird.',
+      'Die zehn LED-Farben werden wie in den Eigenschaften auf zwei Reihen mit je fünf Feldern aufgeteilt.',
+      'Die Farbauswahl ist mittig an der eingerasteten LED-Vorschau ausgerichtet und bewegt sich mit ihr. Beim Bewegen auf die Farbfelder bleibt sie kurz stehen, damit die Farben anklickbar sind.'
+    ]},
+    {version:'V115',title:'Beständige Einfügevorschau und LED-Farben',items:[
+      'Die Clock-Vorschau animiert auch nach einem Klick auf die Bauteilpalette kontinuierlich, ohne dass die Maus bewegt werden muss.',
+      'Leertaste ohne Zusatzfunktion lässt die Vorschau unverändert. Andere Tasten, Zoom und Kameraverschiebungen beenden den Einfügemodus ebenfalls nicht.',
+      'Ein Rechtsziehen zum Verschieben und der Wechsel zwischen Fenstern erhalten das gewählte Einfügewerkzeug; tatsächliche Interaktionen mit anderen Programmfunktionen beenden es weiterhin.',
+      'Bei der LED öffnet die Leertaste unmittelbar unter der Vorschau eine Auswahl aller zehn LED-Farben. Ein Klick auf eine Farbe übernimmt sie für alle danach platzierten LEDs, ohne den Einfügemodus zu verlassen.'
+    ]},
+    {version:'V114',title:'Palettenfokus und Direktbedienung korrigiert',items:[
+      'Ein Maus-Klick auf eine Bauteilkarte erzeugt keinen künstlichen Tastaturfokus mehr. Die Auswahl hat wieder nur ihre normale Kontur; nach dem Abwählen bleibt keine zusätzliche Fokuskontur bestehen.',
+      'Interaktive Eigenschaften bleiben beim Beenden des Einfügemodus über ihren ersten Klick im DOM erhalten. Beispielsweise lässt sich ein frisch platzierter Schalter unmittelbar in den Eigenschaften umlegen.',
+      'Beim Umschalten HIGH ↔ LOW per Leertaste folgt die Hervorhebung der Bauteilkarte dem tatsächlich in der Vorschau gezeigten Typ.',
+      'Bei Pfeilen dreht die Leertaste die Vorschau schrittweise rechts → unten → links → oben; die gewählte Richtung wird beim Platzieren übernommen.'
+    ]},
+    {version:'V113',title:'Transparentere Vorschau und Leertasten-Varianten',items:[
+      'Ghost-Bauteile erscheinen beim Ziehen und beim Platzieren per Klick deutlich transparenter und lassen sich besser von vorhandenen ausgewählten Bauteilen unterscheiden.',
+      'Die Leertaste wechselt während der Vorschau zwischen Schalterzuständen, HIGH/LOW und den Größen 2, 4 und 8 für n-Bit-Anzeigen, MUX, DEMUX sowie Bus-Combiner und Bus-Splitter. Beim Taster bleibt die Taste nur während des Gedrückthaltens aktiv. Die gewählte Variante wird beim Ablegen übernommen.',
+      'Rechtsklick, sonstige Tastenkürzel, Scrollen, Fensterwechsel sowie Klicks außerhalb der Palette oder der freien Schaltungsfläche beenden den Einfügemodus zuverlässig.',
+      'Die Überschriften Bauteile und Eigenschaften sind auf die vertikale Mitte der Zoomsteuerung ausgerichtet.'
+    ]},
+    {version:'V112',title:'Bauteile per wiederholtem Klick platzieren',items:[
+      'Ein Klick auf ein Bauteil in der linken Palette aktiviert einen dauerhaften Einfügemodus. Jeder weitere Klick auf eine freie Stelle der Arbeitsfläche erzeugt ein neues Exemplar am Rasterpunkt.',
+      'Eine transparente Positionsvorschau folgt dem Mauszeiger und zeigt mögliche Kollisionen an. Esc, ein weiterer Klick auf die aktive Palettenkarte oder die Auswahl bestehender Schaltungselemente beendet den Einfügemodus.',
+      'Das bisherige Ziehen aus der Palette bleibt erhalten. Nach dem Ablegen ist das Bauteil weiter als Einfügewerkzeug ausgewählt; der Statusbalken zeigt den aktiven Modus.'
+    ]},
     {version:'V111',title:'Rückkopplungs-Klapppfeil exakt ausgerichtet',items:[
       'Die horizontale Position des Rückkopplungs-Klapppfeils wird jetzt direkt am tatsächlichen rechten Rand des Tastenkürzel-Pfeils gemessen und bei Größenänderungen nachgeführt. Die übrige Anordnung bleibt unverändert.'
     ]},
@@ -7941,6 +8271,9 @@
 
   scene.addEventListener('pointerdown', e => {
     currentPointer = {x:e.clientX,y:e.clientY};
+    // Ein Klick auf die freie Schaltung schließt die Farbpalette, ist aber
+    // zugleich bereits der erste Platzierungsklick für die gewählte LED.
+    if(e.button===0&&!paletteLedPicker.hidden)closePaletteLedPicker();
     if(moduleSimulation&&e.button===0){
       const nodeElement=e.target.closest&&e.target.closest('[data-node]');
       const node=nodeElement&&byId(nodeElement.dataset.node);
@@ -7949,8 +8282,16 @@
       e.preventDefault();e.stopPropagation();return;
     }
     if (e.button === 0 && selectedPaletteType) {
-      selectedPaletteType = null;
-      document.querySelectorAll('.palette-item.selected').forEach(btn => btn.classList.remove('selected'));
+      // Eine freie Stelle setzt das gewählte Bauteil. Bestehende Bauteile, Pins
+      // und Leitungen bleiben dagegen normal bedienbar und beenden das Werkzeug.
+      const occupiedTarget=e.target.closest&&e.target.closest('[data-node],[data-wire-select],[data-wire-segment][data-wire-id],[data-wire-end][data-wire-id],.pin,[data-pin-hit]');
+      const occupiedBody=topmostNodeBodyAtWorldPoint(worldPoint(e.clientX,e.clientY));
+      if(!occupiedTarget&&!occupiedBody&&!pendingPaste){
+        gesture={kind:'place',type:selectedPaletteType,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,moved:false};
+        try{scene.setPointerCapture(e.pointerId);}catch(_){}
+        e.preventDefault();e.stopPropagation();return;
+      }
+      clearPalettePlacement();
     }
     // Das ursprüngliche Ziel des Rechtsklicks vor Pointer Capture sichern:
     // Nach setPointerCapture kann contextmenu sonst nur noch die SVG-Arbeitsfläche sehen.
@@ -8160,15 +8501,14 @@
     e.preventDefault();
   });
 
-  function cancelActiveGesture() {
+  function cancelActiveGesture({preservePalette=false}={}) {
     const active=gesture;
     gesture=null; lastLabelClick=null;
     clearArmedPin();
-    if (active?.kind==='palette') {
-      // Abgebrochener Palette-Drag darf keine ausgewählte Palette-Kachel
-      // zurücklassen (Escape, Pointer-Cancel, Fensterwechsel oder Blur).
-      selectedPaletteType=null;
-      renderPalette();
+    if (active?.kind==='palette'||active?.kind==='place') {
+      // Ein Verlust des Fensterfokus beendet nur die laufende Mausgeste,
+      // nicht aber das ausgewählte Einfügewerkzeug.
+      if(!preservePalette)clearPalettePlacement();
     }
     if (active?.kind==='node' && active.moved && active.origins) {
       active.origins.forEach((origin,id)=>{ const n=byId(id); if(n){n.x=origin.x;n.y=origin.y;} });
@@ -8194,6 +8534,7 @@
   window.addEventListener('pointermove', e => {
     currentPointer={x:e.clientX,y:e.clientY};
     updateNearestPinHover(e.clientX,e.clientY);
+    updatePalettePlacementPreview(e.clientX,e.clientY);
     if (!gesture || (gesture.pointerId!=null && gesture.pointerId!==e.pointerId)) {
       const p=worldPoint(e.clientX,e.clientY); $('coordStatus').textContent=`x: ${Math.round(p.x)} · y: ${Math.round(p.y)}`; return;
     }
@@ -8201,6 +8542,10 @@
       const dx=e.clientX-gesture.startX, dy=e.clientY-gesture.startY;
       if (!gesture.moved && Math.hypot(dx,dy)>5) gesture.moved=true;
       updatePaletteGesturePreview(e.clientX,e.clientY,!!(e.shiftKey||shiftKeyHeld));
+      return;
+    }
+    if(gesture.kind==='place'){
+      if(Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)>5)gesture.moved=true;
       return;
     }
     if (gesture.kind==='toggle') { if (Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)>3) gesture.moved=true; return; }
@@ -8288,6 +8633,19 @@
   window.addEventListener('pointerup', e => {
     if (!gesture || (gesture.pointerId!=null && gesture.pointerId!==e.pointerId)) return;
     const done=gesture; gesture=null;
+    if(done.kind==='place'){
+      const target=document.elementFromPoint(e.clientX,e.clientY);
+      let placed=false;
+      if(!done.moved&&selectedPaletteType===done.type&&target&&scene.contains(target)){
+        const point=worldPoint(e.clientX,e.clientY),node=addNode(paletteDraft.type,point.x,point.y,paletteDraft);
+        if(node){placed=true;showToast(`${TYPES[node.type].label} platziert · weiterer Klick fügt erneut ein`);}
+      }
+      // Nach dem Setzen nicht sofort einen roten Kollisionsgeist über dem neuen
+      // Bauteil einblenden. Die Vorschau erscheint bei der nächsten Bewegung.
+      if(placed)palettePlacementLayer.innerHTML='';
+      else updatePalettePlacementPreview(e.clientX,e.clientY);
+      return;
+    }
     if(done.kind==='wire-segment'){
       const wire=wires.find(item=>item.id===done.wireId);
       if(!wire){render(false,false);return;}
@@ -8311,18 +8669,21 @@
       tempLayer.innerHTML='';
       const r=stage.getBoundingClientRect();
       const inside=done.moved&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
+      let placed=false;
       if(inside&&done.insertMode&&done.insertWireId&&(e.shiftKey||shiftKeyHeld)){
-        selectedPaletteType=null;document.querySelectorAll('.palette-item.selected').forEach(btn=>btn.classList.remove('selected'));
-        insertNodeIntoWire(done.type,done.insertWireId,e.clientX,e.clientY);
+        placed=insertNodeIntoWire(paletteDraft.type,done.insertWireId,e.clientX,e.clientY,paletteDraft);
       } else if (inside) {
-        selectedPaletteType = null;
-        document.querySelectorAll('.palette-item.selected').forEach(btn => btn.classList.remove('selected'));
-        const p=worldPoint(e.clientX,e.clientY), n=addNode(done.type,p.x,p.y);
-        if(n) showToast(`${TYPES[n.type].label} platziert`);
+        const p=worldPoint(e.clientX,e.clientY), n=addNode(paletteDraft.type,p.x,p.y,paletteDraft);
+        if(n){placed=true;showToast(`${TYPES[n.type].label} platziert`);}
       } else if (!done.moved) {
-        selectPaletteItem(done.type);
+        if(done.wasSelected)clearPalettePlacement();
+        else selectPaletteItem(done.type);
+      } else {
+        clearPalettePlacement();
       }
       setInsertWirePreview(null);
+      if(placed)palettePlacementLayer.innerHTML='';
+      else updatePalettePlacementPreview(e.clientX,e.clientY);
       return;
     }
     if (done.kind==='push') {
@@ -8471,17 +8832,32 @@
     }
     if (done.kind==='pan') {
       stage.classList.remove('panning');
-      if(done.button===2&&done.moved){suppressObjectContextMenuUntil=performance.now()+450;rightClickContextTarget=null;}
+      if(done.button===2){
+        if(done.moved){suppressObjectContextMenuUntil=performance.now()+1100;rightClickContextTarget=null;}
+        else clearPalettePlacement();
+      }
       saveLocal(); return;
     }
   });
   window.addEventListener('pointercancel', e => {
-    if (gesture && (gesture.pointerId==null || gesture.pointerId===e.pointerId)) cancelActiveGesture();
+    if (gesture && (gesture.pointerId==null || gesture.pointerId===e.pointerId)){
+      const paletteGesture=gesture.kind==='palette'||gesture.kind==='place';
+      const shortRightClick=gesture.kind==='pan'&&gesture.button===2&&!gesture.moved;
+      if(gesture.kind==='pan'&&gesture.button===2&&gesture.moved){
+        suppressObjectContextMenuUntil=performance.now()+1100;
+        rightClickContextTarget=null;
+      }
+      cancelActiveGesture();
+      if(paletteGesture||shortRightClick)clearPalettePlacement();
+    }
   });
   scene.addEventListener('lostpointercapture', e => {
     if (gesture?.kind==='push' && (gesture.pointerId==null || gesture.pointerId===e.pointerId)) cancelActiveGesture();
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) cancelActiveGesture(); });
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden)cancelActiveGesture({preservePalette:true});
+    else if(selectedPaletteType)updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
+  });
 
   function arrowVector(keys,step){
     const left=keys.has('ArrowLeft'),right=keys.has('ArrowRight'),up=keys.has('ArrowUp'),down=keys.has('ArrowDown');
@@ -8534,7 +8910,18 @@
         else updateExistingNodeInsertPreview(gesture.id,currentPointer.x,currentPointer.y,true);
       }
     }
-    if (e.key==='Escape') { clearArrowNavigation(); cancelActiveGesture(); if(pendingPaste) cancelPendingPaste(); armedFrom=null; $('shareModal').classList.remove('show'); $('patchLogModal').classList.remove('show'); $('helpModal').classList.remove('show'); $('newCircuitModal').classList.remove('show'); if($('deleteModuleModal').classList.contains('show'))closeDeleteModuleDialog(); closeMenus(); }
+    if (e.key==='Escape') {
+      clearArrowNavigation();
+      // Escape beendet auch den Einfügemodus samt LED-Farbvorschau.
+      cancelActiveGesture();
+      clearPalettePlacement();
+      if(pendingPaste) cancelPendingPaste();
+      armedFrom=null;
+      $('shareModal').classList.remove('show'); $('patchLogModal').classList.remove('show');
+      $('helpModal').classList.remove('show'); $('newCircuitModal').classList.remove('show');
+      if($('deleteModuleModal').classList.contains('show'))closeDeleteModuleDialog();
+      closeMenus();
+    }
     if ($('shareModal').classList.contains('show') || $('patchLogModal').classList.contains('show') || $('helpModal').classList.contains('show') || $('newCircuitModal').classList.contains('show') || $('deleteModuleModal').classList.contains('show')) return;
     if (editingTarget()) return;
     const focusedWireHandle=e.target.closest&&e.target.closest('[data-wire-segment][data-wire-id]');
@@ -8584,7 +8971,19 @@
     if (mod && e.key.toLowerCase()==='y') { e.preventDefault(); redo(); return; }
     if (mod && e.key.toLowerCase()==='c') { e.preventDefault(); copySelection(); }
     if (mod && e.key.toLowerCase()==='x') { e.preventDefault(); if(copySelection()) deleteSelection(); }
-    if (mod && e.key.toLowerCase()==='v') { e.preventDefault(); pasteSelection(); }
+    if (mod && e.key.toLowerCase()==='v') {
+      // Das Tastaturkürzel darf das echte ClipboardEvent nicht verhindern.
+      // Für Browser, die keines liefern, greift die App-Kopie nach kurzer Frist.
+      const token=++pasteHotkeyFallbackToken;
+      window.setTimeout(()=>{
+        if(token!==pasteHotkeyFallbackToken)return;
+        if(pasteSelection()){
+          pasteHotkeyFallbackUsedToken=token;
+          pasteHotkeyFallbackUsedAt=performance.now();
+        }
+      },60);
+      return;
+    }
     if (mod && e.key.toLowerCase()==='d') { e.preventDefault(); duplicateSelection(); }
     if (e.key==='Delete' || e.key==='Backspace') { e.preventDefault(); deleteSelection(); }
   });
@@ -8603,7 +9002,10 @@
       if(!pressedArrowKeys.size&&arrowRepeatTimer){clearInterval(arrowRepeatTimer);arrowRepeatTimer=null;}
     }
   });
-  window.addEventListener('blur', () => { shiftKeyHeld=false;clearArrowNavigation();setInsertWirePreview(null);wireRouteCache.clear();cancelActiveGesture();renderWires(); });
+  window.addEventListener('blur', () => {
+    shiftKeyHeld=false;clearArrowNavigation();setInsertWirePreview(null);wireRouteCache.clear();
+    cancelActiveGesture({preservePalette:true});renderWires();
+  });
   window.addEventListener('storage', event => {
     if (event.key !== SHARED_CLIPBOARD_KEY || !event.newValue) return;
     const data = parseClipboardPayload(event.newValue);
@@ -8611,7 +9013,10 @@
   });
   // Bereits vor dem ersten Ctrl+V eine vorhandene gemeinsame Kopie verfügbar machen.
   readSharedClipboard();
-  window.addEventListener('resize', () => { applyMinimapLayout(); renderEmpty(); updateMinimap(); if(inlineLabelEditor) positionInlineLabelEditor(); });
+  window.addEventListener('resize', () => {
+    applyMinimapLayout();renderEmpty();updateMinimap();
+    if(inlineLabelEditor)positionInlineLabelEditor();
+  });
   // Das Arbeitsflächenmaß ändert sich während des Ein-/Ausklappens frameweise.
   // ResizeObserver hält die Leerzustands-Beschriftung in jedem Animationsschritt zentriert.
   if('ResizeObserver' in window){
