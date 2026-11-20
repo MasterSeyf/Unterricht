@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
-<title>GatterLab V126</title>
+<title>GatterLab V131</title>
 <style>
   :root {
     color-scheme: dark;
@@ -70,6 +70,7 @@
   .workspace.left-narrow .palette-category-full { display:none; }
   .workspace.left-narrow .palette-category-short { display:inline; }
   .workspace.left-resizing { grid-template-columns:var(--left-panel-width) minmax(0,1fr) var(--right-panel-width) !important; transition:none !important; }
+  .workspace.left-resizing.right-collapsed { grid-template-columns:var(--left-panel-width) minmax(0,1fr) 0 !important; }
   .workspace.left-resizing > .sidebar.left { opacity:1; pointer-events:auto; border-right-width:1px; }
   .workspace.left-collapsed { grid-template-columns:0 minmax(0,1fr) var(--right-panel-width); }
   .workspace.right-collapsed { grid-template-columns:var(--left-panel-width) minmax(0,1fr) 0; }
@@ -214,7 +215,8 @@
   .board-tabs { display:flex; flex:0 1 auto; width:max-content; align-items:center; gap:4px; min-width:0; max-width:calc(100% - 36px); height:100%; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
   .board-tabs::-webkit-scrollbar { display:none; }
   /* Lange Namen bleiben vollständig im Tab. Bei knapper Breite scrollt die Tab-Leiste. */
-  .board-tabs:not(.has-modules) { padding-right:6px; }
+  /* Kein Sonderabstand ohne Unterfunktionen: Der Hinzufügen-Knopf beginnt
+     exakt dort, wo nach dem Erstellen der erste Unterfunktions-Tab beginnt. */
   .board-tab { height:27px; flex:0 0 auto; display:inline-flex; align-items:center; gap:7px; max-width:none; padding:4px 9px; border:1px solid transparent; border-radius:7px; background:transparent; color:#91a4b9; font-size:10px; cursor:pointer; white-space:nowrap; }
   .board-tab:hover { color:#e3eef9; background:#1c2b3b; border-color:#30465e; }
   .board-tab.module-board-tab { cursor:pointer; gap:3px; }
@@ -302,6 +304,7 @@
   .wire-flow.bus-wire-8 { stroke-width:5; stroke-dasharray:6 12; animation-name:flow-bus-8; }
   .bus-symbol-route { fill:none; stroke:#a9d8ff; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
   .bus-symbol-trunk { fill:none; stroke:#a9d8ff; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .bus-pin-stub { fill:none; stroke:#7d94aa; stroke-width:1.65; stroke-linecap:round; pointer-events:none; }
   .wire-base.bus-wire-2.selected { stroke-width:4.25; }
   .wire-base.bus-wire-4.selected { stroke-width:5.5; }
   .wire-base.bus-wire-8.selected { stroke-width:6.75; }
@@ -394,6 +397,7 @@
   .node .mux-route { fill:none; stroke:#647c94; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; opacity:.48; pointer-events:none; }
   .node .mux-route.mux-route-active { stroke:#65e5ae; stroke-width:2.8; opacity:1; filter:drop-shadow(0 0 3px #55e5a477); }
   .node .mux-common-route { fill:none; stroke:#65e5ae; stroke-width:2.8; stroke-linecap:round; stroke-linejoin:round; opacity:1; filter:drop-shadow(0 0 3px #55e5a477); pointer-events:none; }
+  .node .mux-route.mux-route-uncertain, .node .mux-common-route.mux-route-uncertain { stroke:#e6bd68; stroke-width:2.8; stroke-dasharray:5 4; opacity:1; filter:drop-shadow(0 0 3px #e6bd6866); }
   .node .mux-pin-stub, .node .mux-select-stub { fill:none; stroke:#7d94aa; stroke-width:1.65; stroke-linecap:round; pointer-events:none; }
   .node .mux-port-label, .node .mux-select-label { fill:#94a9be; font-size:6.8px; text-anchor:middle; pointer-events:none; }
   .node .mux-select-label { font-size:6.5px; fill:#79c6f7; }
@@ -1072,7 +1076,7 @@
               <section class="help-section" id="help-guide">
                 <h3>Kurzanleitung</h3>
                 <ol>
-                  <li><strong>Bauteile platzieren:</strong> Ziehe ein Bauteil aus der linken Palette auf das Raster. Oder klicke seine Karte an und setze es mit beliebig vielen Klicks auf freie Stellen der Arbeitsfläche. Die halbtransparente Vorschau zeigt Einfügeposition und Kollisionen. Mit der Leertaste wechselst du in der Vorschau zwischen Schalterzuständen, HIGH/LOW und den verfügbaren Größen von Anzeige, MUX, DEMUX, Bus-Combiner und -Splitter; bei Pfeilen drehst du die Richtung jeweils um 90° im Uhrzeigersinn. Bei einer LED öffnet die Leertaste zehn Farben in einem kleinen festen Fenster mit zwei Reihen zu je fünf. Mehrere Farben lassen sich nacheinander wählen; das × oben rechts schließt nur die Farbauswahl. Die LED-Vorschau lässt sich weiterhin frei bewegen. Ein Taster bleibt nur während gedrückter Leertaste aktiv. Esc, Entf, ein kurzer Rechtsklick und Strg+S/A/C/X/V/D beenden den Einfügemodus. Ziehen über freie Schaltungsfläche, Rechtsziehen zum Verschieben der Ansicht, Zoom und Pfeiltasten beenden ihn nicht. Ein Klick auf eine bereits vorhandene Komponente oder eine andere Programmfunktion beendet ihn ebenfalls. Eigenschaftsregler können unmittelbar nach der Platzierung bedient werden.</li>
+                  <li><strong>Bauteile platzieren:</strong> Ziehe ein Bauteil aus der linken Palette auf das Raster. Oder klicke seine Karte an und setze es mit beliebig vielen Klicks auf freie Stellen der Arbeitsfläche. Die halbtransparente Vorschau zeigt Einfügeposition und Kollisionen. Mit der Leertaste wechselst du in der Vorschau zwischen Schalterzuständen, HIGH/LOW und den verfügbaren Größen von Anzeige, MUX, DEMUX, Bus-Combiner und -Splitter.</li>
                   <li><strong>Bauteile bewegen:</strong> Ziehe ein Bauteil mit der linken Maustaste. Mehrere markierte Bauteile lassen sich gemeinsam verschieben.</li>
                   <li><strong>Kabel verbinden:</strong> Ziehe einen Ausgangs-Pin auf einen Eingangs-Pin. Ein gültiges Ziel wird während des Ziehens hervorgehoben. Bestehende Kabel können an ihren Endpunkten umgesteckt werden.</li>
                   <li><strong>Schaltung testen:</strong> Die Simulation läuft laufend. Schalter ändern ihren Zustand per Klick, Taster werden durch Drücken aktiviert und Clock-Bauteile erzeugen periodische Signale.</li>
@@ -1308,7 +1312,7 @@
     ARROW:    { label:'Pfeil', category:'Sonstiges', inputs:0, kind:'annotation', glyph:'→', description:'Frei platzierbarer Richtungspfeil.' },
     MODULE_INPUT: { label:'Eingang', category:'Modulschnittstellen', inputs:0, kind:'input', glyph:'IN', description:'Definiert einen Eingang der Unterfunktion.' },
     MODULE_OUTPUT: { label:'Ausgang', category:'Modulschnittstellen', inputs:1, kind:'output', glyph:'OUT', description:'Definiert einen Ausgang der Unterfunktion.' },
-    BUS_COMBINER: { label:'Bus-Combiner', category:'Kombinationslogik', inputs:4, kind:'bus-combiner', glyph:'B+', description:'Fasst mehrere einzelne Digitalsignale zu einem Mehrbit-Bus zusammen. Eingang 0 ist das höchstwertige Bit (MSB).' },
+    BUS_COMBINER: { label:'Bus-Combiner', category:'Kombinationslogik', inputs:2, kind:'bus-combiner', glyph:'B+', description:'Fasst mehrere einzelne Digitalsignale zu einem Mehrbit-Bus zusammen. Eingang 0 ist das höchstwertige Bit (MSB).' },
     BUS_SPLITTER: { label:'Bus-Splitter', category:'Kombinationslogik', inputs:1, kind:'bus-splitter', glyph:'B÷', description:'Teilt einen Mehrbit-Bus in einzelne Digitalsignale auf. Ausgang 0 liefert das höchstwertige Bit (MSB).' },
     MUX:      { label:'Multiplexer', category:'Kombinationslogik', inputs:3, kind:'mux', glyph:'MUX', dataInputs:2, description:'Wählt über die Auswahlleitungen genau einen von n Dateneingängen und leitet ihn zum gemeinsamen Ausgang.' },
     DEMUX:    { label:'Demultiplexer', category:'Kombinationslogik', inputs:2, kind:'demux', glyph:'DEMUX', dataOutputs:2, description:'Wählt über die Auswahlleitungen genau einen von n Datenausgängen und leitet ihn zum gemeinsamen Eingang.' }
@@ -1363,8 +1367,12 @@
   const $ = id => document.getElementById(id);
   const workspace=$('workspace');
   const PANEL_LAYOUT_KEY='gatterlab-panel-layout-v1';
-  let panelVisibility={left:true,right:true};
-  let leftPanelMode='full',lastOpenLeftPanelMode='full';
+  // Nur auf Smartphones mit Touch-Eingabe im Auslieferungszustand einklappen.
+  // Auf Rechnern bleiben beide Leisten offen; individuelle Einstellungen
+  // aus localStorage haben unabhängig vom Gerät weiterhin Vorrang.
+  const isPhoneViewport=window.matchMedia('(pointer: coarse)').matches&&Math.min(window.innerWidth,window.innerHeight)<=650;
+  let panelVisibility={left:!isPhoneViewport,right:!isPhoneViewport};
+  let leftPanelMode=isPhoneViewport?'hidden':'full',lastOpenLeftPanelMode='full';
   let panelLayoutTransition=null;
   try {
     const savedPanels=JSON.parse(localStorage.getItem(PANEL_LAYOUT_KEY)||'null');
@@ -1373,8 +1381,7 @@
       lastOpenLeftPanelMode=savedPanels.leftMode==='narrow'?'narrow':'full';
       leftPanelMode=panelVisibility.left?lastOpenLeftPanelMode:'hidden';
     }
-    else if(window.matchMedia&&window.matchMedia('(max-width: 980px)').matches)panelVisibility.right=false;
-  } catch(_) { if(window.matchMedia&&window.matchMedia('(max-width: 980px)').matches)panelVisibility.right=false; }
+  } catch(_) {}
   const stage = $('stage'), scene = $('scene'), world = $('world');
   const nodeLayer = $('nodeLayer'), wireLayer = $('wireLayer'), wireHandleLayer = $('wireHandleLayer'), pinHoverLayer=$('pinHoverLayer'), tempLayer = $('tempLayer'), palettePlacementLayer=$('palettePlacementLayer'), paletteLedPicker=$('paletteLedPicker');
   const selectionLayer = $('selectionLayer');
@@ -1408,8 +1415,8 @@
   let minimapUiGesture = null, inlineLabelEditor = null, lastLabelClick = null, selectedPaletteType = null, paletteDraft = null, paletteLedPreviewLast=null;
   let wireRouteCache = new Map(), insertPreviewWireId = null, shiftKeyHeld = false;
   let suppressObjectContextMenuUntil=0,objectContextNodeId=null,wireContextId=null,rightClickContextTarget=null;
-  let shortcutsCollapsed=false;
-  try { shortcutsCollapsed=localStorage.getItem(SHORTCUTS_COLLAPSED_KEY)==='true'; } catch(_) {}
+  let shortcutsCollapsed=true;
+  try { const stored=localStorage.getItem(SHORTCUTS_COLLAPSED_KEY);if(stored!==null)shortcutsCollapsed=stored==='true'; } catch(_) {}
   const activeTouchPointers=new Map();
   let touchLongPress=null,touchPinch=null;
   const MINIMAP_LAYOUT_KEY = 'gatterlab-minimap-layout-v1';
@@ -1466,7 +1473,7 @@
     const defaultName=`${width}-Bit-Anzeige`;
     return isDefaultDisplayNodeName(node)?defaultName:String(node?.label??defaultName);
   }
-  const normalizeBufferDelay = value => { const n=Number(value); return Math.round(Math.max(.1,Math.min(2,Number.isFinite(n)?n:1))*10)/10; };
+  const normalizeBufferDelay = value => { const n=Number(value); return Math.round(Math.max(0,Math.min(2,Number.isFinite(n)?n:1))*10)/10; };
   const formatBufferDelay = value => `${normalizeBufferDelay(value).toFixed(1).replace('.',',')} s`;
   const meta = n => {
     const base=TYPES[n?.type] || {label:n?.label||'Unbekannt',category:'Unbekannt',inputs:0,outputs:0,kind:'gate',glyph:'?',description:'Unbekanntes Bauteil'};
@@ -1483,6 +1490,26 @@
   };
   const stageCenterWorld = () => worldPoint(stage.getBoundingClientRect().left + stage.clientWidth / 2, stage.getBoundingClientRect().top + stage.clientHeight / 2);
   const editingTarget = () => /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '') || !!document.activeElement?.isContentEditable;
+  function enforceSingleSpaceInput(input){
+    // Gleiche Leerzeichenregel wie bei Schaltkreisnamen: höchstens eines
+    // zwischen zwei Wörtern. Funktioniert auch für Einfügen und mobile IMEs.
+    const normalize=()=>{
+      const old=input.value,clean=old.replace(/ {2,}/g,' ');
+      if(clean===old)return;
+      const start=input.selectionStart??old.length,end=input.selectionEnd??start;
+      input.value=clean;
+      input.setSelectionRange(old.slice(0,start).replace(/ {2,}/g,' ').length,old.slice(0,end).replace(/ {2,}/g,' ').length);
+    };
+    input.addEventListener('beforeinput',e=>{
+      if(e.isComposing||e.data!==' '||!e.inputType?.startsWith('insert'))return;
+      const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
+      const proposed=input.value.slice(0,start)+' '+input.value.slice(end);
+      if(/ {2,}/.test(proposed))e.preventDefault();
+    });
+    input.addEventListener('input',normalize);
+    input.addEventListener('compositionend',normalize);
+    normalize();
+  }
   const selectionEmpty = () => selectedNodes.size === 0 && selectedWires.size === 0;
 
   const MODULE_TYPE_PREFIX='CUSTOM_';
@@ -1670,22 +1697,22 @@
     if(type==='ARROW') return svg('<path class="icon-fill" d="M10 20.2 H51 V15 L62 22 L51 29 V23.8 H10 Z"/>');
     if(type==='MODULE_INPUT') return svg(R(25,8,32,28,5)+L('M6 22 H25 M18 15 L25 22 L18 29')+C(46,22,3,'class="icon-soft"'));
     if(type==='MODULE_OUTPUT') return svg(R(15,8,32,28,5)+L('M47 22 H66 M59 15 L66 22 L59 29')+C(26,22,3,'class="icon-soft"'));
-    if(type==='BUS_COMBINER') return svg(L('M5 8 H23 C33 8 36 22 48 22 M5 17 H23 C33 17 37 22 48 22 M5 27 H23 C33 27 37 22 48 22 M5 36 H23 C33 36 36 22 48 22')+L('M48 22 H67','stroke-width="4"')+C(6,8,1.4,'class="icon-soft"')+C(6,17,1.4,'class="icon-soft"')+C(6,27,1.4,'class="icon-soft"')+C(6,36,1.4,'class="icon-soft"')+C(48,22,2.1,'class="icon-soft"'));
-    if(type==='BUS_SPLITTER') return svg(L('M5 22 H25','stroke-width="4"')+L('M25 22 C35 22 36 8 47 8 H67 M25 22 C35 22 36 17 47 17 H67 M25 22 C35 22 36 27 47 27 H67 M25 22 C35 22 36 36 47 36 H67')+C(25,22,2.1,'class="icon-soft"')+C(66,8,1.5,'class="icon-soft"')+C(66,17,1.5,'class="icon-soft"')+C(66,27,1.5,'class="icon-soft"')+C(66,36,1.5,'class="icon-soft"'));
+    if(type==='BUS_COMBINER') return svg(R(14,7,44,30,4)+L('M5 13 H14 M5 31 H14 M14 13 H24 L48 22 H58 M14 31 H24 L48 22 H58')+L('M58 22 H62','stroke-width="3.8"')+C(67,22,3.3));
+    if(type==='BUS_SPLITTER') return svg(R(14,7,44,30,4)+L('M14 22 H24 L48 13 H58 M14 22 H24 L48 31 H58 M58 13 H67 M58 31 H67')+L('M10 22 H14','stroke-width="3.8"')+C(5,22,3.3));
     if(type==='MUX') return svg(
       // Der breitere Körper erhält symmetrische, kurze waagerechte Abschnitte
       // auf beiden Seiten: 10 Einheiten innen und 9 Einheiten bis zu den Pins.
       L('M5 13 H14 M5 31 H14 M58 22 H67')+
       R(14,7,44,30,4)+
       L('M14 13 H24 L48 22 H58 M14 31 H24 L48 22 H58')+
-      L('M36 37 V41')+C(36,41,1.7,'class="icon-soft"')
+      L('M36 37 V38')+C(36,40.5,2.5)
     );
     if(type==='DEMUX') return svg(
       // Auch beim DEMUX sind Eingangs- und Ausgangsabschnitte gleich lang.
       L('M5 22 H14 M58 13 H67 M58 31 H67')+
       R(14,7,44,30,4)+
       L('M14 22 H24 L48 13 H58 M14 22 H24 L48 31 H58')+
-      L('M36 37 V41')+C(36,41,1.7,'class="icon-soft"')
+      L('M36 37 V38')+C(36,40.5,2.5)
     );
     if(type.startsWith('CUSTOM_')){
       // Ein kleines Editor-/Funktionsfenster; die drei sichtbaren Pins je Seite
@@ -2275,7 +2302,7 @@
     return {type,label:type==='DISPLAY'?null:TYPES[type].label,state:type==='HIGH',value:type==='TRISTATE'?null:type==='HIGH',
       displayBits:type==='DISPLAY'?2:undefined,
       muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,
-      busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?4:undefined,
+      busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?2:undefined,
       ledColor:type==='OUTPUT'?DEFAULT_LED_COLOR:undefined,
       arrowDirection:type==='ARROW'?'right':undefined,
       selectedChannel:0,portValues:type==='DEMUX'?[false,false]:undefined};
@@ -2294,7 +2321,19 @@
     paletteLedPicker.style.left=`${Math.max(6,Math.min(Math.max(6,rect.width-width-6),desiredLeft))}px`;
     const below=centerY+31*camera.z+10;
     const above=centerY-31*camera.z-height-10;
-    paletteLedPicker.style.top=`${below+height<=rect.height-6?below:Math.max(6,above)}px`;
+    paletteLedPicker.style.top=`${Math.max(6,Math.min(Math.max(6,rect.height-height-6),below+height<=rect.height-6?below:above))}px`;
+  }
+  function followPaletteLedPicker(clientX,clientY){
+    if(paletteLedPicker.hidden)return;
+    // Die Farbauswahl folgt der LED ohne Zeitverzögerung. Berührt der Zeiger
+    // direkt die Farbauswahl, hält updatePalettePlacementPreview den letzten
+    // LED-Anker fest, bis der Zeiger wieder auf der Arbeitsfläche ist.
+    positionPaletteLedPicker(clientX,clientY);
+  }
+  function syncPaletteLedChoices(){
+    paletteLedPicker.querySelectorAll('[data-palette-led-color]').forEach(choice=>{
+      choice.setAttribute('aria-pressed',String(choice.dataset.paletteLedColor===paletteDraft?.ledColor));
+    });
   }
   function togglePaletteLedPicker(){
     if(!paletteDraft||paletteDraft.type!=='OUTPUT')return;
@@ -2356,7 +2395,13 @@
       const directions=['right','down','left','up'];
       draft.arrowDirection=directions[(directions.indexOf(normalizeArrowDirection(draft.arrowDirection))+1)%directions.length];
     }
-    else if(type==='OUTPUT')togglePaletteLedPicker();
+    else if(type==='OUTPUT'){
+      if(!paletteLedPicker.hidden){
+        const current=LED_COLORS.findIndex(color=>color.id===draft.ledColor);
+        draft.ledColor=LED_COLORS[(current+1)%LED_COLORS.length].id;
+        syncPaletteLedChoices();
+      }else togglePaletteLedPicker();
+    }
     else return false;
     if(gesture?.kind==='palette')updatePaletteGesturePreview(currentPointer.x,currentPointer.y,!!shiftKeyHeld);
     else updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
@@ -2407,7 +2452,10 @@
       if(!paletteLedPicker.hidden&&target&&paletteLedPicker.contains(target)&&paletteLedPreviewLast){
         clientX=paletteLedPreviewLast.x;clientY=paletteLedPreviewLast.y;
       }else{palettePlacementLayer.innerHTML='';return;}
-    }else if(paletteDraft.type==='OUTPUT')paletteLedPreviewLast={x:clientX,y:clientY};
+    }else if(paletteDraft.type==='OUTPUT'){
+      paletteLedPreviewLast={x:clientX,y:clientY};
+      followPaletteLedPicker(clientX,clientY);
+    }
     palettePlacementLayer.innerHTML=nodeMarkup(palettePreviewNode(clientX,clientY),true);
   }
 
@@ -2501,7 +2549,7 @@
     const spacing=count===2?24:Math.max(10,20-2*(Math.min(count,8)-3));
     return (index-(count-1)/2)*spacing;
   }
-  const normalizeBusWidth = value => [2,4,8].includes(Number(value)) ? Number(value) : 4;
+  const normalizeBusWidth = value => [2,4,8].includes(Number(value)) ? Number(value) : 2;
   const normalizeMuxInputs = value => [2,4,8].includes(Number(value)) ? Number(value) : 2;
   const normalizeDemuxOutputs = value => [2,4,8].includes(Number(value)) ? Number(value) : 2;
   const selectBitCount = count => Math.round(Math.log2(count));
@@ -2514,6 +2562,14 @@
   function muxNodeHalfHeight(n){
     const count=n.type==='MUX'?normalizeMuxInputs(n.muxInputs):normalizeDemuxOutputs(n.demuxOutputs);
     return Math.max(42,Math.abs(channelPortOffset(count,0))+25);
+  }
+  function busNodeHalfHeight(n){
+    return Math.max(42,Math.abs(channelPortOffset(normalizeBusWidth(n.busWidth),0))+25);
+  }
+  function displayNodeHalfHeight(n){
+    // n-Bit-Anzeigen besitzen bei 2, 4 und 8 Eingängen dieselbe Höhe und
+    // dieselben vertikalen Pinabstände wie die gleich breiten MUX/DEMUX/Busse.
+    return Math.max(42,Math.abs(channelPortOffset(meta(n).inputs,0))+25);
   }
   const inputPortCount = n => meta(n).kind==='annotation' ? 0 : n.type==='BUS_COMBINER' ? normalizeBusWidth(n.busWidth) : n.type==='MUX' ? normalizeMuxInputs(n.muxInputs)+selectBitCount(normalizeMuxInputs(n.muxInputs)) : n.type==='DEMUX' ? 1+selectBitCount(normalizeDemuxOutputs(n.demuxOutputs)) : meta(n).inputs;
   const outputPortCount = n => meta(n).kind==='annotation' ? 0 : n.type==='BUS_SPLITTER' ? normalizeBusWidth(n.busWidth) : n.type==='DEMUX' ? normalizeDemuxOutputs(n.demuxOutputs) : (meta(n).kind==='custom' ? meta(n).outputs : 1);
@@ -2647,14 +2703,14 @@
       return {left:n.x-width/2, right:n.x+width/2, top:n.y-height/2-4, bottom:n.y+height/2+4};
     }
     if (m.kind === 'output' && m.displayBits) {
-      const halfH = Math.max(38, Math.abs(inputOffset(m.inputs,0))+26);
+      const halfH = displayNodeHalfHeight(n);
       // Die linke Begrenzung schließt den sichtbaren Eingangs-Pin samt Radius ein.
       return {left:n.x-63, right:n.x+54, top:n.y-halfH, bottom:n.y+halfH};
     }
     if (m.kind === 'output') return {left:n.x-63, right:n.x+52, top:n.y-32, bottom:n.y+32};
     if (n.type==='BUS_COMBINER' || n.type==='BUS_SPLITTER') {
-      const width=normalizeBusWidth(n.busWidth), halfH=Math.max(38,Math.abs(inputOffset(width,0))+25);
-      return {left:n.x-64,right:n.x+64,top:n.y-halfH,bottom:n.y+halfH};
+      const halfH=busNodeHalfHeight(n);
+      return {left:n.x-64,right:n.x+64,top:n.y-halfH-5,bottom:n.y+halfH+5};
     }
     if(n.type==='MUX'||n.type==='DEMUX'){
       const halfH=muxNodeHalfHeight(n);return {left:n.x-64,right:n.x+64,top:n.y-halfH-5,bottom:n.y+halfH+23};
@@ -2682,13 +2738,12 @@
       return {left:n.x-width/2, right:n.x+width/2, top:n.y-height/2, bottom:n.y+height/2};
     }
     if (m.kind === 'output' && m.displayBits) {
-      const top = inputOffset(m.inputs,0)-24;
-      const bottom = inputOffset(m.inputs,m.inputs-1)+24;
-      return {left:n.x-52, right:n.x+52, top:n.y+top, bottom:n.y+bottom};
+      const halfH=displayNodeHalfHeight(n);
+      return {left:n.x-52, right:n.x+52, top:n.y-halfH, bottom:n.y+halfH};
     }
     if (n.type==='BUS_COMBINER' || n.type==='BUS_SPLITTER') {
-      const width=normalizeBusWidth(n.busWidth), halfH=Math.max(34,Math.abs(inputOffset(width,0))+20);
-      return {left:n.x-50,right:n.x+50,top:n.y-halfH,bottom:n.y+halfH};
+      const halfH=busNodeHalfHeight(n);
+      return {left:n.x-44,right:n.x+44,top:n.y-halfH,bottom:n.y+halfH};
     }
     if(n.type==='MUX'||n.type==='DEMUX'){
       const halfH=muxNodeHalfHeight(n);return {left:n.x-44,right:n.x+44,top:n.y-halfH,bottom:n.y+halfH};
@@ -2804,12 +2859,12 @@
       const select=index-1;return {x:n.x+selectPortXOffset(bits,select),y:n.y+halfH+11};
     }
     if (m.kind === 'input') return { x: n.x + 58, y: n.y };
-    if (m.kind === 'output') return { x: n.x - 58, y: n.y + inputOffset(m.inputs, index) };
+    if (m.kind === 'output') return { x: n.x - 58, y: n.y + (m.displayBits?channelPortOffset(m.inputs,index):inputOffset(m.inputs,index)) };
     if (m.kind === 'custom') return direction==='out' ? {x:n.x+58,y:n.y+modulePortOffset(m.outputs,index)} : {x:n.x-58,y:n.y+modulePortOffset(m.inputs,index)};
     if (m.kind === 'label' || m.kind==='annotation') return {x:n.x,y:n.y};
-    if (n.type==='BUS_SPLITTER' && direction==='out') return {x:n.x+58,y:n.y+inputOffset(normalizeBusWidth(n.busWidth),index)};
+    if (n.type==='BUS_SPLITTER' && direction==='out') return {x:n.x+58,y:n.y+channelPortOffset(normalizeBusWidth(n.busWidth),index)};
     if (n.type==='BUS_SPLITTER' && direction==='in') return {x:n.x-58,y:n.y};
-    if (n.type==='BUS_COMBINER' && direction==='in') return {x:n.x-58,y:n.y+inputOffset(normalizeBusWidth(n.busWidth),index)};
+    if (n.type==='BUS_COMBINER' && direction==='in') return {x:n.x-58,y:n.y+channelPortOffset(normalizeBusWidth(n.busWidth),index)};
     if (direction === 'out') return { x: n.x + 58, y: n.y };
     return { x: n.x - 58, y: n.y + inputOffset(m.inputs, index) };
   }
@@ -4092,11 +4147,34 @@
       }
       for(const node of graphNodes){
         node.logicFault=logicFaults.has(node.id)?'unstable-feedback':null;
+        // Ein unbestimmtes MUX-/DEMUX-Auswahlsignal bedeutet eine unbekannte
+        // Kanalwahl – selbst wenn identische Daten den Ausgang auf 0/1 maskieren.
+        // Deshalb Steuerunsicherheit separat von der Ausgangsunsicherheit halten.
+        let uncertainControlSource=null;
+        if(node.type==='MUX'||node.type==='DEMUX'){
+          const count=node.type==='MUX'?normalizeMuxInputs(node.muxInputs):normalizeDemuxOutputs(node.demuxOutputs);
+          const firstSelectPort=node.type==='MUX'?count:1;
+          // Teilweise bekannte Selektorbits schränken die noch möglichen
+          // Kanäle ein. Diese Menge steuert später die orange gestrichelten
+          // Pfade im Bauteilsymbol – kein beliebig letzter grüner Kanal.
+          const selection=selectorState(node,read,count,firstSelectPort);
+          node.uncertainChannels=selection.known?null:selection.possible;
+          for(let bit=0;bit<selectBitCount(count);bit++){
+            const wire=inputWire(node.id,firstSelectPort+bit);
+            if(!wire)continue;
+            const control=logicValue(read(wire.from.id,wire.from.port||0));
+            if(isLogicUnknown(control)||control===null){uncertainControlSource=wire.from.id;break;}
+          }
+        }
+        node.controlUnknown=uncertainControlSource!==null;
         if(outputPortCount(node)>0||meta(node).kind==='output'){
           node.value=decodeLogicSignal(read(node.id,0));
           if(node.type==='BUS_SPLITTER'||node.type==='DEMUX'||meta(node).kind==='custom')node.portValues=Array.from({length:outputPortCount(node)},(_,port)=>decodeLogicSignal(read(node.id,port)));
         }
-        node.logicDiagnostic=causes.get(node.id)||(isUnknownNode(node.id)?{reason:'unknown-input',sourceId:node.id}:null);
+        const controlCause=uncertainControlSource!==null?causes.get(uncertainControlSource):null;
+        node.logicDiagnostic=causes.get(node.id)||(uncertainControlSource!==null?
+          {...(controlCause||{reason:'unknown-input',sourceId:uncertainControlSource}),propagated:true}:
+          isUnknownNode(node.id)?{reason:'unknown-input',sourceId:node.id}:null);
       }
       return {values,logicFaults,feedback};
     }
@@ -4533,7 +4611,7 @@
     const selectedClass = (selectedNodes.has(n.id) || preview) ? ' selected' : '';
     const marqueeClass = !preview && marqueePreviewNodes.has(n.id) && !selectedNodes.has(n.id) ? ' marquee-preview' : '';
     const activeClass = (n.value === true || (isBusSignal(n.value) && n.value.bits.some(bit=>bit===true)) || (meta(n).kind==='custom' && n.portValues?.some(bit=>bit===true))) ? ' active-node' : '';
-    const unknownClass = (isLogicUnknown(n.value) || (isBusSignal(n.value)&&n.value.bits.some(isLogicUnknown)) || n.portValues?.some(isLogicUnknown) || n.logicFault) ? ' logic-unknown' : '';
+    const unknownClass = (isLogicUnknown(n.value) || (isBusSignal(n.value)&&n.value.bits.some(isLogicUnknown)) || n.portValues?.some(isLogicUnknown) || n.logicFault || n.controlUnknown) ? ' logic-unknown' : '';
     const previewClass = preview ? ' preview-node' : '';
     const collisionClass = (collisionPreviewNodeIds.has(n.id) || n.invalidPlacement) ? ' collision-preview' : '';
     const nodeAttrs = preview ? '' : `data-node="${esc(n.id)}"`;
@@ -4584,14 +4662,17 @@
       // Ein-/Ausgangsabschnitt wird nur einmal gezeichnet und bleibt dadurch
       // durchgehend grün statt von mehrfach gerenderten grauen Pfaden überlagert.
       const routeMarkup=channelOffsets.map((y,i)=>({i,d:isMux?`M -44 ${y} H -31 L 31 0`:`M -31 0 L 31 ${y} H 44`}));
+      const possibleUncertain=!preview&&n.controlUnknown&&Array.isArray(n.uncertainChannels)?new Set(n.uncertainChannels):null;
       // Nicht aktive Abzweige liegen zuerst. Der aktive Kanal wird bewusst
       // zuletzt gezeichnet, damit er an Kreuzungs-/Zusammenführungspunkten
       // niemals von einem grauen Kanal überdeckt werden kann.
-      const routes=routeMarkup.filter(route=>route.i!==selected).map(route=>`<path class="mux-route" data-mux-channel="${route.i}" d="${route.d}"/>`).join('')+
-        (routeMarkup.find(route=>route.i===selected)?`<path class="mux-route mux-route-active" data-mux-channel="${selected}" d="${routeMarkup.find(route=>route.i===selected).d}"/>`:'');
+      const routes=possibleUncertain
+        ? routeMarkup.map(route=>`<path class="mux-route${possibleUncertain.has(route.i)?' mux-route-uncertain':''}" data-mux-channel="${route.i}" d="${route.d}"/>`).join('')
+        : routeMarkup.filter(route=>route.i!==selected).map(route=>`<path class="mux-route" data-mux-channel="${route.i}" d="${route.d}"/>`).join('')+
+          (routeMarkup.find(route=>route.i===selected)?`<path class="mux-route mux-route-active" data-mux-channel="${selected}" d="${routeMarkup.find(route=>route.i===selected).d}"/>`:'');
       const commonRoute=isMux
-        ? `<path class="mux-common-route" d="M 31 0 H 44"/>`
-        : `<path class="mux-common-route" d="M -44 0 H -31"/>`;
+        ? `<path class="mux-common-route${possibleUncertain?' mux-route-uncertain':''}" d="M 31 0 H 44"/>`
+        : `<path class="mux-common-route${possibleUncertain?' mux-route-uncertain':''}" d="M -44 0 H -31"/>`;
       const dataPins=isMux
         ? channelOffsets.map((y,i)=>`<path class="mux-pin-stub" d="M -58 ${y} H -44"/><circle class="pin ${isConnected(n.id,'in',i,connectionIndex)?'connected':''}" ${preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="${i}"`} cx="-58" cy="${y}" r="5"/>`).join('')
         : `<path class="mux-pin-stub" d="M -58 0 H -44"/><circle class="pin ${isConnected(n.id,'in',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="0"`} cx="-58" cy="0" r="5"/>`;
@@ -4607,7 +4688,7 @@
         <text class="node-title mux-title" xml:space="preserve" x="0" y="${-halfH+13}">${title} · ${count}:1</text>
         <g class="mux-routes">${routes}${commonRoute}</g>
         ${dataPins}${outputPins}${selectPins}
-        <text class="node-sub mux-state" x="0" y="${halfH-8}">${logicLevelText(selectedInputValue)}</text>
+        <text class="node-sub mux-state" x="0" y="${halfH-8}">${possibleUncertain?'Kanal ?':logicLevelText(selectedInputValue)}</text>
       </g>`;
     }
     if (kind === 'annotation') {
@@ -4669,14 +4750,14 @@
     if (kind === 'output') {
       const pinMarkup = Array.from({length:m.inputs}, (_,i) => {
         const attrs = preview ? '' : `data-pin="in" data-node="${esc(n.id)}" data-port="${i}"`;
-        const y = inputOffset(m.inputs,i);
+        const y = m.displayBits?channelPortOffset(m.inputs,i):inputOffset(m.inputs,i);
         return `<circle class="pin ${isConnected(n.id,'in',i,connectionIndex) ? 'connected' : ''}" ${attrs} cx="-58" cy="${y}" r="5" />`;
       }).join('');
       if (m.displayBits) {
         const bits = Array.isArray(n.bits) ? n.bits : Array(m.inputs).fill(false);
         const bitText = bits.map(logicBitText).join('');
         const decimal = isLogicUnknown(n.value) ? '?' : (Number.isFinite(n.value) ? n.value : 0);
-        const top = inputOffset(m.inputs,0)-24, bottom=inputOffset(m.inputs,m.inputs-1)+24;
+        const halfH=displayNodeHalfHeight(n), top=-halfH,bottom=halfH;
         return `<g class="node output-node${n.value===true ? ' on' : ''}${selectedClass}${marqueeClass}${unknownClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
           <rect class="body" x="-52" y="${top}" width="104" height="${bottom-top}" rx="10" />
           ${pinMarkup}
@@ -4697,24 +4778,25 @@
       </g>`;
     }
     if (n.type==='BUS_COMBINER' || n.type==='BUS_SPLITTER') {
-      const width=normalizeBusWidth(n.busWidth), halfH=Math.max(38,Math.abs(inputOffset(width,0))+25), top=-halfH, height=halfH*2;
+      // Körperhöhe und Kanalabstände exakt wie beim MUX/DEMUX gleicher Breite.
+      const width=normalizeBusWidth(n.busWidth), halfH=busNodeHalfHeight(n), top=-halfH, height=halfH*2;
       const busBits=busBitsForNode(n).map(v=>isLogicUnknown(v)?'?':v?'1':'0').join('') || '0'.repeat(width);
       const pins=n.type==='BUS_COMBINER'
-        ? Array.from({length:width},(_,i)=>{ const attrs=preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="${i}"`; const y=inputOffset(width,i); return `<text class="port-label" text-anchor="end" x="-42" y="${y+3}">${width-1-i}</text><circle class="pin ${isConnected(n.id,'in',i,connectionIndex)?'connected':''}" ${attrs} cx="-58" cy="${y}" r="5" />`; }).join('')
-        : (()=>{ const attrs=preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="0"`; return `<circle class="pin bus-pin ${isConnected(n.id,'in',0,connectionIndex)?'connected':''}" ${attrs} cx="-58" cy="0" r="6" />`; })();
+        ? Array.from({length:width},(_,i)=>{ const attrs=preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="${i}"`; const y=channelPortOffset(width,i); return `<path class="bus-pin-stub" d="M -58 ${y} H -44"/><text class="port-label" text-anchor="end" x="-42" y="${y+3}">${width-1-i}</text><circle class="pin ${isConnected(n.id,'in',i,connectionIndex)?'connected':''}" ${attrs} cx="-58" cy="${y}" r="5" />`; }).join('')
+        : (()=>{ const attrs=preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="0"`; return `<path class="bus-pin-stub" d="M -58 0 H -44"/><circle class="pin bus-pin ${isConnected(n.id,'in',0,connectionIndex)?'connected':''}" ${attrs} cx="-58" cy="0" r="6" />`; })();
       const outputs=n.type==='BUS_COMBINER'
-        ? `<circle class="pin bus-pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="6" />`
-        : Array.from({length:width},(_,i)=>{ const attrs=preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="${i}"`; const y=inputOffset(width,i); return `<circle class="pin ${n.portValues?.[i]===true?'hot':''} ${isConnected(n.id,'out',i,connectionIndex)?'connected':''}" ${attrs} cx="58" cy="${y}" r="5" /><text class="port-label" x="40" y="${y+3}">${width-1-i}</text>`; }).join('');
+        ? `<path class="bus-pin-stub" d="M 44 0 H 58"/><circle class="pin bus-pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="6" />`
+        : Array.from({length:width},(_,i)=>{ const attrs=preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="${i}"`; const y=channelPortOffset(width,i); return `<path class="bus-pin-stub" d="M 44 ${y} H 58"/><circle class="pin ${n.portValues?.[i]===true?'hot':''} ${isConnected(n.id,'out',i,connectionIndex)?'connected':''}" ${attrs} cx="58" cy="${y}" r="5" /><text class="port-label" x="40" y="${y+3}">${width-1-i}</text>`; }).join('');
       const title=n.type==='BUS_COMBINER'?'Bus-Combiner':'Bus-Splitter';
       const stateLine=busBits;
       const busPaths=n.type==='BUS_COMBINER'
-        ? Array.from({length:width},(_,i)=>{const y=inputOffset(width,i);return `<path class="bus-symbol-route" d="M -34 ${y} C -22 ${y} -18 0 -5 0"/>`;}).join('')+`<path class="bus-symbol-trunk" d="M -5 0 H 37"/>`
-        : `<path class="bus-symbol-trunk" d="M -37 0 H -5"/>`+Array.from({length:width},(_,i)=>{const y=inputOffset(width,i);return `<path class="bus-symbol-route" d="M -5 0 C 9 0 12 ${y} 29 ${y}"/>`;}).join('');
+        ? Array.from({length:width},(_,i)=>{const y=channelPortOffset(width,i);return `<path class="bus-symbol-route" d="M -44 ${y} H -31 L 31 0"/>`;}).join('')+`<path class="bus-symbol-trunk" d="M 31 0 H 44"/>`
+        : `<path class="bus-symbol-trunk" d="M -44 0 H -31"/>`+Array.from({length:width},(_,i)=>{const y=channelPortOffset(width,i);return `<path class="bus-symbol-route" d="M -31 0 L 31 ${y} H 44"/>`;}).join('');
       return `<g class="node bus-node${selectedClass}${marqueeClass}${activeClass}${unknownClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
-        <rect class="body" x="-50" y="${top}" width="100" height="${height}" rx="10" />
-        <text class="node-title" xml:space="preserve" x="0" y="${top+15}" style="font-size:10px">${safeLabel}</text>
+        <rect class="body" x="-44" y="${top}" width="88" height="${height}" rx="8" />
+        <text class="node-title" xml:space="preserve" x="0" y="${top+13}" style="font-size:9px">${safeLabel}</text>
         <g class="bus-symbol-diagram">${busPaths}</g>
-        <text class="node-sub bus-live-value" x="0" y="${halfH-9}">${stateLine}</text>
+        <text class="node-sub bus-live-value" x="0" y="${halfH-8}">${stateLine}</text>
         ${pins}${outputs}
       </g>`;
     }
@@ -5075,7 +5157,7 @@
     const miniOrder = nodeDrawOrder.map(id=>nodeById.get(id)).filter(Boolean).concat(nodes.filter(n=>!orderedNodeIds.has(n.id)));
     minimapNodeLayer.innerHTML = miniOrder.map(n => {
       const b = nodeBounds(n), width=b.right-b.left, height=b.bottom-b.top;
-      const unknown=isLogicUnknown(n.value)||(isBusSignal(n.value)&&n.value.bits.some(isLogicUnknown))||n.portValues?.some(isLogicUnknown)||!!n.logicFault;
+      const unknown=isLogicUnknown(n.value)||(isBusSignal(n.value)&&n.value.bits.some(isLogicUnknown))||n.portValues?.some(isLogicUnknown)||!!n.logicFault||!!n.controlUnknown;
       const cls = `mini-node${(n.value === true || (isBusSignal(n.value)&&n.value.bits.some(bit=>bit===true))) ? ' hot' : ''}${unknown ? ' logic-unknown' : ''}${focusedNodes.has(n.id) ? ' feedback-highlight' : ''}${selectedNodes.has(n.id) ? ' selected' : ''}${marqueePreviewNodes.has(n.id) && !selectedNodes.has(n.id) ? ' marquee-preview' : ''}${collisionPreviewNodeIds.has(n.id) ? ' collision-preview' : ''}`;
       return `<rect class="${cls}" x="${b.left}" y="${b.top}" width="${width}" height="${height}" rx="8" />`;
     }).join('');
@@ -5199,7 +5281,7 @@
       const m = meta(n);
       const isActive = n.value === true || (isBusSignal(n.value) && n.value.bits.some(bit=>bit===true)) || (m.kind==='custom' && n.portValues?.some(bit=>bit===true));
       el.classList.toggle('active-node',isActive);
-      const isUnknown=isLogicUnknown(n.value)||(isBusSignal(n.value)&&n.value.bits.some(isLogicUnknown))||n.portValues?.some(isLogicUnknown)||!!n.logicFault;
+      const isUnknown=isLogicUnknown(n.value)||(isBusSignal(n.value)&&n.value.bits.some(isLogicUnknown))||n.portValues?.some(isLogicUnknown)||!!n.logicFault||!!n.controlUnknown;
       el.classList.toggle('logic-unknown',!!isUnknown);
       if(n.type==='MUX'||n.type==='DEMUX'){
         const channelCount=n.type==='MUX'?normalizeMuxInputs(n.muxInputs):normalizeDemuxOutputs(n.demuxOutputs);
@@ -5207,19 +5289,23 @@
         const routeGroup=el.querySelector('.mux-routes');
         if(routeGroup){
           const routeElements=[...routeGroup.querySelectorAll('.mux-route[data-mux-channel]')];
+          const uncertainChannels=n.controlUnknown&&Array.isArray(n.uncertainChannels)?new Set(n.uncertainChannels):null;
           let activeRoute=null;
           routeElements.forEach(route=>{
-            const active=Number(route.dataset.muxChannel)===activeChannel;
+            const channel=Number(route.dataset.muxChannel);
+            const active=!uncertainChannels&&channel===activeChannel;
             route.classList.toggle('mux-route-active',active);
+            route.classList.toggle('mux-route-uncertain',!!uncertainChannels&&uncertainChannels.has(channel));
             if(active)activeRoute=route;
           });
+          routeGroup.querySelector('.mux-common-route')?.classList.toggle('mux-route-uncertain',!!uncertainChannels);
           // Wenn sich ein Clock-Signal am Auswahlport ändert, wird auch die
           // DOM-Zeichenreihenfolge angepasst: der neue aktive Pfad liegt oben.
           if(activeRoute)routeGroup.appendChild(activeRoute);
         }
         const routedValue=n.type==='MUX'?n.value:(n.portValues?.[activeChannel]!==undefined?n.portValues[activeChannel]:false);
         const state=el.querySelector('.mux-state');
-        if(state)state.textContent=isLogicUnknown(routedValue)?'?':routedValue===true?'HIGH':'LOW';
+        if(state)state.textContent=n.controlUnknown?'Kanal ?':isLogicUnknown(routedValue)?'?':routedValue===true?'HIGH':'LOW';
       }
       if (m.kind === 'input') {
         el.classList.toggle('on', !!n.state);
@@ -5352,8 +5438,9 @@
     const originalDisplay=node.type==='DISPLAY'?displayNodeName(node):String(node.label??meta(node).label);
     const input=document.createElement('input');
     input.type='text'; input.className='inspector-name-input';
-    input.value=originalDisplay;
+    input.value=originalDisplay.replace(/ {2,}/g,' ');
     input.maxLength=120; input.setAttribute('aria-label','Bauteilnamen bearbeiten');
+    enforceSingleSpaceInput(input);
     title.dataset.editing='true'; title.classList.add('editing-name');
     title.appendChild(input);
     let finished=false,finishTimer=null,pendingPointerId=null;
@@ -5583,7 +5670,7 @@
         const mixed=delays.size>1;
         const current=mixed?1.05:Number([...delays][0]);
         const currentText=mixed?'Gemischt':formatBufferDelay(current);
-        bufferGroupControls=`<div class="prop-row buffer-delay-row"><span>Verzögerung</span><div class="buffer-delay-controls"><input class="buffer-delay-range${mixed?' mixed':''}" id="bufferGroupDelay" type="range" min="0.1" max="2" step="0.1" value="${current}" aria-label="Verzögerung für alle ausgewählten Puffer"/><output class="buffer-delay-value" id="bufferGroupDelayValue">${currentText}</output></div></div>`;
+        bufferGroupControls=`<div class="prop-row buffer-delay-row"><span>Verzögerung</span><div class="buffer-delay-controls"><input class="buffer-delay-range${mixed?' mixed':''}" id="bufferGroupDelay" type="range" min="0" max="2" step="0.1" value="${current}" aria-label="Verzögerung für alle ausgewählten Puffer"/><output class="buffer-delay-value" id="bufferGroupDelayValue">${currentText}</output></div></div>`;
       }
       if(isSwitchGroup){
         const states=new Set(selectedSwitchNodes.map(node=>!!node.state));
@@ -5748,7 +5835,7 @@
       } else if (m.kind === 'gate' || m.kind === 'flipflop') {
         const occupiedInputs = wires.filter(w => w.to.id === n.id).length;
         extra = `<div class="prop-row" title="Belegte Eingänge im Verhältnis zu allen verfügbaren Eingängen"><span>Eingangsbelegung</span><span class="value-chip ${occupiedInputs===m.inputs?'on':''}">${occupiedInputs}/${m.inputs}</span></div>`;
-        if(n.type==='BUFFER') extra += `<div class="prop-row buffer-delay-row"><span>Verzögerung</span><div class="buffer-delay-controls"><input class="buffer-delay-range" id="bufferDelay" type="range" min="0.1" max="2" step="0.1" value="${normalizeBufferDelay(n.bufferDelay)}" aria-label="Puffer-Verzögerung"/><output class="buffer-delay-value" id="bufferDelayValue">${formatBufferDelay(n.bufferDelay)}</output></div></div>`;
+        if(n.type==='BUFFER') extra += `<div class="prop-row buffer-delay-row"><span>Verzögerung</span><div class="buffer-delay-controls"><input class="buffer-delay-range" id="bufferDelay" type="range" min="0" max="2" step="0.1" value="${normalizeBufferDelay(n.bufferDelay)}" aria-label="Puffer-Verzögerung"/><output class="buffer-delay-value" id="bufferDelayValue">${formatBufferDelay(n.bufferDelay)}</output></div></div>`;
         if (m.kind === 'flipflop') extra += `<div class="prop-row"><span>Gespeicherter Zustand Q</span><span class="value-chip ${n.q?'on':''}" id="inspectorQValue">${n.q?'1':'0'}</span></div><div class="prop-row"><span>Taktauswertung</span><span class="prop-value">Steigende Flanke</span></div>`;
       } else if (m.kind === 'output') {
         if (m.displayBits) {
@@ -7152,7 +7239,7 @@
   function createNodeRecord(type,x,y){
     const m=TYPES[type],frequency=type==='CLOCK'?1:undefined,phaseOffset=type==='CLOCK'?0:undefined;
     const initialClockState=type==='CLOCK'?clockStateAt({frequency,phaseOffset}):false;
-    const record={id:uid('n'),type,x:snap(x),y:snap(y),label:type==='DISPLAY'?null:m.label,text:type==='LABEL'?m.label:undefined,state:type==='HIGH'?true:initialClockState,q:false,clockWasHigh:false,frequency,phaseOffset,arrowDirection:type==='ARROW'?'right':undefined,arrowLength:type==='ARROW'?96:undefined,arrowScale:type==='ARROW'?1.25:undefined,arrowColor:type==='ARROW'?DEFAULT_ARROW_COLOR:undefined,bufferDelay:type==='BUFFER'?1:undefined,bufferOutput:type==='BUFFER'?false:undefined,bufferLastInput:type==='BUFFER'?null:undefined,bufferQueue:type==='BUFFER'?[]:undefined,busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?4:undefined,displayBits:type==='DISPLAY'?2:undefined,muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,selectedChannel:0,portValues:type==='DEMUX'?[false,false]:undefined,ledColor:type==='OUTPUT'?DEFAULT_LED_COLOR:undefined,value:type==='HIGH'};
+    const record={id:uid('n'),type,x:snap(x),y:snap(y),label:type==='DISPLAY'?null:m.label,text:type==='LABEL'?m.label:undefined,state:type==='HIGH'?true:initialClockState,q:false,clockWasHigh:false,frequency,phaseOffset,arrowDirection:type==='ARROW'?'right':undefined,arrowLength:type==='ARROW'?96:undefined,arrowScale:type==='ARROW'?1.25:undefined,arrowColor:type==='ARROW'?DEFAULT_ARROW_COLOR:undefined,bufferDelay:type==='BUFFER'?1:undefined,bufferOutput:type==='BUFFER'?false:undefined,bufferLastInput:type==='BUFFER'?null:undefined,bufferQueue:type==='BUFFER'?[]:undefined,busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?2:undefined,displayBits:type==='DISPLAY'?2:undefined,muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,selectedChannel:0,portValues:type==='DEMUX'?[false,false]:undefined,ledColor:type==='OUTPUT'?DEFAULT_LED_COLOR:undefined,value:type==='HIGH'};
     if(m.kind==='custom'){record.moduleId=m.moduleId;record.moduleState={};record.label=m.label;}
     if(type==='MODULE_INPUT'||type==='MODULE_OUTPUT'){
       const same=nodes.filter(node=>node.type===type);record.portOrder=same.reduce((max,node)=>Math.max(max,Number(node.portOrder)||0),-1)+1;
@@ -7235,6 +7322,7 @@
     const rect=stage.getBoundingClientRect(),inside=x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom;
     if(inside){
       tempLayer.innerHTML=nodeMarkup(palettePreviewNode(x,y),true);
+      if(paletteDraft?.type==='OUTPUT')followPaletteLedPicker(x,y);
       const candidate=shift?wireAtClientPoint(x,y):null;
       gesture.insertWireId=candidate||null;gesture.insertMode=!!(shift&&candidate);
       setInsertWirePreview(candidate);
@@ -7285,9 +7373,7 @@
     paletteDraft.ledColor=normalizeLedColor(button.dataset.paletteLedColor);
     // Die Auswahl bleibt geöffnet; nur die aktive Farbe und die LED-Vorschau
     // werden aktualisiert. Weitere Farben lassen sich sofort anklicken.
-    paletteLedPicker.querySelectorAll('[data-palette-led-color]').forEach(choice=>{
-      choice.setAttribute('aria-pressed',String(choice.dataset.paletteLedColor===paletteDraft.ledColor));
-    });
+    syncPaletteLedChoices();
     updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
   });
   // Ansicht ändern, auf der Arbeitsfläche platzieren oder eine LED-Farbe
@@ -7348,6 +7434,16 @@
     return !!target&&scene.contains(target);
   }
   document.addEventListener('keydown',e=>{
+    const space=e.key===' '||e.code==='Space';
+    if(space&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!editingTarget()){
+      // Browser aktivieren fokussierte Buttons häufig erst beim LOSLASSEN
+      // von Space. Das darf weder alte Panelpfeile noch Aufgaben-/Menüknöpfe
+      // erneut betätigen. Nur eine tatsächlich aktive Bauteilvorschau darf
+      // die Leertaste als bewusste Variantenaktion verwenden.
+      e.preventDefault();e.stopPropagation();
+      if(!e.repeat&&selectedPaletteType&&!moduleSimulation&&palettePreviewUnderPointer())cyclePaletteDraft();
+      return;
+    }
     if(!selectedPaletteType||moduleSimulation)return;
     if(e.key==='Delete'&&!editingTarget()){
       // Entf beendet nur das Einfügewerkzeug, ohne das zuletzt platzierte
@@ -7364,12 +7460,6 @@
       clearPalettePlacement();
       return;
     }
-    const space=e.key===' '||e.code==='Space';
-    if(!space||e.ctrlKey||e.metaKey||e.altKey||editingTarget())return;
-    // Space ohne Zusatzfunktion bleibt folgenlos. Alle anderen Tasten dürfen
-    // ihre regulären Aktionen ausführen, ohne den Einfügemodus zu verlassen.
-    e.preventDefault();e.stopPropagation();
-    if(!e.repeat&&palettePreviewUnderPointer())cyclePaletteDraft();
   },true);
   window.addEventListener('keyup',e=>{
     if(e.key!==' '&&e.code!=='Space')return;
@@ -7378,9 +7468,11 @@
       if(gesture?.kind==='palette')updatePaletteGesturePreview(currentPointer.x,currentPointer.y,!!shiftKeyHeld);
       else updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
     }
-    // Verhindert die sonst mögliche native Space-Klickaktivierung der Kachel.
-    if(selectedPaletteType&&!editingTarget()){e.preventDefault();e.stopPropagation();}
+    // Auch die native Space-Aktivierung auf keyup unterbinden: sonst öffnet
+    // sich z. B. das zuletzt per Maus bediente Aufgaben- oder Menüfenster.
+    if(!editingTarget()&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();e.stopPropagation();}
   },true);
+  enforceSingleSpaceInput($('paletteSearch'));
   renderPalette();
   renderBoardTabs();
   $('paletteSearch').addEventListener('input', renderPalette);
@@ -7936,6 +8028,34 @@
   $('shareBtn').addEventListener('click', shareConfig);
   $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
   const PATCH_LOG = [
+    {version:'V131',title:'Unterfunktions-Knopf korrekt ausgerichtet',items:[
+      'Der zusätzliche rechte Abstand der Tableiste ohne Unterfunktionen wurde entfernt. „+ Unterfunktion“ beginnt nun exakt an der Stelle, an der der erste neu erstellte Unterfunktions-Tab erscheinen würde.'
+    ]},
+    {version:'V130',title:'Leertaste entkoppelt und Namen sauber eingegeben',items:[
+      'Die Leertaste aktiviert keine zuvor fokussierten Seitenleistenpfeile, Aufgaben- oder Menüknöpfe mehr. Nur bei aktiver Bauteilvorschau bleibt ihre vorgesehene Zusatzfunktion verfügbar; Texteingaben bleiben möglich.',
+      'In der Bauteilsuche und beim Bearbeiten von Objektnamen werden mehrere unmittelbar aufeinanderfolgende Leerzeichen verhindert oder beim Einfügen auf eines reduziert.'
+    ]},
+    {version:'V129',title:'Verfeinerte Symbole und gleich hohe n-Bit-Anzeigen',items:[
+      'In den Bauteilemenüsymbolen sind die großen Bus-Pins etwas kleiner und ringförmig. Die kleinen Kreise an den beiden Einzelanschlüssen von Combiner und Splitter entfallen.',
+      'Die unteren Auswahlpins der Multiplexer- und Demultiplexer-Symbole sind etwas größer und als Ringe gezeichnet.',
+      'n-Bit-Anzeigen haben bei 2, 4 und 8 Bit exakt die Gehäusehöhen und vertikalen Pinabstände der entsprechenden MUX-, DEMUX- und Bus-Bauteile.',
+      'Ohne aktiv gewähltes Einfügewerkzeug löst die Leertaste auf der Schaltungsfläche und an lediglich fokussierten Bauteilkarten keine Aktion aus.',
+      'Der Abschnitt zur Bauteilplatzierung in der Kurzanleitung wurde auf die grundlegende Bedienung gekürzt.'
+    ]},
+    {version:'V128',title:'Intuitive LED-Farben und eindeutige Signalkanäle',items:[
+      'Auf Computern sind beide Seitenleisten beim ersten Öffnen sichtbar; nur auf Smartphones werden sie standardmäßig eingeklappt. Individuell gespeicherte Breiten und Sichtbarkeiten bleiben erhalten.',
+      'MUX und DEMUX zeigen bei mehrdeutiger Auswahl alle noch möglichen Signalwege orange gestrichelt statt einen zufälligen grünen Weg. Durch bekannte Selektorbits ausgeschlossene Wege bleiben grau.',
+      'Beim wiederholten LED-Einfügen öffnet die erste Leertaste die Farbauswahl, danach werden die zehn Farben mit jeder weiteren Leertaste durchgeschaltet. Das vorher notwendige kurze Innehalten entfällt.',
+      'Die dickeren Bus-Anschlüsse sind in den Bauteilemenüsymbolen als deutlich größere Kreise zu erkennen.',
+      'Im Schaltkreis besitzen Bus-Combiner und Bus-Splitter nun alle kurzen waagerechten Pinverbindungen zwischen Kreisen und Gehäuse wie MUX und DEMUX.'
+    ]},
+    {version:'V127',title:'Webansicht, Busgeometrie und LED-Platzierung',items:[
+      'Beim Ziehen der linken Bauteileleiste bleibt eine geschlossene rechte Eigenschaftenleiste geschlossen. Frische Webansichten starten mit beiden Leisten und den essenziellen Tastenkürzeln eingeklappt.',
+      'Multiplexer und Demultiplexer zeigen auch unbekannte Auswahlsignale mit der orange gestrichelten Umrandung an – unabhängig davon, ob der Ausgang noch eindeutig ist.',
+      'Die LED-Farbauswahl folgt der Platzierungsvorschau. Während des Ziehens schaltet Leertaste nach dem Öffnen des Farbfeldes die zehn Farben der Reihe nach weiter; bei der Klickvorschau bleibt das Menü bedienbar.',
+      'Gedrückthalten auf Touchgeräten öffnet Kontextmenüs an Objekten, Kabeln, Schaltungstabs und Minimap.',
+      'Puffer lassen Verzögerungen bis 0 Sekunden zu. Bus-Combiner und Bus-Splitter starten mit zwei Leitungen und haben für 2, 4 und 8 Bit dieselbe Gehäuse- und Pinabstandsgeometrie wie Multiplexer und Demultiplexer.'
+    ]},
     {version:'V126',title:'Kompakte Kategorien und gleich große Aufgabenknöpfe',items:[
       'Im schmalen Bauteilemenü heißen die Abschnitte Eingabe, Ausgabe, Gatter, Kombination, Flip-Flops, Sonstiges und Funktionen. Die Unterfunktionsanschlüsse heißen bei Bedarf Anschlüsse.',
       'Der Schließen-Knopf im Aufgabenfenster besitzt dieselben Außenmaße und denselben Eckenradius wie der Knopf links zum Aufgabenkatalog.'
@@ -8725,6 +8845,46 @@
     if (node && node.type==='LABEL') { e.preventDefault(); e.stopPropagation(); beginInlineLabelEdit(node); }
   });
 
+  // Ein langes Berühren der Tableiste bzw. Minimap öffnet dieselben Menüs
+  // wie ein Rechtsklick am Desktop. Die Arbeitsfläche hat unten einen eigenen
+  // Touch-Handler für Objekt-/Kabelmenüs und Zwei-Finger-Zoom.
+  let panelTouchContextPress=null,suppressTouchContextClick=null;
+  function cancelPanelTouchContextPress(){
+    if(panelTouchContextPress)clearTimeout(panelTouchContextPress.timer);
+    panelTouchContextPress=null;
+  }
+  document.addEventListener('pointerdown',e=>{
+    if(e.pointerType!=='touch'||e.button!==0)return;
+    cancelPanelTouchContextPress();
+    const tab=e.target.closest?.('#boardTabs [data-board-id]');
+    const map=e.target.closest?.('#minimap');
+    if((!tab&&!map)||e.target.closest?.('input,button:not([data-board-id]),[data-minimap-resize]'))return;
+    const pointerId=e.pointerId,x=e.clientX,y=e.clientY;
+    panelTouchContextPress={pointerId,x,y,timer:setTimeout(()=>{
+      if(!panelTouchContextPress||panelTouchContextPress.pointerId!==pointerId)return;
+      cancelPanelTouchContextPress();
+      if(tab&&moduleSimulation)return;
+      if(selectedPaletteType)clearPalettePlacement();
+      suppressTouchContextClick={element:tab||map,until:performance.now()+800};
+      if(tab)openBoardTabContextMenu(tab.dataset.boardId,x,y);
+      else openMinimapContextMenu(x,y);
+    },560)};
+  },true);
+  document.addEventListener('pointermove',e=>{
+    if(panelTouchContextPress?.pointerId===e.pointerId&&Math.hypot(e.clientX-panelTouchContextPress.x,e.clientY-panelTouchContextPress.y)>10)cancelPanelTouchContextPress();
+  },true);
+  for(const eventName of ['pointerup','pointercancel'])document.addEventListener(eventName,e=>{
+    if(panelTouchContextPress?.pointerId===e.pointerId)cancelPanelTouchContextPress();
+  },true);
+  document.addEventListener('click',e=>{
+    const s=suppressTouchContextClick;
+    if(!s)return;
+    suppressTouchContextClick=null;
+    if(performance.now()<s.until&&(e.target===s.element||s.element.contains(e.target))){
+      e.preventDefault();e.stopImmediatePropagation();
+    }
+  },true);
+
   function clearTouchLongPress(pointerId=null){
     if(!touchLongPress||(pointerId!==null&&touchLongPress.pointerId!==pointerId))return;
     clearTimeout(touchLongPress.timer);touchLongPress=null;
@@ -8755,13 +8915,15 @@
     }
     const nodeEl=e.target.closest&&e.target.closest('[data-node]');
     const wireEl=e.target.closest&&e.target.closest('[data-wire-select],[data-wire-segment][data-wire-id],[data-wire-end][data-wire-id]');
-    if(nodeEl||wireEl){
+    if(nodeEl||wireEl||selectedPaletteType){
       const nodeId=nodeEl?.dataset.node||null,wireId=wireEl?.dataset.wireSelect||wireEl?.dataset.wireId||null;
       const clientX=e.clientX,clientY=e.clientY,pointerId=e.pointerId;
       touchLongPress={pointerId,nodeId,wireId,startX:clientX,startY:clientY,timer:setTimeout(()=>{
         if(!activeTouchPointers.has(pointerId)||touchPinch)return;
+        const wasPlacing=!!selectedPaletteType;
         touchLongPress=null;cancelActiveGesture();
         suppressObjectContextMenuUntil=performance.now()+1100;
+        if(wasPlacing){clearPalettePlacement();return;}
         if(nodeId)openObjectContextMenu(nodeId,clientX,clientY);
         else if(wireId)openWireContextMenu(wireId,clientX,clientY);
       },560)};
