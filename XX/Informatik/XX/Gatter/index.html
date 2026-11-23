@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
-<title>GatterLab V131</title>
+<title>GatterLab V135</title>
 <style>
   :root {
     color-scheme: dark;
@@ -803,6 +803,13 @@
   .lesson-panel[hidden] { display:none !important; }
   .lesson-panel button { cursor:pointer; }
   .lesson-panel .lesson-top { display:flex; align-items:center; gap:9px; padding:10px 13px; border-bottom:1px solid #32485c; background:linear-gradient(115deg,#1b3947,#1b293a); }
+  .lesson-hint-float { position:absolute; top:13px; right:13px; z-index:18; display:flex; align-items:center; gap:7px; border:1px solid #a8874f; border-radius:9px; background:#403725ed; color:#ffe7ad; padding:9px 12px; font-size:11px; font-weight:750; box-shadow:0 7px 22px #0008; backdrop-filter:blur(7px); cursor:pointer; }
+  .lesson-hint-float:hover,.lesson-hint-float.is-open { background:#594a2e; border-color:#d5ae6a; color:#fff0c9; }
+  .lesson-hint-float[hidden] { display:none !important; }
+  .lesson-hint-float:focus-visible { outline:2px solid #ffe2a5; outline-offset:3px; }
+  .lesson-header-hint[hidden] { display:none !important; }
+  .lesson-hint.lesson-hint-overlay { position:absolute; top:57px; right:13px; z-index:19; width:min(308px,calc(100% - 26px)); max-height:calc(100% - 75px); overflow-y:auto; touch-action:pan-y; margin:0; padding:12px; background:#403725fa; border-color:#a8874f; border-radius:11px; box-shadow:0 12px 32px #000a; backdrop-filter:blur(9px); scrollbar-color:#9a7d49 transparent; }
+  .lesson-hint-overlay[hidden] { display:none !important; }
   .lesson-panel .lesson-icon { width:31px; height:31px; display:grid; place-items:center; border:1px solid #448a86; background:#214f57; border-radius:9px; font-size:16px; }
   .lesson-panel button.lesson-icon { padding:0; cursor:pointer; color:#b8f4e0; flex:none; }
   .lesson-panel button.lesson-icon:hover { background:#316675; border-color:#66cfba; color:#fff; }
@@ -838,20 +845,32 @@
   .lesson-back:hover { text-decoration:underline; color:#d9ffff; }
   .lesson-kicker { color:#a2e7d2; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.75px; }
   .lesson-name { font-size:19px; font-weight:800; line-height:1.25; margin:5px 0 12px; color:#f2fcff; }
+  .lesson-name-row { display:flex; align-items:flex-start; gap:9px; margin:5px 0 12px; }
+  .lesson-name-row .lesson-name { flex:1; min-width:0; margin:0; }
+  .lesson-reset-icon { margin:0; font-size:21px; }
   .lesson-intro { padding:12px; margin:0 0 13px; background:#213d49; border:1px solid #416f76; border-radius:10px; }
   .lesson-intro h3 { margin:0 0 7px; font-size:12px; color:#aff5d8; }
   .lesson-intro p { margin:0; font-size:11px; line-height:1.65; color:#d0e7e6; }
   .lesson-intro button { margin-top:9px; color:#91e5ca; border:0; background:transparent; padding:0; font-size:11px; }
   .lesson-objective { color:#e4eefa; font-size:12px; line-height:1.6; margin:0 0 11px; }
-  .lesson-notice { font-size:11px; line-height:1.55; color:#a2b7c8; background:#192b3b; border-radius:9px; padding:10px 11px; margin-bottom:12px; }
   .lesson-actions { display:flex; gap:7px; flex-wrap:wrap; margin:12px 0; }
   .lesson-action { flex:1; min-width:90px; border-radius:8px; border:1px solid #436176; background:#24394c; color:#d9eff8; padding:9px 10px; font-size:11px; font-weight:650; }
   .lesson-action:hover { background:#335068; }
   .lesson-action.primary { background:#257965; border-color:#39bc99; color:#edfff6; }
   .lesson-action.primary:hover { background:#32977a; }
+  .lesson-next-action:not(:disabled) { background:#254a40; border-color:#4a9c83; color:#d5ffed; }
+  .lesson-next-action:not(:disabled):hover { background:#326958; }
   .lesson-action:disabled { cursor:not-allowed; opacity:.45; }
   .lesson-action:focus-visible,.lesson-list-btn:focus-visible,.lesson-icon-btn:focus-visible { outline:2px solid #9ae9d5; outline-offset:2px; }
   .lesson-hint { background:#403826; border:1px solid #7a653a; border-radius:8px; color:#ffe2a5; padding:10px; margin-bottom:11px; font-size:11px; line-height:1.6; }
+  .lesson-hint-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
+  .lesson-hint-head strong { flex:1; min-width:0; }
+  .lesson-hint-text { margin:0; overflow-wrap:anywhere; }
+  .lesson-hint-nav { display:flex; justify-content:flex-end; align-items:center; gap:6px; flex:none; }
+  .lesson-hint-nav button { display:grid; place-items:center; width:27px; height:25px; flex:none; border:1px solid #957746; border-radius:6px; background:#58472c; color:#ffe9b3; font-size:17px; line-height:1; padding:0; }
+  .lesson-hint-nav button:hover:not(:disabled) { background:#765d34; border-color:#c9a36a; }
+  .lesson-hint-nav button:disabled { opacity:.35; cursor:default; }
+  .lesson-hint-nav button:focus-visible { outline:2px solid #ffe2a5; outline-offset:2px; }
   .lesson-result { margin-top:12px; border-radius:9px; border:1px solid #4f7183; padding:11px; background:#192f40; }
   .lesson-result.passed { border-color:#4ab98f; background:#1b3b36; }
   .lesson-result.failed { border-color:#9e7652; background:#342c2c; }
@@ -862,6 +881,7 @@
   .lesson-truth { border-collapse:collapse; width:100%; font-size:10px; text-align:center; font-variant-numeric:tabular-nums; }
   .lesson-truth th,.lesson-truth td { padding:5px 3px; border-bottom:1px solid #466074; }
   .lesson-truth th { color:#a9c3d7; font-weight:750; }
+  .lesson-truth .lesson-truth-actual { border-left:2px solid #7693a5; padding-left:9px; }
   .lesson-truth .mismatch { color:#ffb28e; font-weight:800; background:#633d343b; }
   .lesson-truth .match { color:#a9f3ca; }
   .lesson-bottom { border-top:1px solid #32485c; padding:9px 12px; background:#192b3c; display:flex; justify-content:space-between; align-items:center; gap:10px; }
@@ -994,10 +1014,12 @@
       </div>
       <div class="stage" id="stage">
         <section id="lessonPanel" class="lesson-panel" aria-label="Aufgaben und Übungen" hidden>
-          <header class="lesson-top"><button class="lesson-icon" type="button" data-lesson-action="catalog" aria-label="Alle Aufgaben anzeigen" title="Alle Aufgaben anzeigen">▤</button><div class="lesson-top-copy"><div class="lesson-eyebrow">Digitaltechnik entdecken</div><div class="lesson-header-progress" id="lessonHeaderProgress" aria-label="Lernfortschritt"></div></div><button class="lesson-icon-btn" type="button" id="lessonClose" aria-label="Aufgabenbereich ausblenden" title="Aufgabenbereich ausblenden"><span class="lesson-close-glyph">×</span></button></header>
+          <header class="lesson-top"><button class="lesson-icon" type="button" data-lesson-action="catalog" aria-label="Alle Aufgaben anzeigen" title="Alle Aufgaben anzeigen">▤</button><div class="lesson-top-copy"><div class="lesson-eyebrow">Digitaltechnik entdecken</div><div class="lesson-header-progress" id="lessonHeaderProgress" aria-label="Lernfortschritt"></div></div><button class="lesson-icon-btn lesson-header-hint" type="button" id="lessonHeaderHint" aria-controls="lessonHintOverlay" aria-expanded="false" aria-label="Tipps ansehen" title="Tipps ansehen" hidden>💡</button><button class="lesson-icon-btn" type="button" id="lessonClose" aria-label="Aufgabenbereich ausblenden" title="Aufgabenbereich ausblenden"><span class="lesson-close-glyph">×</span></button></header>
           <div class="lesson-scroll" id="lessonContent" aria-live="polite"></div>
           <footer class="lesson-bottom" id="lessonFooter" hidden><small id="lessonFooterInfo">Deine freie Schaltung ist gesichert.</small><button class="lesson-exit" type="button" id="lessonExit" hidden>Zum freien Modus</button></footer>
         </section>
+        <button class="lesson-hint-float" id="lessonHintFloat" type="button" aria-controls="lessonHintOverlay" aria-label="Tipps ansehen" aria-expanded="false" title="Tipps ansehen" hidden><span aria-hidden="true">💡</span><span id="lessonHintFloatLabel">Tipps ansehen</span></button>
+        <section class="lesson-hint lesson-hint-overlay" id="lessonHintOverlay" aria-label="Tipps zur aktuellen Aufgabe" aria-live="polite" hidden></section>
         <section class="module-sim-banner" id="moduleSimulationBanner" aria-live="polite" aria-label="Unterfunktions-Simulation" hidden>
           <div class="module-sim-top"><div class="module-sim-heading"><span class="module-sim-title" id="moduleSimulationTitle">Simulation</span></div><div class="module-sim-controls"><button type="button" class="module-sim-icon-button" id="moduleSimulationHelpToggle" aria-label="Hilfe zum Testmodus" aria-controls="moduleSimulationHelp" aria-expanded="false" title="Wie funktioniert der Testmodus?">?</button><button type="button" class="module-sim-icon-button" id="moduleSimulationExit" aria-label="Simulation beenden" title="Simulation beenden">×</button></div></div>
           <div class="module-sim-help" id="moduleSimulationHelp" hidden><strong>So funktioniert der Testmodus</strong><p>Klicke auf einen Eingang oder seine Kachel, um zwischen 0 und 1 zu wechseln. Die Ausgangskacheln zeigen sofort das Ergebnis.</p><p>Der Test verändert deine gespeicherte Schaltung nicht. Über ×, Esc oder einen Klick auf die freie Arbeitsfläche kehrst du zurück.</p></div>
@@ -1737,11 +1759,13 @@
     moduleDefinitions.filter(def=>canUseModuleOnActiveBoard(def.id)).forEach(def=>{
       const type=MODULE_TYPE_PREFIX+def.id,m=TYPES[type]; if(m) entries.push({...m,type,ready:m.outputs>0,description:m.description});
     });
-    const filtered=entries.filter(item=>!query||item.label.toLocaleLowerCase('de').includes(query));
-    const showEmptyModulePlaceholder=!activeModuleId && moduleDefinitions.length===0;
+    const allowedLessonTypes=lessonAllowedPaletteTypes();
+    const visibleEntries=allowedLessonTypes?entries.filter(item=>allowedLessonTypes.has(item.type)):entries;
+    const filtered=visibleEntries.filter(item=>!query||item.label.toLocaleLowerCase('de').includes(query));
+    const showEmptyModulePlaceholder=!allowedLessonTypes&&!activeModuleId && moduleDefinitions.length===0;
     const categories=[...CATEGORY_ORDER];
-    if(entries.some(item=>item.category==='Modulschnittstellen')) categories.push('Modulschnittstellen');
-    if(entries.some(item=>item.category==='Unterfunktionen')||showEmptyModulePlaceholder) categories.push('Unterfunktionen');
+    if(visibleEntries.some(item=>item.category==='Modulschnittstellen')) categories.push('Modulschnittstellen');
+    if(visibleEntries.some(item=>item.category==='Unterfunktionen')||showEmptyModulePlaceholder) categories.push('Unterfunktionen');
     let html='';
     categories.forEach(category=>{
       const items=filtered.filter(item=>item.category===category);
@@ -1775,7 +1799,7 @@
       html+='</section>';
     });
     if(!html) html='<div class="palette-empty">Keine passenden Bauteile gefunden.</div>';
-    $('paletteCategories').innerHTML=html; $('paletteCount').textContent=`${filtered.length} / ${entries.length}`;
+    $('paletteCategories').innerHTML=html; $('paletteCount').textContent=`${filtered.length} / ${visibleEntries.length}`;
   }
   function normalizeBoard(raw){
     const rawNodes=Array.isArray(raw?.nodes)?raw.nodes:[];
@@ -5193,6 +5217,7 @@
   // Taktwechsel aktualisieren nur die Simulation. Die Eigenschaften-Spalte bleibt im DOM,
   // damit fokussierte Eingabefelder, Textcursor und laufende Bearbeitungen erhalten bleiben.
   function syncInspectorLiveReadouts() {
+    if(gesture?.kind==='toggle')return; // Erst den bestätigten Schalter-Klick abwarten.
     if (selectedNodes.size>1) {
       const groupOutput=$('inspectorGroupOutputValue');
       if(groupOutput){
@@ -6671,10 +6696,10 @@
   // Aufgaben werden ausschließlich lokal gespeichert. Das freie Projekt liegt
   // während der Übungen in einer separaten Sicherung und bleibt unverändert.
   const LESSON_UNITS=[
-    {id:'signale',name:'01 · Signale und Stromkreise',title:'Vom Schalter zum Licht',intro:'Stell dir eine Lampe vor, die du mit einem Lichtschalter steuerst. Im Computer gibt es ebenfalls nur zwei eindeutige Signalwerte: 0 (aus/LOW) und 1 (an/HIGH). Wir beginnen mit einem einzigen Kabel. Danach verändern wir ein Signal mit dem ersten Logikgatter, dem NOT.'},
-    {id:'entscheidungen',name:'02 · Logische Entscheidungen',title:'Wann soll das Licht leuchten?',intro:'An einer Maschine sollen manchmal zwei Bedingungen gleichzeitig erfüllt sein – etwa eine geschlossene Tür UND ein gedrückter Startknopf. In anderen Situationen reicht eine von zwei Bedingungen. Das sind die Grundideen von AND und OR. Wir prüfen sie mit einer Wahrheitstabelle.'},
+    {id:'signale',name:'01 · Signale und Stromkreise',title:'Vom Schalter zum Licht',intro:'Stell dir eine Lampe vor, die du mit einem Lichtschalter steuerst. Im Computer gibt es ebenfalls nur zwei eindeutige Signalwerte: 0 (aus/LOW) und 1 (an/HIGH). Wir beginnen mit einem einzigen Kabel. Danach wird es Schritt für Schritt interessanter.'},
+    {id:'entscheidungen',name:'02 · Logische Entscheidungen',title:'Wann soll das Licht leuchten?',intro:'An einer Maschine sollen manchmal zwei Bedingungen gleichzeitig erfüllt sein – etwa eine geschlossene Tür UND ein gedrückter Startknopf. In anderen Situationen reicht eine von zwei Bedingungen. Das sind die Grundideen von AND und OR.'},
     {id:'kombinieren',name:'03 · Gatter kombinieren',title:'Kleine Bausteine, größere Ideen',intro:'Aus wenigen einfachen Gattern lassen sich schon überraschend viele Regeln bauen. Wie bei einem Baukasten verknüpfen wir Zwischenergebnisse: Zuerst kehren wir eine gemeinsame Bedingung um, danach entwickeln wir eine kleine Alarmanlage mit drei Sensoren.'},
-    {id:'werkstatt',name:'04 · Knobelwerkstatt',title:'Genau einer – und dann rechnen',intro:'Digitaltechnik kann mehr als Lampen schalten. Ein exklusives ODER erkennt unterschiedliche Eingänge. Kombinieren wir dieses Prinzip mit AND, können zwei einzelne Bits sogar addiert werden.'}
+    {id:'werkstatt',name:'04 · Vergleichen und Rechnen',title:'Eigene Logik entwickeln und rechnen',intro:'Zuerst entwickeln wir eine Schaltung, die zwei unterschiedliche Eingänge erkennt. Danach verwenden wir die Idee als Baustein für eine einfache Binäraddition.'}
   ];
   const LESSON_TASKS=[
     {id:'licht',unit:'signale',title:'Ein Schalter, eine LED',inputs:['A'],outputs:['Y'],expected:([a])=>[a],
@@ -6694,7 +6719,7 @@
       note:'OR (ODER) bedeutet: Mindestens eine Bedingung trifft zu. Auch wenn beide Schalter 1 liefern, bleibt das Ergebnis 1.',
       hints:['Erinnere dich: Bei nur einem eingeschalteten Eingang soll das Ergebnis bereits 1 sein.','Ein OR-Gatter mit zwei Eingängen leistet genau das. Verbinde A und B mit OR, dann OR mit Y.'],success:'Genau! OR reagiert auf mindestens einen aktiven Eingang.'},
     {id:'nand',unit:'kombinieren',title:'Nur nicht beide',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[!(a&&b)],
-      goal:'Die LED soll nur dann AUS sein, wenn A und B gleichzeitig 1 sind. Versuche diese Regel mit einem AND-Gatter und einem NOT-Gatter zu bauen.',
+      goal:'Die LED soll nur dann AUS sein, wenn A und B gleichzeitig 1 sind. Versuche diese Regel mit einer Kombination von verschiedenen Gattern zu bauen.',
       note:'Denk in zwei Schritten: Zuerst feststellen, ob BEIDE 1 sind, danach das Ergebnis umkehren. Diese Funktion heißt NAND – NOT AND.',
       hints:['Welche Schaltung liefert 1, wenn beide Schalter 1 sind?','Schalte den Ausgang eines AND-Gatters auf den Eingang eines NOT-Gatters. Dessen Ausgang führt zur LED.'],success:'Prima! Du hast eine mehrstufige logische Schaltung verstanden.'},
     {id:'alarm',unit:'kombinieren',title:'Alarm in der Nacht',inputs:['N','T','F'],outputs:['Y'],expected:([n,t,f])=>[n&&(t||f)],
@@ -6702,14 +6727,40 @@
       note:'Die Bedingung lautet: Nacht UND (Tür ODER Fenster). Löse zuerst die Klammer, dann verknüpfe dieses Zwischenergebnis mit dem Nachtsignal.',
       hints:['Verbinde zunächst T und F über OR. So entsteht „mindestens eine Öffnung“.','Verbinde das OR-Ergebnis und N mit AND. Der AND-Ausgang führt zur LED.'],success:'Die Alarmregel ist korrekt für alle acht Sensorbelegungen!' },
     {id:'xor',unit:'werkstatt',title:'Genau einer von zwei',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a!==b],
-      goal:'Eine LED soll leuchten, wenn genau einer der beiden Schalter A und B eingeschaltet ist. Bei 0/0 und 1/1 bleibt sie aus.',
+      goal:'Eine LED soll leuchten, wenn genau einer der beiden Schalter A und B eingeschaltet ist. Bei 0/0 und 1/1 bleibt sie aus. Baue diese Funktion selbst aus den bisher bekannten Gattern auf.',
       note:'Diese Regel heißt exklusives ODER (XOR). „Exklusiv“ bedeutet hier: Beide Eingänge dürfen nicht denselben Wert haben.',
-      hints:['Probiere das XOR-Gatter in der linken Bauteileliste aus.','Verbinde A und B mit den beiden XOR-Eingängen und den Ausgang mit Y.'],success:'Richtig! Ein XOR erkennt unterschiedliche Bits.'},
+      hints:['Betrachte die beiden Fälle, in denen die LED leuchten soll: A=1 und B=0 sowie A=0 und B=1.','Baue mit NOT- und AND-Gattern für beide Fälle einen eigenen Zweig: A UND (NICHT B) sowie (NICHT A) UND B.','Fasse die Ausgänge beider AND-Gatter mit OR zusammen und verbinde das Ergebnis mit Y.'],success:'Richtig! Du hast die XOR-Funktion selbst aus NOT, AND und OR zusammengesetzt.'},
     {id:'halbaddierer',unit:'werkstatt',title:'Zwei Bits addieren',inputs:['A','B'],outputs:['S','Ü'],expected:([a,b])=>[a!==b,a&&b],
       goal:'Addiere die Bits A und B. Die obere LED S zeigt die Summe an, die untere LED Ü den Übertrag. Bei 1+1 soll S=0 und Ü=1 sein.',
-      note:'Eine binäre Addition hat zwei Ergebnisse: Das Summenbit S entspricht XOR; der Übertrag Ü entsteht genau dann, wenn beide Eingänge 1 sind (AND). Verwende für beide Ausgänge dieselben Eingangsschalter.',
+      note:'Eine binäre Addition hat zwei Ergebnisse: Das Summenbit S entspricht XOR; der Übertrag Ü entsteht genau dann, wenn beide Eingänge 1 sind (AND). Die zuvor selbst entwickelte XOR-Funktion steht dir jetzt als fertiges Gatter zur Verfügung.',
       hints:['Überlege getrennt, wann das Summenbit und wann der Übertrag 1 ist.','Baue einen XOR-Zweig zu S und einen AND-Zweig zu Ü. Von einem Schalter dürfen mehrere Kabel abgehen.'],success:'Gratulation! Dein Halbaddierer berechnet 0+0, 0+1, 1+0 und 1+1 korrekt.'}
   ];
+  // Bauteile werden schrittweise eingeführt. In späteren Aufgaben bleiben
+  // alle vorherigen Werkzeuge einschließlich selbst verwendeter Typen erhalten.
+  const LESSON_NEW_TYPES={
+    licht:['INPUT','OUTPUT'],not:['NOT'],and:['AND'],or:['OR'],
+    nand:[],alarm:[],xor:[],halbaddierer:['XOR']
+  };
+  function lessonAllowedPaletteTypes(){
+    if(!lessonActiveId)return null;
+    const index=LESSON_TASKS.findIndex(task=>task.id===lessonActiveId);
+    if(index<0)return null;
+    const allowed=new Set();
+    for(let i=0;i<=index;i++){
+      const task=LESSON_TASKS[i];
+      (LESSON_NEW_TYPES[task.id]||[]).forEach(type=>allowed.add(type));
+      if(i<index){
+        const board=lessonTaskBoards[task.id];
+        const priorNodes=board?.mainBoard?.nodes||board?.nodes||[];
+        priorNodes.forEach(node=>{if(TYPES[node.type])allowed.add(node.type);});
+      }
+    }
+    // Bei Aufgabe 7 muss XOR wirklich aufgebaut werden, selbst wenn eine
+    // ältere Übungssicherung bereits ein fertiges XOR-Bauteil enthielt.
+    if(lessonActiveId==='xor')allowed.delete('XOR');
+    return allowed;
+  }
+  const lessonHints=task=>[task.note,...task.hints];
   const lessonTask=id=>LESSON_TASKS.find(task=>task.id===id)||null;
   const lessonUnit=id=>LESSON_UNITS.find(unit=>unit.id===id)||null;
   function lessonCanStart(id){
@@ -6728,19 +6779,72 @@
     const outputSpacing=task.outputs.length===2?164:0;
     const panelWidth=Math.min(338,Math.max(0,stage.clientWidth-24));
     const usableWidth=Math.max(160,stage.clientWidth-panelWidth-32);
-    const zoom=Math.max(.45,Math.min(1,usableWidth/360));
-    const inputScreenX=panelWidth+16+Math.max(8,(usableWidth-300*zoom)/2);
+    const inputOutputDistance=720;
+    const zoom=Math.max(.25,Math.min(1,(usableWidth-30)/795));
+    const inputScreenX=panelWidth+16+Math.max(8,(usableWidth-inputOutputDistance*zoom)/2);
     const allNodes=[];
     task.inputs.forEach((label,index)=>{
       const node=createNodeRecord('INPUT',-45,(index-(task.inputs.length-1)/2)*inputSpacing);
       node.id=`lesson-${task.id}-in-${index}`;node.label=label;node.state=false;allNodes.push(node);
     });
     task.outputs.forEach((label,index)=>{
-      const node=createNodeRecord('OUTPUT',255,(index-(task.outputs.length-1)/2)*outputSpacing);
+      const node=createNodeRecord('OUTPUT',-45+inputOutputDistance,(index-(task.outputs.length-1)/2)*outputSpacing);
       node.id=`lesson-${task.id}-out-${index}`;node.label=label;allNodes.push(node);
     });
     const board={nodes:allNodes,wires:[],nodeDrawOrder:allNodes.map(node=>node.id),wireDrawOrder:[],camera:{x:inputScreenX+45*zoom,y:stage.clientHeight/2,z:zoom}};
     return {version:1,projectName:`Übung · ${task.title}`,activeModuleId:null,mainBoard:board,nodes:board.nodes,wires:board.wires,camera:board.camera,gridVisible};
+  }
+  function lessonHasLegacyStartPositions(task,config){
+    // Nur wirklich unveränderte Startschaltungen anpassen. Bereits verdrahtete,
+    // verschobene oder umbenannte Schülerarbeiten behalten ihr Layout.
+    const board=config?.mainBoard?.nodes?config.mainBoard:config;
+    const parts=board?.nodes,links=board?.wires;
+    if(!Array.isArray(parts)||!Array.isArray(links)||links.length||parts.length!==task.inputs.length+task.outputs.length)return false;
+    const inputSpacing=task.inputs.length===3?126:task.inputs.length===2?164:0;
+    const outputSpacing=task.outputs.length===2?164:0;
+    const inputsMatch=task.inputs.every((label,index)=>parts.some(n=>n.id===`lesson-${task.id}-in-${index}`&&n.type==='INPUT'&&n.label===label&&n.x===snap(-45)&&n.y===snap((index-(task.inputs.length-1)/2)*inputSpacing)));
+    const outputsMatch=task.outputs.every((label,index)=>parts.some(n=>n.id===`lesson-${task.id}-out-${index}`&&n.type==='OUTPUT'&&n.label===label&&(n.x===snap(255)||n.x===snap(555))&&n.y===snap((index-(task.outputs.length-1)/2)*outputSpacing)));
+    return inputsMatch&&outputsMatch;
+  }
+  function syncLessonHintButtons(){
+    const active=!!lessonTask(lessonActiveId);
+    // Auf sehr schmalen Arbeitsflächen liegt der Aufgabenkasten über dem
+    // rechten oberen Eck. Der Tipp ist dann im Aufgabenkopf erreichbar.
+    const compact=lessonPanelOpen&&stage.clientWidth<520;
+    $('lessonHintFloat').hidden=!active||compact;
+    $('lessonHeaderHint').hidden=!active||!compact;
+    const showingHint=lessonHintIndex>0;
+    const toggleLabel=showingHint?'Tipps ausblenden':'Tipps ansehen';
+    $('lessonHintFloatLabel').textContent=toggleLabel;
+    $('lessonHintFloat').title=toggleLabel;
+    $('lessonHintFloat').setAttribute('aria-label',toggleLabel);
+    $('lessonHintFloat').classList.toggle('is-open',showingHint);
+    $('lessonHintFloat').setAttribute('aria-expanded',String(showingHint));
+    $('lessonHeaderHint').title=toggleLabel;
+    $('lessonHeaderHint').setAttribute('aria-label',toggleLabel);
+    $('lessonHeaderHint').setAttribute('aria-expanded',String(showingHint));
+    if(!active)$('lessonHintOverlay').hidden=true;
+  }
+  function renderLessonHintOverlay(){
+    const task=lessonTask(lessonActiveId),overlay=$('lessonHintOverlay');
+    const hints=task?lessonHints(task):[];
+    const visible=!!task&&lessonHintIndex>0;
+    overlay.hidden=!visible;
+    if(visible){
+      const index=Math.min(lessonHintIndex,hints.length);
+      overlay.setAttribute('aria-label',`Tipps zu ${task.title}`);
+      overlay.innerHTML=`<div class="lesson-hint-head"><strong>Hinweis ${index} von ${hints.length}</strong><div class="lesson-hint-nav"><button type="button" data-lesson-hint-action="prev" aria-label="Vorheriger Hinweis" title="Vorheriger Hinweis" ${index===1?'disabled':''}>‹</button><button type="button" data-lesson-hint-action="next" aria-label="Nächster Hinweis" title="Nächster Hinweis" ${index===hints.length?'disabled':''}>›</button></div></div><p class="lesson-hint-text">${esc(hints[index-1])}</p>`;
+    }else overlay.innerHTML='';
+    syncLessonHintButtons();
+  }
+  function lessonRevealHint(){
+    if(!lessonTask(lessonActiveId))return;
+    lessonHintIndex=lessonHintIndex>0?0:1;
+    if(lessonHintIndex&&lessonShowCatalog){
+      lessonShowCatalog=false;
+      if(lessonPanelOpen)renderLessonPanel();
+    }
+    renderLessonHintOverlay();
   }
   function lessonPanelVisibility(open){
     lessonPanelOpen=!!open;
@@ -6748,6 +6852,7 @@
     $('lessonLaunch').classList.toggle('active',lessonPanelOpen||!!lessonActiveId);
     $('lessonLaunch').setAttribute('aria-expanded',String(lessonPanelOpen));
     if(lessonPanelOpen)renderLessonPanel();
+    else syncLessonHintButtons();
   }
   function lessonStart(id){
     const task=lessonTask(id);if(!task)return;
@@ -6768,7 +6873,9 @@
     lessonActiveId=task.id;lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;lessonShowCatalog=false;
     try{localStorage.setItem(LESSON_ACTIVE_KEY,task.id);}catch(_){}
     undoHistory=[];undoIndex=-1;
-    let config=lessonTaskBoards[task.id]||lessonCreateBoard(task);
+    if($('paletteSearch'))$('paletteSearch').value='';
+    const savedBoard=lessonTaskBoards[task.id];
+    let config=savedBoard&&!lessonHasLegacyStartPositions(task,savedBoard)?savedBoard:lessonCreateBoard(task);
     try{applyConfig(config);}catch(_){config=lessonCreateBoard(task);applyConfig(config);}
     saveLocal(true,false);
     lessonPanelVisibility(true);
@@ -6830,9 +6937,11 @@
       });
       rows.push({bits,expected,actual,correct:expected.every((value,i)=>value===actual[i])});
     }
-    const passed=!unconnected&&!hasUnknown&&!hasFeedback&&rows.every(row=>row.correct);
+    const usesReadyXor=task.id==='xor'&&nodes.some(node=>node.type==='XOR');
+    const passed=!usesReadyXor&&!unconnected&&!hasUnknown&&!hasFeedback&&rows.every(row=>row.correct);
     const firstError=rows.find(row=>!row.correct);
-    let reason=passed?task.success:unconnected?'Mindestens ein vorbereiteter Anschluss hat noch kein Kabel. Prüfe alle Schalter und LED-Eingänge.':
+    let reason=passed?task.success:usesReadyXor?'In dieser Aufgabe sollst du die XOR-Funktion selbst bauen. Entferne das fertige XOR-Gatter und verwende NOT, AND und OR.':
+      unconnected?'Mindestens ein vorbereiteter Anschluss hat noch kein Kabel. Prüfe alle Schalter und LED-Eingänge.':
       hasFeedback?'Die Schaltung enthält eine Rückkopplung. Für diese Aufgabe brauchen wir eine eindeutige Schaltung ohne Rückkopplung.':
       hasUnknown?'Mindestens ein Signal ist unbestimmt. Prüfe Verbindungen und Bauteile.':
       firstError?`Noch nicht ganz: Bei ${task.inputs.map((name,i)=>`${name}=${firstError.bits[i]?1:0}`).join(', ')} stimmt mindestens ein LED-Ergebnis nicht.`:
@@ -6845,10 +6954,12 @@
   function lessonTruthTable(task,result){
     if(!result?.rows?.length)return '';
     const headers=[...task.inputs,...task.outputs.map(name=>`${name} soll`),...task.outputs.map(name=>`${name} ist`)];
-    return `<table class="lesson-truth" aria-label="Automatische Wahrheitstabellenprüfung"><thead><tr>${headers.map(name=>`<th>${esc(name)}</th>`).join('')}</tr></thead><tbody>${result.rows.map(row=>`<tr>${row.bits.map(v=>`<td>${+v}</td>`).join('')}${row.expected.map(v=>`<td>${+v}</td>`).join('')}${row.actual.map((v,i)=>`<td class="${v===row.expected[i]?'match':'mismatch'}">${v===null?'?':+v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    const actualStart=task.inputs.length+task.outputs.length;
+    return `<table class="lesson-truth" aria-label="Automatische Wahrheitstabellenprüfung"><thead><tr>${headers.map((name,i)=>`<th${i===actualStart?' class="lesson-truth-actual"':''}>${esc(name)}</th>`).join('')}</tr></thead><tbody>${result.rows.map(row=>`<tr>${row.bits.map(v=>`<td>${+v}</td>`).join('')}${row.expected.map(v=>`<td>${+v}</td>`).join('')}${row.actual.map((v,i)=>`<td class="${v===row.expected[i]?'match':'mismatch'}${i===0?' lesson-truth-actual':''}">${v===null?'?':+v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   }
   function renderLessonPanel(){
     if(!lessonPanelOpen)return;
+    renderLessonHintOverlay();
     const content=$('lessonContent'),task=lessonTask(lessonActiveId);
     $('lessonFooter').hidden=!task;
     $('lessonExit').hidden=!task;
@@ -6865,14 +6976,28 @@
     const unit=lessonUnit(task.unit),index=LESSON_TASKS.indexOf(task),next=LESSON_TASKS[index+1];
     const introVisible=unit&&!lessonIntroDismissed.has(unit.id);
     const intro=introVisible?`<aside class="lesson-intro"><h3>💡 ${esc(unit.title)}</h3><p>${esc(unit.intro)}</p><button type="button" data-lesson-action="intro-hide">Einführung verstanden ✓</button></aside>`:`<button class="lesson-back" type="button" data-lesson-action="intro-show">↳ Einführung zur Einheit lesen</button>`;
-    const hint=lessonHintIndex>0?`<div class="lesson-hint"><strong>Hinweis ${lessonHintIndex}/${task.hints.length}:</strong> ${esc(task.hints[lessonHintIndex-1])}</div>`:'';
-    const result=lessonResult?`<section class="lesson-result ${lessonResult.passed?'passed':'failed'}" aria-label="Prüfergebnis"><div class="lesson-result-head">${lessonResult.passed?'✓ Alle Kombinationen richtig':'↻ Noch einmal probieren'}</div><p>${esc(lessonResult.reason)}</p>${lessonTruthTable(task,lessonResult)}${lessonResult.passed&&next&&lessonCanStart(next.id)?`<div class="lesson-actions"><button class="lesson-action primary" type="button" data-lesson-action="start" data-lesson-id="${next.id}">Nächste Aufgabe →</button></div>`:''}</section>`:'';
-    content.innerHTML=`<div class="lesson-kicker">${esc(unit?.name||'Übung')} · Aufgabe ${index+1} von ${LESSON_TASKS.length}</div><h2 class="lesson-name">${esc(task.title)} ${lessonCompleted.has(task.id)?'<span style="color:#72deaa;font-size:14px" title="Schon einmal erfolgreich gelöst">✓</span>':''}</h2>${intro}<p class="lesson-objective">${esc(task.goal)}</p><div class="lesson-notice">${esc(task.note)}</div><div class="lesson-actions"><button class="lesson-action primary" type="button" data-lesson-action="check">✓ Schaltung prüfen</button><button class="lesson-action" type="button" data-lesson-action="hint" ${lessonHintIndex>=task.hints.length?'disabled':''}>${lessonHintIndex?'Weiterer Tipp':'Tipp anzeigen'}</button></div>${hint}${result}<div class="lesson-actions"><button class="lesson-action" type="button" data-lesson-action="reset">↺ Neu starten</button></div>`;
+    const result=lessonResult?`<section class="lesson-result ${lessonResult.passed?'passed':'failed'}" aria-label="Prüfergebnis"><div class="lesson-result-head">${lessonResult.passed?'✓ Alle Kombinationen richtig':'↻ Noch einmal probieren'}</div><p>${esc(lessonResult.reason)}</p>${lessonTruthTable(task,lessonResult)}</section>`:'';
+    const nextAction=next?`<button class="lesson-action lesson-next-action" type="button" data-lesson-action="start" data-lesson-id="${next.id}" ${lessonCompleted.has(task.id)&&lessonCanStart(next.id)?'':'disabled title="Erst nach einer erfolgreich geprüften Schaltung verfügbar"'}>Nächste Aufgabe →</button>`:'';
+    content.innerHTML=`<div class="lesson-kicker">${esc(unit?.name||'Übung')} · Aufgabe ${index+1} von ${LESSON_TASKS.length}</div><div class="lesson-name-row"><h2 class="lesson-name">${esc(task.title)} ${lessonCompleted.has(task.id)?'<span style="color:#72deaa;font-size:14px" title="Schon einmal erfolgreich gelöst">✓</span>':''}</h2><button class="lesson-icon-btn lesson-reset-icon" type="button" data-lesson-action="reset" aria-label="Aufgabe neu starten" title="Aufgabe neu starten">↺</button></div>${intro}<p class="lesson-objective">${esc(task.goal)}</p><div class="lesson-actions"><button class="lesson-action primary" type="button" data-lesson-action="check">✓ Schaltung prüfen</button>${nextAction}</div>${result}`;
   }
   function initLessonUI(){
     $('lessonLaunch').addEventListener('click',()=>lessonPanelVisibility(!lessonPanelOpen));
     $('lessonClose').addEventListener('click',()=>lessonPanelVisibility(false));
     $('lessonExit').addEventListener('click',lessonExit);
+    for(const id of ['lessonHintFloat','lessonHeaderHint']){
+      const button=$(id);
+      button.addEventListener('pointerdown',event=>event.stopPropagation());
+      button.addEventListener('click',event=>{event.stopPropagation();lessonRevealHint();});
+    }
+    $('lessonHintOverlay').addEventListener('pointerdown',event=>event.stopPropagation());
+    $('lessonHintOverlay').addEventListener('click',event=>{
+      event.stopPropagation();
+      const button=event.target.closest('[data-lesson-hint-action]');if(!button)return;
+      const task=lessonTask(lessonActiveId),count=task?lessonHints(task).length:0;
+      if(button.dataset.lessonHintAction==='prev')lessonHintIndex=Math.max(1,lessonHintIndex-1);
+      else if(button.dataset.lessonHintAction==='next')lessonHintIndex=Math.min(count,lessonHintIndex+1);
+      renderLessonHintOverlay();
+    });
     const resetModal=$('lessonResetModal');
     const closeReset=()=>resetModal.classList.remove('show');
     $('lessonResetCancel').addEventListener('click',closeReset);
@@ -6885,9 +7010,8 @@
       const button=event.target.closest('[data-lesson-action]');if(!button)return;
       const action=button.dataset.lessonAction;
       if(action==='start')lessonStart(button.dataset.lessonId);
-      else if(action==='catalog'){lessonShowCatalog=true;renderLessonPanel();$('lessonContent').scrollTop=0;}
+      else if(action==='catalog'){lessonShowCatalog=true;lessonHintIndex=0;renderLessonPanel();$('lessonContent').scrollTop=0;}
       else if(action==='check')lessonCheck();
-      else if(action==='hint'){const task=lessonTask(lessonActiveId);lessonHintIndex=Math.min(task?.hints.length||0,lessonHintIndex+1);renderLessonPanel();$('lessonContent').querySelector('.lesson-hint')?.scrollIntoView({block:'nearest',behavior:'smooth'});}
       else if(action==='reset')lessonReset();
       else if(action==='intro-hide'){const task=lessonTask(lessonActiveId);if(task)lessonIntroDismissed.add(task.unit);renderLessonPanel();}
       else if(action==='intro-show'){const task=lessonTask(lessonActiveId);if(task)lessonIntroDismissed.delete(task.unit);renderLessonPanel();}
@@ -6896,6 +7020,7 @@
       lessonActiveId=null;try{localStorage.removeItem(LESSON_ACTIVE_KEY);}catch(_){}
     }
     if(lessonActiveId){lessonShowCatalog=false;lessonPanelVisibility(true);}
+    else syncLessonHintButtons();
   }
 
   function encodeConfig(config) {
@@ -8028,6 +8153,33 @@
   $('shareBtn').addEventListener('click', shareConfig);
   $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
   const PATCH_LOG = [
+    {version:'V135',title:'Kompakte Tippnavigation und klare Ein-/Ausblendung',items:[
+      'Die Pfeile zum Blättern stehen direkt rechts im Kopf des Hinweisfensters. Der untere Navigationsbereich und das separate Schließen-× entfallen.',
+      'Der Schaltknopf heißt bei geschlossenen Hinweisen „Tipps ansehen“ und bei geöffneten Hinweisen „Tipps ausblenden“ – auch in der schmalen Ansicht.',
+      'Der Hinweisfenster-Kopf verwendet keinen Emoji mehr.',
+      'Die Einleitung der siebten Aufgabe beginnt direkt mit „Zuerst entwickeln wir eine Schaltung …“.'
+    ]},
+    {version:'V134',title:'Tipps im Schaltkreis und eigenständige XOR-Schaltung',items:[
+      '„Tipps ansehen“ öffnet die Hinweise direkt oben rechts auf der Schaltungsfläche. Der Name des Knopfs bleibt beim Öffnen gleich.',
+      'Der neue kompakte Neustart-Knopf sitzt rechts neben der Aufgabenüberschrift unterhalb des Schließen-Knopfs.',
+      'Ein Schalterklick aktualisiert die Eigenschaften erst nach der bestätigten Zustandsänderung, ohne kurz den vorherigen Signalwert einzublenden.',
+      'Aufgabe 5 enthält die neutralere Formulierung zur Gatterkombination.',
+      'Aufgabe 7 verlangt, XOR aus NOT, AND und OR selbst aufzubauen; ein fertiges XOR-Gatter wird dort auch bei der Prüfung zurückgewiesen. Es wird erst in Aufgabe 8 freigeschaltet.',
+      'Die abschließende Einheit heißt „Vergleichen und Rechnen“ und wird nicht mehr als Knobelwerkstatt bezeichnet.'
+    ]},
+    {version:'V133',title:'Hinweise am Schaltkreis und klarer Lernfortschritt',items:[
+      'Der Einführungstext zu AND und OR enthält nicht mehr den Satz zur Wahrheitstabelle.',
+      'Ein neuer Tipp-Knopf oben rechts auf der Schaltungsfläche öffnet die Hinweise zur aktuellen Aufgabe. Auf schmalen Flächen ist er im Aufgabenkopf erreichbar.',
+      '„Nächste Aufgabe“ steht direkt rechts neben „Schaltung prüfen“ und wird erst nach der ersten erfolgreich bestandenen Prüfung freigeschaltet. Der freigeschaltete Zustand bleibt erhalten.',
+      'Die vorbereiteten Ein- und Ausgänge werden nochmals weiter voneinander entfernt; die Startansicht passt sich an. Unveränderte ältere Startschaltungen erhalten die neue Anordnung automatisch.'
+    ]},
+    {version:'V132',title:'Kleinschrittige Aufgaben und besser lesbare Hinweise',items:[
+      'Wahrheitstabellen trennen Soll- und Ist-Ausgänge mit einer deutlich sichtbaren Linie.',
+      'Hinweise lassen sich innerhalb der Karte vor- und zurückblättern; die bisherigen Erklärungstexte stehen jeweils als erster Hinweis.',
+      'Vorbereitete Eingänge und Ausgänge liegen beim neuen Start oder Neustart einer Aufgabe etwa doppelt so weit auseinander. Die Startansicht wird passend angepasst.',
+      'Die Bauteileliste im Aufgabenmodus enthält nur die aktuell benötigten und in vorherigen Aufgaben eingeführten oder eingesetzten Bauteile.',
+      'Der Einführungstext der ersten Einheit führt jetzt allgemeiner in die folgenden Schritte ein.'
+    ]},
     {version:'V131',title:'Unterfunktions-Knopf korrekt ausgerichtet',items:[
       'Der zusätzliche rechte Abstand der Tableiste ohne Unterfunktionen wurde entfernt. „+ Unterfunktion“ beginnt nun exakt an der Stelle, an der der erste neu erstellte Unterfunktions-Tab erscheinen würde.'
     ]},
@@ -9071,7 +9223,10 @@
       promoteNode(id);
       wireImpliedNodeIds.delete(id);
       if (e.shiftKey) { selectedNodes.add(id); wireImpliedNodeIds.delete(id); } else selectOnlyNode(id);
-      renderNodes(); renderInspector(); updateStatus();
+      // Die Schalterstellung wird erst beim bestätigten Klick auf pointerup
+      // geändert. Die Eigenschaften deshalb erst DANACH aktualisieren: sonst
+      // blitzt beim ersten Auswählen kurz der bisherige LOW/HIGH-Wert auf.
+      renderNodes(); updateStatus();
       gesture = {kind:'toggle', id, startX:e.clientX, startY:e.clientY, moved:false};
       try { scene.setPointerCapture(e.pointerId); } catch(_) {}
       e.preventDefault(); e.stopPropagation(); return;
@@ -9737,7 +9892,7 @@
   // Bereits vor dem ersten Ctrl+V eine vorhandene gemeinsame Kopie verfügbar machen.
   readSharedClipboard();
   window.addEventListener('resize', () => {
-    applyMinimapLayout();renderEmpty();updateMinimap();
+    applyMinimapLayout();renderEmpty();updateMinimap();syncLessonHintButtons();
     if(inlineLabelEditor)positionInlineLabelEditor();
   });
   // Das Arbeitsflächenmaß ändert sich während des Ein-/Ausklappens frameweise.
@@ -9747,6 +9902,7 @@
       renderEmpty();
       if(!syncPanelLayoutFrame())updateMinimap();
       if(inlineLabelEditor)positionInlineLabelEditor();
+      syncLessonHintButtons();
     });
     stageLayoutObserver.observe(stage);
   }
@@ -9799,7 +9955,10 @@
     if (linked) applyConfig(linked);
     else {
       const saved=localStorage.getItem(STORAGE_KEY);
-      if (saved) applyConfig(JSON.parse(saved));
+      if (saved){
+        const storedConfig=JSON.parse(saved),activeTask=lessonTask(lessonActiveId);
+        applyConfig(activeTask&&lessonHasLegacyStartPositions(activeTask,storedConfig)?lessonCreateBoard(activeTask):storedConfig);
+      }
       else { camera={x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}; mainBoardState={nodes,wires,nodeDrawOrder,wireDrawOrder,camera:{...camera}}; renderBoardTabs(); renderPalette(); render(); }
     }
   } catch(e) { projectName='Hauptschaltkreis';activeModuleId=null;moduleDefinitions=[];refreshCustomModuleTypes();nodes=[];wires=[];nodeDrawOrder=[];wireDrawOrder=[];mainBoardState={nodes,wires,nodeDrawOrder,wireDrawOrder,camera:{x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}};camera={...mainBoardState.camera};renderBoardTabs();renderPalette();render();showToast('Gespeicherte Konfiguration konnte nicht geladen werden'); }
