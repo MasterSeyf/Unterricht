@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
-<title>GatterLab V135</title>
+<title>GatterLab V142</title>
 <style>
   :root {
     color-scheme: dark;
@@ -71,14 +71,14 @@
   .workspace.left-narrow .palette-category-short { display:inline; }
   .workspace.left-resizing { grid-template-columns:var(--left-panel-width) minmax(0,1fr) var(--right-panel-width) !important; transition:none !important; }
   .workspace.left-resizing.right-collapsed { grid-template-columns:var(--left-panel-width) minmax(0,1fr) 0 !important; }
-  .workspace.left-resizing > .sidebar.left { opacity:1; pointer-events:auto; border-right-width:1px; }
+  .workspace.left-resizing > .sidebar.left { opacity:1; pointer-events:auto; border-right-width:1px; overflow-x:hidden; overflow-y:scroll; scrollbar-gutter:stable; }
   .workspace.left-collapsed { grid-template-columns:0 minmax(0,1fr) var(--right-panel-width); }
   .workspace.right-collapsed { grid-template-columns:var(--left-panel-width) minmax(0,1fr) 0; }
   .workspace.left-collapsed.right-collapsed { grid-template-columns:0 minmax(0,1fr) 0; }
   .sidebar { background: var(--panel); min-width:0; min-height: 0; overflow-y: auto; border-right: 1px solid #273547; transition:opacity .16s ease; }
-  .sidebar.left { overflow-x:hidden; }
+  .sidebar.left { overflow-x:hidden; scrollbar-gutter:stable; }
   .workspace.left-collapsed > .sidebar.left, .workspace.right-collapsed > .sidebar.right { opacity:0; pointer-events:none; overflow:hidden; border-width:0; }
-  .workspace.left-collapsed.left-resizing > .sidebar.left { opacity:1; pointer-events:auto; border-right-width:1px; }
+  .workspace.left-collapsed.left-resizing > .sidebar.left { opacity:1; pointer-events:auto; border-right-width:1px; overflow-x:hidden; overflow-y:scroll; }
   .sidebar.right { border-right: 0; border-left: 1px solid #273547; padding-bottom: 0; display:flex; flex-direction:column; overflow:hidden; position:relative; }
   #inspector { flex:1 1 auto; min-height:0; overflow-y:auto; padding-bottom:8px; }
   /* Beide Spaltenüberschriften sitzen mittig auf derselben Höhe wie die Zoomsteuerung. */
@@ -223,6 +223,9 @@
   .board-tab.module-board-tab:active { cursor:grabbing; }
   .board-tab.main-board-tab { position:relative; cursor:pointer; border-right:1px solid transparent; border-radius:7px; margin-right:5px; }
   .board-tab.main-board-tab::after { content:''; position:absolute; right:-5.5px; top:50%; width:1px; height:12px; transform:translateY(-50%); border-radius:1px; background:#4b6d8c; pointer-events:none; }
+  /* Ohne freigegebene Unterfunktionen gibt es auch keinen optischen Trenner. */
+  .board-tabs.no-subfunctions .board-tab.main-board-tab { margin-right:0; }
+  .board-tabs.no-subfunctions .board-tab.main-board-tab::after { display:none; }
   .board-tab.dragging { opacity:.42; filter:saturate(.65); }
   .board-tab.drop-before { position:relative; }
   .board-tab.drop-before::after { content:''; position:absolute; left:-4px; top:3px; bottom:3px; width:3px; border-radius:3px; background:#79c9ff; box-shadow:0 0 8px #65bfffaa; }
@@ -262,6 +265,7 @@
   .push-inspector-button:hover { border-color:#ffc0c8; filter:brightness(1.08); }
   .push-inspector-button:active { transform:translateY(1px); }
   .push-inspector-button.on { background:#1c7958; border-color:#75f0b7; color:#effff7; box-shadow:0 0 0 2px #45d99a33,0 0 9px #45d99a55; }
+  .add-board-btn[hidden], #boardTabContextMenu .menu-item[hidden] { display:none !important; }
   .add-board-btn { flex:0 0 auto; height:27px; padding:3px 8px !important; gap:0; border-color:#36516d !important; color:#aed5f5 !important; background:#172638 !important; font-size:10px !important; }
   .add-board-space { flex:0 0 auto; white-space:pre; }
   .stage-actions { display:flex; align-items:center; justify-content:flex-end; gap:4px; flex:0 0 auto; margin-left:auto; }
@@ -797,17 +801,37 @@
     .stage-actions .btn { padding:4px 6px; }
   }
   /* Unterrichtsmodus: eine ruhige Arbeitskarte direkt neben der Schaltung. */
+  /* Die Aufgabenkarte lässt sich auf ihre Kopfzeile verkleinern; der Fortschritt bleibt sichtbar. */
+  /* Kopfzeile und Fortschrittsbalken behalten beim Auf- und Zuklappen ihre Maße.
+     Nur die äußere Höhe animiert: der Inhalt wird darunter weich abgeschnitten. */
+  .lesson-panel.is-minimized { height:var(--lesson-minimized-height,70px); }
+  .lesson-panel.is-minimized .lesson-scroll { opacity:0; pointer-events:none; }
+  .lesson-minimize-btn { font-size:23px; font-weight:650; }
+  .lesson-minimize-btn span { display:grid; place-items:center; width:100%; height:100%; line-height:1; }
+  @media (prefers-reduced-motion:reduce) { .lesson-panel { transition:none !important; } .lesson-scroll { transition:none !important; } }
   .lesson-launch { margin-right:9px; font-size:12px; border-color:#3b6d78; color:#b5f4e0; background:#15313b; }
   .lesson-launch:hover,.lesson-launch.active { background:#20505a; border-color:#54bba4; color:#e5fff7; }
-  .lesson-panel { position:absolute; left:12px; top:12px; bottom:12px; width:min(338px,calc(100% - 24px)); z-index:16; display:flex; flex-direction:column; border:1px solid #405b71; border-radius:13px; background:#142232f5; box-shadow:0 13px 35px #0009; overflow:hidden; backdrop-filter:blur(9px); touch-action:pan-y; }
+  .lesson-panel { position:absolute; left:12px; top:12px; bottom:auto; height:calc(100% - 24px); min-height:var(--lesson-minimized-height,70px); transition:height .28s cubic-bezier(.2,.75,.25,1); width:min(338px,calc(100% - 24px)); z-index:16; display:flex; flex-direction:column; border:1px solid #405b71; border-radius:13px; background:#142232f5; box-shadow:0 13px 35px #0009; overflow:hidden; backdrop-filter:blur(9px); touch-action:pan-y; }
   .lesson-panel[hidden] { display:none !important; }
   .lesson-panel button { cursor:pointer; }
-  .lesson-panel .lesson-top { display:flex; align-items:center; gap:9px; padding:10px 13px; border-bottom:1px solid #32485c; background:linear-gradient(115deg,#1b3947,#1b293a); }
+  .lesson-panel .lesson-top { display:flex; flex:0 0 auto; align-items:center; gap:9px; padding:10px 13px; border-bottom:1px solid #32485c; background:linear-gradient(115deg,#1b3947,#1b293a); }
   .lesson-hint-float { position:absolute; top:13px; right:13px; z-index:18; display:flex; align-items:center; gap:7px; border:1px solid #a8874f; border-radius:9px; background:#403725ed; color:#ffe7ad; padding:9px 12px; font-size:11px; font-weight:750; box-shadow:0 7px 22px #0008; backdrop-filter:blur(7px); cursor:pointer; }
   .lesson-hint-float:hover,.lesson-hint-float.is-open { background:#594a2e; border-color:#d5ae6a; color:#fff0c9; }
   .lesson-hint-float[hidden] { display:none !important; }
   .lesson-hint-float:focus-visible { outline:2px solid #ffe2a5; outline-offset:3px; }
   .lesson-header-hint[hidden] { display:none !important; }
+  /* Der Zugang und das Hinweisfenster erscheinen aus ihrer eigenen Mitte:
+     ausschließlich zentriertes Skalieren, niemals ein vertikaler Versatz. */
+  .lesson-hint-float, .lesson-header-hint, .lesson-hint-overlay {
+    opacity:0; transform:scale(.84); transform-origin:50% 50%; pointer-events:none;
+    transition:opacity .22s ease, transform .22s cubic-bezier(.2,.75,.25,1);
+  }
+  .lesson-hint-float.is-visible, .lesson-header-hint.is-visible, .lesson-hint-overlay.is-visible {
+    opacity:1; transform:scale(1); pointer-events:auto;
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .lesson-hint-float, .lesson-header-hint, .lesson-hint-overlay { transition:none !important; }
+  }
   .lesson-hint.lesson-hint-overlay { position:absolute; top:57px; right:13px; z-index:19; width:min(308px,calc(100% - 26px)); max-height:calc(100% - 75px); overflow-y:auto; touch-action:pan-y; margin:0; padding:12px; background:#403725fa; border-color:#a8874f; border-radius:11px; box-shadow:0 12px 32px #000a; backdrop-filter:blur(9px); scrollbar-color:#9a7d49 transparent; }
   .lesson-hint-overlay[hidden] { display:none !important; }
   .lesson-panel .lesson-icon { width:31px; height:31px; display:grid; place-items:center; border:1px solid #448a86; background:#214f57; border-radius:9px; font-size:16px; }
@@ -820,9 +844,8 @@
   .lesson-header-progress .lesson-progress-track { flex:1; margin:0; }
   .lesson-header-progress-count { flex:none; color:#b4eed7; font-size:10px; font-weight:700; font-variant-numeric:tabular-nums; }
   .lesson-icon-btn { width:31px; height:31px; flex:none; display:grid; place-items:center; padding:0; background:transparent; border:1px solid #486276; border-radius:9px; font-size:18px; line-height:1; color:#baccda; }
-  .lesson-close-glyph { display:block; transform:translateY(-2px); pointer-events:none; }
   .lesson-icon-btn:hover { border-color:#8bb3d0; background:#2b4257; color:white; }
-  .lesson-scroll { flex:1; min-height:0; overflow-y:auto; padding:13px; scrollbar-color:#527287 transparent; }
+  .lesson-scroll { flex:1; min-height:0; overflow-y:auto; padding:13px; scrollbar-color:#527287 transparent; opacity:1; transition:opacity .16s ease; }
   .lesson-lead { font-size:12px; line-height:1.6; color:#c5d5e3; margin:0 0 13px; }
   .lesson-lead strong { display:block; color:#e3fff6; margin-bottom:4px; }
   .lesson-progress { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 6px; color:#9baebf; font-size:10px; }
@@ -948,6 +971,13 @@
           <button class="menu-item" type="button" id="allowWireObjectCrossingsBtn" role="menuitemcheckbox" aria-checked="true"><span class="menu-check">✓</span><span>Kabel-Objekt-Überschneidung vermeiden</span></button>
         </div>
       </div>
+      <div class="menu" data-menu="mode">
+        <button class="menu-trigger" type="button" aria-haspopup="true" aria-expanded="false">Modus</button>
+        <div class="menu-popover" role="menu" aria-label="Arbeitsmodus wählen">
+          <button class="menu-item" id="menuModeSandbox" type="button" data-menu-action="modeSandbox" role="menuitemradio" aria-checked="true"><span class="menu-check">✓</span><span>Sandbox</span></button>
+          <button class="menu-item" id="menuModeLessons" type="button" data-menu-action="modeLessons" role="menuitemradio" aria-checked="false"><span class="menu-check"></span><span>Aufgaben</span></button>
+        </div>
+      </div>
       <div class="menu" data-menu="help">
         <button class="menu-trigger" type="button" aria-haspopup="true" aria-expanded="false">Hilfe</button>
         <div class="menu-popover" role="menu">
@@ -982,7 +1012,6 @@
       <button class="menu-item danger" type="button" role="menuitem" data-wire-action="delete"><span class="menu-check">×</span><span>Kabel löschen</span><span class="menu-shortcut">Entf</span></button>
     </div>
     <div class="toolbar-spacer"></div>
-    <button class="btn lesson-launch" type="button" id="lessonLaunch" aria-expanded="false" aria-controls="lessonPanel" title="Aufgabenkatalog und Übungen öffnen">▤ <span class="btn-text">Aufgaben</span></button>
     <button class="btn primary" id="shareBtn" title="Konfiguration als Link anzeigen">↗ <span class="btn-text">Link anzeigen</span></button>
   </header>
 
@@ -1014,9 +1043,8 @@
       </div>
       <div class="stage" id="stage">
         <section id="lessonPanel" class="lesson-panel" aria-label="Aufgaben und Übungen" hidden>
-          <header class="lesson-top"><button class="lesson-icon" type="button" data-lesson-action="catalog" aria-label="Alle Aufgaben anzeigen" title="Alle Aufgaben anzeigen">▤</button><div class="lesson-top-copy"><div class="lesson-eyebrow">Digitaltechnik entdecken</div><div class="lesson-header-progress" id="lessonHeaderProgress" aria-label="Lernfortschritt"></div></div><button class="lesson-icon-btn lesson-header-hint" type="button" id="lessonHeaderHint" aria-controls="lessonHintOverlay" aria-expanded="false" aria-label="Tipps ansehen" title="Tipps ansehen" hidden>💡</button><button class="lesson-icon-btn" type="button" id="lessonClose" aria-label="Aufgabenbereich ausblenden" title="Aufgabenbereich ausblenden"><span class="lesson-close-glyph">×</span></button></header>
+          <header class="lesson-top"><button class="lesson-icon" type="button" data-lesson-action="catalog" aria-label="Alle Aufgaben anzeigen" title="Alle Aufgaben anzeigen">▤</button><div class="lesson-top-copy"><div class="lesson-eyebrow">Digitaltechnik entdecken</div><div class="lesson-header-progress" id="lessonHeaderProgress" aria-label="Lernfortschritt"></div></div><button class="lesson-icon-btn lesson-header-hint" type="button" id="lessonHeaderHint" aria-controls="lessonHintOverlay" aria-expanded="false" aria-label="Tipps ansehen" title="Tipps ansehen" hidden>💡</button><button class="lesson-icon-btn lesson-minimize-btn" type="button" id="lessonMinimize" aria-label="Aufgabenfenster minimieren" aria-expanded="true" aria-controls="lessonContent" title="Aufgabenfenster minimieren"><span id="lessonMinimizeGlyph" aria-hidden="true">−</span></button></header>
           <div class="lesson-scroll" id="lessonContent" aria-live="polite"></div>
-          <footer class="lesson-bottom" id="lessonFooter" hidden><small id="lessonFooterInfo">Deine freie Schaltung ist gesichert.</small><button class="lesson-exit" type="button" id="lessonExit" hidden>Zum freien Modus</button></footer>
         </section>
         <button class="lesson-hint-float" id="lessonHintFloat" type="button" aria-controls="lessonHintOverlay" aria-label="Tipps ansehen" aria-expanded="false" title="Tipps ansehen" hidden><span aria-hidden="true">💡</span><span id="lessonHintFloatLabel">Tipps ansehen</span></button>
         <section class="lesson-hint lesson-hint-overlay" id="lessonHintOverlay" aria-label="Tipps zur aktuellen Aufgabe" aria-live="polite" hidden></section>
@@ -1178,7 +1206,7 @@
         <div class="modal-backdrop confirm-backdrop" id="lessonResetModal" role="dialog" aria-modal="true" aria-labelledby="lessonResetTitle" aria-describedby="lessonResetMessage">
           <div class="modal confirm-modal">
             <h2 id="lessonResetTitle">Aufgabe neu starten?</h2>
-            <div class="confirm-warning"><span class="icon">!</span><span id="lessonResetMessage">Deine bisherige Schaltung in dieser Aufgabe wird zurückgesetzt. Bereits abgeschlossene andere Aufgaben und deine freie Schaltung bleiben erhalten.</span></div>
+            <div class="confirm-warning"><span class="icon">!</span><span id="lessonResetMessage">Deine aktuelle Schaltung in dieser Aufgabe wird zurückgesetzt. Bereits abgeschlossene Aufgaben und deine Schaltung im Sandbox Modus bleiben erhalten.</span></div>
             <div class="modal-actions">
               <button class="btn" id="lessonResetCancel" type="button">Abbrechen</button>
               <button class="btn danger-solid" id="lessonResetConfirm" type="button">Aufgabe neu starten</button>
@@ -1279,8 +1307,9 @@
   const LESSON_FREE_KEY='gatterlab-lessons-free-backup-v1';
   const LESSON_BOARDS_KEY='gatterlab-lessons-boards-v1';
   const LESSON_DONE_KEY='gatterlab-lessons-completed-v1';
+  const LESSON_LAST_KEY='gatterlab-lessons-last-open-v1';
   let lessonActiveId=null,lessonFreeBackup=null,lessonTaskBoards={},lessonCompleted=new Set();
-  let lessonResult=null,lessonResultFingerprint=null,lessonHintIndex=0,lessonPanelOpen=false,lessonShowCatalog=true,lessonIntroDismissed=new Set();
+  let lessonResult=null,lessonResultFingerprint=null,lessonHintIndex=0,lessonPanelOpen=false,lessonPanelMinimized=false,lessonShowCatalog=true,lessonIntroDismissed=new Set();
   try {
     lessonActiveId=localStorage.getItem(LESSON_ACTIVE_KEY)||null;
     const storedBoards=JSON.parse(localStorage.getItem(LESSON_BOARDS_KEY)||'{}');
@@ -1544,8 +1573,10 @@
     const target=activeBoardRef();
     target.nodes=nodes; target.wires=wires; target.nodeDrawOrder=nodeDrawOrder; target.wireDrawOrder=wireDrawOrder; target.camera={...camera};
   }
+  // Überall dieselbe Reihenfolge von Unterfunktionsports verwenden.
+  const compareModulePorts=(a,b)=>(Number(a.portOrder)||0)-(Number(b.portOrder)||0)||String(a.id).localeCompare(String(b.id));
   function modulePortNodes(def,type){
-    return (def?.nodes||[]).filter(node=>node.type===type).sort((a,b)=>(Number(a.portOrder)||0)-(Number(b.portOrder)||0)||String(a.id).localeCompare(String(b.id)));
+    return (def?.nodes||[]).filter(node=>node.type===type).sort(compareModulePorts);
   }
   function moduleInterface(def){ return {inputs:modulePortNodes(def,'MODULE_INPUT'),outputs:modulePortNodes(def,'MODULE_OUTPUT')}; }
   function moduleDependsOn(moduleId,targetId,visited=new Set()){
@@ -1657,12 +1688,25 @@
   // Vor sämtlichen Pin-, Kabel- und Objektgesten schließen, auch wenn deren
   // eigene Pointer-Handler später die Weitergabe des Ereignisses stoppen.
   scene.addEventListener('pointerdown',()=>closeAllFloatingMenus(),true);
+  // Unterfunktionen sind in Übungen nur bei ausdrücklicher Freigabe durch
+  // die jeweilige Aufgabendefinition möglich. In der Sandbox bleibt alles frei.
+  function lessonAllowsSubfunctions(){
+    return !lessonActiveId || lessonTask(lessonActiveId)?.allowSubfunctions===true;
+  }
+  function denyUnneededSubfunction(){
+    if(lessonAllowsSubfunctions())return false;
+    showToast('In dieser Aufgabe werden keine Unterfunktionen benötigt.');
+    return true;
+  }
   function openBoardTabContextMenu(boardId,clientX,clientY){
     if(moduleSimulation)return;
     closeObjectContextMenu();closeWireContextMenu();closeMinimapContextMenu();
     if(boardId!=='main'&&!moduleDefinitions.some(def=>def.id===boardId))return;
     const menu=$('boardTabContextMenu');
     const deleteButton=menu.querySelector('[data-board-tab-action="delete"]');
+    const duplicateButton=menu.querySelector('[data-board-tab-action="duplicate"]');
+    duplicateButton.hidden=!lessonAllowsSubfunctions();
+    duplicateButton.disabled=!lessonAllowsSubfunctions();
     boardTabContextId=boardId;
     deleteButton.disabled=boardId==='main';
     menu.querySelector('[data-board-tab-action="simulate-default"]').hidden=boardId==='main';
@@ -1672,10 +1716,12 @@
   function renderBoardTabs(){
     const tabs=$('boardTabs'); if(!tabs) return;
     tabs.classList.toggle('has-modules',moduleDefinitions.length>0);
+    tabs.classList.toggle('no-subfunctions',!lessonAllowsSubfunctions());
     if(boardTabContextId!==null)closeBoardTabContextMenu();
     const items=[{id:'main',name:projectName,isMain:true},...moduleDefinitions.map(def=>({id:def.id,name:def.name,isMain:false}))];
     tabs.innerHTML=items.map(item=>`<button type="button" draggable="${item.isMain||moduleSimulation?'false':'true'}" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}${moduleSimulation&&item.id===moduleSimulation.moduleId?' simulating':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" ${item.isMain?'':'title="Doppelklicken zum Umbenennen"'}>${esc(item.name)}</span>${item.isMain?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
-    $('addModuleBtn').disabled=!!moduleSimulation;
+    $('addModuleBtn').hidden=!lessonAllowsSubfunctions();
+    $('addModuleBtn').disabled=!!moduleSimulation||!lessonAllowsSubfunctions();
   }
   function paletteTypeIconSvg(item){
     const type=String(item?.type||'');
@@ -2000,6 +2046,7 @@
     });
   }
   function createModule(){
+    if(denyUnneededSubfunction())return false;
     if(pendingPaste)cancelPendingPaste();
     saveActiveBoardState();
     const existingNames=new Set([projectName,...moduleDefinitions.map(def=>def.name)].map(name=>String(name).trim().toLocaleLowerCase('de')));
@@ -2011,6 +2058,7 @@
     refreshCustomModuleTypes();switchBoard(id,true);showToast('Unterfunktion erstellt');
   }
   function duplicateBoardAsModule(sourceBoardId){
+    if(denyUnneededSubfunction())return false;
     if(pendingPaste)cancelPendingPaste();
     if(moduleDefinitions.length>=100){showToast('Maximal 100 Unterfunktionen können angelegt werden');return false;}
     saveActiveBoardState();
@@ -2054,7 +2102,6 @@
     const boards=[{name:'Hauptfunktion',board:mainBoardState},...moduleDefinitions.map(def=>({name:def.name,board:def}))];
     return boards.map(({name,board})=>({name,count:(board.nodes||[]).filter(node=>node.moduleId===moduleId).length})).filter(row=>row.count>0);
   }
-  function moduleUsageCount(moduleId){return moduleUsageRows(moduleId).reduce((sum,row)=>sum+row.count,0);}
   function removeModuleInstancesFromBoard(board,moduleId){
     if(!board)return false;
     const removedNodeIds=new Set((board.nodes||[]).filter(node=>node.moduleId===moduleId).map(node=>node.id));
@@ -2157,7 +2204,6 @@
     if(commit && next!==safeBoardName(raw))showToast(`Name bereits vergeben – stattdessen „${next}“ verwendet`);
     return next;
   }
-  function renameActiveBoard(value,commit=false){return renameBoardById(activeModuleId||'main',value,commit);}
   function beginBoardTabRename(tab,label){
     if(!tab||!label||tab.querySelector('.board-tab-rename-input'))return;
     const boardId=tab.dataset.boardId;
@@ -2481,6 +2527,7 @@
       followPaletteLedPicker(clientX,clientY);
     }
     palettePlacementLayer.innerHTML=nodeMarkup(palettePreviewNode(clientX,clientY),true);
+    if(!gesture||gesture.kind==='place')setInsertWirePreview(shiftKeyHeld?wireAtClientPoint(clientX,clientY):null);
   }
 
   function showToast(message) {
@@ -2509,23 +2556,6 @@
       }
     }
     return true;
-  }
-  function removeWireFromSelection(id) {
-    const wire=wires.find(item=>item.id===id);
-    selectedWires.delete(id);
-    wireEndpointExpandedIds.delete(id);
-    if (!wire) return;
-    for (const endpointId of [wire.from.id,wire.to.id]) {
-      const stillRequired=[...selectedWires].some(selectedId=>{
-        if (!wireEndpointExpandedIds.has(selectedId)) return false;
-        const selectedWire=wires.find(item=>item.id===selectedId);
-        return selectedWire && (selectedWire.from.id===endpointId || selectedWire.to.id===endpointId);
-      });
-      if (!stillRequired && wireImpliedNodeIds.has(endpointId)) {
-        selectedNodes.delete(endpointId);
-        wireImpliedNodeIds.delete(endpointId);
-      }
-    }
   }
   function toggleWireAndEndpointsByShift(id){
     const wire=wires.find(item=>item.id===id);if(!wire)return false;
@@ -2891,10 +2921,6 @@
     if (n.type==='BUS_COMBINER' && direction==='in') return {x:n.x-58,y:n.y+channelPortOffset(normalizeBusWidth(n.busWidth),index)};
     if (direction === 'out') return { x: n.x + 58, y: n.y };
     return { x: n.x - 58, y: n.y + inputOffset(m.inputs, index) };
-  }
-  function pathBetween(a, b) {
-    const mid = snap(a.x + (b.x - a.x) * .5);
-    return `M ${a.x} ${a.y} H ${mid} V ${b.y} H ${b.x}`;
   }
   function segmentHitsRect(a,b,r) {
     const pad=0.001;
@@ -3330,13 +3356,12 @@
     const incomingByPort=new Map();
     for(const wire of graphWires){const key=`${wire.to.id}:${wire.to.port}`;if(!incomingByPort.has(key))incomingByPort.set(key,wire);}
     const inputWire=(id,port)=>incomingByPort.get(`${id}:${port}`);
-    const inputInterfaces=graphNodes.filter(node=>node.type==='MODULE_INPUT').sort((a,b)=>(Number(a.portOrder)||0)-(Number(b.portOrder)||0)||String(a.id).localeCompare(String(b.id)));
+    const inputInterfaces=graphNodes.filter(node=>node.type==='MODULE_INPUT').sort(compareModulePorts);
     const inputIndex=new Map(inputInterfaces.map((node,index)=>[node.id,index]));
-    const outputInterfaces=graphNodes.filter(node=>node.type==='MODULE_OUTPUT').sort((a,b)=>(Number(a.portOrder)||0)-(Number(b.portOrder)||0)||String(a.id).localeCompare(String(b.id)));
-    const cloneRuntime=value=>value&&typeof value==='object'?JSON.parse(JSON.stringify(value)):{};
+    const outputInterfaces=graphNodes.filter(node=>node.type==='MODULE_OUTPUT').sort(compareModulePorts);
+    const cloneRuntime=value=>value&&typeof value==='object'?cloneJson(value):{};
     const valueKey=(id,port=0)=>`${id}:${port}`;
     const readMap=(map,id,port=0)=>map.has(valueKey(id,port))?map.get(valueKey(id,port)):false;
-    const isSequentialSource=node=>meta(node).kind==='flipflop'||node.type==='BUFFER';
     const isCombinationalNode=node=>{
       const kind=meta(node).kind;
       return (kind==='gate'&&node.type!=='BUFFER')||kind==='bus-combiner'||kind==='bus-splitter'||kind==='mux'||kind==='demux'||kind==='custom';
@@ -3430,7 +3455,7 @@
       const runtimeNodes=makeRuntimeNodes(instance,definition);
       const result=evaluateGraph(runtimeNodes,definition.wires,inputValues,[...moduleStack,definition.id],{advanceState:advanceModuleState});
       if(persist){saveRuntimeNodes(instance,runtimeNodes);instance.moduleFeedbackDiagnostics=result.feedback||[];}
-      const outputs=definition.nodes.filter(node=>node.type==='MODULE_OUTPUT').sort((a,b)=>(Number(a.portOrder)||0)-(Number(b.portOrder)||0)||String(a.id).localeCompare(String(b.id))).map((template,index)=>{
+      const outputs=definition.nodes.filter(node=>node.type==='MODULE_OUTPUT').sort(compareModulePorts).map((template,index)=>{
         const runtimeNode=runtimeNodes.find(node=>node.id===template.id);
         return runtimeNode?decodeLogicSignal(runtimeNode.value===undefined?false:runtimeNode.value):(result.outputs[index]===undefined?false:result.outputs[index]);
       });
@@ -4111,7 +4136,7 @@
         }
       }
       // Senken berechnen, nachdem alle Quellen und kombinatorischen Komponenten stehen.
-      const read=(id,port=0)=>readMap(values,id,port),sinkModuleCache=new Map();
+      const read=(id,port=0)=>readMap(values,id,port);
       for(const node of graphNodes){
         const m=meta(node);
         if(m.kind!=='output')continue;
@@ -6017,7 +6042,7 @@
     const next=normalizeMuxInputs(width),targets=(targetNodes||[]).filter(node=>node?.type==='MUX');
     const changed=targets.filter(node=>normalizeMuxInputs(node.muxInputs)!==next);if(!changed.length)return;
     changed.forEach(node=>{
-      const old=normalizeMuxInputs(node.muxInputs),oldBits=selectBitCount(old),newBits=selectBitCount(next);
+      const old=normalizeMuxInputs(node.muxInputs),newBits=selectBitCount(next);
       wires.forEach(wire=>{
         if(wire.to.id!==node.id)return;
         if(wire.to.port>=old){const selectIndex=wire.to.port-old;wire._nextPort=selectIndex<newBits?next+selectIndex:-1;}
@@ -6062,6 +6087,7 @@
   }
 
   function removeNode(id){
+    if(lessonFixedNode(id)){lessonFixedFeedback();return;}
     const node=byId(id);if(!node)return;
     let previousInputs=[],previousOutputs=[],owner=null;
     if(activeModuleId&&(node.type==='MODULE_INPUT'||node.type==='MODULE_OUTPUT')){
@@ -6077,12 +6103,15 @@
   function deleteSelection() {
     if (pendingPaste) { cancelPendingPaste(); return; }
     if (selectionEmpty()) return;
-    const removeIds = new Set(selectedNodes);
+    const fixedSelected=[...selectedNodes].some(id=>lessonFixedNode(id));
+    const removeIds = new Set([...selectedNodes].filter(id=>!lessonFixedNode(id)));
     nodes.filter(n => removeIds.has(n.id)).forEach(n => removeNode(n.id));
     wires = wires.filter(w => !selectedWires.has(w.id));
     const remainingWireIds=new Set(wires.map(w=>w.id));
     wireDrawOrder=wireDrawOrder.filter(wireId=>remainingWireIds.has(wireId));
-    clearSelection(); armedFrom = null; render(); showToast('Auswahl gelöscht');
+    clearSelection(); armedFrom = null; render();
+    if(fixedSelected)lessonFixedFeedback();
+    else showToast('Auswahl gelöscht');
   }
   function buildClipboard() {
     if (selectionEmpty()) return null;
@@ -6741,6 +6770,33 @@
     licht:['INPUT','OUTPUT'],not:['NOT'],and:['AND'],or:['OR'],
     nand:[],alarm:[],xor:[],halbaddierer:['XOR']
   };
+  function lessonFixedNode(id){
+    if(!lessonActiveId || activeModuleId || typeof id!=='string')return false;
+    const task=lessonTask(lessonActiveId);
+    if(!task)return false;
+    return task.inputs.some((_,index)=>id===`lesson-${task.id}-in-${index}`) ||
+           task.outputs.some((_,index)=>id===`lesson-${task.id}-out-${index}`);
+  }
+  function lessonFixedFeedback(){showToast('Diese Ein- und Ausgänge gehören zur Aufgabe und können nicht verschoben oder gelöscht werden.');}
+  function syncModeMenu(){
+    const inLesson=!!lessonActiveId;
+    for(const [id,checked] of [['menuModeSandbox',!inLesson],['menuModeLessons',inLesson]]){
+      const el=$(id);if(!el)continue;
+      el.setAttribute('aria-checked',String(checked));
+      el.querySelector('.menu-check').textContent=checked?'✓':'';
+    }
+  }
+  function lessonSwitchToTasks(){
+    if(lessonActiveId){lessonShowCatalog=true;lessonPanelMinimized=false;lessonPanelVisibility(true);return;}
+    let last=null;
+    try{last=localStorage.getItem(LESSON_LAST_KEY);}catch(_){}
+    const task=LESSON_TASKS.find(t=>t.id===last&&lessonCanStart(t.id))||LESSON_TASKS[0];
+    lessonStart(task.id);
+    lessonShowCatalog=true;
+    lessonPanelMinimized=false;
+    lessonPanelVisibility(true);
+    $('lessonContent').scrollTop=0;
+  }
   function lessonAllowedPaletteTypes(){
     if(!lessonActiveId)return null;
     const index=LESSON_TASKS.findIndex(task=>task.id===lessonActiveId);
@@ -6806,14 +6862,41 @@
     const outputsMatch=task.outputs.every((label,index)=>parts.some(n=>n.id===`lesson-${task.id}-out-${index}`&&n.type==='OUTPUT'&&n.label===label&&(n.x===snap(255)||n.x===snap(555))&&n.y===snap((index-(task.outputs.length-1)/2)*outputSpacing)));
     return inputsMatch&&outputsMatch;
   }
+  function animateLessonHintAccess(button,visible){
+    // Den Button für die Ausblendanimation kurz im DOM behalten; er darf
+    // währenddessen weder angeklickt noch per Tab fokussiert werden.
+    if(button._lessonWantedVisible===visible)return;
+    button._lessonWantedVisible=visible;
+    if(button._lessonHideTimer){clearTimeout(button._lessonHideTimer);button._lessonHideTimer=null;}
+    if(visible){
+      button.hidden=false;
+      button.removeAttribute('aria-hidden');
+      button.tabIndex=0;
+      // Nach dem Entfernen von [hidden] den Ausgangszustand berechnen,
+      // damit die Skalierung auch beim allerersten Öffnen wirklich animiert.
+      void button.offsetWidth;
+      if(button._lessonWantedVisible)button.classList.add('is-visible');
+    }else{
+      button.classList.remove('is-visible');
+      button.setAttribute('aria-hidden','true');
+      button.tabIndex=-1;
+      if(document.activeElement===button)button.blur();
+      button._lessonHideTimer=setTimeout(()=>{
+        if(!button._lessonWantedVisible)button.hidden=true;
+        button._lessonHideTimer=null;
+      },240);
+    }
+  }
   function syncLessonHintButtons(){
-    const active=!!lessonTask(lessonActiveId);
+    // Eine zuletzt bearbeitete Aufgabe bleibt auch in der Übersicht geladen.
+    // Der Tipps-Zugang darf daher NICHT nur von lessonActiveId abhängen.
+    const active=lessonPanelOpen&&!lessonShowCatalog&&!!lessonTask(lessonActiveId);
     // Auf sehr schmalen Arbeitsflächen liegt der Aufgabenkasten über dem
     // rechten oberen Eck. Der Tipp ist dann im Aufgabenkopf erreichbar.
-    const compact=lessonPanelOpen&&stage.clientWidth<520;
-    $('lessonHintFloat').hidden=!active||compact;
-    $('lessonHeaderHint').hidden=!active||!compact;
-    const showingHint=lessonHintIndex>0;
+    const compact=stage.clientWidth<520;
+    animateLessonHintAccess($('lessonHintFloat'),active&&!compact);
+    animateLessonHintAccess($('lessonHeaderHint'),active&&compact);
+    const showingHint=active&&lessonHintIndex>0;
     const toggleLabel=showingHint?'Tipps ausblenden':'Tipps ansehen';
     $('lessonHintFloatLabel').textContent=toggleLabel;
     $('lessonHintFloat').title=toggleLabel;
@@ -6823,41 +6906,79 @@
     $('lessonHeaderHint').title=toggleLabel;
     $('lessonHeaderHint').setAttribute('aria-label',toggleLabel);
     $('lessonHeaderHint').setAttribute('aria-expanded',String(showingHint));
-    if(!active)$('lessonHintOverlay').hidden=true;
+  }
+  function animateLessonHintOverlay(overlay,visible){
+    // Bei einem schnellen Öffnen/Schließen die laufende Ausblendung abbrechen.
+    // Während des Verschwindens bleibt das Fenster für die Animation erhalten,
+    // ist aber nicht mehr per Tastatur, Zeiger oder Screenreader bedienbar.
+    if(overlay._lessonWantedVisible===visible)return;
+    overlay._lessonWantedVisible=visible;
+    if(overlay._lessonHideTimer){clearTimeout(overlay._lessonHideTimer);overlay._lessonHideTimer=null;}
+    if(visible){
+      overlay.hidden=false;
+      overlay.removeAttribute('aria-hidden');
+      overlay.inert=false;
+      void overlay.offsetWidth;
+      if(overlay._lessonWantedVisible)overlay.classList.add('is-visible');
+    }else{
+      overlay.classList.remove('is-visible');
+      overlay.setAttribute('aria-hidden','true');
+      overlay.inert=true;
+      if(overlay.contains(document.activeElement))document.activeElement.blur();
+      overlay._lessonHideTimer=setTimeout(()=>{
+        if(!overlay._lessonWantedVisible){overlay.hidden=true;overlay.innerHTML='';}
+        overlay._lessonHideTimer=null;
+      },250);
+    }
   }
   function renderLessonHintOverlay(){
     const task=lessonTask(lessonActiveId),overlay=$('lessonHintOverlay');
     const hints=task?lessonHints(task):[];
-    const visible=!!task&&lessonHintIndex>0;
-    overlay.hidden=!visible;
+    const visible=!!task&&lessonPanelOpen&&!lessonShowCatalog&&lessonHintIndex>0;
     if(visible){
       const index=Math.min(lessonHintIndex,hints.length);
       overlay.setAttribute('aria-label',`Tipps zu ${task.title}`);
       overlay.innerHTML=`<div class="lesson-hint-head"><strong>Hinweis ${index} von ${hints.length}</strong><div class="lesson-hint-nav"><button type="button" data-lesson-hint-action="prev" aria-label="Vorheriger Hinweis" title="Vorheriger Hinweis" ${index===1?'disabled':''}>‹</button><button type="button" data-lesson-hint-action="next" aria-label="Nächster Hinweis" title="Nächster Hinweis" ${index===hints.length?'disabled':''}>›</button></div></div><p class="lesson-hint-text">${esc(hints[index-1])}</p>`;
-    }else overlay.innerHTML='';
+    }
+    animateLessonHintOverlay(overlay,visible);
     syncLessonHintButtons();
   }
   function lessonRevealHint(){
-    if(!lessonTask(lessonActiveId))return;
+    if(!lessonPanelOpen||lessonShowCatalog||!lessonTask(lessonActiveId))return;
     lessonHintIndex=lessonHintIndex>0?0:1;
-    if(lessonHintIndex&&lessonShowCatalog){
-      lessonShowCatalog=false;
-      if(lessonPanelOpen)renderLessonPanel();
-    }
     renderLessonHintOverlay();
+  }
+  function syncLessonPanelMinimized(){
+    const panel=$('lessonPanel'),content=$('lessonContent'),header=panel.querySelector('.lesson-top');
+    // Die echte Kopfzeilenhöhe statt eines Schätzwerts verwenden. So gibt es
+    // auch bei geänderter Fensterbreite keinen Versatz und keinen Endsprung.
+    if(!panel.hidden){
+      const style=getComputedStyle(panel);
+      const borders=(parseFloat(style.borderTopWidth)||0)+(parseFloat(style.borderBottomWidth)||0);
+      panel.style.setProperty('--lesson-minimized-height',`${Math.ceil(header.getBoundingClientRect().height+borders)}px`);
+    }
+    panel.classList.toggle('is-minimized',lessonPanelMinimized);
+    content.setAttribute('aria-hidden',String(lessonPanelMinimized));
+    content.toggleAttribute('inert',lessonPanelMinimized);
+    $('lessonMinimize').setAttribute('aria-expanded',String(!lessonPanelMinimized));
+    const label=lessonPanelMinimized?'Aufgabenfenster ausklappen':'Aufgabenfenster minimieren';
+    $('lessonMinimize').title=label;
+    $('lessonMinimize').setAttribute('aria-label',label);
+    $('lessonMinimizeGlyph').textContent=lessonPanelMinimized?'▢':'−';
   }
   function lessonPanelVisibility(open){
     lessonPanelOpen=!!open;
     $('lessonPanel').hidden=!lessonPanelOpen;
-    $('lessonLaunch').classList.toggle('active',lessonPanelOpen||!!lessonActiveId);
-    $('lessonLaunch').setAttribute('aria-expanded',String(lessonPanelOpen));
+    syncLessonPanelMinimized();
+    syncModeMenu();
     if(lessonPanelOpen)renderLessonPanel();
     else syncLessonHintButtons();
   }
   function lessonStart(id){
     const task=lessonTask(id);if(!task)return;
     if(lessonActiveId===id){
-      lessonShowCatalog=false;lessonPanelVisibility(true);
+      try{localStorage.setItem(LESSON_LAST_KEY,id);}catch(_){}
+      lessonShowCatalog=false;lessonPanelMinimized=false;lessonPanelVisibility(true);
       $('lessonContent').scrollTop=0;
       return;
     }
@@ -6871,7 +6992,7 @@
     }else saveLocal(false,true);
     cancelActiveGesture();clearPalettePlacement();
     lessonActiveId=task.id;lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;lessonShowCatalog=false;
-    try{localStorage.setItem(LESSON_ACTIVE_KEY,task.id);}catch(_){}
+    try{localStorage.setItem(LESSON_ACTIVE_KEY,task.id);localStorage.setItem(LESSON_LAST_KEY,task.id);}catch(_){}
     undoHistory=[];undoIndex=-1;
     if($('paletteSearch'))$('paletteSearch').value='';
     const savedBoard=lessonTaskBoards[task.id];
@@ -6894,6 +7015,7 @@
     lessonFreeBackup=null;
     undoHistory=[];undoIndex=-1;applyConfig(original);saveLocal(true,false);
     lessonPanelVisibility(false);
+    syncModeMenu();
     showToast('Freie Schaltung wiederhergestellt – Übungsfortschritt bleibt erhalten');
   }
   function lessonReset(){
@@ -6961,9 +7083,6 @@
     if(!lessonPanelOpen)return;
     renderLessonHintOverlay();
     const content=$('lessonContent'),task=lessonTask(lessonActiveId);
-    $('lessonFooter').hidden=!task;
-    $('lessonExit').hidden=!task;
-    $('lessonFooterInfo').textContent=task?'Deine freie Schaltung ist gesichert.':'';
     // Historische Übungsstände können aus der frei anwählbaren V121 stammen.
     // Der Balken zeigt nur die lückenlos hintereinander erreichten Schritte.
     const firstOpen=LESSON_TASKS.findIndex(t=>!lessonCompleted.has(t.id));
@@ -6981,9 +7100,14 @@
     content.innerHTML=`<div class="lesson-kicker">${esc(unit?.name||'Übung')} · Aufgabe ${index+1} von ${LESSON_TASKS.length}</div><div class="lesson-name-row"><h2 class="lesson-name">${esc(task.title)} ${lessonCompleted.has(task.id)?'<span style="color:#72deaa;font-size:14px" title="Schon einmal erfolgreich gelöst">✓</span>':''}</h2><button class="lesson-icon-btn lesson-reset-icon" type="button" data-lesson-action="reset" aria-label="Aufgabe neu starten" title="Aufgabe neu starten">↺</button></div>${intro}<p class="lesson-objective">${esc(task.goal)}</p><div class="lesson-actions"><button class="lesson-action primary" type="button" data-lesson-action="check">✓ Schaltung prüfen</button>${nextAction}</div>${result}`;
   }
   function initLessonUI(){
-    $('lessonLaunch').addEventListener('click',()=>lessonPanelVisibility(!lessonPanelOpen));
-    $('lessonClose').addEventListener('click',()=>lessonPanelVisibility(false));
-    $('lessonExit').addEventListener('click',lessonExit);
+    $('lessonMinimize').addEventListener('click',()=>{
+      lessonPanelMinimized=!lessonPanelMinimized;
+      syncLessonPanelMinimized();
+    });
+    // Responsive Kopfzeile (z. B. Tipp-Icon auf schmalen Bildschirmen).
+    if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>{
+      if(lessonPanelOpen)syncLessonPanelMinimized();
+    }).observe($('lessonPanel').querySelector('.lesson-top'));
     for(const id of ['lessonHintFloat','lessonHeaderHint']){
       const button=$(id);
       button.addEventListener('pointerdown',event=>event.stopPropagation());
@@ -7019,8 +7143,11 @@
     if(lessonActiveId&&!lessonTask(lessonActiveId)){
       lessonActiveId=null;try{localStorage.removeItem(LESSON_ACTIVE_KEY);}catch(_){}
     }
-    if(lessonActiveId){lessonShowCatalog=false;lessonPanelVisibility(true);}
-    else syncLessonHintButtons();
+    if(lessonActiveId){
+      try{localStorage.setItem(LESSON_LAST_KEY,lessonActiveId);}catch(_){}
+      lessonShowCatalog=true;lessonPanelVisibility(true);
+    }
+    else{syncLessonHintButtons();syncModeMenu();}
   }
 
   function encodeConfig(config) {
@@ -7289,6 +7416,8 @@
       case 'paste': pasteSelection(); break;
       case 'duplicate': duplicateSelection(); break;
       case 'delete': deleteSelection(); break;
+      case 'modeLessons': lessonSwitchToTasks(); break;
+      case 'modeSandbox': if(lessonActiveId)lessonExit(); else lessonPanelVisibility(false); break;
       case 'grid': setGridVisible(!gridVisible); break;
       case 'zoomIn': zoomBy(1,!!(event.shiftKey||shiftKeyHeld)); break;
       case 'zoomOut': zoomBy(-1,!!(event.shiftKey||shiftKeyHeld)); break;
@@ -7329,14 +7458,25 @@
       if(accept && !accept(wireId)) continue;
       let matrix; try{matrix=path.getScreenCTM();}catch(_){matrix=null;}
       if(!matrix) continue;
-      const total=path.getTotalLength(), steps=Math.max(2,Math.ceil(total/8));
-      for(let i=0;i<=steps;i++){
-        const point=path.getPointAtLength(total*i/steps);
-        const screenPoint=scene.createSVGPoint();screenPoint.x=point.x;screenPoint.y=point.y;
-        const transformed=screenPoint.matrixTransform(matrix);
-        const distance=Math.hypot(clientX-transformed.x,clientY-transformed.y);
-        if(distance<bestDistance){bestDistance=distance;best=wireId;}
-      }
+      // Kann ein Kabel wegen einer Kollision nicht geroutet werden, erhält
+      // sein SVG-Pfad d="" und stattdessen ein Ausrufezeichen. In Chromium
+      // wirft getPointAtLength() auf solchen Pfaden einen InvalidStateError.
+      // Ein einziges unroutbares Kabel darf nicht die Trefferauswertung für
+      // sämtliche anderen, korrekt gezeichneten Leitungen abbrechen.
+      if(!path.getAttribute('d')?.trim())continue;
+      let total;
+      try{total=path.getTotalLength();}catch(_){continue;}
+      if(!Number.isFinite(total)||total<=0)continue;
+      const steps=Math.max(2,Math.ceil(total/8));
+      try{
+        for(let i=0;i<=steps;i++){
+          const point=path.getPointAtLength(total*i/steps);
+          const screenPoint=scene.createSVGPoint();screenPoint.x=point.x;screenPoint.y=point.y;
+          const transformed=screenPoint.matrixTransform(matrix);
+          const distance=Math.hypot(clientX-transformed.x,clientY-transformed.y);
+          if(distance<bestDistance){bestDistance=distance;best=wireId;}
+        }
+      }catch(_){continue;}
     }
     return best;
   }
@@ -7375,6 +7515,19 @@
     return record;
   }
 
+  // Ersetzt eine Leitung durch zwei Verbindungen über dasselbe Bauteil.
+  // Die Auswahl inklusive der implizit mitmarkierten Endpunkte bleibt erhalten.
+  function spliceWireThroughNode(wire,node,inputPort){
+    const incoming={id:uid('w'),from:{...wire.from},to:{id:node.id,port:inputPort}};
+    const outgoing={id:uid('w'),from:{id:node.id,port:0},to:{...wire.to}};
+    wires=[...wires.filter(item=>item.id!==wire.id),incoming,outgoing];
+    wireDrawOrder=wireDrawOrder.filter(id=>id!==wire.id);
+    wireDrawOrder.push(incoming.id,outgoing.id);
+    clearSelection();selectedNodes.add(node.id);
+    addWireAndEndpointsToSelection(incoming.id);
+    addWireAndEndpointsToSelection(outgoing.id);
+  }
+
   function insertNodeIntoWire(type,wireId,clientX,clientY,draft=null) {
     const wire=wires.find(item=>item.id===wireId);
     if(!wire||!TYPES[type]) return false;
@@ -7389,13 +7542,8 @@
     const firstValid=canConnectPorts(wire.from,{id:node.id,port:0});
     const secondValid=canConnectPorts({id:node.id,port:0},wire.to);
     if(!firstValid||!secondValid){nodes.pop();showToast('Bauteil kann nicht in diese Verbindung eingesetzt werden: Signalbreite oder Pin-Typ passt nicht');return false;}
-    const remaining=wires.filter(item=>item.id!==wire.id);
-    const incoming={id:uid('w'),from:{...wire.from},to:{id:node.id,port:0}};
-    const outgoing={id:uid('w'),from:{id:node.id,port:0},to:{...wire.to}};
-    wires=[...remaining,incoming,outgoing];
-    wireDrawOrder=wireDrawOrder.filter(id=>id!==wire.id);wireDrawOrder.push(incoming.id,outgoing.id);
+    spliceWireThroughNode(wire,node,0);
     nodeDrawOrder.push(node.id);
-    clearSelection();selectedNodes.add(node.id);addWireAndEndpointsToSelection(incoming.id);addWireAndEndpointsToSelection(outgoing.id);
     setInsertWirePreview(null);wireRouteCache.clear();render();showToast(`${TYPES[type].label} in Kabel eingesetzt`);return true;
   }
   function existingNodeInsertInputPort(node,wire) {
@@ -7421,12 +7569,7 @@
       return false;
     }
     node.x=candidate.x;node.y=candidate.y;
-    const remaining=wires.filter(item=>item.id!==wire.id);
-    const incoming={id:uid('w'),from:{...wire.from},to:{id:node.id,port:inputPort}};
-    const outgoing={id:uid('w'),from:{id:node.id,port:0},to:{...wire.to}};
-    wires=[...remaining,incoming,outgoing];
-    wireDrawOrder=wireDrawOrder.filter(id=>id!==wire.id);wireDrawOrder.push(incoming.id,outgoing.id);
-    clearSelection();selectedNodes.add(node.id);addWireAndEndpointsToSelection(incoming.id);addWireAndEndpointsToSelection(outgoing.id);
+    spliceWireThroughNode(wire,node,inputPort);
     collisionPreviewNodeIds.clear();setInsertWirePreview(null);wireRouteCache.clear();render();
     showToast(`${TYPES[node.type].label} in bestehendes Kabel eingesetzt`);return true;
   }
@@ -8029,6 +8172,10 @@
     persistMinimapLayout();
     saveLocal(false,true);
   }
+  function schedulePanelLayoutFinish(){
+    const activeTransition=panelLayoutTransition;
+    window.setTimeout(()=>{if(panelLayoutTransition===activeTransition)finishPanelLayoutTransition();},360);
+  }
   function applyPanelVisibility(persist=true){
     workspace.classList.toggle('left-collapsed',!panelVisibility.left);
     workspace.classList.toggle('left-narrow',panelVisibility.left&&leftPanelMode==='narrow');
@@ -8055,8 +8202,7 @@
     }
     panelVisibility[side]=!panelVisibility[side];
     applyPanelVisibility(true);
-    const activeTransition=panelLayoutTransition;
-    window.setTimeout(()=>{if(panelLayoutTransition===activeTransition)finishPanelLayoutTransition();},360);
+    schedulePanelLayoutFinish();
   }
   // Ziehen am linken Klappgriff: flüssige Breite mit drei Rastpunkten. Ein
   // kurzer Klick verhält sich weiterhin wie der bisherige Auf-/Zuklappknopf.
@@ -8128,8 +8274,7 @@
       workspace.classList.remove('left-resizing');
       workspace.style.removeProperty('--left-panel-width');
     });
-    const activeTransition=panelLayoutTransition;
-    window.setTimeout(()=>{if(panelLayoutTransition===activeTransition)finishPanelLayoutTransition();},360);
+    schedulePanelLayoutFinish();
   }
   leftPanelHandle.addEventListener('pointerup',finishLeftPanelDrag);
   leftPanelHandle.addEventListener('pointercancel',finishLeftPanelDrag);
@@ -8153,6 +8298,41 @@
   $('shareBtn').addEventListener('click', shareConfig);
   $('copyShare').addEventListener('click', () => copyText($('shareUrl').value));
   const PATCH_LOG = [
+    {version:'V142',title:'Kabeleinfügung bei unroutbaren Verbindungen repariert',items:[
+      'Nicht darstellbare Kabel mit Ausrufezeichen unterbrechen die SVG-Treffersuche nicht länger. Leere und ungültige Pfade werden übersprungen, während normale Kabel weiterhin per Shift-Klick und Shift-Ziehen zwischengeschaltet werden können.'
+    ]},
+    {version:'V141',title:'Codepflege ohne neue Funktionen',items:[
+      'Entfernte ungenutzte Funktionen und Variablen nach statischer Referenzprüfung.',
+      'Gemeinsame Port-Sortierung und gemeinsames Auftrennen von Leitungen beim Zwischenschalten von Bauteilen.',
+      'Wiederverwendete JSON-Kopierlogik und vereinheitlichte die Abschlussplanung der Seitenleisten-Animationen.'
+    ]},
+    {version:'V140',title:'Zentrierte Pop-Animation für Tipps und Hinweisfenster',items:[
+      'Der Tipps-Knopf erscheint und verschwindet durch eine gleichmäßige Skalierung um seine Mitte, ohne nach oben zu wandern.',
+      'Das Hinweisfenster verwendet dieselbe zentrierte Ein- und Ausblendanimation. Auch beim Zurückwechseln zur Aufgabenübersicht wird es erst nach der Animation entfernt.'
+    ]},
+    {version:'V139',title:'Aufgabenbezogene Tipps und ausgeblendeter Tab-Trenner',items:[
+      'Der Tipps-Knopf erscheint mit einer dezenten Einblendanimation ausschließlich in einer geöffneten Aufgabe und verschwindet beim Wechsel zur Aufgabenübersicht wieder. Die Hinweise selbst schließen in der Übersicht ebenfalls.',
+      'Ohne in der Aufgabe erlaubte Unterfunktionen entfällt auch die senkrechte Trennlinie hinter dem Hauptschaltkreis-Tab. In der Sandbox bleibt sie bestehen.'
+    ]},
+    {version:'V138',title:'Aufgaben ohne Schließen-X und mit begrenzten Unterfunktionen',items:[
+      'Das Schließen-X im Aufgabenfenster wurde samt Ereignisbehandlung entfernt. Das Fenster lässt sich über den verbleibenden Knopf minimieren und maximieren; für den Moduswechsel bleibt das Modusmenü zuständig.',
+      'In Aufgaben ohne Unterfunktionsbedarf verschwindet der Erstellen-Knopf, ebenso die Aktion „Als Unterfunktion duplizieren“ im Tab-Kontextmenü. Beide Erstellungswege sind auch intern gesperrt; in der Sandbox funktionieren sie unverändert.',
+      'Beim Aufziehen der linken Bauteilleiste bleibt die vertikale Scrollbar schon während der Griffbewegung sichtbar, auch wenn die Leiste zuvor vollständig eingeklappt war. Eine stabile Scrollbar-Breite verhindert den Sprung beim Loslassen.'
+    ]},
+    {version:'V137',title:'Ruhiges Aufgabenfenster und sofortige Shift-Einfügung',items:[
+      'Im Modusmenü heißen die beiden Einträge kurz „Sandbox“ und „Aufgaben“.',
+      'Das Aufgabenfenster minimiert und maximiert sich nun fließend; die gesamte Kopfzeile einschließlich Fortschrittsbalken bleibt dabei positionsstabil.',
+      'Die Sicherheitsfrage vor dem Neustart nennt ausdrücklich die aktuelle Aufgabe und den Sandbox-Modus.',
+      'Bei aktiver Klick-Platzierung markiert schon das Drücken von Shift ein darunterliegendes Kabel als Einfügeziel – ohne erneute Mausbewegung; Loslassen hebt die Markierung auf.'
+    ]},
+    {version:'V136',title:'Modusmenü, minimierbare Aufgaben und geschützte Anschlüsse',items:[
+      'Der Modus wird über die obere Menüleiste zwischen Sandbox und Aufgaben gewechselt; die zuletzt bearbeitete Aufgabe und die freie Schaltung bleiben erhalten.',
+      'Beim Wechsel in den Aufgabenmodus zeigt der Katalog die Aufgabenübersicht über der zuletzt bearbeiteten beziehungsweise der ersten Aufgabe.',
+      'Das Aufgabenfenster lässt sich auf seine Kopfzeile minimieren und wieder ausklappen, mit weiterhin sichtbarem Fortschrittsbalken.',
+      'Vorbereitete Ein- und Ausgänge sind gegen Ziehen, Verschieben per Pfeiltasten und Löschen geschützt; eine verständliche Statusmeldung erklärt den Schutz.',
+      'Ein per Klick ausgewähltes Bauteil lässt sich nun mit Shift-Klick genau wie beim Shift-Drag in ein Kabel einsetzen.',
+      'Der Bestätigungstext zum Neustart wurde vereinfacht und der bisherige Freimodus-Hinweis entfernt.'
+    ]},
     {version:'V135',title:'Kompakte Tippnavigation und klare Ein-/Ausblendung',items:[
       'Die Pfeile zum Blättern stehen direkt rechts im Kopf des Hinweisfensters. Der untere Navigationsbereich und das separate Schließen-× entfallen.',
       'Der Schaltknopf heißt bei geschlossenen Hinweisen „Tipps ansehen“ und bei geöffneten Hinweisen „Tipps ausblenden“ – auch in der schmalen Ansicht.',
@@ -9142,6 +9322,15 @@
       // nicht erst das Werkzeug beenden, um denselben Klick weiterzureichen.
       const pinTarget=e.target.closest&&e.target.closest('.pin,[data-pin-hit],[data-wire-end]');
       if(pinTarget){e.preventDefault();e.stopPropagation();return;}
+      // Shift + Klick mit einem per Palette-Klick ausgewählten Bauteil:
+      // dieselbe Einfügung in ein Kabel wie beim Shift-Drag anbieten.
+      const insertionWire=e.shiftKey?wireAtClientPoint(e.clientX,e.clientY):null;
+      if(insertionWire&&!pendingPaste){
+        gesture={kind:'place-wire',type:selectedPaletteType,wireId:insertionWire,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,moved:false};
+        setInsertWirePreview(insertionWire);
+        try{scene.setPointerCapture(e.pointerId);}catch(_){}
+        e.preventDefault();e.stopPropagation();return;
+      }
       // Eine freie Stelle setzt das gewählte Bauteil. Andere bestehende
       // Objekte und Leitungen bleiben bedienbar und beenden das Werkzeug.
       const occupiedTarget=e.target.closest&&e.target.closest('[data-node],[data-wire-select],[data-wire-segment][data-wire-id],[data-wire-end][data-wire-id],.pin,[data-pin-hit]');
@@ -9233,7 +9422,6 @@
     }
 
     const rawWireEndEl=nearestPortHit&&e.target.closest?e.target.closest('[data-wire-end]'):null;
-    const isPortHit=!!nearestPortHit;
     let pinEl=nearestPortHit?.element||null;
     let wireEndInfo=null;
     if(nearestPortHit){
@@ -9357,7 +9545,7 @@
       renderWires(); renderNodes(); renderInspector(); updateStatus();
       const origins = new Map([...selectedNodes].map(nodeId => { const item=byId(nodeId); return [nodeId,{x:item.x,y:item.y}]; }).filter(([,v])=>!!v));
       const wireRouteOrigins=captureNodeMoveWireRoutes(origins);
-      gesture={kind:'node',id,startX:e.clientX,startY:e.clientY,origins,wireRouteOrigins,wireRoutePreview:new Map(),moved:false,shiftToggleCandidate,collapseSelectionOnClick,insertWireId:null,insertMode:false};
+      gesture={kind:'node',id,startX:e.clientX,startY:e.clientY,origins,wireRouteOrigins,wireRoutePreview:new Map(),moved:false,fixedBlocked:[...origins.keys()].some(lessonFixedNode),shiftToggleCandidate,collapseSelectionOnClick,insertWireId:null,insertMode:false};
       clearNearestPinHover();
       try { scene.setPointerCapture(e.pointerId); } catch(_) {}
       e.preventDefault(); return;
@@ -9415,7 +9603,7 @@
       updatePaletteGesturePreview(e.clientX,e.clientY,!!(e.shiftKey||shiftKeyHeld));
       return;
     }
-    if(gesture.kind==='place'){
+    if(gesture.kind==='place'||gesture.kind==='place-wire'){
       if(Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)>5)gesture.moved=true;
       return;
     }
@@ -9486,6 +9674,7 @@
     if (gesture.kind==='node') {
       const dx=e.clientX-gesture.startX, dy=e.clientY-gesture.startY;
       if (Math.hypot(dx,dy)>3) gesture.moved=true;
+      if(gesture.fixedBlocked){return;}
       if (gesture.moved) {
         const gx=Math.round((dx/camera.z)/GRID)*GRID, gy=Math.round((dy/camera.z)/GRID)*GRID;
         gesture.origins.forEach((origin,id) => {
@@ -9504,6 +9693,18 @@
   window.addEventListener('pointerup', e => {
     if (!gesture || (gesture.pointerId!=null && gesture.pointerId!==e.pointerId)) return;
     const done=gesture; gesture=null;
+    if(done.kind==='place-wire'){
+      setInsertWirePreview(null);
+      if(!done.moved&&selectedPaletteType===done.type){
+        const wire=wireAtClientPoint(e.clientX,e.clientY)||done.wireId;
+        if(wire&&insertNodeIntoWire(done.type,wire,e.clientX,e.clientY,paletteDraft)){
+          // Nur ein Klick auf die Bauteilpalette erlaubt wiederholtes Einsetzen.
+          palettePlacementLayer.innerHTML='';
+          syncPaletteHighlight();
+        }
+      }
+      return;
+    }
     if(done.kind==='place'){
       const target=document.elementFromPoint(e.clientX,e.clientY);
       let placed=false;
@@ -9641,6 +9842,7 @@
       return;
     }
     if (done.kind==='node') {
+      if(done.fixedBlocked&&done.moved){lessonFixedFeedback();return;}
       if (done.shiftToggleCandidate && !done.moved) {
         // Endobjekte eines ausgewählten Kabels bleiben separat schaltbar.
         // Das Kabel bleibt ausgewählt; nur die eigenständige Bauteil-Auswahl
@@ -9748,6 +9950,7 @@
   function nudgeSelection(dx,dy) {
     closeAllFloatingMenus();
     if (selectedNodes.size) {
+      if([...selectedNodes].some(lessonFixedNode)){lessonFixedFeedback();return false;}
       const moving=nodes.filter(node=>selectedNodes.has(node.id));
       const candidates=moving.map(node=>({...node,x:node.x+dx,y:node.y+dy}));
       if (!allowNodeOverlaps && collisionCandidateIds(candidates,nodes.filter(node=>!selectedNodes.has(node.id))).size) {
@@ -9786,6 +9989,10 @@
         wireRouteCache.clear();renderWires();
         if(gesture.kind==='palette') updatePaletteGesturePreview(currentPointer.x,currentPointer.y,true);
         else updateExistingNodeInsertPreview(gesture.id,currentPointer.x,currentPointer.y,true);
+      } else if(!wasHeld && selectedPaletteType && !gesture && !editingTarget()) {
+        // Ein per Klick gewähltes Werkzeug markiert das Kabel SOFORT bei Shift,
+        // auch wenn die Maus seit dem Hover keinen Pixel bewegt wurde.
+        updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
       }
     }
     if (e.key==='Escape') {
@@ -9873,6 +10080,9 @@
       else if(gesture?.kind==='node') {
         gesture.insertWireId=null;gesture.insertMode=false;setInsertWirePreview(null);
         wireRouteCache.clear();renderWires();
+      } else if(selectedPaletteType && !gesture) {
+        // Beim Loslassen ohne Mausbewegung die gelbe Kabelmarkierung entfernen.
+        updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
       }
     }
     if(pressedArrowKeys.has(e.key)){
