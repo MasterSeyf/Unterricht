@@ -4,7 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
-<title>GatterLab V147</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>GatterLab V152</title>
 <style>
   :root {
     color-scheme: dark;
@@ -226,22 +227,28 @@
   /* Ohne freigegebene Unterfunktionen gibt es auch keinen optischen Trenner. */
   .board-tabs.no-subfunctions .board-tab.main-board-tab { margin-right:0; }
   .board-tabs.no-subfunctions .board-tab.main-board-tab::after { display:none; }
-  .board-tab.dragging { opacity:.42; filter:saturate(.65); }
-  .board-tab.drop-before { position:relative; }
-  .board-tab.drop-before::after { content:''; position:absolute; left:-4px; top:3px; bottom:3px; width:3px; border-radius:3px; background:#79c9ff; box-shadow:0 0 8px #65bfffaa; }
-  .board-tab.drop-after { position:relative; }
-  .board-tab.drop-after::after { content:''; position:absolute; right:-4px; top:3px; bottom:3px; width:3px; border-radius:3px; background:#79c9ff; box-shadow:0 0 8px #65bfffaa; }
+  .board-tab { transition:scale .12s ease, background .12s ease, border-color .12s ease; }
+  .board-tab:active:not(.renaming):not(.dragging):not(:has(.board-tab-close:active)) { scale:.96; }
+  .board-tab.module-board-tab { touch-action:pan-y; user-select:none; }
+  .board-tab.dragging { position:relative; z-index:5; cursor:grabbing; background:#263d53; border-color:#5b91bd; box-shadow:0 3px 10px #0008; scale:1; transition:none; }
+  .board-tabs.reordering { cursor:grabbing; }
+  .board-tabs.reordering .board-tab { user-select:none; }
+  .board-tabs.blocked-left .main-board-tab::after { background:#ff777f; box-shadow:0 0 5px 1px #ff586faa; }
+  .board-tab.main-board-tab::after { transition:background .12s,box-shadow .12s; }
+  @media(prefers-reduced-motion:reduce){ .board-tab,.board-tab.main-board-tab::after { transition:none; } }
   .board-tab.active { color:#e5f4ff; background:#1e3c58; border-color:#37678f; }
   .board-tab.simulating { color:#bcffe3; background:#17493b; border-color:#46c79a; box-shadow:0 0 0 1px #46c79a20; }
 .board-tab.renaming { position:relative; z-index:2; background:#263d53; border-color:#405a73; box-shadow:inset 0 0 0 1px #67b7ff66,0 0 0 1px #67b7ff22; }
 .board-tab.active.renaming { background:#2a4a66; border-color:#37678f; box-shadow:inset 0 0 0 1px #8acbfa99,0 0 0 1px #8acbfa22; }
   .board-tab-label { display:inline-block; overflow:visible; text-overflow:clip; max-width:none; cursor:pointer; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
-  /* Der echte Tab-Text bleibt während der Eingabe sichtbar und ist die maßgebliche Glyphenebene.
-     Das transparente Eingabefeld liegt exakt darüber; so bleibt der Text pixelgenau an derselben
-     Stelle, während der echte Label-Inhalt die Tabbreite und damit Nachbartabs dynamisch anpasst. */
-  .board-tab-rename-input { position:absolute; z-index:4; display:block; flex:none; box-sizing:content-box; min-width:0; max-width:none; margin:0; padding:0; height:14px; border:0; border-radius:4px; outline:1px solid #65c8ed; outline-offset:2px; background:rgba(16,112,138,.10); color:transparent !important; -webkit-text-fill-color:transparent; text-shadow:none; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:10px; font-weight:inherit; line-height:14px; letter-spacing:0; text-align:left; vertical-align:top; caret-color:#ffffff; box-shadow:0 0 0 1px #67c9ef22; appearance:none; }
-  .board-tab-rename-input:focus { outline-color:#8cddfa; background:rgba(22,136,164,.16); color:transparent !important; -webkit-text-fill-color:transparent; box-shadow:0 0 0 1px #8cddfa55,0 0 7px #42b8e733; text-decoration:none; }
-  .board-tab-rename-input::selection { color:transparent; background:rgba(103,183,255,.20); }
+  /* Eine einzige sichtbare Textebene: Der native Input zeichnet Text, Auswahl
+     und Caret. Ein unsichtbares Flexmaß im Label folgt auch nachlaufenden Leerzeichen. */
+  .board-tab.renaming { scale:1; transition:background .12s ease,border-color .12s ease; }
+  .board-tab-label.editing-name { position:relative; flex:0 0 auto; min-width:4px; min-height:14px; padding-right:3px; white-space:pre; }
+  .board-tab-name-sizer { visibility:hidden; white-space:pre; pointer-events:none; }
+  .board-tab-rename-input { position:absolute; inset:0; z-index:4; display:block; box-sizing:border-box; width:100%; height:100%; min-width:0; max-width:none; margin:0; padding:0; border:0; border-radius:4px; outline:1px solid #65c8ed; outline-offset:2px; background:rgba(16,112,138,.10); color:inherit; font:inherit; letter-spacing:inherit; word-spacing:inherit; text-align:left; caret-color:#fff; box-shadow:0 0 0 1px #67c9ef22; appearance:none; user-select:text; touch-action:auto; }
+  .board-tab-rename-input:focus { outline-color:#8cddfa; background:rgba(22,136,164,.16); box-shadow:0 0 0 1px #8cddfa55,0 0 7px #42b8e733; }
+  .board-tab-rename-input::selection { color:inherit; background:rgba(103,183,255,.32); }
   .board-tab-rename-input.too-long { color:#ffedf0; outline-color:#ff8291; background:rgba(139,52,64,.5); box-shadow:0 0 0 1px #e36b7b66; }
   .board-tab-close { position:relative; left:4px; display:flex; flex:0 0 17px; align-self:center; align-items:center; justify-content:center; box-sizing:border-box; width:17px; height:17px; padding:0; border-radius:4px; color:#8da2b8; font-size:15px; line-height:17px; text-align:center; transform:translateY(0); }
   /* Der Lösch-Hitbereich greift etwas näher an den Namen heran, während das X selbst
@@ -586,8 +593,7 @@
   .modal p { color:#9aadc2; font-size:11px; margin:0 0 12px; text-align:justify; text-justify:inter-word; }
   /* Die Oberkante richtet sich nach der maximalen gemeinsamen Dialoghöhe.
      Nur bei extrem wenig Platz scrollt der Hintergrund, nicht der Dialograhmen. */
-  #shareModal { align-items:flex-start; overflow-y:auto; touch-action:pan-y; }
-  #shareModal.share-viewport { position:fixed; inset:0; z-index:200; }
+  #shareModal { position:fixed; inset:0; z-index:220; align-items:flex-start; overflow-y:auto; touch-action:pan-y; overscroll-behavior:contain; }
   #shareModal .share-modal { --share-panel-height:396px; width:min(680px,100%); min-width:0; max-height:none; flex:0 0 auto; display:flex; flex-direction:column; overflow:hidden; border-radius:14px; margin-top:var(--share-top,0px); }
   .share-modal > h2, .share-modal > p { flex:0 0 auto; }
   .share-tabs { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin:0 0 14px; border:1px solid #34485e; border-radius:9px; background:#0e1722; flex:0 0 auto; }
@@ -605,6 +611,9 @@
   .share-qr p { margin:0; text-align:center; overflow-wrap:anywhere; }
   .share-qr p:empty { display:none; }
   .share-modal .btn:disabled, .share-modal .btn:disabled:hover { background:#26313e; border-color:#3a4653; color:#8794a3; opacity:.7; cursor:not-allowed; transform:none; }
+  /* Beim Öffnen ist der Kopierknopf bereits blau; während der kurzen
+     Komprimierung bleibt er dennoch funktional gesperrt. */
+  .share-modal #copyShare.share-link-pending:disabled { background:#2779bd; border-color:#3998e5; color:#fff; opacity:1; cursor:wait; transition:none; }
   .share-modal .modal-actions { flex:0 0 auto; flex-wrap:wrap; }
   /* Das native Resize-Griffchen bleibt erhalten. Als nicht schrumpfendes Flex-Element
      entspricht die tatsächlich sichtbare Höhe direkt der vom Browser gesetzten Textarea-Höhe. */
@@ -810,7 +819,7 @@
     .palette-search { padding:7px 6px; font-size:10px; }
     .section-label { padding:7px 3px; font-size:9px; }
     .stage-caption { display:none; }
-    .board-tab { padding:4px 6px; max-width:205px; }
+    .board-tab { padding:4px 6px; }
     .board-tab-label { max-width:none; }
     .board-tab-rename-input { max-width:none; }
     .board-tabs { max-width:calc(100% - 32px); }
@@ -973,6 +982,8 @@
       <div class="menu" data-menu="view">
         <button class="menu-trigger" type="button" aria-haspopup="true" aria-expanded="false">Ansicht</button>
         <div class="menu-popover" role="menu">
+          <button class="menu-item" type="button" data-menu-action="fullscreen" id="menuFullscreen" role="menuitemcheckbox" aria-checked="false"><span class="menu-check"></span><span id="menuFullscreenLabel">Vollbildmodus</span><span class="menu-shortcut">F11</span></button>
+          <div class="menu-divider"></div>
           <button class="menu-item" type="button" data-menu-action="zoomIn"><span class="menu-check"></span><span>Vergrößern</span><span class="menu-shortcut">+</span></button>
           <button class="menu-item" type="button" data-menu-action="zoomOut"><span class="menu-check"></span><span>Verkleinern</span><span class="menu-shortcut">−</span></button>
           <button class="menu-item" type="button" data-menu-action="fit"><span class="menu-check"></span><span>Gesamtanpassung</span></button>
@@ -1201,6 +1212,7 @@
                     <tr><td><kbd>Entf</kbd></td><td>Auswahl löschen</td></tr>
                     <tr><td><kbd>Esc</kbd></td><td>Aktion abbrechen</td></tr>
                     <tr><td><kbd>Alt + N</kbd></td><td>Neue Schaltung</td></tr>
+                    <tr><td><kbd>F11</kbd></td><td>Vollbild ein-/ausschalten (browserabhängig)</td></tr>
                     <tr><td><kbd>+</kbd> / <kbd>−</kbd></td><td>Zoom ändern</td></tr>
                     <tr><td><kbd>Shift + Pfeile</kbd></td><td>Auswahl schneller bewegen</td></tr>
                     <tr><td><kbd>Enter</kbd></td><td>Textbearbeitung bestätigen</td></tr>
@@ -1595,7 +1607,28 @@
 
   const MODULE_TYPE_PREFIX='CUSTOM_';
   const BOARD_NAME_MAX_LENGTH=50;
-  const safeBoardName=(value,fallback='Unbenannt')=>String(value||'').replace(/[\u0000-\u001f]/g,'').replace(/ {2,}/g,' ').trim().slice(0,BOARD_NAME_MAX_LENGTH)||fallback;
+  const NODE_NAME_MAX_LENGTH=15;
+  // Eingabe: keine führenden oder mehrfachen Leerzeichen. Ein einzelnes
+  // abschließendes Leerzeichen bleibt bis zum Commit für das nächste Wort erlaubt.
+  const cleanBoardNameDraft=value=>String(value??'').replace(/[\s\u0085]+/gu,' ').replace(/[\u0000-\u001f\u007f-\u009f\u200b]/gu,'').replace(/ {2,}/g,' ').trimStart();
+  const limitBoardName=(value,max=BOARD_NAME_MAX_LENGTH)=>value.slice(0,max).replace(/[\uD800-\uDBFF]$/,'');
+  const safeBoardName=(value,fallback='Unbenannt')=>limitBoardName(cleanBoardNameDraft(value)).trimEnd()||fallback;
+  const cleanNodeName=value=>limitBoardName(cleanBoardNameDraft(value),NODE_NAME_MAX_LENGTH);
+  // Anzeigename und gespeicherter Standardname verwenden dieselbe Quelle.
+  // DISPLAY behält seinen bitbreitenabhängigen Standardnamen.
+  function defaultNodeName(node){
+    if(node.type==='MUX'||node.type==='DEMUX')return node.type;
+    if(node.type==='DISPLAY')return `${normalizeDisplayBits(node.displayBits)}-Bit-Anzeige`;
+    return cleanNodeName(meta(node).label)||'Bauteil';
+  }
+  function normalizedNodeName(node,value){
+    const name=cleanNodeName(value).trimEnd();
+    if(!name||(node.type==='MUX'&&name==='Multiplexer')||(node.type==='DEMUX'&&name==='Demultiplexer'))return defaultNodeName(node);
+    return name;
+  }
+  function nodeDisplayName(node){
+    return node.type==='DISPLAY'?displayNodeName(node):normalizedNodeName(node,node.label);
+  }
   const cloneJson=value=>value==null?value:JSON.parse(JSON.stringify(value));
   function activeBoardRef(){ return activeModuleId ? moduleDefinitions.find(item=>item.id===activeModuleId) || mainBoardState : mainBoardState; }
   function saveActiveBoardState(){
@@ -1628,7 +1661,7 @@
     });
   }
   function serializeNode(node){
-    const out={id:node.id,type:node.type,x:node.x,y:node.y,label:node.label||meta(node).label,state:!!node.state,q:!!node.q,clockWasHigh:node.clockWasHigh===null?null:!!node.clockWasHigh};
+    const out={id:node.id,type:node.type,x:node.x,y:node.y,label:node.type==='DISPLAY'&&isDefaultDisplayNodeName(node)?TYPES.DISPLAY.label:normalizedNodeName(node,node.label),state:!!node.state,q:!!node.q,clockWasHigh:node.clockWasHigh===null?null:!!node.clockWasHigh};
     if(node.type==='LABEL') Object.assign(out,{text:labelText(node),textAlign:node.textAlign,bold:!!node.bold,italic:!!node.italic,underline:!!node.underline,fontSize:Math.max(8,Math.min(32,Number(node.fontSize)||12))});
     if(node.type==='ARROW') Object.assign(out,{arrowDirection:normalizeArrowDirection(node.arrowDirection),arrowLength:normalizeArrowLength(node.arrowLength),arrowScale:normalizeArrowScale(node.arrowScale),arrowColor:normalizeLedColor(node.arrowColor||DEFAULT_ARROW_COLOR)});
     if(node.type==='CLOCK') Object.assign(out,{frequency:normalizeClockFrequency(node.frequency),phaseOffset:normalizeClockOffset(node.phaseOffset)});
@@ -1749,7 +1782,7 @@
     tabs.classList.toggle('no-subfunctions',!lessonAllowsSubfunctions());
     if(boardTabContextId!==null)closeBoardTabContextMenu();
     const items=[{id:'main',name:projectName,isMain:true},...moduleDefinitions.map(def=>({id:def.id,name:def.name,isMain:false}))];
-    tabs.innerHTML=items.map(item=>`<button type="button" draggable="${item.isMain||moduleSimulation?'false':'true'}" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}${moduleSimulation&&item.id===moduleSimulation.moduleId?' simulating':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" ${item.isMain?'':'title="Doppelklicken zum Umbenennen"'}>${esc(item.name)}</span>${item.isMain?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
+    tabs.innerHTML=items.map(item=>`<button type="button" draggable="false" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}${moduleSimulation&&item.id===moduleSimulation.moduleId?' simulating':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" ${item.isMain?'':'title="Doppelklicken zum Umbenennen"'}>${esc(item.name)}</span>${item.isMain?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
     $('addModuleBtn').hidden=!lessonAllowsSubfunctions();
     $('addModuleBtn').disabled=!!moduleSimulation||!lessonAllowsSubfunctions();
   }
@@ -1887,7 +1920,7 @@
       let rawLabel=n.label;
       if(legacyWidth&&(!rawLabel||rawLabel===TYPES[sourceType].label))rawLabel=TYPES.DISPLAY.label;
       if(sourceType==='OUTPUT'&&rawLabel==='LED-Ausgang')rawLabel='LED';
-      const label=String(rawLabel||m.label||'Bauteil').slice(0,120);
+      const label=normalizedNodeName({type,displayBits:legacyWidth||n.displayBits},rawLabel);
       const node={id:String(n.id||uid('n')),type,x:snap(Number(n.x)),y:snap(Number(n.y)),label,state:type==='HIGH'?true:!!n.state,q:!!n.q,clockWasHigh:n.clockWasHigh===null?null:!!n.clockWasHigh,value:false};
       if(type==='CLOCK') Object.assign(node,{frequency,phaseOffset,state:clockStateAt({frequency,phaseOffset})});
       if(type==='BUFFER'){
@@ -2205,23 +2238,23 @@
     moduleDefinitions.forEach(def=>{if(def.id!==excludedModuleId)taken.add(String(def.name).toLocaleLowerCase('de'));});
     if(!taken.has(base.toLocaleLowerCase('de')))return base;
     for(let index=2;index<1000;index++){
-    const suffix=` (${index})`,candidate=base.slice(0,BOARD_NAME_MAX_LENGTH-suffix.length)+suffix;
+    const suffix=` (${index})`,candidate=limitBoardName(base,BOARD_NAME_MAX_LENGTH-suffix.length).trimEnd()+suffix;
       if(!taken.has(candidate.toLocaleLowerCase('de')))return candidate;
     }
-    return `${base.slice(0,BOARD_NAME_MAX_LENGTH-12)} (${Date.now()%100000})`;
+    return `${limitBoardName(base,BOARD_NAME_MAX_LENGTH-12).trimEnd()} (${Date.now()%100000})`;
   }
   function renameBoardById(boardId,value,commit=false,refreshTabs=true,deferPalette=false){
     const isMain=boardId==='main';
     const def=isMain?null:moduleDefinitions.find(item=>item.id===boardId);
     if(!isMain&&!def)return null;
-    const raw=String(value??'').replace(/[\u0000-\u001f]/g,'').replace(/ {2,}/g,' ').slice(0,BOARD_NAME_MAX_LENGTH);
+    const raw=limitBoardName(cleanBoardNameDraft(value));
     const next=commit?uniqueBoardName(raw,isMain?null:boardId,isMain):raw;
     const old=isMain?projectName:def.name;
     if(old!==next){
       if(isMain)projectName=next;
       else {
         def.name=next;
-        for(const board of [mainBoardState,...moduleDefinitions])for(const node of board.nodes||[])if(node.moduleId===def.id&&node.label===old)node.label=next;
+        for(const board of [mainBoardState,...moduleDefinitions])for(const node of board.nodes||[])if(node.moduleId===def.id&&(node.label===old||node.label===cleanNodeName(old)))node.label=cleanNodeName(next);
         refreshCustomModuleTypes();
         // A pointerdown outside the rename field must not detach the palette
         // item that is about to receive its click. Refresh immediately after it.
@@ -2239,112 +2272,98 @@
     const boardId=tab.dataset.boardId;
     const currentName=boardId==='main'?projectName:moduleDefinitions.find(def=>def.id===boardId)?.name;
     if(currentName==null)return;
-    const labelRect=label.getBoundingClientRect();
-    const tabRect=tab.getBoundingClientRect();
-    const labelStyle=getComputedStyle(label);
-    // Der echte Label-Text bleibt sichtbar und bestimmt weiterhin die intrinsische Tabbreite.
-    // Das transparente Eingabefeld liegt deckungsgleich darüber. Beim Tippen wird der Label-Text
-    // mitgeführt: Der Tab und alle Nachbartabs passen sich dadurch natürlich an die neue Textlänge an.
     tab.classList.add('renaming');
+    label.classList.add('editing-name');
+    const sizer=document.createElement('span');
+    sizer.className='board-tab-name-sizer';sizer.setAttribute('aria-hidden','true');
     const input=document.createElement('input');
-    input.type='text';input.className='board-tab-rename-input';input.maxLength=BOARD_NAME_MAX_LENGTH;input.value=currentName;
+    input.type='text';input.className='board-tab-rename-input';input.value=cleanBoardNameDraft(currentName);
     input.setAttribute('aria-label',`Name von ${currentName} ändern`);
     input.autocomplete='off';input.spellcheck=false;
-    // Exakte Typografie des fertigen Tab-Labels übernehmen. Keine Innenabstände
-    // oder Rahmenbreite auf dem Textpfad: nur eine außenliegende Outline markiert
-    // den Editiermodus.
-    for(const property of ['fontFamily','fontSize','fontWeight','fontStyle','fontVariant','fontStretch','lineHeight','letterSpacing','wordSpacing','textAlign','textTransform','textIndent']){
-      input.style[property]=labelStyle[property];
-    }
-    // Nur der Caret gehört zum Input; die sichtbaren Buchstaben stammen jederzeit vom finalen Label.
-    input.style.color='transparent';
-    input.style.webkitTextFillColor='transparent';
-    input.style.textShadow='none';
-    input.style.left=`${labelRect.left-tabRect.left-tab.clientLeft}px`;
-    input.style.top=`${labelRect.top-tabRect.top-tab.clientTop}px`;
-    input.style.height=`${labelRect.height}px`;
-    input.style.maxWidth='none';
-    input.style.width='1px';
-    tab.append(input);
-
-    const canvas=document.createElement('canvas');
-    const context=canvas.getContext('2d');
-    const measureWidth=value=>{
-      const style=getComputedStyle(input);
-      if(!context)return String(value||'').length*6;
-      context.font=style.font;
-      const spacing=parseFloat(style.letterSpacing)||0;
-      return context.measureText(String(value||'')).width+Math.max(0,String(value||'').length-1)*spacing;
+    label.replaceChildren(sizer,input);
+    let composing=false,caretFrame=0,tooLongTimer=null;
+    const revealCaret=()=>{
+      if(caretFrame)return;
+      caretFrame=requestAnimationFrame(()=>{
+        caretFrame=0;
+        if(document.activeElement!==input||!input.isConnected)return;
+        const tabs=tab.closest('.board-tabs');if(!tabs)return;
+        const position=input.selectionDirection==='backward'?input.selectionStart:input.selectionEnd;
+        const range=document.createRange();
+        const text=sizer.firstChild;
+        let x=input.getBoundingClientRect().left;
+        if(text&&position!=null){
+          range.setStart(text,Math.min(position,text.length));range.collapse(true);
+          x=range.getBoundingClientRect().left;
+        }
+        const bounds=tabs.getBoundingClientRect();
+        if(x>bounds.right-8)tabs.scrollLeft+=x-bounds.right+8;
+        else if(x<bounds.left+8)tabs.scrollLeft+=x-bounds.left-8;
+      });
     };
     const updateInputWidth=()=>{
-      const width=Math.max(4,Math.ceil(measureWidth(input.value)+4));
-      input.style.width=`${width}px`;
-      // Das Label ist die sichtbare Enddarstellung und zugleich das Flexmaß des Tabs.
-      // Sein Text wird laufend synchronisiert, damit Tabs und Nachbarn live mitwachsen/-schrumpfen.
-      if(label.textContent!==input.value)label.textContent=input.value;
+      // Der Sizer nutzt dieselbe Typografie und bewahrt Leerzeichen; der Input
+      // bleibt als einzige sichtbare Textebene auch bei Font-Fallback exakt.
+      sizer.textContent=input.value;
       tab.title=input.value||currentName;
-      // Auf schmalen Bildschirmen den Eingabecursor beim Tippen im sichtbaren
-      // Ausschnitt halten; die tatsächliche Tabbreite wird nicht beschnitten.
-      const tabs=tab.closest('.board-tabs');
-      if(tabs){
-        const tabRight=tab.getBoundingClientRect().right;
-        const viewRight=tabs.getBoundingClientRect().right;
-        if(tabRight>viewRight)tabs.scrollLeft+=tabRight-viewRight+4;
-      }
+      revealCaret();
     };
-    updateInputWidth();
-    let tooLongTimer=null;
     const rejectTooLong=()=>{
-      input.classList.add('too-long');
-      showToast('Name zu lang');
+      input.classList.add('too-long');showToast('Name zu lang');
       if(tooLongTimer)clearTimeout(tooLongTimer);
       tooLongTimer=setTimeout(()=>input.classList.remove('too-long'),850);
     };
     const candidateAfter=inserted=>{
-      const start=input.selectionStart??input.value.length;
-      const end=input.selectionEnd??start;
+      const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
       return input.value.slice(0,start)+inserted+input.value.slice(end);
     };
-    // Die Tabbreite folgt der Textlänge bis zur Namensgrenze (50 Zeichen).
-    const fits=value=>String(value).length<=BOARD_NAME_MAX_LENGTH;
-    input.addEventListener('beforeinput',event=>{
-      if(!event.inputType||!event.inputType.startsWith('insert')||event.data==null)return;
-      const inserted=event.data;
-      const start=input.selectionStart??0,end=input.selectionEnd??start;
-      if(inserted===' '&&(input.value.slice(0,start).endsWith(' ')||input.value.slice(end).startsWith(' '))){event.preventDefault();return;}
-      const proposed=candidateAfter(inserted).replace(/ {2,}/g,' ');
-      if(!fits(proposed)){event.preventDefault();rejectTooLong();}
-    });
-    input.addEventListener('keydown',event=>{
-      if(event.key===' '){
-        const start=input.selectionStart??0,end=input.selectionEnd??start;
-        const before=input.value.slice(0,start),after=input.value.slice(end);
-        if(before.endsWith(' ')||after.startsWith(' ')){event.preventDefault();event.stopPropagation();}
-      }
-    });
-    input.addEventListener('input',()=>{
-      const original=input.value,caret=input.selectionStart??original.length;
-      const normalized=original.replace(/ {2,}/g,' ');
+    const normalizeInput=()=>{
+      const original=input.value;
+      const start=input.selectionStart??original.length,end=input.selectionEnd??start,direction=input.selectionDirection;
+      const draft=cleanBoardNameDraft(original),normalized=limitBoardName(draft);
+      if(draft.length>BOARD_NAME_MAX_LENGTH)rejectTooLong();
       if(normalized!==original){
-        const normalizedCaret=original.slice(0,caret).replace(/ {2,}/g,' ').length;
-        input.value=normalized;input.setSelectionRange(normalizedCaret,normalizedCaret);
+        const mapPosition=position=>Math.min(normalized.length,cleanBoardNameDraft(original.slice(0,position)).length);
+        input.value=normalized;
+        input.setSelectionRange(mapPosition(start),mapPosition(end),direction);
       }
       updateInputWidth();
+    };
+    input.addEventListener('beforeinput',event=>{
+      if(composing||event.isComposing||!event.inputType?.startsWith('insert')||event.data==null)return;
+      const proposed=cleanBoardNameDraft(candidateAfter(event.data));
+      if(proposed.length>BOARD_NAME_MAX_LENGTH){event.preventDefault();rejectTooLong();return;}
+      // Eine Eingabe ohne tatsächliche Änderung (z.B. führendes/doppeltes
+      // Leerzeichen) soll auch keine unsichtbare Cursorbewegung erzeugen.
+      if(proposed===input.value&&input.selectionStart===input.selectionEnd&&candidateAfter(event.data)!==proposed)event.preventDefault();
     });
+    input.addEventListener('input',event=>{
+      if(composing||event.isComposing)updateInputWidth();else normalizeInput();
+    });
+    input.addEventListener('compositionstart',()=>{composing=true;});
+    input.addEventListener('compositionend',()=>{composing=false;normalizeInput();});
     input.addEventListener('paste',event=>{
-      const pasted=event.clipboardData?.getData('text');
-      if(pasted==null)return;
-      const normalized=pasted.replace(/ {2,}/g,' ');
-      const proposed=candidateAfter(normalized).replace(/ {2,}/g,' ');
-      if(!fits(proposed)){event.preventDefault();rejectTooLong();}
+      const pasted=event.clipboardData?.getData('text');if(pasted==null)return;
+      const singleLine=pasted.replace(/\s+/gu,' ');
+      if(cleanBoardNameDraft(candidateAfter(singleLine)).length>BOARD_NAME_MAX_LENGTH){event.preventDefault();rejectTooLong();return;}
+      // Nur mehrzeilige Zwischenablage braucht einen manuellen Einsatz; normale
+      // Einfügungen behalten das native Undo-Verhalten des Eingabefeldes.
+      if(singleLine!==pasted){
+        event.preventDefault();
+        input.setRangeText(singleLine,input.selectionStart,input.selectionEnd,'end');normalizeInput();
+      }
     });
+    input.addEventListener('select',revealCaret);
+    input.addEventListener('keyup',revealCaret);
+    updateInputWidth();
     let finished=false;
     const finish=(commit,deferPalette=false)=>{
       if(finished)return;finished=true;
       if(tooLongTimer)clearTimeout(tooLongTimer);
       const next=commit?(renameBoardById(boardId,input.value,true,false,deferPalette)??currentName):currentName;
       input.remove();
-      label.classList.remove('rename-placeholder');
+      if(caretFrame)cancelAnimationFrame(caretFrame);
+      label.classList.remove('editing-name');
       label.textContent=next;
       if(boardId==='main')label.removeAttribute('title');
       else label.title='Doppelklicken zum Umbenennen';
@@ -2356,13 +2375,14 @@
     };
     input._finishBoardRename=finish;
     input.addEventListener('keydown',event=>{
+      if(composing||event.isComposing){event.stopPropagation();return;}
       if(event.key==='Enter'){event.preventDefault();event.stopPropagation();finish(true);}
       else if(event.key==='Escape'){event.preventDefault();event.stopPropagation();finish(false);}
     });
     input.addEventListener('blur',()=>finish(true));
     input.addEventListener('click',event=>event.stopPropagation());
     input.addEventListener('pointerdown',event=>event.stopPropagation());
-    requestAnimationFrame(()=>{if(!finished){input.focus();input.select();}});
+    requestAnimationFrame(()=>{if(!finished){input.focus({preventScroll:true});input.select();revealCaret();}});
   }
   function remapModulePortReferences(moduleId,oldInputs,oldOutputs,newInputs,newOutputs){
     const remap=(oldList,newList)=>new Map(oldList.map((node,index)=>[index,newList.findIndex(item=>item.id===node.id)]));
@@ -2399,7 +2419,7 @@
   // Der aktuelle Entwurf ist unabhängig vom markierten Paletteneintrag: HIGH
   // kann z. B. per Leertaste vor dem Platzieren in LOW umgeschaltet werden.
   function createPaletteDraft(type) {
-    return {type,label:type==='DISPLAY'?null:TYPES[type].label,state:type==='HIGH',value:type==='TRISTATE'?null:type==='HIGH',
+    return {type,label:type==='DISPLAY'?null:defaultNodeName({type}),state:type==='HIGH',value:type==='TRISTATE'?null:type==='HIGH',
       displayBits:type==='DISPLAY'?2:undefined,
       muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,
       busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?2:undefined,
@@ -4685,6 +4705,15 @@
     if(announce){const label={international:'International',english:'Englisch',german:'Deutsch'}[style];showToast(`Gattersymbole: ${label}`);}
   }
 
+  function fittedNodeTitle(name,maxWidth,fontSize,letterSpacing=.3){
+    if(!labelMeasureContext)labelMeasureContext=document.createElement('canvas').getContext('2d');
+    let width=Array.from(name).length*(fontSize+letterSpacing);
+    if(labelMeasureContext){
+      labelMeasureContext.font=`800 ${fontSize}px ${LABEL_FONT_FAMILY}`;
+      width=labelMeasureContext.measureText(name).width+Array.from(name).length*letterSpacing;
+    }
+    return width>maxWidth?` textLength="${maxWidth}" lengthAdjust="spacingAndGlyphs"`:'';
+  }
   function nodeMarkup(n, preview = false, connectionIndex = null) {
     const m = meta(n), kind = m.kind;
     const selectedClass = (selectedNodes.has(n.id) || preview) ? ' selected' : '';
@@ -4694,7 +4723,7 @@
     const previewClass = preview ? ' preview-node' : '';
     const collisionClass = (collisionPreviewNodeIds.has(n.id) || n.invalidPlacement) ? ' collision-preview' : '';
     const nodeAttrs = preview ? '' : `data-node="${esc(n.id)}"`;
-    const safeLabel = kind === 'label' ? esc(labelText(n)) : esc(n.label??m.label);
+    const safeLabel = kind === 'label' ? esc(labelText(n)) : esc(nodeDisplayName(n));
     if(n.type==='MODULE_INPUT'){
       return `<g class="node input-node module-terminal module-input-node${n.state?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" xml:space="preserve" x="0" y="-7">${esc(n.label??'Eingang')}</text><text class="node-sub" x="0" y="13">${moduleSimulation&&!preview?`TEST · ${logicBitText(n.value)}`:'MODUL-EINGANG'}</text><circle class="pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="5"/></g>`;
     }
@@ -4735,7 +4764,7 @@
       const count=isMux?normalizeMuxInputs(n.muxInputs):normalizeDemuxOutputs(n.demuxOutputs);
       const selectBits=selectBitCount(count),halfH=muxNodeHalfHeight(n),selected=Math.max(0,Math.min(count-1,Number(n.selectedChannel)||0));
       const selectedInputValue=isMux?n.value:(n.portValues?.[selected]!==undefined?n.portValues[selected]:false);
-      const title=(n.label!=null&&n.label!==meta(n).label)?String(n.label):(isMux?'MUX':'DEMUX');
+      const title=nodeDisplayName(n);
       const channelOffsets=Array.from({length:count},(_,i)=>channelPortOffset(count,i));
       // Die einzelnen Kanäle enden am gemeinsamen Knoten. Der überlappende
       // Ein-/Ausgangsabschnitt wird nur einmal gezeichnet und bleibt dadurch
@@ -4764,7 +4793,7 @@
       }).join('');
       return `<g class="node ${isMux?'mux-node':'demux-node'}${selectedClass}${marqueeClass}${activeClass}${unknownClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-44" y="${-halfH}" width="88" height="${halfH*2}" rx="8"/>
-        <text class="node-title mux-title" xml:space="preserve" x="0" y="${-halfH+13}">${title} · ${count}:1</text>
+        <text class="node-title mux-title" xml:space="preserve" x="0" y="${-halfH+13}"${fittedNodeTitle(title,78,9,.45)}>${esc(title)}</text>
         <g class="mux-routes">${routes}${commonRoute}</g>
         ${dataPins}${outputPins}${selectPins}
         <text class="node-sub mux-state" x="0" y="${halfH-8}">${possibleUncertain?'Kanal ?':logicLevelText(selectedInputValue)}</text>
@@ -4803,26 +4832,26 @@
       let face = '';
       if (n.type === 'INPUT') {
         const toggleAttrs = preview ? '' : `data-toggle="${esc(n.id)}"`;
-        face = `<text class="node-sub signal-count" x="-24" y="4">${n.state ? '1/1' : '0/1'}</text>
+        face = `<text class="node-sub signal-count" x="-24" y="0">${n.state ? '1/1' : '0/1'}</text>
           <rect class="toggle-track" ${toggleAttrs} x="2" y="-11" width="36" height="22" rx="11" />
           <circle class="toggle-knob" ${toggleAttrs} cx="${n.state ? 29 : 11}" cy="0" r="7" />`;
       } else if (n.type === 'PUSH') {
         const pushAttrs = preview ? '' : `data-push="${esc(n.id)}"`;
-        face = `<text class="node-sub signal-count" x="-24" y="4">${n.state ? '1/1' : '0/1'}</text>
+        face = `<text class="node-sub signal-count" x="-24" y="2">${n.state ? '1/1' : '0/1'}</text>
           <circle class="push-face" ${pushAttrs} cx="19" cy="1" r="11" /><text class="node-sub push-value" x="19" y="2" fill="#fff" text-anchor="middle" dominant-baseline="middle" style="font-size:9px">${n.state ? '1' : '0'}</text>`;
       } else if (n.type === 'CLOCK') {
         const needleAngle = clockNeedleAngle(n);
-        face = `<text class="node-sub signal-count" x="-24" y="4">${n.state ? '1/1' : '0/1'}</text>
+        face = `<text class="node-sub signal-count" x="-24" y="0">${n.state ? '1/1' : '0/1'}</text>
           <rect class="state-pill" x="2" y="-11" width="36" height="22" rx="6" />
           <path class="clock-needle" data-clock-needle="${esc(n.id)}" d="M 20 7 L 20 -7" transform="rotate(${needleAngle.toFixed(2)} 20 7)" />
           <circle class="clock-pivot" cx="20" cy="7" r="2.1" />`;
       } else {
-        face = `<rect class="state-pill" x="2" y="-11" width="36" height="22" rx="6" /><text class="node-glyph" x="20" y="1" style="font-size:14px">${n.type === 'HIGH' ? '1' : '0'}</text>`;
+        face = `<text class="node-sub signal-count" x="-24" y="0">${n.type === 'HIGH' ? '1/1' : '0/1'}</text><rect class="state-pill" x="2" y="-11" width="36" height="22" rx="6" /><text class="node-glyph" x="20" y="1" style="font-size:14px">${n.type === 'HIGH' ? '1' : '0'}</text>`;
       }
       return `<g class="${cls}${marqueeClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-52" y="-31" width="104" height="62" rx="11" />
-        <text class="node-title" xml:space="preserve" x="-24" y="-12" style="font-size:10px">${safeLabel}</text>
-        ${face}
+        <text class="node-title" xml:space="preserve" x="0" y="-20" style="font-size:10px"${fittedNodeTitle(nodeDisplayName(n),94,10)}>${safeLabel}</text>
+        <g transform="translate(0 7)">${face}</g>
         <circle class="pin ${isConnected(n.id,'out',0,connectionIndex) ? 'connected' : ''} ${n.value === true ? 'hot' : ''}" ${outputAttrs} cx="58" cy="0" r="5" />
       </g>`;
     }
@@ -4850,9 +4879,9 @@
       const inputAttrs = preview ? '' : `data-pin="in" data-node="${esc(n.id)}" data-port="0"`;
       return `<g class="node output-node${n.value===true ? ' on' : ''}${selectedClass}${marqueeClass}${unknownClass}${previewClass}${collisionClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})">
         <rect class="body" x="-52" y="-31" width="104" height="62" rx="11" />
-        <circle class="led-indicator" cx="0" cy="-5" r="9" fill="${preview || n.value===true ? ledColorById(n.ledColor).fill : isLogicUnknown(n.value) ? '#8c754d' : '#46586b'}" stroke="${preview || n.value===true ? ledColorById(n.ledColor).stroke : isLogicUnknown(n.value) ? '#e6bd68' : '#8395a9'}" stroke-width="1.5" />
-        <text class="node-title" xml:space="preserve" x="0" y="16">${safeLabel}</text>
-        <text class="node-sub led-status" x="0" y="-20">${isLogicUnknown(n.value)?'?':n.value===true?'HIGH':'LOW'}</text>
+        <circle class="led-indicator" cx="0" cy="0" r="9" fill="${preview || n.value===true ? ledColorById(n.ledColor).fill : isLogicUnknown(n.value) ? '#8c754d' : '#46586b'}" stroke="${preview || n.value===true ? ledColorById(n.ledColor).stroke : isLogicUnknown(n.value) ? '#e6bd68' : '#8395a9'}" stroke-width="1.5" />
+        <text class="node-title" xml:space="preserve" x="0" y="-20" style="font-size:10px"${fittedNodeTitle(nodeDisplayName(n),94,10)}>${safeLabel}</text>
+        <text class="node-sub led-status" x="0" y="20">${logicLevelText(n.value)}</text>
         <circle class="pin ${incoming ? 'connected' : ''}" ${inputAttrs} cx="-58" cy="0" r="5" />
       </g>`;
     }
@@ -5410,7 +5439,7 @@
             indicator.setAttribute('stroke', n.value===true ? ledColor.stroke : isLogicUnknown(n.value) ? '#e6bd68' : '#8395a9');
           }
           const status = el.querySelector('.led-status');
-          if (status) status.textContent = isLogicUnknown(n.value)?'?':n.value===true?'HIGH':'LOW';
+          if (status) status.textContent = logicLevelText(n.value);
         }
       } else if (m.kind==='custom') {
         const live=el.querySelector('.custom-live-value');if(live)live.textContent=`${m.inputs} IN · ${m.outputs} OUT`;
@@ -5515,11 +5544,11 @@
     if (!title || title.dataset.editing==='true') return;
     const ownerNodes=nodes;
     const originalModelLabel=node.label;
-    const originalDisplay=node.type==='DISPLAY'?displayNodeName(node):String(node.label??meta(node).label);
+    const originalDisplay=nodeDisplayName(node);
     const input=document.createElement('input');
     input.type='text'; input.className='inspector-name-input';
-    input.value=originalDisplay.replace(/ {2,}/g,' ');
-    input.maxLength=120; input.setAttribute('aria-label','Bauteilnamen bearbeiten');
+    input.value=cleanNodeName(originalDisplay);
+    input.maxLength=NODE_NAME_MAX_LENGTH; input.setAttribute('aria-label','Bauteilnamen bearbeiten');
     enforceSingleSpaceInput(input);
     title.dataset.editing='true'; title.classList.add('editing-name');
     title.appendChild(input);
@@ -5535,7 +5564,7 @@
       finished=true;
       if(finishTimer!==null){clearTimeout(finishTimer);finishTimer=null;}
       removeOutsideListeners();
-      const value=input.value;
+      const value=normalizedNodeName(node,input.value);
       input.remove();
       title.classList.remove('editing-name');
       delete title.dataset.editing;
@@ -5549,7 +5578,7 @@
         return;
       }
       // Ein unveränderter Standardname bleibt weiterhin ein Metadaten-Standardwert.
-      node.label=value===originalDisplay?originalModelLabel:value;
+      node.label=node.type==='DISPLAY'&&value===defaultNodeName(node)?null:value;
       render();
       if(value!==originalDisplay)showToast('Bauteilname geändert');
     };
@@ -5580,7 +5609,18 @@
     document.addEventListener('pointerup',onOutsidePointerUp,true);
     document.addEventListener('pointercancel',onOutsidePointerCancel,true);
     window.addEventListener('blur',onWindowBlur);
-    input.addEventListener('input',()=>{node.label=input.value;});
+    const normalizeNameInput=()=>{
+      const original=input.value, value=cleanNodeName(original);
+      if(value!==original){
+        const start=input.selectionStart??original.length,end=input.selectionEnd??start,direction=input.selectionDirection;
+        const position=i=>Math.min(value.length,cleanNodeName(original.slice(0,i)).length);
+        input.value=value;
+        input.setSelectionRange(position(start),position(end),direction);
+      }
+      node.label=value;
+    };
+    input.addEventListener('input',event=>{if(!event.isComposing)normalizeNameInput();});
+    input.addEventListener('compositionend',normalizeNameInput);
     input.addEventListener('keydown',event=>{
       if(event.key==='Enter'&&!event.isComposing){event.preventDefault();event.stopPropagation();finish(true);}
       else if(event.key==='Escape'){event.preventDefault();event.stopPropagation();finish(false);}
@@ -5648,7 +5688,7 @@
       const paletteInputs=m.kind==='custom'?Math.max(0,Number(m.inputs)||0):selectedPaletteType==='DISPLAY'||selectedPaletteType==='BUS_COMBINER'?'n':isPaletteMux?'n':isPaletteDemux?1:Math.max(0,Number(m.inputs)||0);
       const paletteOutputs=m.kind==='custom'?Math.max(0,Number(m.outputs)||0):m.kind==='input'?1:m.kind==='output'||m.kind==='label'||m.kind==='annotation'?0:selectedPaletteType==='BUS_SPLITTER'?'n':isPaletteMux?1:isPaletteDemux?'n':1;
       root.innerHTML = `<div class="inspector-card">
-        <div class="inspector-title">${esc(m.label)}</div>
+        <div class="inspector-title">${esc(isPaletteMux||isPaletteDemux?selectedPaletteType:m.label)}</div>
         <div class="inspector-type">${esc(m.category)}</div>
         <div class="inspector-description">${esc(m.description)}</div>
         <div class="inspector-rule"></div>
@@ -5736,13 +5776,13 @@
       if(isMuxGroup){
         const widths=new Set(selectedMuxNodes.map(node=>normalizeMuxInputs(node.muxInputs)));
         const current=widths.size===1?String([...widths][0]):'';
-        const options=(widths.size>1?'<option value="" selected>Gemischt</option>':'')+[2,4,8].map(value=>`<option value="${value}" ${String(value)===current?'selected':''}>${value} Dateneingänge</option>`).join('');
+        const options=(widths.size>1?'<option value="" selected>Gemischt</option>':'')+[2,4,8].map(value=>`<option value="${value}" ${String(value)===current?'selected':''}>${value} Bit</option>`).join('');
         muxGroupControls=`<div class="prop-row"><span>Dateneingänge</span><select class="inspector-input" id="muxGroupInputs" aria-label="Dateneingänge für alle ausgewählten Multiplexer">${options}</select></div>`;
       }
       if(isDemuxGroup){
         const widths=new Set(selectedDemuxNodes.map(node=>normalizeDemuxOutputs(node.demuxOutputs)));
         const current=widths.size===1?String([...widths][0]):'';
-        const options=(widths.size>1?'<option value="" selected>Gemischt</option>':'')+[2,4,8].map(value=>`<option value="${value}" ${String(value)===current?'selected':''}>${value} Datenausgänge</option>`).join('');
+        const options=(widths.size>1?'<option value="" selected>Gemischt</option>':'')+[2,4,8].map(value=>`<option value="${value}" ${String(value)===current?'selected':''}>${value} Bit</option>`).join('');
         demuxGroupControls=`<div class="prop-row"><span>Datenausgänge</span><select class="inspector-input" id="demuxGroupOutputs" aria-label="Datenausgänge für alle ausgewählten Demultiplexer">${options}</select></div>`;
       }
       if(isBufferGroup){
@@ -5886,11 +5926,11 @@
           extra = `<div class="prop-row"><span>Frequenz</span><select class="inspector-input clock-frequency" id="clockFrequency" aria-label="Clock-Frequenz">${options}</select></div><div class="prop-row"><span>Phasenversetzung</span><select class="inspector-input clock-offset" id="clockOffset" aria-label="Clock-Phasenversetzung">${offsetOptions}</select></div>`;
         } else if (n.type === 'HIGH' || n.type === 'LOW') extra = '';
       } else if(n.type==='MUX'){
-        const width=normalizeMuxInputs(n.muxInputs),options=[2,4,8].map(value=>`<option value="${value}" ${value===width?'selected':''}>${value} Dateneingänge</option>`).join('');
+        const width=normalizeMuxInputs(n.muxInputs),options=[2,4,8].map(value=>`<option value="${value}" ${value===width?'selected':''}>${value} Bit</option>`).join('');
         const selectValue=Array.from({length:selectBitCount(width)},(_,bit)=>{const wire=incomingWire(n.id,width+bit);return logicBitText(wire?outputPortSignal(byId(wire.from.id),wire.from.port||0):false);}).reverse().join('');
         extra=`<div class="prop-row"><span>Dateneingänge</span><select class="inspector-input" id="muxInputsSelect" aria-label="Anzahl der Multiplexer-Dateneingänge">${options}</select></div><div class="prop-row"><span>Auswahl</span><span class="value-chip" id="muxSelectedInput">I${Number(n.selectedChannel)||0}</span></div><div class="prop-row"><span>Steuerwert</span><span class="prop-value" id="muxSelectValue">${selectValue}</span></div>`;
       } else if(n.type==='DEMUX'){
-        const width=normalizeDemuxOutputs(n.demuxOutputs),options=[2,4,8].map(value=>`<option value="${value}" ${value===width?'selected':''}>${value} Datenausgänge</option>`).join('');
+        const width=normalizeDemuxOutputs(n.demuxOutputs),options=[2,4,8].map(value=>`<option value="${value}" ${value===width?'selected':''}>${value} Bit</option>`).join('');
         const selectValue=Array.from({length:selectBitCount(width)},(_,bit)=>{const wire=incomingWire(n.id,1+bit);return logicBitText(wire?outputPortSignal(byId(wire.from.id),wire.from.port||0):false);}).reverse().join('');
         const rows=Array.from({length:width},(_,index)=>{const signal=n.portValues?.[index]??false;return `<div class="prop-row"><span>Q${index}</span><span class="value-chip ${signal===true?'on':''} ${isLogicUnknown(signal)?'logic-unknown':''}" id="inspectorDemuxOutput${index}">${inspectorOutputText(signal)}</span></div>`;}).join('');
         extra=`<div class="prop-row"><span>Datenausgänge</span><select class="inspector-input" id="demuxOutputsSelect" aria-label="Anzahl der Demultiplexer-Datenausgänge">${options}</select></div><div class="prop-row"><span>Auswahl</span><span class="value-chip" id="demuxSelectedOutput">Q${Number(n.selectedChannel)||0}</span></div><div class="prop-row"><span>Steuerwert</span><span class="prop-value" id="demuxSelectValue">${selectValue}</span></div><div class="inspector-rule"></div>${rows}`;
@@ -5940,7 +5980,7 @@
       }
       if(n.type==='OUTPUT') extra += ledColorControls([n]);
       const valueText = inspectorOutputText(n.value);
-      const inspectorNodeTitle=n.type==='DISPLAY'?displayNodeName(n):String(n.label??m.label);
+      const inspectorNodeTitle=nodeDisplayName(n);
       const inspectorSubhead=m.kind==='custom'?m.category:`${m.category} · ${m.label}`;
       const inspectorDescription=m.kind==='custom'?'Selbstdefinierte Unterfunktion':m.description;
       const showOutputRow = m.kind !== 'label' && m.kind !== 'custom' && m.kind !== 'annotation' && !(m.kind === 'output' && m.displayBits) && !['BUS_COMBINER','BUS_SPLITTER','DEMUX'].includes(n.type);
@@ -6164,6 +6204,7 @@
           !Number.isFinite(Number(node.x)) || !Number.isFinite(Number(node.y))) return null;
       seen.add(node.id);
       const safeNode={...node,x:Number(node.x),y:Number(node.y)};
+      safeNode.label=node.type==='DISPLAY'&&isDefaultDisplayNodeName(node)?null:normalizedNodeName(node,node.label);
       if(node.type==='BUFFER'){
         safeNode.bufferDelay=normalizeBufferDelay(node.bufferDelay);
         safeNode.bufferOutput=typeof node.bufferOutput==='boolean'?node.bufferOutput:false;
@@ -6259,8 +6300,11 @@
       terminal.portOrder=siblings.filter(node=>node.type===terminal.type).reduce((max,node)=>Math.max(max,Number(node.portOrder)||0),-1)+1;
       const base=terminal.type==='MODULE_INPUT'?'Eingang':'Ausgang';
       const used=new Set(siblings.filter(node=>node.type===terminal.type).map(node=>String(node.label||'').toLocaleLowerCase('de')));
-      const sourceLabel=String(terminal.label||base);let label=sourceLabel,index=2;
-      while(used.has(label.toLocaleLowerCase('de')))label=`${sourceLabel} (${index++})`;
+      const sourceLabel=cleanNodeName(terminal.label)||base;let label=sourceLabel,index=2;
+      while(used.has(label.toLocaleLowerCase('de'))){
+        const suffix=` (${index++})`;
+        label=limitBoardName(sourceLabel,NODE_NAME_MAX_LENGTH-suffix.length).trimEnd()+suffix;
+      }
       terminal.label=label;
     }
     const hasNewModulePorts=newNodes.some(node=>node.type==='MODULE_INPUT'||node.type==='MODULE_OUTPUT');
@@ -8832,7 +8876,6 @@ module.exports = QRCode;
   function layoutShareDialog() {
     const backdrop=$('shareModal');
     if(!backdrop.classList.contains('show'))return;
-    backdrop.classList.toggle('share-viewport',backdrop.parentElement.clientWidth<360);
     const modal=backdrop.querySelector('.share-modal');
     const css=getComputedStyle(modal), outer=getComputedStyle(backdrop);
     const px=value=>parseFloat(value)||0;
@@ -8848,9 +8891,32 @@ module.exports = QRCode;
     modal.style.setProperty('--share-panel-height',panelHeight+'px');
     modal.style.setProperty('--share-top',Math.max(0,(available-chrome-panelHeight)/2)+'px');
   }
+  // Der Teilen-Dialog liegt außerhalb der App, damit deren gesamter Inhalt
+  // während des Teilens auch für Tastatur und Touch nicht bedienbar ist.
+  const shareBackdrop=$('shareModal'),shareApp=document.querySelector('.app');
+  document.body.appendChild(shareBackdrop);
+  let sharePreviousFocus=null;
+  function closeShareDialog(){
+    if(!shareBackdrop.classList.contains('show'))return;
+    shareBackdrop.classList.remove('show');shareApp.inert=false;
+    if(sharePreviousFocus?.isConnected)sharePreviousFocus.focus({preventScroll:true});
+    sharePreviousFocus=null;
+  }
+  window.addEventListener('keydown',e=>{
+    if(!shareBackdrop.classList.contains('show'))return;
+    if(e.key==='Escape'){e.preventDefault();closeShareDialog();}
+    else if(e.key==='Tab'){
+      const controls=[...shareBackdrop.querySelectorAll('button:not(:disabled),textarea')].filter(el=>el.getClientRects().length);
+      const first=controls[0],last=controls.at(-1);
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
+    }
+    // Keine Editor-Kürzel im modalen Fenster; native Texteingabe/Kopieren bleibt möglich.
+    e.stopImmediatePropagation();
+  },true);
   const shareLayoutObserver=new ResizeObserver(layoutShareDialog);
   shareLayoutObserver.observe($('shareModal'));
-  shareLayoutObserver.observe($('shareModal').parentElement);
+  shareLayoutObserver.observe(document.documentElement);
   $('shareModal').querySelectorAll('.share-modal > h2, .share-modal > p, .share-tabs, .modal-actions').forEach(el=>shareLayoutObserver.observe(el));
   function setShareView(view) {
     const qr=view==='qr',url=$('shareUrl').value;
@@ -8858,7 +8924,9 @@ module.exports = QRCode;
     $('shareQrTab').setAttribute('aria-pressed',String(qr));
     $('shareLinkPanel').hidden=qr;
     $('shareQr').hidden=!qr;
-    $('copyShare').disabled=qr||!url;
+    const copy=$('copyShare');
+    copy.classList.toggle('share-link-pending',!qr&&!url&&shareInProgress);
+    copy.disabled=qr||!url;
     if(qr&&url&&shareQrRenderedUrl!==url){
       renderShareQr(url);shareQrRenderedUrl=url;
     }
@@ -8871,8 +8939,10 @@ module.exports = QRCode;
     urlField.value='';urlField.placeholder='Link wird erstellt …';
     shareQrRenderedUrl='';$('shareQrCanvas').hidden=true;$('shareQrInfo').textContent='Link wird erstellt …';
     setShareView('link');
-    $('shareModal').classList.add('show');
-    layoutShareDialog();
+    sharePreviousFocus=document.activeElement;
+    clearArrowNavigation();closeMenus();closeAllFloatingMenus();
+    shareBackdrop.classList.add('show');shareApp.inert=true;
+    layoutShareDialog();$('shareLinkTab').focus({preventScroll:true});
     try {
       const packed=await encodeConfig(makeConfig(false));
       const url=location.href.split('#')[0]+'#c='+packed;
@@ -8881,7 +8951,7 @@ module.exports = QRCode;
       urlField.value=url;
       setShareView($('shareQr').hidden?'link':'qr');
     }catch(error){urlField.placeholder=error.message||'Link konnte nicht erstellt werden.';$('shareQrInfo').textContent=urlField.placeholder;showToast('Link konnte nicht erstellt werden');}
-    finally{shareInProgress=false;}
+    finally{shareInProgress=false;$('copyShare').classList.remove('share-link-pending');}
   }
   function exportConfig() {
     const blob = new Blob([JSON.stringify(makeConfig(), null, 2)], {type:'application/json'});
@@ -9051,6 +9121,46 @@ module.exports = QRCode;
     zoomAt(camera.z+direction*step,x,y);
   }
 
+  // Vollbild betrifft das gesamte Dokument einschließlich ausgelagerter Dialoge.
+  const fullscreenRoot=document.documentElement;
+  const fullscreenElement=()=>document.fullscreenElement||document.webkitFullscreenElement||null;
+  const requestFullscreenMethod=()=>fullscreenRoot.requestFullscreen||fullscreenRoot.webkitRequestFullscreen;
+  const exitFullscreenMethod=()=>document.exitFullscreen||document.webkitExitFullscreen;
+  const isStandaloneWebApp=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches;
+  function syncFullscreenMenu(){
+    const active=!!fullscreenElement(),item=$('menuFullscreen');
+    item.setAttribute('aria-checked',String(active));
+    item.querySelector('.menu-check').textContent=active?'✓':'';
+    $('menuFullscreenLabel').textContent=active?'Vollbildmodus beenden':'Vollbildmodus';
+  }
+  function fullscreenUnavailable(){
+    if(isStandaloneWebApp())showToast('GatterLab läuft bereits als Web-App ohne Browserleiste.');
+    else if(/iPhone|iPod/i.test(navigator.userAgent))showToast('iPhone: In Safari über Teilen → Zum Home-Bildschirm als Web-App öffnen.');
+    else showToast('Vollbild wird von diesem Browser oder Fenster nicht unterstützt.');
+  }
+  let fullscreenPending=false;
+  async function toggleFullscreen(){
+    if(fullscreenPending)return;
+    const active=!!fullscreenElement();
+    const method=active?exitFullscreenMethod():requestFullscreenMethod();
+    const allowed=document.fullscreenEnabled??document.webkitFullscreenEnabled;
+    if(!method||(!active&&allowed===false)){fullscreenUnavailable();return;}
+    fullscreenPending=true;
+    try{await method.call(active?document:fullscreenRoot);}
+    catch(_){fullscreenUnavailable();}
+    finally{fullscreenPending=false;syncFullscreenMenu();}
+  }
+  document.addEventListener('fullscreenchange',syncFullscreenMenu);
+  document.addEventListener('webkitfullscreenchange',syncFullscreenMenu);
+  syncFullscreenMenu();
+  // F11 nur übernehmen, wenn das Ereignis beim Dokument ankommt und die API
+  // verfügbar ist. Sonst kann der Browser sein eigenes Vollbild verwenden.
+  window.addEventListener('keydown',e=>{
+    if(e.key!=='F11'||e.ctrlKey||e.metaKey||e.altKey||e.shiftKey)return;
+    if(!fullscreenElement()&&(!requestFullscreenMethod()||(document.fullscreenEnabled??document.webkitFullscreenEnabled)===false))return;
+    e.preventDefault();e.stopImmediatePropagation();
+    if(!e.repeat)toggleFullscreen();
+  },true);
   // Hauptmenüs: Datei, Bearbeiten und Ansicht wie in klassischen Desktop-Editoren.
   function closeMenus() {
     document.querySelectorAll('.menu.open').forEach(menu=>{
@@ -9067,6 +9177,7 @@ module.exports = QRCode;
     });
   });
   document.addEventListener('pointerdown',e=>{
+    if(e.target.closest('#shareModal'))return;
     if (armedFrom && e.button===0) {
       const pinTarget=e.target.closest && e.target.closest('.pin,[data-pin-hit],[data-wire-end]');
       const viewNavigation=e.target.closest && e.target.closest('#minimapSvg,#zoomIn,#zoomOut,#minimapAllFit,#minimapSelectionFit,[data-menu-action="zoomIn"],[data-menu-action="zoomOut"],[data-menu-action="fit"],[data-menu-action="fitSelection"]');
@@ -9124,6 +9235,7 @@ module.exports = QRCode;
       case 'delete': deleteSelection(); break;
       case 'modeLessons': lessonSwitchToTasks(); break;
       case 'modeSandbox': if(lessonActiveId)lessonExit(); else lessonPanelVisibility(false); break;
+      case 'fullscreen': toggleFullscreen(); break;
       case 'grid': setGridVisible(!gridVisible); break;
       case 'zoomIn': zoomBy(1,!!(event.shiftKey||shiftKeyHeld)); break;
       case 'zoomOut': zoomBy(-1,!!(event.shiftKey||shiftKeyHeld)); break;
@@ -9210,8 +9322,8 @@ module.exports = QRCode;
   function createNodeRecord(type,x,y){
     const m=TYPES[type],frequency=type==='CLOCK'?1:undefined,phaseOffset=type==='CLOCK'?0:undefined;
     const initialClockState=type==='CLOCK'?clockStateAt({frequency,phaseOffset}):false;
-    const record={id:uid('n'),type,x:snap(x),y:snap(y),label:type==='DISPLAY'?null:m.label,text:type==='LABEL'?m.label:undefined,state:type==='HIGH'?true:initialClockState,q:false,clockWasHigh:false,frequency,phaseOffset,arrowDirection:type==='ARROW'?'right':undefined,arrowLength:type==='ARROW'?96:undefined,arrowScale:type==='ARROW'?1.25:undefined,arrowColor:type==='ARROW'?DEFAULT_ARROW_COLOR:undefined,bufferDelay:type==='BUFFER'?1:undefined,bufferOutput:type==='BUFFER'?false:undefined,bufferLastInput:type==='BUFFER'?null:undefined,bufferQueue:type==='BUFFER'?[]:undefined,busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?2:undefined,displayBits:type==='DISPLAY'?2:undefined,muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,selectedChannel:0,portValues:type==='DEMUX'?[false,false]:undefined,ledColor:type==='OUTPUT'?DEFAULT_LED_COLOR:undefined,value:type==='HIGH'};
-    if(m.kind==='custom'){record.moduleId=m.moduleId;record.moduleState={};record.label=m.label;}
+    const record={id:uid('n'),type,x:snap(x),y:snap(y),label:type==='DISPLAY'?null:defaultNodeName({type}),text:type==='LABEL'?m.label:undefined,state:type==='HIGH'?true:initialClockState,q:false,clockWasHigh:false,frequency,phaseOffset,arrowDirection:type==='ARROW'?'right':undefined,arrowLength:type==='ARROW'?96:undefined,arrowScale:type==='ARROW'?1.25:undefined,arrowColor:type==='ARROW'?DEFAULT_ARROW_COLOR:undefined,bufferDelay:type==='BUFFER'?1:undefined,bufferOutput:type==='BUFFER'?false:undefined,bufferLastInput:type==='BUFFER'?null:undefined,bufferQueue:type==='BUFFER'?[]:undefined,busWidth:(type==='BUS_COMBINER'||type==='BUS_SPLITTER')?2:undefined,displayBits:type==='DISPLAY'?2:undefined,muxInputs:type==='MUX'?2:undefined,demuxOutputs:type==='DEMUX'?2:undefined,selectedChannel:0,portValues:type==='DEMUX'?[false,false]:undefined,ledColor:type==='OUTPUT'?DEFAULT_LED_COLOR:undefined,value:type==='HIGH'};
+    if(m.kind==='custom'){record.moduleId=m.moduleId;record.moduleState={};}
     if(type==='MODULE_INPUT'||type==='MODULE_OUTPUT'){
       const same=nodes.filter(node=>node.type===type);record.portOrder=same.reduce((max,node)=>Math.max(max,Number(node.portOrder)||0),-1)+1;
       const base=type==='MODULE_INPUT'?'Eingang':'Ausgang',used=new Set(same.map(node=>String(node.label||'').toLocaleLowerCase('de')));
@@ -9641,7 +9753,7 @@ module.exports = QRCode;
     const editor=document.querySelector('.board-tab-rename-input');
     if(editor&&!editor.contains(e.target))editor._finishBoardRename?.(true,true);
   },true);
-  let boardTabDragId=null,boardTabDragMoved=false,ignoreBoardTabClickUntil=0,boardTabDragOriginalOrder=null,boardTabDropCommitted=false;
+  let boardTabDrag=null,ignoreBoardTabClickUntil=0;
   const boardTabsRoot=$('boardTabs');
   // In der schmalen Tableiste das vertikale Mausrad horizontal übersetzen:
   // nach unten = rechts, nach oben = links. Trackpad-Querbewegungen bleiben nutzbar.
@@ -9653,59 +9765,122 @@ module.exports = QRCode;
     event.preventDefault();
     boardTabsRoot.scrollLeft+=rawDelta*unit;
   },{passive:false});
-  function clearBoardTabDropHints(){boardTabsRoot.querySelectorAll('.dragging,.drop-before,.drop-after').forEach(tab=>tab.classList.remove('dragging','drop-before','drop-after'));}
-  boardTabsRoot.addEventListener('dragstart',event=>{
-    const tab=event.target.closest('[data-board-id]');
-    if(!tab||tab.dataset.boardId==='main'||event.target.closest('.board-tab-close')||event.target.closest('.board-tab-rename-input')){event.preventDefault();return;}
-    boardTabDragId=tab.dataset.boardId;boardTabDragMoved=false;boardTabDropCommitted=false;
-    boardTabDragOriginalOrder=[...boardTabsRoot.querySelectorAll('[data-board-id]')].map(item=>item.dataset.boardId);
-    event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',boardTabDragId);
-    tab.classList.add('dragging');
-    try{event.dataTransfer.setDragImage(tab,Math.min(event.offsetX||tab.offsetWidth/2,tab.offsetWidth),event.offsetY||tab.offsetHeight/2);}catch(_){}
-  });
-  boardTabsRoot.addEventListener('dragover',event=>{
-    if(!boardTabDragId)return;
-    event.preventDefault();event.dataTransfer.dropEffect='move';
-    const dragged=[...boardTabsRoot.querySelectorAll('[data-board-id]')].find(tab=>tab.dataset.boardId===boardTabDragId);
-    const target=event.target.closest('[data-board-id]');
-    if(!dragged||!target||target===dragged)return;
-    clearBoardTabDropHints();dragged.classList.add('dragging');
-    if(target.dataset.boardId==='main'){
-      target.classList.add('drop-after');
-      if(dragged!==target.nextElementSibling)boardTabsRoot.insertBefore(dragged,target.nextElementSibling);
-      boardTabDragMoved=true;return;
+  // Pointer-Drag mit echtem Tab und FLIP-Animation der Nachbarn. Layoutpositionen
+  // werden unabhängig von laufenden visuellen Animationen berechnet.
+  const tabSlideAnimations=new Map();
+  const moduleTabs=()=>[...boardTabsRoot.querySelectorAll('.module-board-tab')];
+  function tabLayoutLeft(tab){
+    const main=boardTabsRoot.firstElementChild;
+    return main.getBoundingClientRect().left+tab.offsetLeft-main.offsetLeft;
+  }
+  function animateTabNeighbors(before,dragged){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    for(const tab of moduleTabs()){
+      if(tab===dragged)continue;
+      const old=before.get(tab);
+      tabSlideAnimations.get(tab)?.cancel();tabSlideAnimations.delete(tab);
+      if(old===undefined)continue;
+      const dx=old-tab.getBoundingClientRect().left;
+      if(Math.abs(dx)<.5)continue;
+      const animation=tab.animate([{transform:`translateX(${dx}px)`},{transform:'translateX(0)'}],{duration:160,easing:'cubic-bezier(.2,.75,.25,1)'});
+      tabSlideAnimations.set(tab,animation);
+      animation.onfinish=()=>{if(tabSlideAnimations.get(tab)===animation)tabSlideAnimations.delete(tab);};
     }
-    const rect=target.getBoundingClientRect(),after=event.clientX>rect.left+rect.width/2;
-    target.classList.add(after?'drop-after':'drop-before');
-    if(after){if(target.nextElementSibling!==dragged)boardTabsRoot.insertBefore(dragged,target.nextElementSibling);}
-    else if(dragged!==target)boardTabsRoot.insertBefore(dragged,target);
-    // Der Hauptschaltkreis ist ein fest verankerter linker Anfangspunkt.
-    const main=boardTabsRoot.querySelector('[data-board-id="main"]');
-    if(main&&main!==boardTabsRoot.firstElementChild)boardTabsRoot.insertBefore(main,boardTabsRoot.firstElementChild);
-    boardTabDragMoved=true;
-  });
-  boardTabsRoot.addEventListener('drop',event=>{
-    if(!boardTabDragId)return;
-    event.preventDefault();
-    const order=[...boardTabsRoot.querySelectorAll('[data-board-id]')].map(tab=>tab.dataset.boardId).filter(id=>id!=='main');
-    const byIdMap=new Map(moduleDefinitions.map(def=>[def.id,def]));
-    const reordered=order.map(id=>byIdMap.get(id)).filter(Boolean);
-    if(reordered.length===moduleDefinitions.length){
-      const changed=reordered.some((def,index)=>moduleDefinitions[index]?.id!==def.id);
-      if(changed){moduleDefinitions=reordered;saveLocal(true,true);showToast('Reihenfolge der Unterfunktionen geändert');ignoreBoardTabClickUntil=Date.now()+500;}
+  }
+  function updateBoardTabDrag(){
+    const drag=boardTabDrag;
+    if(!drag?.started||!drag.tab.isConnected)return;
+    const {tab,x,grabOffset}=drag;
+    const first=moduleTabs()[0],main=boardTabsRoot.firstElementChild;
+    const leftLimit=tabLayoutLeft(first),rawLeft=x-grabOffset;
+    const blocked=rawLeft<leftLimit-2;
+    boardTabsRoot.classList.toggle('blocked-left',blocked);
+    const desiredLeft=Math.max(leftLimit,rawLeft);
+    // Maßgeblich ist die dem Nachbarn zugewandte Kante, nicht die Mitte
+    // des gezogenen Tabs. So reicht bei breiten Tabs die halbe Überdeckung
+    // eines schmalen Nachbarn; bei sehr schmalen Tabs gilt dessen Mitte
+    // ebenfalls als Umschaltpunkt (50 % Überdeckung wäre ggf. unmöglich).
+    const width=tab.offsetWidth;
+    const reachesHalf=(neighbor,after)=>{
+      const middle=tabLayoutLeft(neighbor)+neighbor.offsetWidth/2;
+      return after?desiredLeft+width>=middle:desiredLeft<=middle;
+    };
+    const previous=tab.previousElementSibling,next=tab.nextElementSibling;
+    let target=null,after=false;
+    if(previous&&previous!==main&&reachesHalf(previous,false)){target=previous;}
+    else if(next&&reachesHalf(next,true)){target=next;after=true;}
+    if(target){
+      const before=new Map(moduleTabs().filter(t=>t!==tab).map(t=>[t,t.getBoundingClientRect().left]));
+      // Ein großer Zeigersprung darf mehrere Nachbarn überqueren.
+      while(target){
+        boardTabsRoot.insertBefore(tab,after?target.nextElementSibling:target);
+        const candidate=after?tab.nextElementSibling:tab.previousElementSibling;
+        if(!candidate||candidate===main)break;
+        target=reachesHalf(candidate,after)?candidate:null;
+      }
+      animateTabNeighbors(before,tab);
     }
-    boardTabDropCommitted=true;
-    boardTabDragId=null;boardTabDragMoved=false;clearBoardTabDropHints();
-    renderBoardTabs();
-  });
-  boardTabsRoot.addEventListener('dragend',()=>{
-    if(boardTabDragMoved)ignoreBoardTabClickUntil=Date.now()+450;
-    if(!boardTabDropCommitted&&boardTabDragOriginalOrder){
-      const tabById=new Map([...boardTabsRoot.querySelectorAll('[data-board-id]')].map(tab=>[tab.dataset.boardId,tab]));
-      boardTabDragOriginalOrder.forEach(id=>{const tab=tabById.get(id);if(tab)boardTabsRoot.appendChild(tab);});
+    const last=moduleTabs().at(-1);
+    const rightLimit=Math.max(leftLimit,tabLayoutLeft(last)+last.offsetWidth-tab.offsetWidth);
+    const position=Math.min(rightLimit,desiredLeft);
+    tab.style.transform=`translateX(${position-tabLayoutLeft(tab)}px)`;
+  }
+  function boardTabScrollFrame(){
+    const drag=boardTabDrag;if(!drag?.started)return;
+    const rect=boardTabsRoot.getBoundingClientRect(),edge=26;
+    const delta=drag.x<rect.left+edge?-Math.min(12,(rect.left+edge-drag.x)*.4):drag.x>rect.right-edge?Math.min(12,(drag.x-rect.right+edge)*.4):0;
+    if(delta){const before=boardTabsRoot.scrollLeft;boardTabsRoot.scrollLeft+=delta;if(before!==boardTabsRoot.scrollLeft)updateBoardTabDrag();}
+    drag.frame=requestAnimationFrame(boardTabScrollFrame);
+  }
+  function finishBoardTabDrag(commit){
+    const drag=boardTabDrag;if(!drag)return;
+    boardTabDrag=null;cancelAnimationFrame(drag.frame);
+    if(!drag.started)return;
+    const tab=drag.tab;
+    const before=new Map(moduleTabs().map(t=>[t,t.getBoundingClientRect().left]));
+    boardTabsRoot.classList.remove('reordering','blocked-left');
+    for(const animation of tabSlideAnimations.values())animation.cancel();
+    tabSlideAnimations.clear();
+    tab.classList.remove('dragging');tab.style.transform='';
+    if(boardTabsRoot.hasPointerCapture(drag.pointerId))boardTabsRoot.releasePointerCapture(drag.pointerId);
+    ignoreBoardTabClickUntil=Date.now()+180;
+    const order=moduleTabs().map(t=>t.dataset.boardId);
+    const byId=new Map(moduleDefinitions.map(def=>[def.id,def]));
+    const reordered=order.map(id=>byId.get(id)).filter(Boolean);
+    if(commit&&reordered.length===moduleDefinitions.length){
+      if(reordered.some((def,index)=>moduleDefinitions[index]?.id!==def.id)){
+        moduleDefinitions=reordered;saveLocal(true,true);showToast('Reihenfolge der Unterfunktionen geändert');
+      }
+    }else{
+      const tabs=new Map(moduleTabs().map(t=>[t.dataset.boardId,t]));
+      drag.originalOrder.forEach(id=>{if(tabs.has(id))boardTabsRoot.appendChild(tabs.get(id));});
     }
-    boardTabDragId=null;boardTabDragMoved=false;boardTabDragOriginalOrder=null;boardTabDropCommitted=false;clearBoardTabDropHints();
+    animateTabNeighbors(before,null);
+  }
+  boardTabsRoot.addEventListener('pointerdown',e=>{
+    ignoreBoardTabClickUntil=0;
+    if(e.button!==0||!e.isPrimary||moduleSimulation||boardTabDrag||e.target.closest('.board-tab-close,.board-tab-rename-input'))return;
+    const tab=e.target.closest('.module-board-tab');if(!tab)return;
+    boardTabDrag={tab,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,x:e.clientX,grabOffset:e.clientX-tab.getBoundingClientRect().left,started:false,originalOrder:moduleTabs().map(t=>t.dataset.boardId)};
   });
+  window.addEventListener('pointermove',e=>{
+    const drag=boardTabDrag;if(!drag||e.pointerId!==drag.pointerId)return;
+    if(!drag.started){
+      if(Math.abs(e.clientX-drag.startX)<(e.pointerType==='touch'?11:5))return;
+      if(!drag.tab.isConnected||boardTabContextId!==null){finishBoardTabDrag(false);return;}
+      drag.started=true;cancelPanelTouchContextPress();
+      tabSlideAnimations.get(drag.tab)?.cancel();tabSlideAnimations.delete(drag.tab);
+      boardTabsRoot.setPointerCapture(e.pointerId);boardTabsRoot.classList.add('reordering');drag.tab.classList.add('dragging');
+      drag.frame=requestAnimationFrame(boardTabScrollFrame);
+    }
+    e.preventDefault();drag.x=e.clientX;updateBoardTabDrag();
+  },{passive:false});
+  window.addEventListener('pointerup',e=>{if(boardTabDrag?.pointerId===e.pointerId)finishBoardTabDrag(true);});
+  window.addEventListener('pointercancel',e=>{if(boardTabDrag?.pointerId===e.pointerId)finishBoardTabDrag(false);});
+  boardTabsRoot.addEventListener('lostpointercapture',e=>{if(boardTabDrag?.pointerId===e.pointerId)finishBoardTabDrag(false);});
+  window.addEventListener('blur',()=>finishBoardTabDrag(false));
+  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&boardTabDrag?.started){e.preventDefault();e.stopImmediatePropagation();finishBoardTabDrag(false);}},true);
+  boardTabsRoot.addEventListener('dragstart',e=>e.preventDefault());
   $('boardTabs').addEventListener('dblclick',e=>{
     if(moduleSimulation)return;
     const clickedTab=e.target.closest('[data-board-id]');
@@ -10006,6 +10181,28 @@ module.exports = QRCode;
   $('shareLinkTab').addEventListener('click',()=>setShareView('link'));
   $('shareQrTab').addEventListener('click',()=>setShareView('qr'));
   const PATCH_LOG = [
+    {version:'V152',title:'Einheitliche Bauteilbeschriftung',items:[
+      'Bauteilnamen sind auf 15 Zeichen begrenzt. Leere Namen werden beim Übernehmen durch den Standardnamen ersetzt.',
+      'LEDs zeigen oben den Namen, mittig die Lampe und unten den Signalzustand. Eingabequellen haben einen zentrierten Namen und darunter ihre bisherigen Symbole.',
+      'MUX und DEMUX verwenden dieselben Standardnamen in Schaltung und Eigenschaften, ohne Kanalverhältnis im Schaltungstitel. Die Auswahlfelder zeigen nur die Kanalanzahl.'
+    ]},
+    {version:'V151',title:'Einheitliche Bauteilnamen',items:[
+      'Bauteilnamen sind auf 20 Zeichen begrenzt; führende und mehrfache Leerzeichen werden bei der Eingabe und Übernahme bereinigt.',
+      'Dieselbe Begrenzung gilt beim Laden und Erzeugen von Bauteilen sowie beim Kopieren von Modulschnittstellen. Tabnamen und freie Textlabel-Inhalte bleiben unverändert.'
+    ]},
+    {version:'V150',title:'Präzise Tabnamen und Textcursor',items:[
+      'Tabnamen verhindern führende und mehrfache Leerzeichen bereits bei der Eingabe. Einfügen, Löschen, Sonderzeichen und mobile Texteingabe werden einheitlich behandelt.',
+      'Ein natives sichtbares Textfeld ersetzt die transparente Cursor-Ebene. Die Tabbreite folgt dem Text; bei langen Namen bleibt die Tableiste horizontal scrollbar.'
+    ]},
+    {version:'V149',title:'Präzise Tab-Schwelle und Vollbildmodus',items:[
+      'Beim Umsortieren löst die Vorderkante des gezogenen Tabs den Wechsel an der Mitte des Nachbartabs aus, auch bei unterschiedlich breiten Unterfunktionen.',
+      'Der Kopierknopf im Teilen-Dialog erscheint in der Linkansicht bereits blau und bleibt bis zur fertigen URL funktional gesperrt.',
+      'Ansicht → Vollbildmodus und F11 schalten das Dokumentvollbild in unterstützten Browsern um. Auf iPhones ohne Fullscreen-API verweist ein Hinweis auf die Home-Bildschirm-Web-App.'
+    ]},
+    {version:'V148',title:'Dynamische Tableiste und modales Teilen',items:[
+      'Unterfunktions-Tabs folgen beim Ziehen dem Zeiger; Nachbarn gleiten beim Überschreiten ihrer Mitte zur freien Position. Der Hauptschaltkreis bleibt fest, sein Trenner leuchtet bei einem Zug nach links rot.',
+      'Einzelklicks auf Tabs haben eine kurze Druckanimation. Der Teilen-Dialog verdunkelt die gesamte Anwendung und sperrt deren Bedienung bis zum Schließen.'
+    ]},
     {version:'V147',title:'Einheitliche Größe des Teilen-Dialogs',items:[
       'Alle vier Dialogecken sind abgerundet. Ober- und unterhalb des QR-Codes bleibt Abstand.',
       'Die maximale Höhe des Linkfeldes entspricht dem QR-Bereich. Die feste Oberkante wird so berechnet, dass der Dialog bei voller Größe vertikal mittig liegt.'
@@ -10876,8 +11073,8 @@ module.exports = QRCode;
     const button=e.target.closest('[data-patch-version]');if(!button)return;
     renderPatchLog(button.dataset.patchVersion);
   });
-  $('closeShare').addEventListener('click', () => $('shareModal').classList.remove('show'));
-  $('shareModal').addEventListener('click', e => { if (e.target === $('shareModal')) $('shareModal').classList.remove('show'); });
+  $('closeShare').addEventListener('click',closeShareDialog);
+  $('shareModal').addEventListener('click', e => { if (e.target === $('shareModal')) closeShareDialog(); });
   $('importFile').addEventListener('change', e => { importConfigFile(e.target.files[0]); e.target.value=''; });
 
   scene.addEventListener('wheel', e => {
@@ -11730,7 +11927,7 @@ module.exports = QRCode;
       clearPalettePlacement();
       if(pendingPaste) cancelPendingPaste();
       armedFrom=null;
-      $('shareModal').classList.remove('show'); $('patchLogModal').classList.remove('show');
+      closeShareDialog(); $('patchLogModal').classList.remove('show');
       $('helpModal').classList.remove('show'); $('newCircuitModal').classList.remove('show');
       if($('deleteModuleModal').classList.contains('show'))closeDeleteModuleDialog();
       closeMenus();
