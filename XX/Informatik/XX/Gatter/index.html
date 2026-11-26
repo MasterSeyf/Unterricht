@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#101722" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<title>GatterLab V152</title>
+<title>GatterLab V169</title>
 <style>
   :root {
     color-scheme: dark;
@@ -44,6 +44,7 @@
   .menu-item .menu-shortcut { margin-left:auto; color:#8194aa; font-size:10px; }
   .menu-divider { height:1px; margin:5px 4px; background:#2c3e52; }
   .menu-item[aria-checked="false"] .menu-check { color:transparent; }
+  .menu-item[aria-checked] .menu-check { order:2; margin-left:auto; flex:none; }
   .menu-item.danger { color:#ffb0b8; }
   .toolbar { display: flex; align-items: center; gap: 6px; }
   .toolbar-spacer { flex: 1; }
@@ -191,7 +192,7 @@
   .sidebar-note { margin: 5px 13px 14px; padding: 10px 11px; border: 1px solid #2b4055; border-radius: 9px; color: #9aadc1; background: #172331; font-size: 11px; }
   .sidebar-note strong { color: #dce9f6; display: block; font-size: 11px; margin-bottom: 3px; }
   .stage-wrap { min-width: 0; min-height: 0; display: flex; flex-direction: column; position: relative; background: #0f1722; }
-  .panel-toggle { position:absolute; top:50%; z-index:11; display:flex; align-items:center; justify-content:center; width:24px; height:68px; padding:0; border:1px solid #405b76; background:linear-gradient(180deg,#24384c,#172535); color:#c4def5; box-shadow:0 5px 16px #0007; cursor:pointer; font-size:25px; line-height:1; opacity:.86; transition:left .24s ease,right .24s ease,background .15s,opacity .15s,box-shadow .15s; }
+  .panel-toggle { position:absolute; top:calc(50% + 7px); z-index:11; display:flex; align-items:center; justify-content:center; width:24px; height:68px; padding:0; border:1px solid #405b76; background:linear-gradient(180deg,#24384c,#172535); color:#c4def5; box-shadow:0 5px 16px #0007; cursor:pointer; font-size:25px; line-height:1; opacity:.86; transition:left .24s ease,right .24s ease,background .15s,opacity .15s,box-shadow .15s; }
   .panel-toggle svg { display:block; width:19px; height:19px; flex:0 0 19px; pointer-events:none; }
   .panel-toggle:hover { opacity:1; background:#2b4660; box-shadow:0 7px 20px #0009; }
   .panel-toggle:focus-visible { outline:2px solid var(--accent-2); outline-offset:2px; }
@@ -201,7 +202,7 @@
   .panel-toggle-left::after { content:''; position:absolute; right:4px; top:50%; width:2px; height:19px; transform:translateY(-50%); border-radius:4px; background:#8eabc6; opacity:.5; pointer-events:none; }
   .panel-toggle-left svg { transform:translateX(-3px); }
   .panel-toggle-left.is-dragging { opacity:1; border-color:#78bff0; box-shadow:0 0 0 2px #63b9ec55,0 6px 24px #0009; }
-  .panel-width-hint { position:absolute; left:30px; top:50%; transform:translateY(-50%); z-index:12; padding:6px 9px; border:1px solid #5397c2; border-radius:7px; background:#183249; color:#d9eeff; font-size:10px; font-weight:650; white-space:nowrap; box-shadow:0 5px 16px #0008; pointer-events:none; }
+  .panel-width-hint { position:absolute; left:30px; top:calc(50% + 7px); transform:translateY(-50%); z-index:12; padding:6px 9px; border:1px solid #5397c2; border-radius:7px; background:#183249; color:#d9eeff; font-size:10px; font-weight:650; white-space:nowrap; box-shadow:0 5px 16px #0008; pointer-events:none; }
   .panel-width-hint[hidden] { display:none; }
   .panel-toggle-right { right:0; transform:translateY(-50%); border-right:0; border-radius:10px 0 0 10px; }
   .workspace.left-collapsed .panel-toggle-left { left:0; }
@@ -286,10 +287,6 @@
   .palette-led-picker { position:absolute; z-index:15; box-sizing:border-box; width:200px; max-width:calc(100% - 12px); padding:8px 9px 9px; border:1px solid #526c83; border-radius:10px; background:#172738; box-shadow:0 9px 25px #000a; color:#cbdbe9; }
   .palette-led-picker[hidden] { display:none !important; }
   .palette-led-picker-title { font-size:10px; font-weight:700; margin-bottom:7px; color:#dceaf6; text-align:center; }
-  .palette-led-picker-close { position:absolute; right:10px; top:6px; display:grid; place-items:center; width:19px; height:19px; padding:0; border:0; border-radius:5px; background:transparent; color:#9fb3c7; font-size:17px; line-height:1; cursor:pointer; }
-  /* Die Klickfläche rückt 3 px nach unten, das sichtbare × bleibt exakt stehen. */
-  .palette-led-picker-close-glyph { display:block; transform:translateY(-3px); pointer-events:none; }
-  .palette-led-picker-close:hover,.palette-led-picker-close:focus-visible { color:#fff; background:#34495d; outline:1px solid #7392ac; }
   .palette-led-picker-colors { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
   .palette-led-choice { display:grid; place-items:center; width:100%; height:30px; padding:0; background:#23384b; border:1px solid #445a6c; border-radius:7px; cursor:pointer; }
   .palette-led-choice:hover,.palette-led-choice:focus-visible { border-color:#eaf7ff; outline:1px solid #94caff; outline-offset:1px; }
@@ -877,12 +874,12 @@
   .lesson-scroll { flex:1; min-height:0; overflow-y:auto; padding:13px; scrollbar-color:#527287 transparent; opacity:1; transition:opacity .16s ease; }
   .lesson-lead { font-size:12px; line-height:1.6; color:#c5d5e3; margin:0 0 13px; }
   .lesson-lead strong { display:block; color:#e3fff6; margin-bottom:4px; }
-  .lesson-progress { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 6px; color:#9baebf; font-size:10px; }
-  .lesson-progress strong { color:#acf6cf; }
   .lesson-progress-track { width:100%; height:5px; border-radius:8px; background:#304052; overflow:hidden; margin-bottom:15px; }
   .lesson-progress-track>span { display:block; height:100%; background:linear-gradient(90deg,#43a2c5,#65ddad); transition:width .22s; }
   .lesson-unit-header { display:flex; align-items:center; gap:8px; margin:15px 0 7px; font-size:10px; font-weight:800; letter-spacing:.6px; color:#9cc6cd; text-transform:uppercase; }
   .lesson-unit-header:after { content:''; flex:1; height:1px; background:#324b5e; }
+  .lesson-unit-preview .lesson-unit-header:after { order:1; }
+  .lesson-unit-preview .lesson-unit-header small { order:2; flex:none; }
   .lesson-list { display:grid; gap:6px; }
   .lesson-list-btn { text-align:left; display:flex; align-items:center; gap:9px; width:100%; padding:9px 10px; background:#1d3042; border:1px solid #334c60; border-radius:9px; color:#dbeaf4; font-size:11px; }
   .lesson-list-btn:hover { background:#29465d; border-color:#568aa2; }
@@ -895,23 +892,36 @@
   .lesson-done-mark { color:#73e5aa; font-weight:800; }
   .lesson-back { background:transparent; border:0; color:#96d5d7; padding:0; font-size:11px; margin-bottom:11px; }
   .lesson-back:hover { text-decoration:underline; color:#d9ffff; }
-  .lesson-kicker { color:#a2e7d2; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.75px; }
-  .lesson-name { font-size:19px; font-weight:800; line-height:1.25; margin:5px 0 12px; color:#f2fcff; }
-  .lesson-name-row { display:flex; align-items:flex-start; gap:9px; margin:5px 0 12px; }
-  .lesson-name-row .lesson-name { flex:1; min-width:0; margin:0; }
+  .lesson-kicker { color:#a2e7d2; font-size:15px; font-weight:800; line-height:1.25; }
+  .lesson-name { font-size:15px; font-weight:800; line-height:1.25; margin:5px 0 12px; color:#f2fcff; }
+  .lesson-detail-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; column-gap:9px; row-gap:4px; }
+  .lesson-detail-heading .lesson-kicker { grid-column:1; grid-row:1; }
+  .lesson-detail-heading .lesson-name { grid-column:1; grid-row:2; min-width:0; margin:0; }
+  .lesson-detail-heading .lesson-reset-icon { grid-column:2; grid-row:1 / span 2; justify-self:end; align-self:start; }
+  .lesson-lead { text-align:justify; }
+  .lesson-lead + .lesson-lead { margin-top:-5px; }
+  /* Fließtexte im Blocksatz, nicht Überschriften, Tabellen oder kurze Bedienlabels. */
+  .lesson-panel p, .lesson-hint-text, .lesson-reflection-choice span:last-child,
+  .help-section p, .help-section li, .inspector-description, .sidebar-note { text-align:justify; text-justify:inter-word; hyphens:auto; }
+  .lesson-reflection-choice span:last-child { flex:1; min-width:0; }
+  .help-intro { text-align:justify !important; }
   .lesson-reset-icon { margin:0; font-size:21px; }
-  .lesson-intro { padding:12px; margin:0 0 13px; background:#213d49; border:1px solid #416f76; border-radius:10px; }
+  .lesson-detail-heading .lesson-kicker,.lesson-detail-heading .lesson-name { position:relative; top:-3px; }
+  .lesson-phase-track { position:relative; top:-2px; }
+  .lesson-intro { padding:12px; margin:0; background:#213d49; border:1px solid #416f76; border-radius:10px; }
   .lesson-intro h3 { margin:0 0 7px; font-size:12px; color:#aff5d8; }
   .lesson-intro p { margin:0; font-size:11px; line-height:1.65; color:#d0e7e6; }
-  .lesson-intro button { margin-top:9px; color:#91e5ca; border:0; background:transparent; padding:0; font-size:11px; }
-  .lesson-objective { color:#e4eefa; font-size:12px; line-height:1.6; margin:0 0 11px; }
+  .lesson-intro .lesson-action { margin-top:10px; width:100%; }
+  #lessonTeacherCode { font-size:20px; min-height:40px; }
+  .lesson-objective { color:#e4eefa; font-size:12px; line-height:1.6; margin:0 0 6px; }
   .lesson-actions { display:flex; gap:7px; flex-wrap:wrap; margin:12px 0; }
   .lesson-action { flex:1; min-width:90px; border-radius:8px; border:1px solid #436176; background:#24394c; color:#d9eff8; padding:9px 10px; font-size:11px; font-weight:650; }
   .lesson-action:hover { background:#335068; }
   .lesson-action.primary { background:#257965; border-color:#39bc99; color:#edfff6; }
   .lesson-action.primary:hover { background:#32977a; }
-  .lesson-next-action:not(:disabled) { background:#254a40; border-color:#4a9c83; color:#d5ffed; }
-  .lesson-next-action:not(:disabled):hover { background:#326958; }
+  .lesson-task-footer .lesson-action:not(:disabled) { background:#257965; border-color:#39bc99; color:#edfff6; }
+  .lesson-task-footer .lesson-action:not(:disabled):hover { background:#32977a; }
+  .lesson-task-footer .lesson-action:disabled { background:#24394c; border-color:#436176; color:#d9eff8; opacity:.45; cursor:not-allowed; }
   .lesson-action:disabled { cursor:not-allowed; opacity:.45; }
   .lesson-action:focus-visible,.lesson-list-btn:focus-visible,.lesson-icon-btn:focus-visible { outline:2px solid #9ae9d5; outline-offset:2px; }
   .lesson-hint { background:#403826; border:1px solid #7a653a; border-radius:8px; color:#ffe2a5; padding:10px; margin-bottom:11px; font-size:11px; line-height:1.6; }
@@ -920,22 +930,118 @@
   .lesson-hint-text { margin:0; overflow-wrap:anywhere; }
   .lesson-hint-nav { display:flex; justify-content:flex-end; align-items:center; gap:6px; flex:none; }
   .lesson-hint-nav button { display:grid; place-items:center; width:27px; height:25px; flex:none; border:1px solid #957746; border-radius:6px; background:#58472c; color:#ffe9b3; font-size:17px; line-height:1; padding:0; }
+  .lesson-hint-nav .hint-chevron { display:block; transform:translateY(-2px); pointer-events:none; }
   .lesson-hint-nav button:hover:not(:disabled) { background:#765d34; border-color:#c9a36a; }
   .lesson-hint-nav button:disabled { opacity:.35; cursor:default; }
   .lesson-hint-nav button:focus-visible { outline:2px solid #ffe2a5; outline-offset:2px; }
-  .lesson-result { margin-top:12px; border-radius:9px; border:1px solid #4f7183; padding:11px; background:#192f40; }
-  .lesson-result.passed { border-color:#4ab98f; background:#1b3b36; }
-  .lesson-result.failed { border-color:#9e7652; background:#342c2c; }
-  .lesson-result-head { display:flex; gap:7px; align-items:center; font-size:12px; font-weight:800; margin-bottom:6px; }
-  .lesson-result.passed .lesson-result-head { color:#95f2bd; }
-  .lesson-result.failed .lesson-result-head { color:#f5bf8e; }
-  .lesson-result p { color:#d5e5ed; font-size:11px; line-height:1.55; margin:0 0 9px; }
   .lesson-truth { border-collapse:collapse; width:100%; font-size:10px; text-align:center; font-variant-numeric:tabular-nums; }
   .lesson-truth th,.lesson-truth td { padding:5px 3px; border-bottom:1px solid #466074; }
   .lesson-truth th { color:#a9c3d7; font-weight:750; }
   .lesson-truth .lesson-truth-actual { border-left:2px solid #7693a5; padding-left:9px; }
   .lesson-truth .mismatch { color:#ffb28e; font-weight:800; background:#633d343b; }
   .lesson-truth .match { color:#a9f3ca; }
+  .lesson-test-card tr.measurement-error-row td:first-child { box-shadow:inset 3px 0 #e47e83; }
+  .lesson-test-card tr.measurement-error-row td:not(.lesson-observe-cell) { background-color:#633d3429; }
+  .lesson-phase-track { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;margin:7px 0 4px; }
+  .lesson-phase-step { display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 2px;color:#91a6b7;font-size:9px;text-align:center;border-bottom:2px solid #354c60; }
+  .lesson-phase-step { min-width:0; background:#142533; border:1px solid transparent; border-bottom:2px solid #354c60; border-radius:7px 7px 0 0; cursor:pointer; font:inherit; font-size:9px; line-height:1.25; }
+  .lesson-phase-step span { white-space:nowrap; font-weight:600; }
+  .lesson-phase-step:not(:disabled):hover { background:#254153; color:#f2fffa; }
+  .lesson-phase-step:disabled { opacity:.42; cursor:default; }
+  .lesson-phase-step:focus-visible { outline:2px solid var(--accent-2); outline-offset:1px; }
+  .lesson-phase-review fieldset,.lesson-preview-fieldset { min-width:0; margin:0; padding:0; border:0; }
+  .lesson-phase-review > .lesson-action { width:100%; }
+  .lesson-phase-step b { display:grid;place-items:center;width:21px;height:21px;border:1px solid #49677b;border-radius:50%;font-size:11px; }
+  .lesson-phase-step { background:#222e39; color:#b2bec9; border-bottom-color:#53616f; }
+  .lesson-phase-step b { background:#303d49; border-color:#607080; }
+  .lesson-phase-step.done { background:#224138; color:#a9e5ce; border-color:#4c997e; }
+  .lesson-phase-step.done b { background:#286453; border-color:#63d9ad; color:#e4fff5; }
+  .lesson-phase-step.current { background:#514325; color:#ffe8aa; border-color:#d9b65f; }
+  .lesson-phase-step.current b { background:#765d34; border-color:#d9b65f; color:#fff4d2; }
+  .lesson-phase-step.done:not(:disabled):hover { background:#285047; }
+  .lesson-phase-step.current:not(:disabled):hover { background:#5c4a2b; }
+  .lesson-learning-card { padding:11px;border:1px solid #3b566b;background:#182b3a;border-radius:10px;margin:0 0 6px; position:relative; }
+  .lesson-learning-card h3 { color:#e1f4f6;font-size:13px;margin:0 0 7px; }
+  .lesson-learning-card.has-phase-help h3 { padding-right:29px; min-height:24px; display:flex;align-items:center; }
+  .lesson-phase-help summary { position:absolute;top:10px;right:10px;display:grid;place-items:center;width:24px;height:24px;border:1px solid #49677b;border-radius:7px;background:#22384a;color:#bcd8eb;font-weight:750;font-size:13px;cursor:pointer;list-style:none; }
+  .lesson-phase-help summary::-webkit-details-marker { display:none; }
+  .lesson-phase-help summary:hover,.lesson-phase-help[open] summary { background:#305565;border-color:#79b8c7;color:#edfaff; }
+  .lesson-phase-help summary:focus-visible { outline:2px solid #a1e4e2;outline-offset:2px; }
+  .lesson-learning-card .lesson-phase-help p { margin:0 0 6px; }
+  .lesson-learning-card .lesson-bit-pair { vertical-align:middle; }
+  .lesson-learning-card .lesson-bit { height:27px; box-sizing:border-box; }
+  .lesson-learning-card p { color:#c6d7e3;font-size:11px;line-height:1.6;margin:0 0 9px; }
+  .lesson-learning-card .lesson-action { width:100%;margin-top:9px; }
+  .lesson-protected-region {fill:#67b7ff0b;stroke:#7ca4c399;stroke-width:1.5;stroke-dasharray:6 4;}
+  .lesson-protected-caption {fill:#9bbbd2;font-size:10px;font-weight:650;letter-spacing:.25px;}
+  .lesson-learning-card .lesson-truth td,.lesson-learning-card .lesson-truth th { padding:6px 2px; }
+  .lesson-bit-pair { display:inline-flex;gap:2px;white-space:nowrap; }
+  .lesson-bit { min-width:23px;min-height:27px;padding:2px 5px;background:#22384a;border:1px solid #466277;color:#c2d8e8;border-radius:5px;font-size:11px;font-weight:750; }
+  .lesson-bit[aria-pressed="true"] { background:#265b68;border-color:#79d1d8;color:#fff; }
+  .lesson-bit:hover:not(:disabled) { border-color:#83c6de; }
+  .lesson-bit:disabled { cursor:default;opacity:.65; }
+  .lesson-truth tr.current-test { background:#25566b55; }
+  .lesson-truth tr.prediction-error { background:#673f3855; }
+  .lesson-measure-live { padding:10px 0 1px;margin-top:9px;border-top:1px solid #365264; }
+  .lesson-measure-row { display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:7px;color:#c9ddea;font-size:11px; }
+  .lesson-measure-row strong { color:#e4f9ff; }
+  .lesson-learning-note { color:#ffd6a0!important;font-size:11px; }
+  .lesson-reflection-choice { display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;padding:8px;border:1px solid #3d596d;background:#203444;color:#d7e8f2;border-radius:7px;margin:5px 0;font-size:11px;line-height:1.45; }
+  .lesson-reflection-choice[aria-pressed="true"] { border-color:#d9b65f;background:#514325;color:#ffe8aa; }
+  .lesson-reflection-choice.is-incorrect { border-color:#db747c;background:#522b37;color:#ffd0d3; }
+  .lesson-reflection-choice.is-correct { border-color:#71d0b3;background:#285047;color:#d9ffed; }
+  .lesson-reflection-choice[aria-pressed="true"] span:first-child { color:inherit; }
+  .lesson-observe-cell { min-width:40px; }
+  .lesson-observe-cell .lesson-bit { min-width:20px; padding:2px 4px; }
+  .lesson-observe-cell.match .lesson-bit[aria-pressed="true"] { background:#285047;border-color:#71d0b3;color:#d9ffed; }
+  .lesson-observe-cell.mismatch .lesson-bit[aria-pressed="true"] { background:#522b37;border-color:#db747c;color:#ffd0d3; }
+  .lesson-measure-feedback { margin-top:8px; min-height:0; }
+  .lesson-measure-feedback p:last-child { margin-bottom:0; }
+  .lesson-measure-feedback .lesson-measure-error { color:#ffb6bb; }
+  /* Stabile Spalten und Zeilen, unabhängig von der gerade aktiven Messung. */
+  .lesson-test-card .lesson-truth { table-layout:fixed; }
+  .lesson-number-answer {width:100%;max-width:76px;min-width:0;box-sizing:border-box;text-align:center;padding:2px;font-size:12px;height:27px;min-height:0;}
+  .lesson-learning-card .lesson-truth td { height:40px; padding:6px 2px; vertical-align:middle; }
+  .lesson-test-card .lesson-truth .lesson-truth-actual { padding-left:2px; }
+  .lesson-test-card .lesson-observe-cell { min-width:0; }
+  .lesson-test-card .lesson-bit-pair { justify-content:center; vertical-align:middle; max-width:100%; }
+  .lesson-test-card .lesson-observe-cell .lesson-bit { min-width:20px; width:22px; padding:2px; }
+  .lesson-test-card .lesson-observe-value { display:inline-flex; align-items:center; justify-content:center; height:27px; vertical-align:middle; }
+  /* Die Lernfläche nutzt die volle Breite; der dezente Sprungknopf ersetzt die sichtbare Scrollbar. */
+  .lesson-scroll-wrap { position:relative; display:flex; flex:1 1 auto; min-height:0; }
+  .lesson-scroll { scrollbar-gutter:auto; scrollbar-width:none; overflow-anchor:none; min-width:0; }
+  .lesson-scroll::-webkit-scrollbar { display:none; }
+  .lesson-scroll-jump { position:absolute; right:10px; bottom:9px; z-index:2; width:32px; height:32px; display:grid; place-items:center; padding:0; border:1px solid #638a9e; border-radius:9px; color:#d6f4f6; background:#25465a; box-shadow:0 3px 12px #0009; }
+  .lesson-scroll-jump:hover { background:#37617a; border-color:#8cc9d5; }
+  .lesson-scroll-jump:focus-visible { outline:2px solid #a1e4e2; outline-offset:2px; }
+  .lesson-scroll-jump[hidden],.lesson-panel.is-minimized .lesson-scroll-jump { display:none !important; }
+  .lesson-phase-step:disabled { background:repeating-linear-gradient(135deg,#8193a520 0px,#8193a520 2px,transparent 2px,transparent 8px),#222e39; opacity:.56; }
+  .lesson-phase-fields { display:flow-root; min-width:0; margin:0; padding:0; border:0; }
+  .lesson-unit-preview .lesson-list-btn { filter:blur(var(--preview-blur)); opacity:var(--preview-opacity); cursor:not-allowed; }
+  .lesson-unit-preview .lesson-list-btn * { pointer-events:none; }
+  .lesson-unit-preview .lesson-unit-header { color:#809bab; }
+  .lesson-unit-preview .lesson-list { overflow:hidden; padding:2px 1px; }
+  .lesson-unit-preview .lesson-unit-header small { font-size:9px; letter-spacing:0; font-weight:600; color:#91a6b7; text-transform:none; }
+  .lesson-test-card .lesson-truth th { white-space:normal; }
+  .lesson-task-footer { flex:0 0 auto; padding:9px 13px; border-top:1px solid #32485c; background:#192b3c; display:flex; flex-direction:column; gap:7px; opacity:1; transition:opacity .16s ease; }
+  .lesson-task-footer .lesson-action { flex:0 0 auto; width:100%; min-width:0; }
+  .lesson-task-navigation { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+  .lesson-task-navigation .lesson-action { white-space:nowrap; padding-inline:4px; font-size:10px; }
+  .lesson-task-footer[hidden] { display:none; }
+  .lesson-panel.is-minimized .lesson-task-footer { opacity:0;pointer-events:none; }
+  @media(prefers-reduced-motion:reduce) { .lesson-task-footer { transition:none; } }
+  @media(max-width:730px) { .lesson-observe-cell .lesson-bit { min-width:22px; } }
+  .lesson-reflection-choice span:first-child { flex:none;color:#96c6c9;font-weight:800; }
+  .lesson-learning-done { color:#a3ecc6!important; }
+  .lesson-learning-card button:focus-visible { outline:2px solid #a1e4e2;outline-offset:2px; }
+  /* Bei zwei geöffneten Seitenleisten kann die Bühne auf dem Handy sehr schmal
+     werden. Die Lernkarten behalten dann ihre lesbare Breite über der Bühne. */
+  .stage.lesson-viewport-fallback .lesson-panel { position:fixed;left:12px;top:var(--lesson-viewport-top);width:min(338px,calc(100vw - 24px));height:var(--lesson-viewport-height);z-index:88; }
+  .stage.lesson-viewport-fallback .lesson-panel.is-minimized { height:var(--lesson-minimized-height,70px); }
+  .stage.lesson-viewport-fallback .lesson-hint-overlay { position:fixed;top:calc(var(--lesson-viewport-top) + 45px);right:12px;width:min(308px,calc(100vw - 24px));max-height:calc(var(--lesson-viewport-height) - 45px);z-index:89; }
+  @media(max-width:730px) { .lesson-bit { min-height:32px;min-width:27px; } .lesson-learning-card .lesson-truth td { height:45px; } .lesson-test-card .lesson-observe-value,.lesson-number-answer { height:32px; } }
+
+
   .lesson-bottom { border-top:1px solid #32485c; padding:9px 12px; background:#192b3c; display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .lesson-bottom[hidden] { display:none !important; }
   .lesson-bottom small { max-width:190px; font-size:10px; line-height:1.3; color:#8fa8ba; }
@@ -1007,6 +1113,7 @@
         <div class="menu-popover" role="menu" aria-label="Arbeitsmodus wählen">
           <button class="menu-item" id="menuModeSandbox" type="button" data-menu-action="modeSandbox" role="menuitemradio" aria-checked="true"><span class="menu-check">✓</span><span>Sandbox</span></button>
           <button class="menu-item" id="menuModeLessons" type="button" data-menu-action="modeLessons" role="menuitemradio" aria-checked="false"><span class="menu-check"></span><span>Aufgaben</span></button>
+          <button class="menu-item" id="menuModeTeacher" type="button" data-menu-action="modeTeacher" role="menuitemradio" aria-checked="false"><span class="menu-check"></span><span>Aufgaben – Lehrermodus</span></button>
         </div>
       </div>
       <div class="menu" data-menu="help">
@@ -1075,9 +1182,10 @@
       <div class="stage" id="stage">
         <section id="lessonPanel" class="lesson-panel" aria-label="Aufgaben und Übungen" hidden>
           <header class="lesson-top"><button class="lesson-icon" type="button" data-lesson-action="catalog" aria-label="Alle Aufgaben anzeigen" title="Alle Aufgaben anzeigen">▤</button><div class="lesson-top-copy"><div class="lesson-eyebrow">Digitaltechnik entdecken</div><div class="lesson-header-progress" id="lessonHeaderProgress" aria-label="Lernfortschritt"></div></div><button class="lesson-icon-btn lesson-header-hint" type="button" id="lessonHeaderHint" aria-controls="lessonHintOverlay" aria-expanded="false" aria-label="Tipps ansehen" title="Tipps ansehen" hidden>💡</button><button class="lesson-icon-btn lesson-minimize-btn" type="button" id="lessonMinimize" aria-label="Aufgabenfenster minimieren" aria-expanded="true" aria-controls="lessonContent" title="Aufgabenfenster minimieren"><span id="lessonMinimizeGlyph" aria-hidden="true">−</span></button></header>
-          <div class="lesson-scroll" id="lessonContent" aria-live="polite"></div>
+          <div class="lesson-scroll-wrap"><div class="lesson-scroll" id="lessonContent" aria-live="polite"></div><button class="lesson-scroll-jump" id="lessonScrollJump" type="button" aria-label="Zum Ende scrollen" title="Zum Ende scrollen" hidden><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v15m-6-6 6 6 6-6"/></svg></button></div>
+          <footer class="lesson-task-footer" id="lessonTaskFooter" hidden></footer>
         </section>
-        <button class="lesson-hint-float" id="lessonHintFloat" type="button" aria-controls="lessonHintOverlay" aria-label="Tipps ansehen" aria-expanded="false" title="Tipps ansehen" hidden><span aria-hidden="true">💡</span><span id="lessonHintFloatLabel">Tipps ansehen</span></button>
+        <button class="lesson-hint-float" id="lessonHintFloat" type="button" aria-controls="lessonHintOverlay" aria-label="Tipps ansehen" aria-expanded="false" title="Tipps ansehen" hidden><span id="lessonHintFloatLabel">Tipps ansehen</span><span aria-hidden="true">💡</span></button>
         <section class="lesson-hint lesson-hint-overlay" id="lessonHintOverlay" aria-label="Tipps zur aktuellen Aufgabe" aria-live="polite" hidden></section>
         <section class="module-sim-banner" id="moduleSimulationBanner" aria-live="polite" aria-label="Unterfunktions-Simulation" hidden>
           <div class="module-sim-top"><div class="module-sim-heading"><span class="module-sim-title" id="moduleSimulationTitle">Simulation</span></div><div class="module-sim-controls"><button type="button" class="module-sim-icon-button" id="moduleSimulationHelpToggle" aria-label="Hilfe zum Testmodus" aria-controls="moduleSimulationHelp" aria-expanded="false" title="Wie funktioniert der Testmodus?">?</button><button type="button" class="module-sim-icon-button" id="moduleSimulationExit" aria-label="Simulation beenden" title="Simulation beenden">×</button></div></div>
@@ -1093,6 +1201,7 @@
           </defs>
           <g id="world">
             <rect id="gridBg" x="-12000" y="-12000" width="24000" height="24000" />
+            <g id="lessonProtectedLayer" pointer-events="none" aria-hidden="true"></g>
             <g id="wireLayer"></g>
             <g id="nodeLayer"></g>
             <g id="wireHandleLayer"></g>
@@ -1245,10 +1354,20 @@
             </div>
           </div>
         </div>
+        <div class="modal-backdrop confirm-backdrop" id="lessonTeacherModal" role="dialog" aria-modal="true" aria-labelledby="lessonTeacherTitle">
+          <div class="modal confirm-modal" id="lessonTeacherForm">
+            <h2 id="lessonTeacherTitle">Lehrermodus öffnen</h2>
+            <p>Durch die Eingabe des passenden Zugangscodes werden alle Aufgaben freigeschaltet. Fortschritte in den jeweiligen Levels werden nicht überschrieben.</p>
+            <label for="lessonTeacherCode">Zugangscode</label>
+            <input class="inspector-input" id="lessonTeacherCode" type="password" autocomplete="new-password" autocapitalize="none" spellcheck="false" style="width:100%;margin:8px 0" />
+            <p id="lessonTeacherError" role="alert" hidden style="color:var(--red)">Der Code ist nicht korrekt.</p>
+            <div class="modal-actions"><button class="btn" id="lessonTeacherCancel" type="button">Abbrechen</button><button class="btn primary" id="lessonTeacherOpen" type="button">Öffnen</button></div>
+          </div>
+        </div>
         <div class="modal-backdrop confirm-backdrop" id="lessonResetModal" role="dialog" aria-modal="true" aria-labelledby="lessonResetTitle" aria-describedby="lessonResetMessage">
           <div class="modal confirm-modal">
             <h2 id="lessonResetTitle">Aufgabe neu starten?</h2>
-            <div class="confirm-warning"><span class="icon">!</span><span id="lessonResetMessage">Deine aktuelle Schaltung in dieser Aufgabe wird zurückgesetzt. Bereits abgeschlossene Aufgaben und deine Schaltung im Sandbox Modus bleiben erhalten.</span></div>
+            <div class="confirm-warning"><span class="icon">!</span><span id="lessonResetMessage">Deine aktuelle Schaltung in dieser Aufgabe wird zurückgesetzt. Bereits abgeschlossene Aufgaben bleiben erhalten.</span></div>
             <div class="modal-actions">
               <button class="btn" id="lessonResetCancel" type="button">Abbrechen</button>
               <button class="btn danger-solid" id="lessonResetConfirm" type="button">Aufgabe neu starten</button>
@@ -1350,15 +1469,28 @@
   const LESSON_BOARDS_KEY='gatterlab-lessons-boards-v1';
   const LESSON_DONE_KEY='gatterlab-lessons-completed-v1';
   const LESSON_LAST_KEY='gatterlab-lessons-last-open-v1';
+  const LESSON_LEARNING_KEY='gatterlab-lessons-learning-v1';
+  const LESSON_TEACHER_KEY='gatterlab-lessons-teacher-active-v1';
+  let lessonTeacher=false,lessonLearning={};
   let lessonActiveId=null,lessonFreeBackup=null,lessonTaskBoards={},lessonCompleted=new Set();
-  let lessonResult=null,lessonResultFingerprint=null,lessonHintIndex=0,lessonPanelOpen=false,lessonPanelMinimized=false,lessonShowCatalog=true,lessonIntroDismissed=new Set();
+  const lessonModeKey=key=>lessonTeacher?key+'-teacher':key;
+  function lessonReadModeData(){
+    lessonTaskBoards={};lessonCompleted=new Set();lessonLearning={};
+    try{
+      const boards=JSON.parse(localStorage.getItem(lessonModeKey(LESSON_BOARDS_KEY))||'{}');
+      if(boards&&typeof boards==='object'&&!Array.isArray(boards))lessonTaskBoards=boards;
+      const done=JSON.parse(localStorage.getItem(lessonModeKey(LESSON_DONE_KEY))||'[]');
+      if(Array.isArray(done))lessonCompleted=new Set(done.filter(id=>typeof id==='string'));
+      const learning=JSON.parse(localStorage.getItem(lessonModeKey(LESSON_LEARNING_KEY))||'{}');
+      if(learning&&typeof learning==='object'&&!Array.isArray(learning))lessonLearning=learning;
+    }catch(_){}
+  }
+  let lessonResult=null,lessonResultFingerprint=null,lessonHintIndex=0,lessonPanelOpen=false,lessonPanelMinimized=false,lessonShowCatalog=true,lessonPhaseView=null;
   try {
     lessonActiveId=localStorage.getItem(LESSON_ACTIVE_KEY)||null;
-    const storedBoards=JSON.parse(localStorage.getItem(LESSON_BOARDS_KEY)||'{}');
-    if(storedBoards&&typeof storedBoards==='object'&&!Array.isArray(storedBoards))lessonTaskBoards=storedBoards;
-    const storedDone=JSON.parse(localStorage.getItem(LESSON_DONE_KEY)||'[]');
-    if(Array.isArray(storedDone))lessonCompleted=new Set(storedDone.filter(id=>typeof id==='string'));
-  } catch(_) {}
+    lessonTeacher=!!lessonActiveId&&localStorage.getItem(LESSON_TEACHER_KEY)==='1';
+  }catch(_){}
+  lessonReadModeData();
   const OVERLAP_STORAGE_KEY = 'gatterlab-allow-overlaps-v1';
   const WIRE_CROSS_STORAGE_KEY='gatterlab-allow-wire-object-crossings-v1';
   const GATE_SYMBOL_STYLE_STORAGE_KEY='gatterlab-gate-symbol-style-v1';
@@ -1715,10 +1847,15 @@
     closeWireContextMenu();closeBoardTabContextMenu();closeMinimapContextMenu();
     objectContextNodeId=nodeId;
     if(!selectedNodes.has(nodeId)||selectedWires.size){selectOnlyNode(nodeId);render(false,false);}
-    const menu=$('objectContextMenu'),custom=meta(byId(nodeId)).kind==='custom';
+    const menu=$('objectContextMenu'),custom=meta(byId(nodeId)).kind==='custom'&&!lessonActiveId;
     menu.querySelectorAll('[data-object-action^="simulate-"]').forEach(button=>button.hidden=!custom);
     menu.querySelector('[data-object-sim-divider]').hidden=!custom;
     menu.querySelector('[data-object-action="truth-table"]').hidden=!TRUTH_GATE_TYPES.has(byId(nodeId).type);
+    const deleteButton=menu.querySelector('[data-object-action="delete"]');
+    menu.querySelector('[data-object-action="rename"]').disabled=lessonModuleView();
+    menu.querySelector('[data-object-action="duplicate"]').disabled=lessonModuleView();
+    deleteButton.disabled=lessonFixedNode(nodeId);
+    deleteButton.title=deleteButton.disabled?'Vorgegebene Bauteile können nicht gelöscht werden':'Bauteil löschen';
     placeFloatingContextMenu(menu,clientX,clientY,custom?'[data-object-action="simulate-current"]':'[data-object-action="rename"]');
   }
   function closeWireContextMenu(){hideFloatingContextMenu($('wireContextMenu'));wireContextId=null;}
@@ -1729,7 +1866,8 @@
     if(selectedWires.size!==1||!selectedWires.has(wireId)||selectedNodes.size){selectOnlyWire(wireId);render(false,false);}
     const menu=$('wireContextMenu');
     const reset=menu?.querySelector('[data-wire-action="reset"]');
-    if(reset){reset.disabled=!Array.isArray(wire.routePoints);reset.title=reset.disabled?'Dieses Kabel verwendet bereits die automatische Route':'Manuell verlegte Route auf automatische Führung zurücksetzen';}
+    menu.querySelector('[data-wire-action="delete"]').disabled=lessonFixedWire(wireId);
+    if(reset){reset.disabled=lessonFixedWire(wireId)||!Array.isArray(wire.routePoints);reset.title=reset.disabled?'Dieses Kabel verwendet bereits die automatische Route':'Manuell verlegte Route auf automatische Führung zurücksetzen';}
     placeFloatingContextMenu(menu,clientX,clientY,'[data-wire-action="reset"]');
   }
   function closeMinimapContextMenu(){hideFloatingContextMenu($('minimapContextMenu'));}
@@ -1766,23 +1904,26 @@
     closeObjectContextMenu();closeWireContextMenu();closeMinimapContextMenu();
     if(boardId!=='main'&&!moduleDefinitions.some(def=>def.id===boardId))return;
     const menu=$('boardTabContextMenu');
+    const renameButton=menu.querySelector('[data-board-tab-action="rename"]');
+    renameButton.disabled=!!lessonActiveId;
+    renameButton.title=lessonActiveId?'Aufgabenschaltkreise haben einen festen Namen':'';
     const deleteButton=menu.querySelector('[data-board-tab-action="delete"]');
     const duplicateButton=menu.querySelector('[data-board-tab-action="duplicate"]');
     duplicateButton.hidden=!lessonAllowsSubfunctions();
     duplicateButton.disabled=!lessonAllowsSubfunctions();
     boardTabContextId=boardId;
-    deleteButton.disabled=boardId==='main';
-    menu.querySelector('[data-board-tab-action="simulate-default"]').hidden=boardId==='main';
-    deleteButton.title=boardId==='main'?'Die Hauptschaltung kann nicht gelöscht werden':'Unterfunktion löschen';
+    deleteButton.disabled=boardId==='main'||!!lessonActiveId;
+    menu.querySelector('[data-board-tab-action="simulate-default"]').hidden=boardId==='main'||!!lessonActiveId;
+    deleteButton.title=boardId==='main'?'Die Hauptschaltung kann nicht gelöscht werden':lessonActiveId?'Die Unterfunktion ist vorgegeben':'Unterfunktion löschen';
     placeFloatingContextMenu(menu,clientX,clientY,'[data-board-tab-action="rename"]');
   }
   function renderBoardTabs(){
     const tabs=$('boardTabs'); if(!tabs) return;
     tabs.classList.toggle('has-modules',moduleDefinitions.length>0);
-    tabs.classList.toggle('no-subfunctions',!lessonAllowsSubfunctions());
+    tabs.classList.toggle('no-subfunctions',!lessonAllowsSubfunctions()&&!moduleDefinitions.length);
     if(boardTabContextId!==null)closeBoardTabContextMenu();
     const items=[{id:'main',name:projectName,isMain:true},...moduleDefinitions.map(def=>({id:def.id,name:def.name,isMain:false}))];
-    tabs.innerHTML=items.map(item=>`<button type="button" draggable="false" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}${moduleSimulation&&item.id===moduleSimulation.moduleId?' simulating':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" ${item.isMain?'':'title="Doppelklicken zum Umbenennen"'}>${esc(item.name)}</span>${item.isMain?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
+    tabs.innerHTML=items.map(item=>`<button type="button" draggable="false" class="board-tab ${item.isMain?'main-board-tab':'module-board-tab'}${(item.isMain?!activeModuleId:activeModuleId===item.id)?' active':''}${moduleSimulation&&item.id===moduleSimulation.moduleId?' simulating':''}" data-board-id="${esc(item.id)}" role="tab" aria-selected="${item.isMain?!activeModuleId:activeModuleId===item.id}" title="${item.isMain?'Hauptschaltkreis':'Ziehen, um die Reihenfolge der Unterfunktionen zu ändern'}"><span class="board-tab-label" ${item.isMain?'':'title="Doppelklicken zum Umbenennen"'}>${esc(item.name)}</span>${item.isMain||lessonActiveId?'':`<span class="board-tab-close" data-close-module="${esc(item.id)}" title="Unterfunktion löschen" aria-label="Unterfunktion löschen"><span class="board-tab-close-glyph">×</span></span>`}</button>`).join('');
     $('addModuleBtn').hidden=!lessonAllowsSubfunctions();
     $('addModuleBtn').disabled=!!moduleSimulation||!lessonAllowsSubfunctions();
   }
@@ -1858,7 +1999,57 @@
     }
     return svg(R(22,8,28,28,6)+C(36,22,6));
   }
-  function renderPalette(){
+  function paletteLayoutSnapshot(container){
+    const result=new Map();
+    for(const el of container.querySelectorAll('.palette-item[data-type], [data-palette-collapse]')){
+      if(el.closest('.is-collapsed'))continue;
+      const rect=el.getBoundingClientRect();
+      if(rect.width&&rect.height)result.set(el.dataset.type?`item:${el.dataset.type}`:`section:${el.dataset.paletteCollapse}`,{el,rect});
+    }
+    return result;
+  }
+  function animatePaletteUnlock(previous,container){
+    const current=paletteLayoutSnapshot(container);
+    const added=[...current.keys()].some(key=>key.startsWith('item:')&&!previous.has(key));
+    const removed=[...previous].filter(([key])=>!current.has(key));
+    if(!added&&!removed.length)return;
+    // Die alten Karten bleiben nur als nicht interaktive, geklippte Animation sichtbar.
+    // Das neue Raster hat bereits seine endgültige Reihenfolge und Hitboxen.
+    if(removed.length){
+      const sidebar=container.closest('.sidebar.left'),bounds=sidebar?.getBoundingClientRect();
+      if(bounds&&typeof Element.prototype.animate==='function'){
+        const layer=document.createElement('div');layer.className='palette-exit-layer';
+        layer.setAttribute('aria-hidden','true');layer.inert=true;
+        Object.assign(layer.style,{position:'fixed',left:`${bounds.left}px`,top:`${bounds.top}px`,width:`${sidebar.clientWidth}px`,height:`${sidebar.clientHeight}px`,overflow:'hidden',pointerEvents:'none',zIndex:'95'});
+        document.body.append(layer);
+        for(const [key,{el,rect}] of removed){
+          if(rect.bottom<=bounds.top||rect.top>=bounds.bottom)continue;
+          const ghost=el.cloneNode(true);
+          ghost.removeAttribute('id');ghost.tabIndex=-1;
+          Object.assign(ghost.style,{position:'absolute',left:`${rect.left-bounds.left}px`,top:`${rect.top-bounds.top}px`,width:`${rect.width}px`,height:`${rect.height}px`,margin:'0',pointerEvents:'none',transformOrigin:'center',transition:'none'});
+          layer.append(ghost);
+          ghost.animate([{opacity:1,transform:'scale(1)'},{opacity:0,transform:key.startsWith('item:')?'scale(.72)':'scale(1)'}],{duration:200,easing:'cubic-bezier(.4,0,.8,.5)',fill:'forwards'});
+        }
+        setTimeout(()=>layer.remove(),210);
+      }
+    }
+    for(const [key,{el,rect}] of current){
+      if(typeof el.animate!=='function')continue;
+      const old=previous.get(key)?.rect;
+      if(old){
+        const dx=old.left-rect.left,dy=old.top-rect.top;
+        if(Math.abs(dx)+Math.abs(dy)>.5)el.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'translate(0,0)'}],{duration:280,delay:removed.length?85:0,fill:'backwards',easing:'cubic-bezier(.2,.75,.25,1)'});
+      }else if(key.startsWith('item:')){
+        el.animate([{opacity:0,transform:'scale(.72)'},{opacity:1,transform:'scale(1.025)',offset:.78},{opacity:1,transform:'scale(1)'}],{duration:330,delay:65,easing:'cubic-bezier(.2,.7,.3,1)',fill:'backwards'});
+      }else{
+        el.animate([{opacity:0},{opacity:1}],{duration:260});
+      }
+    }
+  }
+  function renderPalette(animateUnlock=false){
+    const container=$('paletteCategories');
+    document.querySelectorAll('.palette-exit-layer').forEach(layer=>layer.remove());
+    const before=animateUnlock===true&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&!workspace.classList.contains('left-collapsed')?paletteLayoutSnapshot(container):null;
     stage.classList.toggle('placing',!!selectedPaletteType&&!moduleSimulation);
     if(!selectedPaletteType){paletteDraft=null;palettePlacementLayer.innerHTML='';}
     const highlightedPaletteType=paletteDraft?.type||selectedPaletteType;
@@ -1908,7 +2099,8 @@
       html+='</section>';
     });
     if(!html) html='<div class="palette-empty">Keine passenden Bauteile gefunden.</div>';
-    $('paletteCategories').innerHTML=html; $('paletteCount').textContent=`${filtered.length} / ${visibleEntries.length}`;
+    container.innerHTML=html; $('paletteCount').textContent=`${filtered.length} / ${visibleEntries.length}`;
+    if(before)animatePaletteUnlock(before,container);
   }
   function normalizeBoard(raw){
     const rawNodes=Array.isArray(raw?.nodes)?raw.nodes:[];
@@ -1965,6 +2157,7 @@
     return true;
   }
   function beginModuleSimulation(moduleId,mode='default',instanceId=null){
+    if(lessonActiveId){showToast('Teste die Unterfunktion in der Aufgabenschaltung.');return false;}
     if(moduleSimulation)endModuleSimulation();
     const def=moduleDefinitions.find(item=>item.id===moduleId);
     if(!def){showToast('Unterfunktion nicht gefunden');return false;}
@@ -2205,6 +2398,7 @@
     return true;
   }
   function deleteModule(moduleId){
+    if(lessonActiveId){lessonReadOnlyFeedback();return;}
     if(pendingPaste)cancelPendingPaste();
     saveActiveBoardState();
     const def=moduleDefinitions.find(item=>item.id===moduleId);if(!def)return;
@@ -2244,6 +2438,7 @@
     return `${limitBoardName(base,BOARD_NAME_MAX_LENGTH-12).trimEnd()} (${Date.now()%100000})`;
   }
   function renameBoardById(boardId,value,commit=false,refreshTabs=true,deferPalette=false){
+    if(lessonActiveId)return boardId==='main'?projectName:null;
     const isMain=boardId==='main';
     const def=isMain?null:moduleDefinitions.find(item=>item.id===boardId);
     if(!isMain&&!def)return null;
@@ -2268,7 +2463,7 @@
     return next;
   }
   function beginBoardTabRename(tab,label){
-    if(!tab||!label||tab.querySelector('.board-tab-rename-input'))return;
+    if(lessonActiveId||!tab||!label||tab.querySelector('.board-tab-rename-input'))return;
     const boardId=tab.dataset.boardId;
     const currentName=boardId==='main'?projectName:moduleDefinitions.find(def=>def.id===boardId)?.name;
     if(currentName==null)return;
@@ -2458,7 +2653,7 @@
   function togglePaletteLedPicker(){
     if(!paletteDraft||paletteDraft.type!=='OUTPUT')return;
     if(!paletteLedPicker.hidden){closePaletteLedPicker();return;}
-    paletteLedPicker.innerHTML=`<div class="palette-led-picker-title">LED-Farbe wählen</div><button type="button" class="palette-led-picker-close" data-palette-led-close aria-label="Farbauswahl schließen" title="Schließen"><span class="palette-led-picker-close-glyph">×</span></button><div class="palette-led-picker-colors">${LED_COLORS.map(color=>`<button class="palette-led-choice" type="button" data-palette-led-color="${color.id}" title="${color.label}" aria-label="${color.label}" aria-pressed="${paletteDraft.ledColor===color.id}"><span style="background:${color.fill};color:${color.fill}"></span></button>`).join('')}</div>`;
+    paletteLedPicker.innerHTML=`<div class="palette-led-picker-title">LED-Farbe wählen</div><div class="palette-led-picker-colors">${LED_COLORS.map(color=>`<button class="palette-led-choice" type="button" data-palette-led-color="${color.id}" title="${color.label}" aria-label="${color.label}" aria-pressed="${paletteDraft.ledColor===color.id}"><span style="background:${color.fill};color:${color.fill}"></span></button>`).join('')}</div>`;
     paletteLedPicker.hidden=false;
     positionPaletteLedPicker(currentPointer.x,currentPointer.y);
   }
@@ -3228,6 +3423,7 @@
   }
   function beginWireSegmentGesture(wire,segmentIndex,event){
     if(!wire)return false;
+    if(lessonFixedWire(wire.id)){lessonWireFeedback();return false;}
     const points=routePointsForWire(wire).map(point=>({...point}));
     if(!Number.isInteger(segmentIndex)||segmentIndex<0||points.length<=segmentIndex+1)return false;
     const horizontal=Math.abs(points[segmentIndex].y-points[segmentIndex+1].y)<.01;
@@ -3503,7 +3699,7 @@
         return Array(count).fill(LOGIC_UNKNOWN);
       }
       const runtimeNodes=makeRuntimeNodes(instance,definition);
-      const result=evaluateGraph(runtimeNodes,definition.wires,inputValues,[...moduleStack,definition.id],{advanceState:advanceModuleState});
+      const result=evaluateGraph(runtimeNodes,definition.wires,inputValues,[...moduleStack,definition.id],{advanceState:advanceModuleState,now:evaluationOptions.now});
       if(persist){saveRuntimeNodes(instance,runtimeNodes);instance.moduleFeedbackDiagnostics=result.feedback||[];}
       const outputs=definition.nodes.filter(node=>node.type==='MODULE_OUTPUT').sort(compareModulePorts).map((template,index)=>{
         const runtimeNode=runtimeNodes.find(node=>node.id===template.id);
@@ -4307,7 +4503,7 @@
       for(const node of graphNodes){
         if(node.type!=='BUFFER')continue;
         const wire=inputWire(node.id,0),input=wire?read(wire.from.id,wire.from.port||0):false;
-        evaluateDelayedBuffer(node,input);
+        evaluateDelayedBuffer(node,input,evaluationOptions.now??Date.now());
       }
       // Unterfunktionen erhalten ihre eigenen Flip-Flop-, Buffer- und
       // kombinatorischen Rückkopplungszustände. Alle Instanz-Eingänge stammen
@@ -4725,11 +4921,11 @@
     const nodeAttrs = preview ? '' : `data-node="${esc(n.id)}"`;
     const safeLabel = kind === 'label' ? esc(labelText(n)) : esc(nodeDisplayName(n));
     if(n.type==='MODULE_INPUT'){
-      return `<g class="node input-node module-terminal module-input-node${n.state?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" xml:space="preserve" x="0" y="-7">${esc(n.label??'Eingang')}</text><text class="node-sub" x="0" y="13">${moduleSimulation&&!preview?`TEST · ${logicBitText(n.value)}`:'MODUL-EINGANG'}</text><circle class="pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="5"/></g>`;
+      return `<g class="node input-node module-terminal module-input-node${n.state?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-31" width="104" height="62" rx="11"/><text class="node-title" xml:space="preserve" x="0" y="-20" style="font-size:10px"${fittedNodeTitle(nodeDisplayName(n),94,10)}>${safeLabel}</text><text class="node-sub" x="0" y="3">${moduleSimulation&&!preview?`TEST · ${logicBitText(n.value)}`:'MODUL-EINGANG'}</text><circle class="pin ${isConnected(n.id,'out',0,connectionIndex)?'connected':''}" ${preview?'':`data-pin="out" data-node="${esc(n.id)}" data-port="0"`} cx="58" cy="0" r="5"/></g>`;
     }
     if(n.type==='MODULE_OUTPUT'){
       const wire=incomingWire(n.id,0),source=wire&&byId(wire.from.id),hot=source&&outputSignalActive(source,wire.from.port||0);
-      return `<g class="node output-node module-terminal module-output-node${hot?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-28" width="104" height="56" rx="10"/><text class="node-title" xml:space="preserve" x="0" y="-4">${esc(n.label??'Ausgang')}</text><text class="node-sub" x="0" y="13">MODUL-AUSGANG</text><circle class="pin ${wire?'connected':''}" ${preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="0"`} cx="-58" cy="0" r="5"/></g>`;
+      return `<g class="node output-node module-terminal module-output-node${hot?' on':''}${selectedClass}${marqueeClass}${previewClass}" ${nodeAttrs} transform="translate(${n.x} ${n.y})"><rect class="body" x="-52" y="-31" width="104" height="62" rx="11"/><text class="node-title" xml:space="preserve" x="0" y="-20" style="font-size:10px"${fittedNodeTitle(nodeDisplayName(n),94,10)}>${safeLabel}</text><text class="node-sub" x="0" y="3">MODUL-AUSGANG</text><circle class="pin ${wire?'connected':''}" ${preview?'':`data-pin="in" data-node="${esc(n.id)}" data-port="0"`} cx="-58" cy="0" r="5"/></g>`;
     }
     if(kind==='custom'){
       const count=Math.max(m.inputs,m.outputs,1),halfH=Math.max(44,Math.abs(modulePortOffset(count,0))+30);
@@ -4929,7 +5125,82 @@
     </g>`;
   }
 
+  // Gerundete orthogonale Kontur; auch innere Ecken werden weich gezeichnet.
+  function lessonProtectedOutline(points){
+    const corners=points.filter((p,i)=>{
+      const a=points[(i+points.length-1)%points.length],b=points[(i+1)%points.length];
+      return (p.x-a.x)*(b.y-p.y)!==(p.y-a.y)*(b.x-p.x);
+    });
+    const toward=(p,q,d)=>{const l=Math.hypot(q.x-p.x,q.y-p.y);return {x:p.x+(q.x-p.x)*d/l,y:p.y+(q.y-p.y)*d/l};};
+    const fmt=p=>`${p.x} ${p.y}`;
+    const curves=corners.map((p,i)=>{const a=corners[(i+corners.length-1)%corners.length],b=corners[(i+1)%corners.length];
+      const r=Math.min(13,Math.hypot(a.x-p.x,a.y-p.y)/2,Math.hypot(b.x-p.x,b.y-p.y)/2);
+      return {p,entry:toward(p,a,r),exit:toward(p,b,r)};});
+    return curves.length?`M ${fmt(curves[0].entry)} ${curves.map((c,i)=>`${i?'L '+fmt(c.entry)+' ':''}Q ${fmt(c.p)} ${fmt(c.exit)}`).join(' ')} Z`:'';
+  }
+  function renderLessonProtectedRegions(){
+    const layer=$('lessonProtectedLayer');
+    if(!lessonActiveId){layer.innerHTML='';return;}
+    // Zuerst fest verdrahtete Komponenten ermitteln; getrennte Komponenten
+    // mit einer gemeinsamen vertikalen Bauteilspalte gehören ebenfalls zusammen.
+    const remaining=new Set(nodes.filter(n=>lessonFixedNode(n.id)).map(n=>n.id));
+    const groups=[];
+    while(remaining.size){
+      const group=new Set([remaining.values().next().value]);
+      for(const id of group)for(const w of wires)if(lessonFixedWire(w.id)){
+        if(w.from.id===id&&remaining.has(w.to.id))group.add(w.to.id);
+        if(w.to.id===id&&remaining.has(w.from.id))group.add(w.from.id);
+      }
+      group.forEach(id=>remaining.delete(id));
+      const members=[...group].map(byId).filter(Boolean);if(!members.length)continue;
+      // Gehäuse statt Anschluss-Pins: an beiden Seiten exakt 18 Einheiten Abstand.
+      const bounds=members.map(nodeCollisionBounds);
+      groups.push({columns:new Set(members.map(n=>n.x)),boxes:[{
+        left:Math.min(...bounds.map(b=>b.left))-18,right:Math.max(...bounds.map(b=>b.right))+18,
+        top:Math.min(...bounds.map(b=>b.top))-30,bottom:Math.max(...bounds.map(b=>b.bottom))+18
+      }]});
+    }
+    for(let i=0;i<groups.length;i++)for(let j=i+1;j<groups.length;){
+      if([...groups[j].columns].some(x=>groups[i].columns.has(x))){
+        for(const x of groups[j].columns)groups[i].columns.add(x);
+        groups[i].boxes.push(...groups[j].boxes);groups.splice(j,1);j=i+1;
+      }else j++;
+    }
+    const parts=[];
+    for(const {boxes} of groups){
+      boxes.sort((a,b)=>a.top-b.top);
+      // Vertikale Zwischenräume schließen, ohne den schmaleren Bereich unnötig
+      // zu verbreitern. Bei Level 24 entsteht so eine abgestufte Sechseckkontur.
+      let previous=boxes[0];
+      for(const box of boxes.slice(1)){
+        if(previous.bottom<box.top){
+          if(previous.right-previous.left>=box.right-box.left)box.top=previous.bottom;
+          else previous.bottom=box.top;
+        }
+        if(box.bottom>previous.bottom)previous=box;
+      }
+      const ys=[...new Set(boxes.flatMap(b=>[b.top,b.bottom]))].sort((a,b)=>a-b);
+      const bands=[];
+      for(let i=0;i<ys.length-1;i++){
+        const top=ys[i],bottom=ys[i+1],active=boxes.filter(b=>b.top<bottom&&b.bottom>top);
+        if(!active.length)continue;
+        const left=Math.min(...active.map(b=>b.left)),right=Math.max(...active.map(b=>b.right));
+        const last=bands[bands.length-1];
+        if(last&&last.left===left&&last.right===right&&last.bottom===top)last.bottom=bottom;
+        else bands.push({left,right,top,bottom});
+      }
+      const points=[];
+      const add=(x,y)=>{const p=points[points.length-1];if(!p||p.x!==x||p.y!==y)points.push({x,y});};
+      const first=bands[0];add(first.left,first.top);
+      for(const b of bands){add(b.right,b.top);add(b.right,b.bottom);}
+      for(const b of [...bands].reverse()){add(b.left,b.bottom);add(b.left,b.top);}
+      points.pop(); // letzter Punkt entspricht wieder dem Startpunkt
+      parts.push(`<path class="lesson-protected-region" d="${lessonProtectedOutline(points)}"/><text class="lesson-protected-caption" x="${first.left+11}" y="${first.top+16}">Vorgegeben · geschützt</text>`);
+    }
+    layer.innerHTML=parts.join('');
+  }
   function renderNodes() {
+    renderLessonProtectedRegions();
     const map = new Map(nodes.map(n=>[n.id,n]));
     const seen = new Set();
     const ordered = [];
@@ -5215,6 +5486,7 @@
     updateMinimap();
     updateHistoryButtons();
     renderModuleSimulationUI();
+    lessonSyncMeasurement();
   }
 
   function updateMinimap() {
@@ -5539,6 +5811,7 @@
     applyLabelProperty(labelNodes,property,value,`${value?'Aktiviert':'Deaktiviert'}: ${property==='bold'?'Fett':property==='italic'?'Kursiv':'Unterstrichen'}`);
   }
   function beginNodeRename(node) {
+    if(lessonModuleView()){lessonReadOnlyFeedback();return;}
     if (!node) return;
     const title=$('inspectorNodeName');
     if (!title || title.dataset.editing==='true') return;
@@ -6098,6 +6371,7 @@
   }
   function resizeBusComponent(node,width){resizeBusComponents([node],width);}
   function resizeDisplayDigits(targetNodes,width){
+    if((targetNodes||[]).some(n=>lessonFixedNode(n.id))){lessonFixedFeedback();renderInspector();return;}
     const nextWidth=normalizeDisplayBits(width);
     const targets=(targetNodes||[]).filter(node=>node?.type==='DISPLAY');
     const changed=targets.filter(node=>normalizeDisplayBits(node.displayBits)!==nextWidth);
@@ -6109,6 +6383,7 @@
   }
   function resizeDisplayDigit(node,width){resizeDisplayDigits([node],width);}
   function resizeMuxComponents(targetNodes,width){
+    if((targetNodes||[]).some(n=>lessonFixedNode(n.id))){lessonFixedFeedback();renderInspector();return;}
     const next=normalizeMuxInputs(width),targets=(targetNodes||[]).filter(node=>node?.type==='MUX');
     const changed=targets.filter(node=>normalizeMuxInputs(node.muxInputs)!==next);if(!changed.length)return;
     changed.forEach(node=>{
@@ -6124,6 +6399,7 @@
     const removed=pruneInvalidPortConnections();render();showToast(`Multiplexer für ${changed.length} Bauteile auf ${next} Dateneingänge eingestellt${removed?` · ${removed} ungültige Verbindungen entfernt`:''}`);
   }
   function resizeDemuxComponents(targetNodes,width){
+    if((targetNodes||[]).some(n=>lessonFixedNode(n.id))){lessonFixedFeedback();renderInspector();return;}
     const next=normalizeDemuxOutputs(width),targets=(targetNodes||[]).filter(node=>node?.type==='DEMUX');
     const changed=targets.filter(node=>normalizeDemuxOutputs(node.demuxOutputs)!==next);if(!changed.length)return;
     changed.forEach(node=>{node.demuxOutputs=next;node.selectedChannel=Math.min(next-1,Number(node.selectedChannel)||0);});
@@ -6146,6 +6422,7 @@
   }
 
   function addNode(type,x,y,draft=null){
+    if(lessonModuleView()){lessonReadOnlyFeedback();return null;}
     if(!TYPES[type])return null;
     if((type==='MODULE_INPUT'||type==='MODULE_OUTPUT')&&!activeModuleId){showToast('Moduleingänge und -ausgänge können nur innerhalb einer Unterfunktion erstellt werden');return null;}
     if(TYPES[type].kind==='custom'&&!canUseModuleOnActiveBoard(TYPES[type].moduleId)){showToast('Diese Unterfunktion würde eine zyklische Verschachtelung erzeugen');return null;}
@@ -6176,11 +6453,13 @@
     const fixedSelected=[...selectedNodes].some(id=>lessonFixedNode(id));
     const removeIds = new Set([...selectedNodes].filter(id=>!lessonFixedNode(id)));
     nodes.filter(n => removeIds.has(n.id)).forEach(n => removeNode(n.id));
-    wires = wires.filter(w => !selectedWires.has(w.id));
+    const fixedWireSelected=[...selectedWires].some(lessonFixedWire);
+    wires = wires.filter(w => !selectedWires.has(w.id)||lessonFixedWire(w.id));
     const remainingWireIds=new Set(wires.map(w=>w.id));
     wireDrawOrder=wireDrawOrder.filter(wireId=>remainingWireIds.has(wireId));
     clearSelection(); armedFrom = null; render();
-    if(fixedSelected)lessonFixedFeedback();
+    if(fixedWireSelected)lessonWireFeedback();
+    else if(fixedSelected)lessonFixedFeedback();
     else showToast('Auswahl gelöscht');
   }
   function buildClipboard() {
@@ -6279,6 +6558,7 @@
     return true;
   }
   function pasteClipboardData(sourceData) {
+    if(lessonModuleView()){lessonReadOnlyFeedback();return false;}
     const data = normalizeClipboardData(sourceData);
     if (!data || !data.nodes.length) return false;
     if(data.nodes.some(node=>node.type==='MODULE_INPUT'||node.type==='MODULE_OUTPUT')&&!activeModuleId){showToast('Moduleingänge und -ausgänge können nur innerhalb einer Unterfunktion eingefügt werden');return false;}
@@ -6379,6 +6659,7 @@
     const identical = wires.find(w => w.from.id===from.id && (w.from.port||0)===(from.port||0) && w.to.id===to.id && w.to.port===to.port);
     if (identical) { clearSelection(); armedFrom=null; gesture=null; render(false,false); tempLayer.innerHTML=''; showToast('Diese Verbindung besteht bereits'); return true; }
     const replacedIds=new Set(wires.filter(w=>w.to.id===to.id && (busToDisplay || w.to.port===to.port)).map(w=>w.id));
+    if(lessonModuleView()||lessonLockedSource(from)||lessonLockedTarget(to)||[...replacedIds].some(lessonFixedWire)){lessonWireFeedback();return false;}
     wires=wires.filter(w=>!replacedIds.has(w.id));
     wireDrawOrder=wireDrawOrder.filter(id=>!replacedIds.has(id));
     const newWire={id:uid('w'),from:{id:from.id,port:from.port||0},to:{id:to.id,port:to.port}};
@@ -6754,13 +7035,11 @@
     if (persist) { try {
       const config=makeConfig();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-      if(lessonActiveId){lessonTaskBoards[lessonActiveId]=config;localStorage.setItem(LESSON_BOARDS_KEY,JSON.stringify(lessonTaskBoards));}
+      if(lessonActiveId){lessonTaskBoards[lessonActiveId]=config;localStorage.setItem(lessonModeKey(LESSON_BOARDS_KEY),JSON.stringify(lessonTaskBoards));}
     } catch (_) { /* private browsing / quota */ } }
     // Die Prüftabelle bleibt bei Auswahl, Schalterklick und Kamerabewegung sichtbar.
     // Nur eine geänderte Schaltungslogik macht den alten Befund ungültig.
-    if(lessonActiveId&&lessonResult&&lessonResultFingerprint!==lessonCircuitSignature()){
-      lessonResult=null;lessonResultFingerprint=null;renderLessonPanel();
-    }
+    if(lessonActiveId)lessonInvalidateEvidence();
     if (!trackHistory) return;
     const snapshot = historySnapshot();
     if (undoIndex < 0) {
@@ -6780,12 +7059,14 @@
     const active=serializeBoard(activeBoardRef());
     return {version:1,projectName,activeModuleId,mainBoard,modules,nodes:active.nodes,nodeDrawOrder:active.nodeDrawOrder,wires:active.wires,wireDrawOrder:active.wireDrawOrder,camera:active.camera,gridVisible};
   }
-  function applyConfig(raw,fit=false){
+  function applyConfig(raw,fit=false,animatePalette=false){
     if(moduleSimulation){moduleSimulation=null;workspace.classList.remove('module-simulation-mode');$('moduleSimulationBanner').hidden=true;}
     if(!raw||raw.version!==1||(!Array.isArray(raw.nodes)&&!raw.mainBoard)||(!Array.isArray(raw.wires)&&!raw.mainBoard))throw new Error('Ungültige Konfiguration');
     clearFocusedFeedback();
     const storedProjectName=String(raw.projectName??'').trim();
-    projectName=safeBoardName(!storedProjectName||storedProjectName.toLocaleLowerCase('de')==='unbenannt'?'Hauptschaltkreis':storedProjectName,'Hauptschaltkreis');
+    const activeLesson=lessonTask(lessonActiveId);
+    lessonAdaptInputTypes(activeLesson,raw);
+    projectName=safeBoardName(activeLesson?`Übung · ${activeLesson.title}`:!storedProjectName||storedProjectName.toLocaleLowerCase('de')==='unbenannt'?'Hauptschaltkreis':storedProjectName,'Hauptschaltkreis');
     moduleDefinitions=Array.isArray(raw.modules)?raw.modules.filter(def=>def&&typeof def.id==='string'&&/^[a-z0-9_-]{1,48}$/i.test(def.id)).slice(0,100).map(def=>({id:def.id,name:safeBoardName(def.name||'Unterfunktion'),nodes:Array.isArray(def.nodes)?def.nodes:[],wires:Array.isArray(def.wires)?def.wires:[],nodeDrawOrder:Array.isArray(def.nodeDrawOrder)?def.nodeDrawOrder:[],wireDrawOrder:Array.isArray(def.wireDrawOrder)?def.wireDrawOrder:[],camera:def.camera||null})):[];
     refreshCustomModuleTypes();
     mainBoardState=normalizeBoard(raw.mainBoard||raw);
@@ -6795,77 +7076,258 @@
     const active=activeBoardRef();nodes=active.nodes||[];wires=active.wires||[];nodeDrawOrder=active.nodeDrawOrder||[];wireDrawOrder=active.wireDrawOrder||[];
     camera=fit?{x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}:active.camera?{...active.camera}:{x:stage.clientWidth/2,y:stage.clientHeight/2,z:1};
     gridVisible=raw.gridVisible!==false;$('gridBg').style.display=gridVisible?'':'none';$('menuGridCheck').textContent=gridVisible?'✓':'';
-    clearSelection();armedFrom=null;pendingPaste=null;refreshCustomModuleTypes();renderBoardTabs();renderPalette();render(false,false);saveLocal(false,true);if(fit)fitView();
+    clearSelection();armedFrom=null;pendingPaste=null;refreshCustomModuleTypes();renderBoardTabs();renderPalette(animatePalette);render(false,false);saveLocal(false,true);if(fit)fitView();
   }
 
   // Aufgaben werden ausschließlich lokal gespeichert. Das freie Projekt liegt
   // während der Übungen in einer separaten Sicherung und bleibt unverändert.
   const LESSON_UNITS=[
-    {id:'signale',name:'01 · Signale und Stromkreise',title:'Vom Schalter zum Licht',intro:'Stell dir eine Lampe vor, die du mit einem Lichtschalter steuerst. Im Computer gibt es ebenfalls nur zwei eindeutige Signalwerte: 0 (aus/LOW) und 1 (an/HIGH). Wir beginnen mit einem einzigen Kabel. Danach wird es Schritt für Schritt interessanter.'},
-    {id:'entscheidungen',name:'02 · Logische Entscheidungen',title:'Wann soll das Licht leuchten?',intro:'An einer Maschine sollen manchmal zwei Bedingungen gleichzeitig erfüllt sein – etwa eine geschlossene Tür UND ein gedrückter Startknopf. In anderen Situationen reicht eine von zwei Bedingungen. Das sind die Grundideen von AND und OR.'},
-    {id:'kombinieren',name:'03 · Gatter kombinieren',title:'Kleine Bausteine, größere Ideen',intro:'Aus wenigen einfachen Gattern lassen sich schon überraschend viele Regeln bauen. Wie bei einem Baukasten verknüpfen wir Zwischenergebnisse: Zuerst kehren wir eine gemeinsame Bedingung um, danach entwickeln wir eine kleine Alarmanlage mit drei Sensoren.'},
-    {id:'werkstatt',name:'04 · Vergleichen und Rechnen',title:'Eigene Logik entwickeln und rechnen',intro:'Zuerst entwickeln wir eine Schaltung, die zwei unterschiedliche Eingänge erkennt. Danach verwenden wir die Idee als Baustein für eine einfache Binäraddition.'}
+    {id:'signale',name:'01 - Signale und Stromkreise'},
+    {id:'entscheidungen',name:'02 - Logische Entscheidungen'},
+    {id:'zeit',name:'03 - Signale und Zeit'},
+    {id:'negationen',name:'04 - Verneinte Gatter'},
+    {id:'vergleich',name:'05 - Vergleichen und Addieren'},
+    {id:'zahlen',name:'06 - Bits und Zahlen'},
+    {id:'auswahl',name:'07 - Signale auswählen und verteilen'},
+    {id:'transfer',name:'08 - Logik anwenden'},
+    {id:'rechnen',name:'09 - Rechnen mit Übertrag'},
+    {id:'module',name:'10 - Unterfunktionen'},
+    {id:'speicher',name:'11 - Zustände speichern'}
   ];
   const LESSON_TASKS=[
     {id:'licht',unit:'signale',title:'Ein Schalter, eine LED',inputs:['A'],outputs:['Y'],expected:([a])=>[a],
+      predictionGoal:'Die LED Y soll immer denselben Zustand wie der Schalter A haben. Ist A aus, bleibt Y aus; ist A an, leuchtet Y.',
       goal:'Verbinde den Ausgang des Schalters A direkt mit dem Eingang der LED Y. Klicke anschließend auf den Schalter: Die LED soll seinem Zustand folgen.',
       note:'Ein Kabel überträgt einen Zustand von links nach rechts. 0 bedeutet LOW, 1 bedeutet HIGH. Die Bauteile sind schon vorbereitet – du musst nur die Verbindung herstellen.',
       hints:['Die kleinen Anschlusspunkte heißen Pins. Der Ausgang befindet sich rechts am Schalter, der Eingang links an der LED.','Ziehe mit gedrückter Maustaste vom rechten Pin des Schalters zum linken Pin der LED.'],success:'Geschafft! Eine Leitung überträgt das Eingangssignal unverändert.'},
     {id:'not',unit:'signale',title:'Das Licht umkehren',inputs:['A'],outputs:['Y'],expected:([a])=>[!a],
+      predictionGoal:'Die LED Y soll leuchten, wenn der Schalter A aus ist, und ausgehen, wenn A an ist.',
       goal:'Die LED soll leuchten, wenn der Schalter AUS ist – und ausgehen, wenn er AN ist. Baue ein NOT-Gatter zwischen A und Y ein.',
       note:'NOT bedeutet NICHT. Dieses Gatter hat nur einen Eingang und kehrt 0 in 1 sowie 1 in 0 um. Du findest es links unter „Logikgatter“.',
       hints:['Eine direkte Leitung reicht nicht mehr: Das Signal muss verändert werden.','Verbinde A → NOT → Y. Der Ausgang des NOT-Gatters liegt rechts.'],success:'Sehr gut! Du hast die erste logische Operation aufgebaut: NICHT A.'},
     {id:'and',unit:'entscheidungen',title:'Beide müssen zustimmen',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a&&b],
-      goal:'Eine Maschine startet nur, wenn Schutzklappe A geschlossen UND Startknopf B gedrückt ist. Die LED Y soll ausschließlich bei A=1 und B=1 leuchten.',
-      note:'Ein AND-Gatter (UND) liefert nur dann 1, wenn beide Eingänge 1 sind. Prüfe die vier möglichen Kombinationen der beiden Schalter.',
-      hints:['Hier brauchst du ein Gatter mit zwei Eingängen: AND.','Führe beide Schalter auf verschiedene Eingänge des AND-Gatters und seinen Ausgang zur LED.'],success:'Richtig! AND ist die logische UND-Verknüpfung.'},
+      predictionGoal:'Eine Maschine startet nur, wenn Schutzklappe A geschlossen UND die Startfreigabe B eingeschaltet ist. Die LED Y soll ausschließlich bei A=1 und B=1 leuchten.',
+      goal:'Eine Maschine startet nur, wenn Schutzklappe A geschlossen UND die Startfreigabe B eingeschaltet ist. Die LED Y soll ausschließlich bei A=1 und B=1 leuchten.',
+      note:'Ein AND-Gatter (UND) liefert nur dann 1, wenn beide Eingänge 1 sind. A und B sind Schalter. Prüfe alle vier Kombinationen.',
+      hints:['Hier brauchst du ein Gatter mit zwei Eingängen: AND.','Führe Schalter A und B auf verschiedene Eingänge des AND-Gatters und seinen Ausgang zur LED.'],success:'Richtig! AND ist die logische UND-Verknüpfung.'},
     {id:'or',unit:'entscheidungen',title:'Ein Sensor genügt',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a||b],
+      predictionGoal:'Eine Warnleuchte Y soll angehen, wenn Tür A ODER Fenster B geöffnet wird. Sie bleibt nur aus, wenn beide Melder 0 liefern.',
       goal:'Eine Warnleuchte soll angehen, wenn Tür A ODER Fenster B geöffnet wird. Sie bleibt nur aus, wenn beide Melder 0 liefern.',
       note:'OR (ODER) bedeutet: Mindestens eine Bedingung trifft zu. Auch wenn beide Schalter 1 liefern, bleibt das Ergebnis 1.',
       hints:['Erinnere dich: Bei nur einem eingeschalteten Eingang soll das Ergebnis bereits 1 sein.','Ein OR-Gatter mit zwei Eingängen leistet genau das. Verbinde A und B mit OR, dann OR mit Y.'],success:'Genau! OR reagiert auf mindestens einen aktiven Eingang.'},
-    {id:'nand',unit:'kombinieren',title:'Nur nicht beide',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[!(a&&b)],
-      goal:'Die LED soll nur dann AUS sein, wenn A und B gleichzeitig 1 sind. Versuche diese Regel mit einer Kombination von verschiedenen Gattern zu bauen.',
+    {id:'buffer-signal',unit:'zeit',title:'Das Licht reagiert später',inputs:['A'],outputs:['Y'],timing:{delay:1.5,configuredDelay:1.5},required:['BUFFER'],expected:([a])=>[a],
+      predictionGoal:'Y soll denselben Zustand wie A haben, aber jede Änderung erst nach genau 1,5 Sekunden übernehmen. Sage die Werte nach dem Abwarten voraus.',
+      goal:'Verbinde A über einen Buffer mit Y. Stelle in den Eigenschaften eine Verzögerung von 1,5 s ein. Beobachte das Ein- und Ausschalten: Y darf erst 1,5 Sekunden später wechseln.',
+      note:'Ein Buffer verändert den logischen Wert nicht, sondern gibt eine Änderung zeitversetzt weiter. Die Wahrheitstabelle zeigt hier die Werte nach dem Abwarten.',hints:['Suche „Buffer“ im Bauteilemenü.','Wähle den Buffer an und stelle rechts in den Eigenschaften die Verzögerung auf 1,5 s. Warte nach jedem Schaltvorgang, bevor du den Messwert erfasst. Die Prüfung kontrolliert zusätzlich beide Signalwechsel.'],success:'Die Signalwechsel werden korrekt um 1,5 Sekunden verzögert.'},
+    {id:'buffer-vergleich',unit:'zeit',title:'Sofort und zeitversetzt',inputs:['A'],outputs:['D','Y'],timing:{delay:.5,immediate:[0]},required:['BUFFER'],expected:([a])=>[a,!a],
+      predictionGoal:'D soll A sofort folgen. Y soll nach einer halben Sekunde den jeweils entgegengesetzten Wert von A anzeigen. Sage die Werte nach dem Abwarten voraus.',
+      goal:'Verbinde A direkt mit D. Baue einen zweiten Signalweg mit NOT und Buffer (0,5 s) zu Y. Beobachte, dass D sofort und Y erst verzögert reagiert.',
+      note:'Logik und Zeit sind zwei verschiedene Eigenschaften. NOT kehrt ein Signal um; der Buffer verzögert die Weitergabe. Zwei Ausgänge machen den Unterschied sichtbar.',hints:['D benötigt keine Verzögerung.','NOT und Buffer hintereinander erzeugen die verzögerte Umkehrung. Die Prüfung kontrolliert auch die Übergänge beider LEDs.'],success:'Beide Ausgänge reagieren mit der geforderten Logik und Zeit.'},
+    {id:'nand',unit:'negationen',title:'Nur nicht beide',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[!(a&&b)],
+      predictionGoal:'Die LED Y soll nur dann aus sein, wenn beide Schalter A und B eingeschaltet sind.',
+      goal:'Die LED soll nur dann AUS sein, wenn beide Schalter A und B eingeschaltet sind. Diese Funktion heißt NAND. Baue sie mit einer Kombination aus bekannten Gattern.',
       note:'Denk in zwei Schritten: Zuerst feststellen, ob BEIDE 1 sind, danach das Ergebnis umkehren. Diese Funktion heißt NAND – NOT AND.',
-      hints:['Welche Schaltung liefert 1, wenn beide Schalter 1 sind?','Schalte den Ausgang eines AND-Gatters auf den Eingang eines NOT-Gatters. Dessen Ausgang führt zur LED.'],success:'Prima! Du hast eine mehrstufige logische Schaltung verstanden.'},
-    {id:'alarm',unit:'kombinieren',title:'Alarm in der Nacht',inputs:['N','T','F'],outputs:['Y'],expected:([n,t,f])=>[n&&(t||f)],
+      hints:['Welche Schaltung liefert 1, wenn beide Eingänge 1 sind?','Schalte den Ausgang eines AND-Gatters auf den Eingang eines NOT-Gatters. Dessen Ausgang führt zur LED.'],success:'Prima! Du hast eine mehrstufige logische Schaltung verstanden.'},
+    {id:'nand-kompakt',unit:'negationen',title:'NAND als einzelnes Gatter',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[!(a&&b)],required:['NAND'],
+      predictionGoal:'Wie in der vorherigen Aufgabe: Y ist nur aus, wenn beide Schalter eingeschaltet sind.',
+      goal:'Wiederhole die Regel der vorherigen Aufgabe: Y ist nur bei zwei Einsen aus. Verwende diesmal das neue NAND-Gatter.',note:'NAND vereint AND und NOT in einem Bauteil. Die kleine Blase am Ausgang kennzeichnet die Negation.',hints:['Vergleiche die Regel mit deiner vorherigen Lösung.','Verbinde beide Schalter mit NAND und seinen Ausgang mit Y.'],success:'Die kompakte NAND-Schaltung ist funktional gleichwertig.'},
+    {id:'nor-aufbau',unit:'negationen',title:'Nur wenn beide aus sind',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[!(a||b)],
+      predictionGoal:'Eine Bereitschaftsleuchte Y soll nur leuchten, wenn weder A noch B aktiv ist.',
+      goal:'Eine Bereitschaftsleuchte soll nur leuchten, wenn weder A noch B aktiv ist. Diese Funktion heißt NOR. Entwickle sie aus bekannten Gattern.',note:'NOR bedeutet NOT OR: Die ODER-Regel wird umgekehrt.',hints:['Wann würde ein OR-Gatter eine Eins liefern?','Kehre den Ausgang von OR mit NOT um.'],success:'Du hast die NOR-Funktion selbst aufgebaut.'},
+    {id:'nor-kompakt',unit:'negationen',title:'Bereitschaft mit Freigabe',inputs:['A','B','E'],outputs:['Y'],expected:([a,b,e])=>[e&&!(a||b)],required:['NOR'],
+      predictionGoal:'Y soll nur leuchten, wenn beide Melder A und B aus sind UND Freigabe E eingeschaltet ist.',
+      goal:'Y soll nur leuchten, wenn beide Melder A und B aus sind UND Freigabe E eingeschaltet ist. Nutze das neue NOR-Gatter. Die LED bleibt bei ausgeschalteter Freigabe dunkel.',note:'Ein NOR liefert genau bei 0/0 eine Eins. Die Freigabe E bestimmt, ob dieses Ergebnis zur LED gelangen darf.',hints:['NOR prüft A und B.','Ein AND-Gatter verbindet das NOR-Ergebnis mit E.'],success:'Du hast NOR in eine Bereitschaftsanzeige mit Freigabe eingebaut.'},
+    {id:'xor',unit:'vergleich',title:'Genau einer von zwei',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a!==b],
+      predictionGoal:'Die LED Y soll leuchten, wenn genau einer der beiden Schalter A und B eingeschaltet ist. Bei 0/0 und 1/1 bleibt sie aus.',
+      goal:'Eine LED soll leuchten, wenn genau einer der beiden Schalter A und B eingeschaltet ist. Bei 0/0 und 1/1 bleibt sie aus. Diese Funktion heißt XOR (exklusives ODER). Baue sie selbst aus den bisher bekannten Gattern auf.',
+      note:'Diese Regel heißt exklusives ODER (XOR). „Exklusiv“ bedeutet hier: Beide Eingänge dürfen nicht denselben Wert haben.',
+      hints:['Betrachte die beiden Fälle, in denen die LED leuchten soll: A=1 und B=0 sowie A=0 und B=1.','Baue mit NOT- und AND-Gattern für beide Fälle einen eigenen Zweig: A UND (NICHT B) sowie (NICHT A) UND B.','Fasse die Ausgänge beider AND-Gatter mit OR zusammen und verbinde das Ergebnis mit Y.'],success:'Richtig! Du hast die XOR-Funktion selbst aus NOT, AND und OR zusammengesetzt.'},
+    {id:'xnor-aufbau',unit:'vergleich',title:'Sind beide gleich?',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a===b],
+      predictionGoal:'Y soll leuchten, wenn beide Schalter denselben Zustand haben.',
+      goal:'Y soll leuchten, wenn beide Schalter denselben Zustand haben. Diese Funktion heißt XNOR. Entwickle sie ohne fertiges XNOR-Gatter.',note:'XOR erkennt Unterschiede. Die Umkehrung davon erkennt Gleichheit und heißt XNOR.',hints:['Welche Werte liefert XOR bei 0/0 und 1/1?','Kehre das XOR-Ergebnis um. Auch andere gleichwertige Lösungen sind möglich.'],success:'Du hast die Gleichheitsfunktion entwickelt.'},
+    {id:'vergleich',unit:'vergleich',title:'Gleichheit mit Freigabe',inputs:['A','B','E'],outputs:['Y'],expected:([a,b,e])=>[e&&(a===b)],required:['XNOR'],
+      predictionGoal:'Eine Kontrollleuchte Y soll nur dann leuchten, wenn A und B übereinstimmen UND Freigabe E eingeschaltet ist.',
+      goal:'Eine Kontrollleuchte soll bei übereinstimmenden Sensoren A und B und aktiver Freigabe E leuchten. Verwende XNOR.',note:'XNOR liefert eine Eins, wenn die Eingänge gleich sind. Die Freigabe E bestimmt, ob die Kontrollleuchte eingeschaltet werden darf.',hints:['Prüfe A und B mit XNOR.','Verknüpfe das Vergleichsergebnis mit E über AND.'],success:'Du hast den Gleichheitsvergleich sinnvoll erweitert.'},
+    {id:'alarm',unit:'transfer',title:'Alarm in der Nacht',inputs:['N','T','F'],outputs:['Y'],expected:([n,t,f])=>[n&&(t||f)],
+      predictionGoal:'Eine Alarmanlage soll nur nachts (N=1) warnen – und auch dann nur, wenn Tür T ODER Fenster F offen ist.',
       goal:'Eine Alarmanlage soll nur nachts (N=1) warnen – und auch dann nur, wenn Tür T ODER Fenster F offen ist. Baue die passende Schaltung.',
       note:'Die Bedingung lautet: Nacht UND (Tür ODER Fenster). Löse zuerst die Klammer, dann verknüpfe dieses Zwischenergebnis mit dem Nachtsignal.',
       hints:['Verbinde zunächst T und F über OR. So entsteht „mindestens eine Öffnung“.','Verbinde das OR-Ergebnis und N mit AND. Der AND-Ausgang führt zur LED.'],success:'Die Alarmregel ist korrekt für alle acht Sensorbelegungen!' },
-    {id:'xor',unit:'werkstatt',title:'Genau einer von zwei',inputs:['A','B'],outputs:['Y'],expected:([a,b])=>[a!==b],
-      goal:'Eine LED soll leuchten, wenn genau einer der beiden Schalter A und B eingeschaltet ist. Bei 0/0 und 1/1 bleibt sie aus. Baue diese Funktion selbst aus den bisher bekannten Gattern auf.',
-      note:'Diese Regel heißt exklusives ODER (XOR). „Exklusiv“ bedeutet hier: Beide Eingänge dürfen nicht denselben Wert haben.',
-      hints:['Betrachte die beiden Fälle, in denen die LED leuchten soll: A=1 und B=0 sowie A=0 und B=1.','Baue mit NOT- und AND-Gattern für beide Fälle einen eigenen Zweig: A UND (NICHT B) sowie (NICHT A) UND B.','Fasse die Ausgänge beider AND-Gatter mit OR zusammen und verbinde das Ergebnis mit Y.'],success:'Richtig! Du hast die XOR-Funktion selbst aus NOT, AND und OR zusammengesetzt.'},
-    {id:'halbaddierer',unit:'werkstatt',title:'Zwei Bits addieren',inputs:['A','B'],outputs:['S','Ü'],expected:([a,b])=>[a!==b,a&&b],
-      goal:'Addiere die Bits A und B. Die obere LED S zeigt die Summe an, die untere LED Ü den Übertrag. Bei 1+1 soll S=0 und Ü=1 sein.',
-      note:'Eine binäre Addition hat zwei Ergebnisse: Das Summenbit S entspricht XOR; der Übertrag Ü entsteht genau dann, wenn beide Eingänge 1 sind (AND). Die zuvor selbst entwickelte XOR-Funktion steht dir jetzt als fertiges Gatter zur Verfügung.',
-      hints:['Überlege getrennt, wann das Summenbit und wann der Übertrag 1 ist.','Baue einen XOR-Zweig zu S und einen AND-Zweig zu Ü. Von einem Schalter dürfen mehrere Kabel abgehen.'],success:'Gratulation! Dein Halbaddierer berechnet 0+0, 0+1, 1+0 und 1+1 korrekt.'}
+    {id:'mehrheit',unit:'transfer',title:'Mehrheitsentscheidung',inputs:['A','B','C'],outputs:['Y'],expected:([a,b,c])=>[(a&&b)||(a&&c)||(b&&c)],
+      predictionGoal:'Drei Personen stimmen ab. Y soll genau dann leuchten, wenn mindestens zwei Personen mit Ja stimmen.',
+      goal:'Drei Personen stimmen ab. Y soll genau dann leuchten, wenn mindestens zwei Personen mit Ja stimmen.',note:'Betrachte die möglichen Zweierpaare: AB, AC und BC. Es genügt, wenn mindestens eines zustimmt.',hints:['Baue für jedes Paar eine UND-Bedingung.','Verknüpfe die drei Ergebnisse so, dass eines davon genügt.'],success:'Deine Schaltung erkennt die Mehrheit bei allen acht Kombinationen.'},
+    {id:'halbaddierer',unit:'vergleich',title:'Zwei Bits addieren',inputs:['A','B'],outputs:['S','Ü'],expected:([a,b])=>[a!==b,a&&b],
+      predictionGoal:'Addiere die Bits A und B gedanklich. Die LED S steht für das Summenbit, die LED Ü für den Übertrag. Bei 1+1 gilt S=0 und Ü=1.',
+      goal:'Baue einen Halbaddierer, der die Bits A und B addiert. Die obere LED S zeigt die Summe an, die untere LED Ü den Übertrag. Bei 1+1 soll S=0 und Ü=1 sein.',
+      note:'Eine binäre Addition hat zwei Ergebnisse: Das Summenbit S entspricht XOR; der Übertrag Ü entsteht genau dann, wenn beide Eingänge 1 sind (AND). Die zuvor selbst entwickelte XOR-Funktion steht dir als fertiges Gatter zur Verfügung.',
+      hints:['Überlege getrennt, wann das Summenbit und wann der Übertrag 1 ist.','Baue einen XOR-Zweig zu S und einen AND-Zweig zu Ü. Von einem Schalter dürfen mehrere Kabel abgehen.'],success:'Gratulation! Dein Halbaddierer berechnet 0+0, 0+1, 1+0 und 1+1 korrekt.'},
+    {id:'volladdierer',unit:'rechnen',title:'Drei Bits addieren',inputs:['A','B','C'],outputs:['S','Ü'],expected:([a,b,c])=>[(a!==b)!==c,(a&&b)||(c&&(a!==b))],
+      predictionGoal:'Addiere A, B und den eingehenden Übertrag C gedanklich. S ist das Summenbit und Ü der neue Übertrag. Bei drei Einsen gilt S=1 und Ü=1.',
+      goal:'Baue einen Volladdierer für A, B und den eingehenden Übertrag C. S ist das Summenbit und Ü der neue Übertrag. Bei drei Einsen gilt S=1 und Ü=1.',note:'Ein Volladdierer erweitert den bereits kennengelernten Halbaddierer. Die Summe ist 1 bei einer ungeraden Anzahl von Einsen; der Übertrag bei mindestens zwei Einsen.',hints:['Addiere zunächst A und B wie im Halbaddierer.','Addiere das Zwischensummenbit und C.','Der Gesamtübertrag entsteht, wenn eine der beiden Additionen einen Übertrag liefert.'],success:'Dein Volladdierer liefert Summe und Übertrag für alle acht Kombinationen.'},
+    {id:'modul-alarm',unit:'module',title:'Ein Baustein für zwei Sensoren',inputs:['A','B','E'],outputs:['Y'],moduleKind:'or',expected:([a,b,e])=>[(a||b)&&e],
+      predictionGoal:'A und B melden zwei Öffnungen. Y soll nur bei mindestens einer Öffnung und eingeschalteter Freigabe E leuchten.',
+      goal:'Die Unterfunktion „Öffnung“ fasst A und B bereits mit OR zusammen. Ihre Eingänge sind fest verdrahtet. Ergänze hinter ihrem Ausgang die Freigabe E und verbinde das Ergebnis mit Y.',
+      note:'Öffne den Tab „Öffnung“, um die vorgegebene Unterfunktion anzusehen. Ihre Schaltung ist geschützt. Kehre zum Hauptschaltkreis zurück, um weiterzubauen.',hints:['Der Ausgang der Unterfunktion entspricht A ODER B.','Verknüpfe diesen Ausgang und E mit AND.'],success:'Du hast eine vorbereitete Unterfunktion als wiederverwendbaren Baustein eingesetzt.'},
+    {id:'modul-summe',unit:'module',title:'Zwei Ergebnisse eines Bausteins',inputs:['A','B'],outputs:['Y'],moduleKind:'half',expected:([a,b])=>[a||b],
+      predictionGoal:'Ein Halbaddierer liefert das Summenbit S und den Übertrag Ü. Y soll leuchten, wenn die Summe von A und B größer als null ist.',
+      goal:'A und B sind bereits mit dem Halbaddierer verbunden. Nutze beide Ausgänge S und Ü, um Y genau dann einzuschalten, wenn das Additionsergebnis nicht null ist.',
+      note:'Im Tab „Halbaddierer“ siehst du den inneren Aufbau mit XOR und AND. Die beiden Ausgänge liefern unterschiedliche Stellenwerte.',hints:['Bei der Summe 1 ist S=1, bei der Summe 2 ist Ü=1.','Mindestens einer der beiden Ausgänge muss aktiv sein: Verbinde S und Ü mit OR.'],success:'Du hast beide Ausgänge einer Unterfunktion sinnvoll ausgewertet.'}
+,
+    {id:"anzeige-bits",unit:"zahlen",title:"Eine Binärzahl anzeigen",inputs:["A","B"],outputs:["Z"],displayOutput:true,required:['DISPLAY'],expected:([a,b])=>[2*Number(a)+Number(b)],predictionGoal:"Z soll die zweistellige Binärzahl AB als Dezimalzahl anzeigen. A hat den Stellenwert 2, B den Stellenwert 1.",goal:"Verbinde A mit dem oberen und B mit dem unteren Eingang einer 2-Bit-Anzeige Z. Die Anzeige ist bereits vorgegeben.",note:"Der obere Eingang besitzt den höheren Stellenwert.",hints:["Bei A=1 und B=0 zeigt Z die Zahl 2.","Eine 2-Bit-Anzeige kann 0 bis 3 darstellen."],success:"Die Binärzahl wird korrekt angezeigt."},
+    {id:"anzeige-summe",unit:"zahlen",title:"Die Summe als Zahl lesen",inputs:["A","B"],outputs:["Z"],displayOutput:true,required:['DISPLAY'],expected:([a,b])=>[Number(a)+Number(b)],predictionGoal:"Z soll die Summe von A und B als Dezimalzahl anzeigen.",goal:"Baue einen Halbaddierer und verbinde den Übertrag mit dem oberen Eingang und das Summenbit mit dem unteren Eingang der vorgegebenen 2-Bit-Anzeige.",note:"Ein Halbaddierer liefert zwei Bits: Ü und S.",hints:["Der Übertrag hat den Stellenwert 2.","Nutze AND für Ü und XOR für S."],success:"Die Anzeige gibt die Summe korrekt aus."},
+    {id:"mux-bauen",unit:"auswahl",title:"Einen Signalweg auswählen",inputs:["A","B","S"],outputs:["Y"],expected:([a,b,c])=>c? [b]:[a],predictionGoal:"Y soll A folgen, wenn S=0 ist, und B, wenn S=1 ist.",goal:"Diese Auswahlfunktion heißt Multiplexer (MUX). Baue einen 2:1-Multiplexer aus den bisher bekannten Gattern.",note:"Ein Multiplexer wählt genau einen Dateneingang aus.",hints:["Verwende NOT für die Bedingung S=0.","Verknüpfe A mit NICHT S und B mit S; fasse beide Zweige mit OR zusammen."],success:"Du hast einen 2:1-Multiplexer aufgebaut."},
+    {id:"mux-fertig",unit:"auswahl",title:"Auswählen und umkehren",inputs:["A","B","S"],outputs:["Y"],fixedKind:'MUX',required:['MUX'],expected:([a,b,c])=>[!(c?b:a)],predictionGoal:"Y soll den jeweils entgegengesetzten Wert der ausgewählten Quelle anzeigen: S=0 wählt A, S=1 wählt B.",goal:"A, B und S sind bereits mit dem MUX verbunden. Ergänze hinter seinem Ausgang die Umkehrung und verbinde sie mit Y.",note:"Der MUX fasst die zuvor gebaute Auswahllogik in einem Bauteil zusammen.",hints:["Der MUX-Ausgang enthält den ausgewählten Wert.","Ein NOT am MUX-Ausgang genügt."],success:"Auswahl und Negation stimmen."},
+    {id:"demux-bauen",unit:"auswahl",title:"Ein Signal auf zwei Wege verteilen",inputs:["D","S"],outputs:["Y0","Y1"],expected:([d,c])=>[d&&!c,d&&c],predictionGoal:"Bei S=0 soll D zu Y0 gelangen, bei S=1 zu Y1. Der jeweils andere Ausgang bleibt 0.",goal:"Diese Verteilungsfunktion heißt Demultiplexer (DEMUX). Baue sie selbst aus bekannten Gattern.",note:"Ein Demultiplexer verteilt ein Datensignal auf genau einen ausgewählten Ausgang.",hints:["Für Y0 muss D=1 und S=0 sein.","Für Y1 muss D=1 und S=1 sein."],success:"Beide Signalwege werden korrekt ausgewählt."},
+    {id:"demux-fertig",unit:"auswahl",title:"Verteilen und kontrollieren",inputs:["D","S"],outputs:["Y0","Y1"],fixedKind:'DEMUX',required:['DEMUX'],expected:([d,c])=>[d&&!c,!(d&&c)],predictionGoal:"Y0 soll das Signal des ersten DEMUX-Ausgangs zeigen. Y1 soll das Gegenteil des zweiten Ausgangs anzeigen.",goal:"D und S sind bereits mit dem DEMUX verbunden. Verbinde Ausgang 0 mit Y0 und Ausgang 1 über NOT mit Y1.",note:"Die beiden Ausgänge lassen sich unabhängig weiterverarbeiten.",hints:["Der obere Daten-Ausgang ist Kanal 0.","Nur der zweite Ausgang muss invertiert werden."],success:"Die beiden Ausgänge werden korrekt weiterverarbeitet."},
+    {id:"ff-d",unit:"speicher",title:"Ein Bit speichern",inputs:["D","K"],outputs:["Q"],sequence:[[0,0,0],[1,0,0],[1,1,1],[0,1,1],[0,0,1],[0,1,0]],required:['D_FF'],predictionGoal:"Q beginnt bei 0. Nur beim Wechsel von K=0 auf K=1 übernimmt Q den Wert D. Bei allen anderen Änderungen bleibt Q unverändert. Sage Q für die Schritte der Reihe nach voraus.",goal:"Verbinde D und den Taktschalter K mit einem D-Flip-Flop, den Ausgang Q mit der LED. Beginne die Messreihe bei Q=0 und schalte die Eingänge in der angegebenen Reihenfolge.",note:"Eine steigende Flanke ist der Wechsel von 0 auf 1. Ein D-Flip-Flop speichert das Datenbit an dieser Flanke.",hints:["K ist ein gewöhnlicher Schalter am Takteingang.","Ändere D bei K=1: Q darf sich dabei nicht ändern."],success:"Das D-Flip-Flop speichert und hält den Wert korrekt."},
+    {id:"ff-sr",unit:"speicher",title:"Gezielt setzen und löschen",inputs:["S","R","K"],outputs:["Q"],sequence:[[0,0,0,0],[1,0,0,0],[1,0,1,1],[0,0,1,1],[0,0,0,1],[0,0,1,1],[0,0,0,1],[0,1,0,1],[0,1,1,0]],required:['SR_FF'],predictionGoal:"Q beginnt bei 0. An einer steigenden K-Flanke setzt S=1 und R=0 den Wert Q auf 1, R=1 und S=0 löscht ihn auf 0. Bei S=R=0 hält Q seinen Wert. Sage die Schritte der Reihe nach voraus.",goal:"Verbinde S, R und K mit dem SR-Flip-Flop. Verbinde Q mit der LED. Schalte die Eingänge in der angegebenen Reihenfolge.",note:"Der hier verwendete SR-Baustein ist flankengesteuert. Setzen und Rücksetzen geschehen erst bei einer steigenden K-Flanke.",hints:["S steht für Setzen, R für Rücksetzen.","Bei S=R=0 bleibt Q auch nach einer steigenden Flanke erhalten."],success:"Setzen, Halten und Löschen funktionieren."}
   ];
+  const LESSON_ORDER=["licht","not","and","or","buffer-signal","buffer-vergleich","nand","nand-kompakt","nor-aufbau","nor-kompakt","xor","halbaddierer","xnor-aufbau","vergleich","anzeige-bits","anzeige-summe","mux-bauen","mux-fertig","demux-bauen","demux-fertig","alarm","mehrheit","volladdierer","modul-alarm","modul-summe","ff-d","ff-sr"];
+  LESSON_TASKS.sort((a,b)=>LESSON_ORDER.indexOf(a.id)-LESSON_ORDER.indexOf(b.id));
   // Bauteile werden schrittweise eingeführt. In späteren Aufgaben bleiben
   // alle vorherigen Werkzeuge einschließlich selbst verwendeter Typen erhalten.
   const LESSON_NEW_TYPES={
     licht:['INPUT','OUTPUT'],not:['NOT'],and:['AND'],or:['OR'],
-    nand:[],alarm:[],xor:[],halbaddierer:['XOR']
+    nand:[],alarm:[],xor:[],halbaddierer:['XOR'],
+    'nand-kompakt':['NAND'],'nor-aufbau':[],'nor-kompakt':['NOR'],'xnor-aufbau':['XOR'],vergleich:['XNOR'],mehrheit:[],volladdierer:[], 'modul-alarm':[], 'modul-summe':[], 'buffer-signal':['BUFFER'], 'buffer-vergleich':[], 'anzeige-bits':['DISPLAY'], 'anzeige-summe':[], 'mux-bauen':[], 'mux-fertig':['MUX'], 'demux-bauen':[], 'demux-fertig':['DEMUX'], 'ff-d':['D_FF'], 'ff-sr':['SR_FF']
+  };
+  // Jede Aufgabe besitzt einen eigenen Einstieg, ohne die Lösung vorwegzunehmen.
+  const LESSON_INTROS={
+  "licht": [
+    "Vom Schalter zum Licht",
+    "Stell dir eine Lampe vor, die du mit einem Lichtschalter steuerst. Auch digitale Schaltungen arbeiten mit zwei Signalwerten: 0 (aus/LOW) und 1 (an/HIGH). Wir beginnen mit einer Verbindung zwischen einem Schalter und einer LED."
+  ],
+  "not": [
+    "Ein Signal auf den Kopf stellen",
+    "Nicht jede Lampe soll bei eingeschaltetem Schalter leuchten. Denk zum Beispiel an eine Kontrollleuchte, die anzeigt, dass etwas ausgeschaltet ist. Wie lässt sich aus einem Signal sein Gegenteil erzeugen?"
+  ],
+  "and": [
+    "Zwei Bedingungen für einen Start",
+    "Bei einer Maschine reicht es aus Sicherheitsgründen oft nicht, einfach auf Start zu drücken. Auch die Schutzklappe muss geschlossen sein. Digitale Schaltungen können mehrere Bedingungen gleichzeitig berücksichtigen. Die Startfreigabe wird hier durch einen zweiten Schalter dargestellt."
+  ],
+  "or": [
+    "Mehr als ein Auslöser",
+    "Eine Warnanlage soll nicht erst reagieren, wenn mehrere Dinge gleichzeitig passieren. Schon ein einzelner Melder kann genügen. Untersuche, wie sich diese Art von Entscheidung von der vorherigen Aufgabe unterscheidet."
+  ],
+  "nand": [
+    "Eine bekannte Regel umkehren",
+    "Manchmal interessiert uns gerade der Fall, in dem eine Bedingung nicht erfüllt ist. Aus den bisher kennengelernten Gattern lassen sich solche Regeln zusammensetzen, ohne einen völlig neuen Baustein erfinden zu müssen."
+  ],
+  "alarm": [
+    "Eine Alarmanlage für die Nacht",
+    "Eine Alarmanlage hat mehrere Sensoren und soll nicht zu jeder Tageszeit aktiv sein. Die einzelnen Signale müssen sinnvoll zusammenwirken. Überlege, welche Rolle jeder Sensor und die Tageszeit spielen."
+  ],
+  "xor": [
+    "Entweder das eine oder das andere",
+    "Stell dir zwei Personen vor, die unabhängig voneinander eine Auswahl treffen. Eine Leuchte soll anzeigen, dass sich ihre Entscheidungen unterscheiden. Das gewöhnliche ODER allein beschreibt diesen Fall nicht vollständig."
+  ],
+  "halbaddierer": [
+    "Rechnen mit zwei Signalwerten",
+    "Computer rechnen mit Nullen und Einsen. Bei der Addition zweier Bits kann ein Ergebnis entstehen, das nicht mehr in eine einzige Stelle passt. Deshalb betrachten wir neben der Summe auch den Übertrag."
+  ],
+  "nand-kompakt": [
+    "Aus mehreren Gattern wird eines",
+    "Eine Schaltung lässt sich oft auf verschiedene Arten aufbauen. Wenn zwei Aufbauten bei allen Eingaben dasselbe Ergebnis liefern, sind sie logisch gleichwertig. In diesem Level lernst du einen kompakten Baustein für eine bereits bekannte Funktion kennen."
+  ],
+  "nor-aufbau": [
+    "Ruhe als Signal",
+    "Eine Bereitschaftsanzeige kann melden, dass gerade keiner von zwei Sensoren aktiv ist. Damit betrachten wir nicht das Auftreten eines Ereignisses, sondern dessen Ausbleiben. Welche bekannte Regel hilft dir dabei?"
+  ],
+  "nor-kompakt": [
+    "Bereit, aber nur mit Erlaubnis",
+    "Eine Anlage meldet Bereitschaft nur, wenn keine Störung vorliegt und die Anzeige freigegeben ist. Untersuche, wie sich zwei solche Bedingungen kombinieren lassen."
+  ],
+  "xnor-aufbau": [
+    "Übereinstimmung erkennen",
+    "Zwei Sensoren können denselben oder unterschiedliche Zustände melden. Bei einer Kontrollschaltung ist oft gerade die Übereinstimmung wichtig. Überlege, wie sich diese Aufgabe zu der früheren Frage nach unterschiedlichen Eingängen verhält."
+  ],
+  "vergleich": [
+    "Vergleichen mit Freigabe",
+    "Eine Prüfanzeige soll die Übereinstimmung zweier Sensoren nur dann melden, wenn die Prüfung freigegeben ist. Ein drittes Signal entscheidet, ob das Vergleichsergebnis sichtbar wird."
+  ],
+  "mehrheit": [
+    "Eine Abstimmung mit drei Personen",
+    "Bei einer Abstimmung muss nicht jeder zustimmen, damit eine Entscheidung getroffen wird. Die Mehrheit genügt. Wie lässt sich eine solche Gruppenentscheidung allein durch digitale Signale ausdrücken?"
+  ],
+  "volladdierer": [
+    "Die nächste Stelle beim Addieren",
+    "Bei einer mehrstelligen Binäraddition muss eine Stelle neben ihren beiden Bits auch einen Übertrag aus der vorherigen Stelle berücksichtigen. Dafür erweitern wir die Idee des Halbaddierers um einen dritten Eingang."
+  ],
+  "modul-alarm":["Einmal bauen, mehrfach nutzen","Eine fertige Schaltung kann als eigener Baustein in einer größeren Schaltung verwendet werden. Sie verbirgt die Details, ohne deren Funktion zu ändern. In diesem Level nutzt du eine bereits verdrahtete Unterfunktion."],
+  "modul-summe":["Mehrere Ergebnisse weiterverwenden","Ein Baustein muss nicht nur einen Ausgang besitzen. Ein Halbaddierer liefert zwei Bits, die zusammen das Ergebnis einer Addition beschreiben. Nutze diese Informationen für eine neue Entscheidung."],
+  "buffer-signal":["Wenn Zeit eine Rolle spielt","Ein Licht, das erst nach einer kurzen Verzögerung reagiert, verhält sich anders als ein Licht an einer direkten Leitung. Beide können langfristig denselben Zustand haben. Untersuche, wann die Änderung tatsächlich ankommt."],
+  "buffer-vergleich":["Zwei Signalwege im Vergleich","Manche Anzeigen sollen sofort reagieren, andere erst später. Zwei Ausgänge helfen, den Unterschied direkt zu beobachten. Verbinde die bisher bekannten logischen Operationen mit einer zeitlichen Vorgabe."],
+  "anzeige-bits":["Von Bits zu Zahlen","Zwei Bits können vier verschiedene Zahlen darstellen. Eine Anzeige macht aus den Signalwerten eine lesbare Zahl."],
+  "anzeige-summe":["Ein lesbares Rechenergebnis","Zwei LEDs können ein Ergebnis codieren. Eine Zahlenanzeige kann die beiden Ergebnisbits direkt als Zahl darstellen."],
+  "mux-bauen":["Zwei Quellen, ein Ausgang","Eine Anzeige soll wahlweise zwei verschiedene Quellen zeigen. Ein Steuersignal entscheidet, welche Quelle durchgelassen wird."],
+  "mux-fertig":["Ein fertiger Auswahlbaustein","Ein kompakter Multiplexer ersetzt mehrere Gatter. Jetzt kombinieren wir ihn mit einer weiteren Operation."],
+  "demux-bauen":["Ein Eingang, zwei Ziele","Eine Nachricht soll an genau eines von zwei Zielen gelangen. Statt eine Quelle zu wählen, wählst du einen Empfänger."],
+  "demux-fertig":["Ein Verteiler als Baustein","Ein Demultiplexer stellt die verteilten Signale an getrennten Anschlüssen bereit. Hinter jedem Ausgang kann eine andere Logik folgen."],
+  "ff-d":["Nicht nur der Moment zählt","Bisher hing das Ergebnis allein von den aktuellen Eingängen ab. Ein Speicher kann auch nach einer Änderung des Datenwerts seinen alten Zustand behalten."],
+  "ff-sr":["Ein Speicher mit zwei Befehlen","Ein Alarmzustand kann gespeichert bleiben, bis er gezielt gelöscht wird. Setzen und Rücksetzen sind zwei getrennte Befehle."]
+};
+  const LESSON_REFLECTIONS={
+    licht:['Was passiert, wenn das Kabel entfernt wird?',['Die LED folgt dem Schalter weiterhin.','Das Schaltsignal erreicht die LED nicht mehr.','Der Schalter wird automatisch eingeschaltet.'],1,'Ohne Verbindung wird das Signal nicht übertragen.','Überlege, welchen Weg das Signal zur LED nimmt.'],
+    not:['Was bewirken zwei NOT-Gatter hintereinander?',['Das ursprüngliche Signal erscheint wieder.','Der Ausgang ist immer 0.','Der Ausgang ist immer 1.'],0,'Zwei Umkehrungen heben sich auf.','Verfolge zuerst eine 0 durch beide Gatter.'],
+    and:['Wann würde ein AND mit drei Eingängen eine 1 liefern?',['Sobald ein Eingang 1 ist.','Wenn genau zwei Eingänge 1 sind.','Wenn alle drei Eingänge 1 sind.'],2,'Jede UND-Bedingung muss erfüllt sein.','Erweitere die Regel von zwei auf drei Eingänge.'],
+    or:['Was unterscheidet OR von AND bei A=1, B=0?',['Beide liefern 0.','OR liefert 1, AND liefert 0.','AND liefert 1, OR liefert 0.'],1,'OR verlangt mindestens eine Eins, AND verlangt beide.','Welche Regel verlangt beide Einsen?'],
+    nand:['Wozu dient das NOT hinter dem AND?',['Es kehrt das AND-Ergebnis um.','Es erhöht die Anzahl der Eingänge.','Es speichert das Ergebnis.'],0,'Aus jeder 1 wird eine 0 und umgekehrt.','NOT verändert den Signalwert, nicht die Anzahl der Pins.'],
+    alarm:['Warum steht das Nachtsignal in einer UND-Verknüpfung?',['Damit beide Melder offen sein müssen.','Damit auch tagsüber Alarm ausgelöst wird.','Damit das Nachtsignal eine notwendige Bedingung für den Alarm ist.'],2,'Ohne N=1 bleibt Y aus, egal wie T und F stehen.','Betrachte den Fall N=0 bei geöffneter Tür.'],
+    xor:['Warum reicht OR für diese Aufgabe nicht?',['OR hat nur einen Eingang.','OR liefert auch bei A=B=1 eine Eins.','OR liefert immer 0.'],1,'XOR schließt den Fall mit zwei Einsen aus.','Vergleiche die beiden Regeln für 1/1.'],
+    halbaddierer:['Warum ergibt 1 + 1 binär 10?',['Der Übertrag hat den Stellenwert 2, das Summenbit ist 0.','Die Summe ist dezimal zehn.','Der Übertrag hat denselben Stellenwert wie die Summe.'],0,'Ü=1 und S=0 entsprechen 2·1 + 0 = 2.','Die linke Binärstelle zählt doppelt.'],
+    'nand-kompakt':['Worin unterscheiden sich NAND und AND gefolgt von NOT?',['In ihrer Wahrheitstabelle.','NAND braucht zwei Ausgänge.','In der Bauform, nicht in der logischen Funktion.'],2,'Beide berechnen dieselbe Wahrheitstabelle.','Vergleiche die Ergebnisse der beiden NAND-Aufgaben.'],
+    'nor-aufbau':['Bei welcher Eingabe unterscheidet sich NOR von NAND?',['Bei 0/0.','Bei 0/1.','Bei 1/1.'],1,'Bei gemischten Eingängen ist NAND 1 und NOR 0.','Berechne OR und AND und kehre beide Ergebnisse um.'],
+    'nor-kompakt':['Warum bleibt Y bei E=0 immer aus?',['NOR liefert immer 0.','AND sperrt das NOR-Ergebnis ohne Freigabe.','E invertiert beide Melder.'],1,'E muss zusätzlich 1 sein, damit AND eine 1 liefert.','Betrachte den letzten Signalweg.'],
+    'xnor-aufbau':['Welche Aussage gilt für XOR und XNOR?',['Beide sind stets gleich.','XNOR leuchtet nur bei zwei Einsen.','Ihre Ausgänge sind bei jeder Kombination entgegengesetzt.'],2,'XNOR ist die Negation von XOR.','Vergleiche die Ausgangswerte bei 0/0 und 0/1.'],
+    vergleich:['Wann leuchtet Y bei E=1?',['Wenn A und B verschieden sind.','Wenn A und B gleich sind.','Immer, unabhängig von A und B.'],1,'XNOR liefert bei Gleichheit eine 1, die über AND freigegeben wird.','Welche Eingaben machen XNOR zu 1?'],
+    mehrheit:['Was ändert sich bei 1/1/0, wenn C auch auf 1 gestellt wird?',['Y bleibt 1, denn die Mehrheit war schon erreicht.','Y wird 0.','Y ist unbestimmt.'],0,'Mindestens zwei Einsen bedeutet auch drei Einsen.','Prüfe, ob die Bedingung weiterhin erfüllt ist.'],
+    volladdierer:['Wie lassen sich S und Ü für 1+1+1 als Dezimalzahl lesen?',['S+Ü=2.','Ü ist das Summenbit ohne Stellenwert.','2·Ü+S=3.'],2,'Der Übertrag zählt zwei und S zählt eins.', 'Lies Ü und S als zweistellige Binärzahl.'],
+    'modul-alarm':['Warum ist eine Unterfunktion nützlich?',['Sie erspart die Prüfung der Anschlüsse.','Sie bündelt eine bekannte Funktion in einem wiederverwendbaren Baustein.','Sie erzeugt immer eine Eins.'],1,'Ein Baustein lässt sich wiederverwenden, ohne seinen inneren Aufbau erneut zu erstellen.','Denke an eine bereits geprüfte OR-Schaltung.'],
+    'modul-summe':['Warum müssen beide Ausgänge betrachtet werden?',['Bei 1+1 ist S=0, aber Ü=1.','S ist immer 1.','Ü ist immer 0.'],0,'S und Ü beschreiben gemeinsam die Summe.','Denke an das binäre Ergebnis 10.'],
+    'buffer-signal':['Warum genügt die gewöhnliche Wahrheitstabelle nicht?',['Ein Buffer hat keine Eingänge.','Die Tabelle enthält den Zeitpunkt des Signalwechsels nicht.','Ein Buffer kehrt alle Werte um.'],1,'Die stationären Werte sind gleich; erst die zeitliche Beobachtung zeigt den Unterschied.','Vergleiche die direkte Leitung und den verzögerten Signalweg.'],
+    'buffer-vergleich':['Was passiert direkt nach dem Wechsel von A=0 auf A=1, wenn beide LEDs zuvor stabil waren?',['D bleibt 0 und Y wird sofort 0.','Beide LEDs werden sofort 0.','D wird 1, Y bleibt zunächst 1 und wird später 0.'],2,'D reagiert direkt. Die vorherige Eins am verzögerten NOT-Ausgang bleibt bis zur Fälligkeit erhalten.','Betrachte die beiden Signalwege getrennt.'],
+    "anzeige-bits":["Welchen Stellenwert hat A?",["1","2","4"],1,"Das höherwertige Bit zählt doppelt.","Vergleiche 10 und 01."],
+    "anzeige-summe":["Warum darf S nicht an den oberen Eingang?",["S hat den Stellenwert 1.","S ist immer 0.","Die Anzeige benötigt nur ein Bit."],0,"Der obere Eingang steht für den Übertrag mit dem Stellenwert 2.","Denke an 1+1."],
+    "mux-bauen":["Welche Quelle ist bei S=1 relevant?",["A","B","Beide"],1,"Der Auswahlwert 1 wählt B.","Betrachte die Aufgabenregel."],
+    "mux-fertig":["Wo muss die Umkehrung stattfinden?",["Am Auswahlpin","Am MUX-Ausgang","Nur an A"],1,"So werden beide möglichen Datenwerte umgekehrt.","Beide Quellen sollen gleich behandelt werden."],
+    "demux-bauen":["Was passiert bei D=0?",["Beide Ausgänge sind 0.","Y0 ist immer 1.","Y1 ist immer 1."],0,"Auch der gewählte Weg erhält dann 0.","Unterscheide Auswahl und Datenwert."],
+    "demux-fertig":["Welcher Daten-Ausgang ist bei S=1 gewählt?",["0","1","Beide"],1,"Kanal 1 erhält D, Kanal 0 bleibt LOW.","Lies den Auswahlwert."],
+    "ff-d":["Wann übernimmt Q den neuen Wert D?",["Bei jeder Änderung von D.","Bei einer steigenden Flanke an K.","Nur bei K=0."],1,"Ein D-Flip-Flop tastet D an der steigenden Flanke ab.","Unterscheide Taktpegel und Taktflanke."],
+    "ff-sr":["Was passiert bei S=R=0 an einer steigenden Flanke?",["Q wird 0.","Q wechselt.","Q bleibt erhalten."],2,"Ohne Setz- oder Rücksetzsignal bleibt der gespeicherte Zustand bestehen.","Beide Befehle sind inaktiv."]
   };
   function lessonFixedNode(id){
-    if(!lessonActiveId || activeModuleId || typeof id!=='string')return false;
+    if(!lessonActiveId || typeof id!=='string')return false;
+    if(lessonModuleView())return true;
+    if(activeModuleId)return false;
     const task=lessonTask(lessonActiveId);
     if(!task)return false;
-    return task.inputs.some((_,index)=>id===`lesson-${task.id}-in-${index}`) ||
+    return id===`lesson-${task.id}-module` || id===`lesson-${task.id}-fixed-part` || task.inputs.some((_,index)=>id===`lesson-${task.id}-in-${index}`) ||
            task.outputs.some((_,index)=>id===`lesson-${task.id}-out-${index}`);
   }
-  function lessonFixedFeedback(){showToast('Diese Ein- und Ausgänge gehören zur Aufgabe und können nicht verschoben oder gelöscht werden.');}
+  function lessonFixedFeedback(){showToast('Vorgegebene Bauteile gehören zur Aufgabe und können nicht verschoben oder gelöscht werden.');}
+  function lessonModuleView(){return !!(activeModuleId&&lessonTask(lessonActiveId)?.moduleKind);}
+  function lessonFixedWire(id){return !!lessonActiveId&&(lessonModuleView()||String(id).startsWith(`lesson-${lessonActiveId}-fixed-wire-`));}
+  function lessonLockedSource(ref){return !!lessonActiveId&&!activeModuleId&&wires.some(w=>lessonFixedWire(w.id)&&w.from.id===ref.id&&(w.from.port||0)===(ref.port||0));}
+  function lessonLockedTarget(ref){return !!lessonActiveId&&!activeModuleId&&wires.some(w=>lessonFixedWire(w.id)&&w.to.id===ref.id&&(w.to.port||0)===(ref.port||0));}
+  function lessonWireFeedback(){showToast('Vorgegebene Kabel und Anschlüsse können nicht gelöscht, umgesteckt oder erweitert werden.');}
+  function lessonReadOnlyFeedback(){showToast('Diese Unterfunktion ist vorgegeben. Baue im Hauptschaltkreis weiter.');}
   function syncModeMenu(){
     const inLesson=!!lessonActiveId;
-    for(const [id,checked] of [['menuModeSandbox',!inLesson],['menuModeLessons',inLesson]]){
+    for(const [id,checked] of [['menuModeSandbox',!inLesson],['menuModeLessons',inLesson&&!lessonTeacher],['menuModeTeacher',inLesson&&lessonTeacher]]){
       const el=$(id);if(!el)continue;
       el.setAttribute('aria-checked',String(checked));
       el.querySelector('.menu-check').textContent=checked?'✓':'';
     }
   }
-  function lessonSwitchToTasks(){
+  function lessonSwitchToTasks(teacher=false){
+    if(lessonTeacher!==teacher){
+      if(lessonActiveId&&!lessonExit())return;
+      lessonTeacher=teacher;lessonReadModeData();lessonPhaseView=null;
+      try{if(teacher)localStorage.setItem(LESSON_TEACHER_KEY,'1');else localStorage.removeItem(LESSON_TEACHER_KEY);}catch(_){}
+    }
     if(lessonActiveId){lessonShowCatalog=true;lessonPanelMinimized=false;lessonPanelVisibility(true);return;}
     let last=null;
-    try{last=localStorage.getItem(LESSON_LAST_KEY);}catch(_){}
+    try{last=localStorage.getItem(lessonModeKey(LESSON_LAST_KEY));}catch(_){}
     const task=LESSON_TASKS.find(t=>t.id===last&&lessonCanStart(t.id))||LESSON_TASKS[0];
     lessonStart(task.id);
     lessonShowCatalog=true;
@@ -6881,15 +7343,12 @@
     for(let i=0;i<=index;i++){
       const task=LESSON_TASKS[i];
       (LESSON_NEW_TYPES[task.id]||[]).forEach(type=>allowed.add(type));
-      if(i<index){
-        const board=lessonTaskBoards[task.id];
-        const priorNodes=board?.mainBoard?.nodes||board?.nodes||[];
-        priorNodes.forEach(node=>{if(TYPES[node.type])allowed.add(node.type);});
-      }
+
     }
-    // Bei Aufgabe 7 muss XOR wirklich aufgebaut werden, selbst wenn eine
+    // In der XOR-Aufgabe muss XOR wirklich aufgebaut werden, selbst wenn eine
     // ältere Übungssicherung bereits ein fertiges XOR-Bauteil enthielt.
     if(lessonActiveId==='xor')allowed.delete('XOR');
+    if(lessonModuleView())return new Set();
     return allowed;
   }
   const lessonHints=task=>[task.note,...task.hints];
@@ -6897,15 +7356,34 @@
   const lessonUnit=id=>LESSON_UNITS.find(unit=>unit.id===id)||null;
   function lessonCanStart(id){
     const index=LESSON_TASKS.findIndex(task=>task.id===id);
-    return index>=0&&LESSON_TASKS.slice(0,index).every(task=>lessonCompleted.has(task.id));
+    return index>=0&&(lessonTeacher||LESSON_TASKS.slice(0,index).every(task=>lessonCompleted.has(task.id)));
   }
   function lessonCircuitSignature(){
-    const partIds=nodes.map(n=>[n.id,n.type,n.moduleId||'',n.busWidth||'',n.displayBits||'',n.muxInputs||'',n.demuxOutputs||'']).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
-    const connections=wires.map(w=>[w.from.id,w.from.port||0,w.to.id,w.to.port||0]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
-    return JSON.stringify([activeModuleId,partIds,connections]);
+    const parts=lessonModuleView()?mainBoardState.nodes:nodes,links=lessonModuleView()?mainBoardState.wires:wires;
+    const partIds=parts.map(n=>[n.id,n.type,n.moduleId||'',n.busWidth||'',n.displayBits||'',n.muxInputs||'',n.demuxOutputs||'',...(n.type==='BUFFER'?[normalizeBufferDelay(n.bufferDelay)]:[])]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+    const connections=links.map(w=>[w.from.id,w.from.port||0,w.to.id,w.to.port||0]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    return JSON.stringify([lessonModuleView()?null:activeModuleId,partIds,connections,...(lessonActiveId==='buffer-signal'?['delay-1.5']:[])]);
   }
   function lessonStore(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch(_) {}}
-  function lessonSaveProgress(){lessonStore(LESSON_DONE_KEY,[...lessonCompleted]);}
+  function lessonSaveProgress(){lessonStore(lessonModeKey(LESSON_DONE_KEY),[...lessonCompleted]);}
+  const lessonInputType=()=> 'INPUT';
+  const lessonInputNodes=task=>task.inputs.map((_,i)=>nodes.find(n=>n.id===`lesson-${task.id}-in-${i}`&&n.type==='INPUT'));
+  const lessonOutputType=task=>task.displayOutput?'DISPLAY':'OUTPUT';
+  const lessonOutputNodes=task=>task.outputs.map((_,i)=>nodes.find(n=>n.id===`lesson-${task.id}-out-${i}`&&n.type===lessonOutputType(task)));
+  const lessonRowCount=task=>task.sequence?.length??(1<<task.inputs.length);
+  const lessonAnswerValues=task=>task.displayOutput?[0,1,2,3]:[0,1];
+  const lessonValidAnswer=(task,v)=>lessonAnswerValues(task).includes(v);
+  function lessonAdaptInputTypes(task,raw){
+    if(!task)return;
+    const board=raw.mainBoard||raw;
+    task.inputs.forEach((label,i)=>{
+      const node=board.nodes?.find(n=>n.id===`lesson-${task.id}-in-${i}`);
+      if(node&&(node.type!=='INPUT'||node.label!==label)){
+        Object.assign(node,{type:'INPUT',label,state:false,runtimeValue:false});
+        delete lessonLearning[task.id];lessonSaveLearning();
+      }
+    });
+  }
   function lessonCreateBoard(task){
     const inputSpacing=task.inputs.length===3?126:task.inputs.length===2?164:0;
     const outputSpacing=task.outputs.length===2?164:0;
@@ -6916,15 +7394,34 @@
     const inputScreenX=panelWidth+16+Math.max(8,(usableWidth-inputOutputDistance*zoom)/2);
     const allNodes=[];
     task.inputs.forEach((label,index)=>{
-      const node=createNodeRecord('INPUT',-45,(index-(task.inputs.length-1)/2)*inputSpacing);
+      const node=createNodeRecord(lessonInputType(task,index),-45,(index-(task.inputs.length-1)/2)*inputSpacing);
       node.id=`lesson-${task.id}-in-${index}`;node.label=label;node.state=false;allNodes.push(node);
     });
     task.outputs.forEach((label,index)=>{
-      const node=createNodeRecord('OUTPUT',-45+inputOutputDistance,(index-(task.outputs.length-1)/2)*outputSpacing);
+      const node=createNodeRecord(lessonOutputType(task),-45+inputOutputDistance,(index-(task.outputs.length-1)/2)*outputSpacing);
       node.id=`lesson-${task.id}-out-${index}`;node.label=label;allNodes.push(node);
     });
     const board={nodes:allNodes,wires:[],nodeDrawOrder:allNodes.map(node=>node.id),wireDrawOrder:[],camera:{x:inputScreenX+45*zoom,y:stage.clientHeight/2,z:zoom}};
-    return {version:1,projectName:`Übung · ${task.title}`,activeModuleId:null,mainBoard:board,nodes:board.nodes,wires:board.wires,camera:board.camera,gridVisible};
+    const modules=[];
+    if(task.fixedKind){
+      const n=createNodeRecord(task.fixedKind,195,0);n.id=`lesson-${task.id}-fixed-part`;board.nodes.push(n);board.nodeDrawOrder.push(n.id);
+      task.inputs.forEach((_,i)=>{const w={id:`lesson-${task.id}-fixed-wire-${i}`,from:{id:allNodes[i].id,port:0},to:{id:n.id,port:i}};board.wires.push(w);board.wireDrawOrder.push(w.id);});
+    }
+    if(task.moduleKind){
+      const id=`lesson-${task.id}-definition`,half=task.moduleKind==='half',name=half?'Halbaddierer':'Öffnung';
+      const parts=[],links=[];
+      const part=(type,label,x,y,order)=>{const n=createNodeRecord(type,x,y);n.id=`${id}-${parts.length}`;n.label=label;if(order!==undefined)n.portOrder=order;parts.push(n);return n;};
+      const link=(a,b,port=0)=>links.push({id:`${id}-wire-${links.length}`,from:{id:a.id,port:0},to:{id:b.id,port}});
+      const a=part('MODULE_INPUT','A',-240,-80,0),b=part('MODULE_INPUT','B',-240,80,1);
+      const g=part(half?'XOR':'OR',half?'XOR':'OR',0,half?-80:0),out=part('MODULE_OUTPUT',half?'S':'O',240,half?-80:0,0);
+      link(a,g);link(b,g,1);link(g,out);
+      if(half){const carry=part('AND','AND',0,80),c=part('MODULE_OUTPUT','Ü',240,80,1);link(a,carry);link(b,carry,1);link(carry,c);}
+      modules.push({id,name,nodes:parts,wires:links,nodeDrawOrder:parts.map(n=>n.id),wireDrawOrder:links.map(w=>w.id),camera:{x:inputScreenX+240*zoom,y:stage.clientHeight/2,z:zoom}});
+      const instance={id:`lesson-${task.id}-module`,type:MODULE_TYPE_PREFIX+id,moduleId:id,label:name,x:snap(195),y:snap(task.inputs.length===3?-63:0),state:false,q:false,clockWasHigh:false,value:false};
+      board.nodes.push(instance);board.nodeDrawOrder.push(instance.id);
+      for(let i=0;i<2;i++){const w={id:`lesson-${task.id}-fixed-wire-${i}`,from:{id:allNodes[i].id,port:0},to:{id:instance.id,port:i}};board.wires.push(w);board.wireDrawOrder.push(w.id);}
+    }
+    return {version:1,projectName:`Übung · ${task.title}`,activeModuleId:null,mainBoard:board,modules,nodes:board.nodes,wires:board.wires,camera:board.camera,gridVisible};
   }
   function lessonHasLegacyStartPositions(task,config){
     // Nur wirklich unveränderte Startschaltungen anpassen. Bereits verdrahtete,
@@ -6934,7 +7431,7 @@
     if(!Array.isArray(parts)||!Array.isArray(links)||links.length||parts.length!==task.inputs.length+task.outputs.length)return false;
     const inputSpacing=task.inputs.length===3?126:task.inputs.length===2?164:0;
     const outputSpacing=task.outputs.length===2?164:0;
-    const inputsMatch=task.inputs.every((label,index)=>parts.some(n=>n.id===`lesson-${task.id}-in-${index}`&&n.type==='INPUT'&&n.label===label&&n.x===snap(-45)&&n.y===snap((index-(task.inputs.length-1)/2)*inputSpacing)));
+    const inputsMatch=task.inputs.every((label,index)=>parts.some(n=>n.id===`lesson-${task.id}-in-${index}`&&n.type===lessonInputType(task,index)&&n.label===label&&n.x===snap(-45)&&n.y===snap((index-(task.inputs.length-1)/2)*inputSpacing)));
     const outputsMatch=task.outputs.every((label,index)=>parts.some(n=>n.id===`lesson-${task.id}-out-${index}`&&n.type==='OUTPUT'&&n.label===label&&(n.x===snap(255)||n.x===snap(555))&&n.y===snap((index-(task.outputs.length-1)/2)*outputSpacing)));
     return inputsMatch&&outputsMatch;
   }
@@ -6963,10 +7460,14 @@
       },240);
     }
   }
+  function lessonHintsAvailable(){
+    const task=lessonTask(lessonActiveId);
+    return !!task&&lessonPanelOpen&&!lessonShowCatalog&&lessonDisplayedPhase(lessonPhase(task,lessonRecordState(task)))>0;
+  }
   function syncLessonHintButtons(){
     // Eine zuletzt bearbeitete Aufgabe bleibt auch in der Übersicht geladen.
     // Der Tipps-Zugang darf daher NICHT nur von lessonActiveId abhängen.
-    const active=lessonPanelOpen&&!lessonShowCatalog&&!!lessonTask(lessonActiveId);
+    const active=lessonHintsAvailable();
     // Auf sehr schmalen Arbeitsflächen liegt der Aufgabenkasten über dem
     // rechten oberen Eck. Der Tipp ist dann im Aufgabenkopf erreichbar.
     const compact=stage.clientWidth<520;
@@ -7010,19 +7511,26 @@
   function renderLessonHintOverlay(){
     const task=lessonTask(lessonActiveId),overlay=$('lessonHintOverlay');
     const hints=task?lessonHints(task):[];
-    const visible=!!task&&lessonPanelOpen&&!lessonShowCatalog&&lessonHintIndex>0;
+    const allowed=lessonHintsAvailable();
+    if(!allowed)lessonHintIndex=0;
+    const visible=allowed&&lessonHintIndex>0;
     if(visible){
       const index=Math.min(lessonHintIndex,hints.length);
       overlay.setAttribute('aria-label',`Tipps zu ${task.title}`);
-      overlay.innerHTML=`<div class="lesson-hint-head"><strong>Hinweis ${index} von ${hints.length}</strong><div class="lesson-hint-nav"><button type="button" data-lesson-hint-action="prev" aria-label="Vorheriger Hinweis" title="Vorheriger Hinweis" ${index===1?'disabled':''}>‹</button><button type="button" data-lesson-hint-action="next" aria-label="Nächster Hinweis" title="Nächster Hinweis" ${index===hints.length?'disabled':''}>›</button></div></div><p class="lesson-hint-text">${esc(hints[index-1])}</p>`;
+      overlay.innerHTML=`<div class="lesson-hint-head"><strong>Hinweis ${index} von ${hints.length}</strong><div class="lesson-hint-nav"><button type="button" data-lesson-hint-action="prev" aria-label="Vorheriger Hinweis" title="Vorheriger Hinweis" ${index===1?'disabled':''}><span class="hint-chevron" aria-hidden="true">‹</span></button><button type="button" data-lesson-hint-action="next" aria-label="Nächster Hinweis" title="Nächster Hinweis" ${index===hints.length?'disabled':''}><span class="hint-chevron" aria-hidden="true">›</span></button></div></div><p class="lesson-hint-text">${esc(hints[index-1])}</p>`;
     }
     animateLessonHintOverlay(overlay,visible);
     syncLessonHintButtons();
   }
   function lessonRevealHint(){
-    if(!lessonPanelOpen||lessonShowCatalog||!lessonTask(lessonActiveId))return;
+    if(!lessonHintsAvailable())return;
     lessonHintIndex=lessonHintIndex>0?0:1;
     renderLessonHintOverlay();
+  }
+  function syncLessonViewport(){
+    const fallback=lessonPanelOpen&&stage.clientWidth<335;
+    stage.classList.toggle('lesson-viewport-fallback',fallback);
+    if(fallback){const rect=stage.getBoundingClientRect();stage.style.setProperty('--lesson-viewport-top',`${rect.top+12}px`);stage.style.setProperty('--lesson-viewport-height',`${Math.max(70,rect.height-24)}px`);}
   }
   function syncLessonPanelMinimized(){
     const panel=$('lessonPanel'),content=$('lessonContent'),header=panel.querySelector('.lesson-top');
@@ -7036,16 +7544,19 @@
     panel.classList.toggle('is-minimized',lessonPanelMinimized);
     content.setAttribute('aria-hidden',String(lessonPanelMinimized));
     content.toggleAttribute('inert',lessonPanelMinimized);
+    $('lessonTaskFooter').toggleAttribute('inert',lessonPanelMinimized);
+    $('lessonTaskFooter').setAttribute('aria-hidden',String(lessonPanelMinimized));
     $('lessonMinimize').setAttribute('aria-expanded',String(!lessonPanelMinimized));
     const label=lessonPanelMinimized?'Aufgabenfenster ausklappen':'Aufgabenfenster minimieren';
     $('lessonMinimize').title=label;
     $('lessonMinimize').setAttribute('aria-label',label);
     $('lessonMinimizeGlyph').textContent=lessonPanelMinimized?'▢':'−';
+    syncLessonScrollJump();
   }
   function lessonPanelVisibility(open){
     lessonPanelOpen=!!open;
     $('lessonPanel').hidden=!lessonPanelOpen;
-    syncLessonPanelMinimized();
+    syncLessonViewport();syncLessonPanelMinimized();
     syncModeMenu();
     if(lessonPanelOpen)renderLessonPanel();
     else syncLessonHintButtons();
@@ -7053,7 +7564,7 @@
   function lessonStart(id){
     const task=lessonTask(id);if(!task)return;
     if(lessonActiveId===id){
-      try{localStorage.setItem(LESSON_LAST_KEY,id);}catch(_){}
+      try{localStorage.setItem(lessonModeKey(LESSON_LAST_KEY),id);}catch(_){}
       lessonShowCatalog=false;lessonPanelMinimized=false;lessonPanelVisibility(true);
       $('lessonContent').scrollTop=0;
       return;
@@ -7062,18 +7573,19 @@
       showToast('Löse zuerst die vorherigen Aufgaben erfolgreich.');
       return;
     }
+    const animatePalette=!!lessonActiveId;
     if(!lessonActiveId){
       lessonFreeBackup=makeConfig();
       lessonStore(LESSON_FREE_KEY,lessonFreeBackup);
     }else saveLocal(false,true);
     cancelActiveGesture();clearPalettePlacement();
-    lessonActiveId=task.id;lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;lessonShowCatalog=false;
-    try{localStorage.setItem(LESSON_ACTIVE_KEY,task.id);localStorage.setItem(LESSON_LAST_KEY,task.id);}catch(_){}
+    lessonPhaseView=null;lessonActiveId=task.id;lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;lessonShowCatalog=false;
+    try{localStorage.setItem(LESSON_ACTIVE_KEY,task.id);localStorage.setItem(lessonModeKey(LESSON_LAST_KEY),task.id);}catch(_){}
     undoHistory=[];undoIndex=-1;
     if($('paletteSearch'))$('paletteSearch').value='';
     const savedBoard=lessonTaskBoards[task.id];
     let config=savedBoard&&!lessonHasLegacyStartPositions(task,savedBoard)?savedBoard:lessonCreateBoard(task);
-    try{applyConfig(config);}catch(_){config=lessonCreateBoard(task);applyConfig(config);}
+    try{applyConfig(config,false,animatePalette);}catch(_){config=lessonCreateBoard(task);applyConfig(config,false,animatePalette);}
     saveLocal(true,false);
     lessonPanelVisibility(true);
     $('lessonContent').scrollTop=0;
@@ -7084,15 +7596,16 @@
     saveLocal(false,true);
     let original=lessonFreeBackup;
     if(!original){try{original=JSON.parse(localStorage.getItem(LESSON_FREE_KEY)||'null');}catch(_){}}
-    if(!original){showToast('Die Sicherung der freien Schaltung ist nicht verfügbar');return;}
+    if(!original){showToast('Die Sicherung der freien Schaltung ist nicht verfügbar');return false;}
     cancelActiveGesture();clearPalettePlacement();
-    lessonActiveId=null;lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;lessonShowCatalog=true;
+    lessonActiveId=null;lessonPhaseView=null;lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;lessonShowCatalog=true;
     try{localStorage.removeItem(LESSON_ACTIVE_KEY);localStorage.removeItem(LESSON_FREE_KEY);}catch(_){}
     lessonFreeBackup=null;
+    if(lessonTeacher){lessonTeacher=false;lessonReadModeData();try{localStorage.removeItem(LESSON_TEACHER_KEY);}catch(_){}}
     undoHistory=[];undoIndex=-1;applyConfig(original);saveLocal(true,false);
     lessonPanelVisibility(false);
     syncModeMenu();
-    showToast('Freie Schaltung wiederhergestellt – Übungsfortschritt bleibt erhalten');
+    showToast('Freie Schaltung wiederhergestellt – Übungsfortschritt bleibt erhalten');return true;
   }
   function lessonReset(){
     const task=lessonTask(lessonActiveId);if(!task)return;
@@ -7102,80 +7615,412 @@
   function lessonResetConfirmed(){
     const task=lessonTask(lessonActiveId);if(!task)return;
     $('lessonResetModal').classList.remove('show');
+    delete lessonLearning[task.id];lessonSaveLearning();lessonPhaseView=null;
     lessonResult=null;lessonResultFingerprint=null;lessonHintIndex=0;undoHistory=[];undoIndex=-1;
     applyConfig(lessonCreateBoard(task));saveLocal(true,false);renderLessonPanel();
   }
+  function lessonSaveLearning(){lessonStore(lessonModeKey(LESSON_LEARNING_KEY),lessonLearning);}
+  function lessonRecordState(task){
+    if(!lessonLearning[task.id]||typeof lessonLearning[task.id]!=='object')lessonLearning[task.id]={};
+    const data=lessonLearning[task.id],count=lessonRowCount(task);
+    if(typeof data.introOk!=='boolean')data.introOk=!!data.predictionOk;
+    if(!Array.isArray(data.prediction)||data.prediction.length!==count)data.prediction=Array.from({length:count},()=>Array(task.outputs.length).fill(null));
+    if(!Array.isArray(data.observations)||data.observations.length!==count)data.observations=Array(count).fill(null);
+    if(!Array.isArray(data.observedSignals)||data.observedSignals.length!==count){data.observedSignals=Array(count).fill(null);if(data.checkedSignature)data.measurementChecked=true;}
+    // Alte boolesche Fehlversuchsangabe als einen Fehlversuch übernehmen.
+    if(!Number.isSafeInteger(data.predictionFailures)||data.predictionFailures<0)data.predictionFailures=data.predictionAttempt?1:0;
+    if(!Array.isArray(data.predictionErrorRows))data.predictionErrorRows=[];
+    // Ein bereits richtig beantworteter Reflexionsschritt benötigt keinen Abschluss-Tab mehr.
+    if(!lessonCompleted.has(task.id)&&data.reflectionOk&&data.introOk&&data.predictionOk&&data.checkedSignature===lessonCircuitSignature()){
+      lessonCompleted.add(task.id);lessonSaveProgress();
+    }
+    return data;
+  }
+  const lessonBits=(task,index)=>task.sequence?task.sequence[index].slice(0,task.inputs.length).map(Boolean):task.inputs.map((_,bit)=>!!(index&(1<<(task.inputs.length-bit-1))));
+  const lessonExpected=(task,index)=>task.sequence?task.sequence[index].slice(task.inputs.length):task.expected(lessonBits(task,index)).map(Number);
+  const lessonSameBits=(a,b)=>Array.isArray(a)&&a.length===b.length&&a.every((v,i)=>v===b[i]);
+  function lessonInvalidateEvidence(){
+    const task=lessonTask(lessonActiveId);if(!task)return;
+    const data=lessonRecordState(task),signature=lessonCircuitSignature();
+    const invalid=(data.testSignature&&data.testSignature!==signature)||(data.checkedSignature&&data.checkedSignature!==signature);
+    const staleResult=lessonResult&&lessonResultFingerprint!==signature;
+    if(!invalid&&!staleResult)return;
+    if(invalid){data.observations.fill(null);data.observedSignals.fill(null);delete data.measurementChecked;delete data.testSignature;delete data.checkedSignature;delete data.checkAdvanced;delete data.reflectionOk;delete data.reflectionChoice;delete data.reflectionAttempt;lessonSaveLearning();}
+    lessonResult=null;lessonResultFingerprint=null;lessonPhaseView=null;renderLessonPanel();
+  }
+  function lessonPhase(task,data){
+    if(!data.introOk)return 0;
+    // Die bestandene Prüfung selbst schaltet den nächsten Lernschritt frei.
+    // Alte Advanced-Flags sind für die Freischaltung nicht mehr erforderlich.
+    if(!data.predictionOk)return 1;
+    if(data.checkedSignature!==lessonCircuitSignature())return 2;
+    return 3;
+  }
+  function lessonDisplayedPhase(reached){
+    return Math.max(0,Math.min(lessonTeacher?3:reached,lessonPhaseView??reached));
+  }
+  const lessonPhaseAccessible=(phase,reached)=>phase>=0&&phase<=3&&(lessonTeacher||phase<=Math.max(1,reached));
+  function lessonPhaseMarkup(reached,view,data){
+    const done=[data.introOk,data.predictionOk,data.checkedSignature===lessonCircuitSignature(),reached===3&&data.reflectionOk];
+    return `<div class="lesson-phase-track" role="tablist" aria-label="Lernschritte">${['Einführung','Vorhersage','Bau & Test','Reflexion'].map((label,i)=>`<button type="button" role="tab" aria-selected="${i===view}" aria-controls="lessonPhaseContent" id="lessonPhaseTab${i}" data-lesson-action="phase" data-phase="${i}" class="lesson-phase-step ${i===view?'current':done[i]?'done':''}" ${!lessonPhaseAccessible(i,reached)?'disabled title="Schließe zuerst die vorherigen Lernschritte ab"':''}><b>${i}</b><span>${label}</span></button>`).join('')}</div>`;
+  }
+  function lessonIntroMarkup(task){
+    const [title,intro]=LESSON_INTROS[task.id];
+    return `<aside class="lesson-intro"><h3>${esc(title)} 💡</h3><p>${esc(intro)}</p></aside>`;
+  }
+  function lessonPhaseFields(markup,disabled){
+    // Konstante Geometrie für aktive, abgeschlossene und gesperrte Lernkarten.
+    return `<fieldset class="lesson-phase-fields"${disabled?' disabled':''}>${markup}</fieldset>`;
+  }
+  function lessonCanContinue(task,data,view,phase){
+    if(view===3)return false;
+    if(view<phase)return true;
+    if(view>phase)return lessonTeacher;
+    return view===0||view===1&&data.predictionOk||view===2&&data.checkedSignature===lessonCircuitSignature();
+  }
+  function lessonContinue(){
+    const task=lessonTask(lessonActiveId);if(!task||lessonShowCatalog)return;
+    const data=lessonRecordState(task),phase=lessonPhase(task,data),view=lessonDisplayedPhase(phase);
+    if(!lessonCanContinue(task,data,view,phase))return;
+    lessonNavigatePhase(task,data,view+1);
+  }
+  function lessonNavigatePhase(task,data,view){
+    const reached=lessonPhase(task,data);
+    if(!Number.isInteger(view)||!lessonPhaseAccessible(view,reached))return;
+    if(view===1&&!data.introOk){data.introOk=true;lessonSaveLearning();}
+    lessonPhaseView=view;
+    if(view===0)lessonHintIndex=0;
+    $('lessonContent').scrollTop=0;
+    renderLessonPanel();
+  }
+  function lessonBitPair(action,row,col,value,label){
+    const task=lessonTask(lessonActiveId);
+    if(task?.displayOutput)return `<select class="inspector-input lesson-number-answer" data-lesson-number="${action}" data-row="${row}" data-col="${col}" aria-label="${esc(label)}"><option value="" disabled ${value==null?'selected':''}>–</option>${lessonAnswerValues(task).map(v=>`<option value="${v}" ${value===v?'selected':''}>${v}</option>`).join('')}</select>`;
+    return `<span class="lesson-bit-pair" role="group" aria-label="${esc(label)}">${[0,1].map(bit=>`<button class="lesson-bit" type="button" data-lesson-action="${action}" data-row="${row}" data-col="${col}" data-bit="${bit}" aria-label="${esc(label)}: ${bit}" aria-pressed="${value===bit}">${bit}</button>`).join('')}</span>`;
+  }
+  const lessonPhaseHelpState=new Map();
+  function lessonPhaseHelp(task,phase,text){
+    const key=`${task.id}:${phase}`,open=lessonPhaseHelpState.get(key)??task.id==='licht';
+    return `<details class="lesson-phase-help" data-phase-help="${esc(key)}" ${open?'open':''}><summary aria-label="Hinweise zur Bedienung ein- oder ausblenden" title="Bedienhinweise ein- oder ausblenden">?</summary><p>${esc(text)}</p></details>`;
+  }
+  function lessonPredictionMarkup(task,data){
+    const complete=data.prediction.every(row=>row.every(bit=>lessonValidAnswer(task,bit)));
+    return `<section class="lesson-learning-card has-phase-help"><h3>1 · Was erwartest du?</h3>${lessonPhaseHelp(task,1,`Überlege anhand der Aufgabenstellung, welche Ausgabewerte du erwartest. Trage sie anschließend ${task.sequence?'für jeden Schritt der Signalfolge':'für jede Eingangskombination'} ein.`)}<table class="lesson-truth" aria-label="Eigene Vorhersage"><thead><tr>${task.sequence?'<th>#</th>':''}${[...task.inputs,...task.outputs.map(o=>o+' soll')].map(v=>`<th>${esc(v)}</th>`).join('')}</tr></thead><tbody>${data.prediction.map((row,i)=>`<tr class="${data.predictionFailures>=2&&!data.predictionOk&&data.predictionErrorRows.includes(i)?'prediction-error':''}">${task.sequence?`<td>${i+1}</td>`:''}${lessonBits(task,i).map(v=>`<td>${+v}</td>`).join('')}${row.map((v,j)=>`<td>${lessonBitPair('predict',i,j,v,`${task.outputs[j]}, Zeile ${i+1}`)}</td>`).join('')}</tr>`).join('')}</tbody></table>${data.predictionOk?'<p class="lesson-learning-done" role="status">Alle Vorhersagen stimmen. ✓</p>':data.predictionFailures>=2?'<p class="lesson-learning-note" role="status">Prüfe deine Überlegung bei den markierten Zeilen.</p>':data.predictionFailures===1?'<p class="lesson-learning-note" role="status">Noch nicht alle Vorhersagen stimmen. Überprüfe deine Überlegungen und versuche es erneut.</p>':''}<button class="lesson-action primary" type="button" data-lesson-action="prediction-check" ${complete&&!data.predictionOk?'':'disabled'}>Vorhersage prüfen</button></section>`;
+  }
+  function lessonReadOutput(task,n){const v=n?.value;return task.displayOutput?(Number.isInteger(v)&&v>=0&&v<=3?v:null):v===true?1:v===false?0:null;}
+  function lessonOutputConnected(task,n,connections=wires){return task.displayOutput?[0,1].every(port=>connections.some(w=>w.to.id===n.id&&(w.to.port||0)===port)):connections.some(w=>w.to.id===n.id&&(w.to.port||0)===0);}
+  const lessonNextSequenceRow=(task,data)=>data.observations.findIndex(row=>!Array.isArray(row)||row.length!==task.outputs.length||row.some(v=>!lessonValidAnswer(task,v)));
+  function lessonCurrentMeasurement(task){
+    if(activeModuleId)return null;
+    const inputs=lessonInputNodes(task),outputs=lessonOutputNodes(task);
+    if(inputs.some(n=>!n)||outputs.some(n=>!n))return null;
+    const bits=inputs.map(n=>!!n.state),data=lessonRecordState(task);
+    const step=task.sequence?lessonNextSequenceRow(task,data):-1;
+    const row=task.sequence?(step>=0&&lessonSameBits(bits,lessonBits(task,step))?step:-1):bits.reduce((acc,v)=>acc*2+Number(v),0);
+    const connected=outputs.every(n=>lessonOutputConnected(task,n));
+    const pending=nodes.some(n=>n.type==='BUFFER'&&(n.bufferQueue?.length||bufferHasUnseenInput(n)));
+    return {row,step,connected,pending,actual:outputs.map(n=>lessonReadOutput(task,n))};
+  }
+  const lessonAllEntered=(task,data)=>data.observations.length===data.prediction.length&&data.observations.every(row=>Array.isArray(row)&&row.length===task.outputs.length&&row.every(v=>lessonValidAnswer(task,v)));
+  function lessonRestartSequence(task,data){
+    if(!task.sequence||activeModuleId)return;
+    lessonInputNodes(task).filter(Boolean).forEach(n=>n.state=false);
+    nodes.filter(n=>meta(n).kind==='flipflop').forEach(n=>{n.q=false;n.clockWasHigh=false;});
+    data.observations.fill(null);data.observedSignals.fill(null);delete data.measurementChecked;delete data.checkedSignature;delete data.reflectionOk;delete data.reflectionChoice;delete data.reflectionAttempt;
+    lessonResult=null;lessonResultFingerprint=null;lessonPhaseView=2;lessonSaveLearning();render();renderLessonPanel();
+  }
+  function lessonMeasurementCorrect(task,data,i,j){
+    const v=data.observations[i]?.[j];
+    // Messungen aus älteren Versionen wurden bereits beim Eintragen validiert.
+    const actual=Array.isArray(data.observedSignals[i])?data.observedSignals[i][j]:v;
+    return lessonValidAnswer(task,v)&&v===actual&&v===lessonExpected(task,i)[j];
+  }
+  const lessonAllMeasured=(task,data)=>lessonAllEntered(task,data)&&data.observations.every((row,i)=>row.every((_,j)=>lessonMeasurementCorrect(task,data,i,j)));
+  function lessonSyncMeasurement(){
+    const host=$('lessonMeasureLive');if(!host||host.closest('fieldset[disabled]')||!lessonActiveId||lessonShowCatalog)return;
+    const task=lessonTask(lessonActiveId),data=lessonRecordState(task),current=lessonCurrentMeasurement(task);
+    const row=current?.row??-1;
+    const circuitError=lessonResult&&!lessonResult.passed?lessonResult.reason:null;
+    const signature=JSON.stringify([row,current?.connected,current?.pending,current?.step,data.observations,data.observedSignals,!!data.measurementChecked,circuitError]);
+    if(host._signature===signature)return;host._signature=signature;
+    const content=$('lessonContent');
+    content.querySelectorAll('[data-test-row]').forEach(tr=>{
+      const i=Number(tr.dataset.testRow);
+      tr.classList.toggle('current-test',i===row);
+      tr.classList.toggle('measurement-error-row',!!data.measurementChecked&&task.outputs.some((_,j)=>!lessonMeasurementCorrect(task,data,i,j)));
+    });
+    content.querySelectorAll('[data-observe-row]').forEach(cell=>{
+      const i=Number(cell.dataset.observeRow),j=Number(cell.dataset.observeCol),value=data.observations[i]?.[j];
+      const active=i===row&&current?.connected&&!current?.pending,assessed=data.measurementChecked&&value!=null;
+      const correct=assessed&&lessonMeasurementCorrect(task,data,i,j);
+      cell.classList.toggle('match',!!correct);cell.classList.toggle('mismatch',!!assessed&&!correct);
+      const markup=active?lessonBitPair('observe',i,j,value,`${task.outputs[j]} ist, Zeile ${i+1}`):`<span class="lesson-observe-value">${value??'–'}</span>`;
+      if(cell._markup!==markup){cell.innerHTML=markup;cell._markup=markup;}
+    });
+    const wrong=data.measurementChecked&&!lessonAllMeasured(task,data);
+    const check=content.querySelector('[data-lesson-action="check"]');if(check)check.disabled=data.checkedSignature===lessonCircuitSignature()||!lessonAllEntered(task,data)||!!activeModuleId;
+    const activeText=row>=0?`<p>Aktive ${task.sequence?'Schrittfolge · Schritt '+(row+1):'Zeile'}: <strong>${task.inputs.map((name,i)=>esc(name)+'='+Number(lessonBits(task,row)[i])).join(' · ')}</strong></p>`:task.sequence&&current?.step>=0?`<p>Stelle für Schritt ${current.step+1} die Eingänge auf <strong>${task.inputs.map((name,i)=>esc(name)+'='+Number(lessonBits(task,current.step)[i])).join(' · ')}</strong>.</p>`:'<p>Alle Schritte erfasst. Prüfe deine Schaltung.</p>';
+    host.innerHTML=(!current?'<p class="lesson-learning-note">Wechsle zum Hauptschaltkreis, um die Messwerte einzutragen.</p>':!current.connected?'<p class="lesson-learning-note">Es sind nicht alle vorgesehenen Ausgänge verbunden.</p>':current.pending?'<p class="lesson-learning-note">Signaländerung läuft. Warte, bis die Ausgabe stabil ist.</p>':activeText)+(task.sequence?'<button type="button" class="lesson-action" data-lesson-action="restart-sequence">Messreihe neu beginnen</button>':'')+(wrong?'<p class="lesson-measure-error" role="status">Es liegt ein Fehler vor. Entweder wurde der Wert falsch abgelesen oder die Schaltung ist noch nicht korrekt. Prüfe beides.'+(task.sequence?' Beginne die Messreihe erneut.':'')+'</p>':'')+(circuitError?`<p class="lesson-measure-error lesson-circuit-error" role="status">${esc(circuitError)}</p>`:'');
+    syncLessonScrollJump();
+  }
+  function lessonTestMarkup(task,data){
+    return `<section class="lesson-learning-card lesson-test-card has-phase-help"><h3>2 · Bauen und selbst testen</h3>${lessonPhaseHelp(task,2,`Baue deine Schaltung. ${task.sequence?'Beginne mit „Messreihe neu beginnen“, um Q auf 0 zu setzen. Schalte die Eingänge genau in der angegebenen Reihenfolge und trage Q pro Schritt ein. ':'Schalte die Eingänge um und trage die abgelesenen Ausgabewerte direkt in der hervorgehobenen Tabellenzeile ein. '}${task.timing?'Beobachte die Verzögerung. Die Eingabe wird nach dem letzten ausstehenden Signalwechsel freigegeben. ':''}Bei Änderungen beginnt die Messreihe neu.`)}<table class="lesson-truth" aria-label="Messprotokoll"><colgroup>${[...(task.sequence?[.7]:[]),...task.inputs.map(()=>1),...task.outputs.map(()=>1.65),...task.outputs.map(()=>3.2)].map(weight=>`<col style="width:${100*weight/(task.inputs.length+4.85*task.outputs.length+(task.sequence ? .7 : 0))}%">`).join('')}</colgroup><thead><tr>${[...(task.sequence?['#']:[]),...task.inputs,...task.outputs.map(o=>o+' soll'),...task.outputs.map(o=>o+' ist')].map((v,i)=>`<th${i===task.inputs.length+task.outputs.length+(task.sequence?1:0)?' class="lesson-truth-actual"':''}>${esc(v)}</th>`).join('')}</tr></thead><tbody>${data.prediction.map((row,i)=>`<tr data-test-row="${i}">${task.sequence?`<td>${i+1}</td>`:''}${lessonBits(task,i).map(v=>`<td>${+v}</td>`).join('')}${row.map(v=>`<td>${v??'–'}</td>`).join('')}${task.outputs.map((_,j)=>{const v=data.observations[i]?.[j];return `<td data-observe-row="${i}" data-observe-col="${j}" class="lesson-observe-cell ${j===0?'lesson-truth-actual ':''}${v==null||!data.measurementChecked?'':lessonMeasurementCorrect(task,data,i,j)?'match':'mismatch'}"><span class="lesson-observe-value">${v??'–'}</span></td>`;}).join('')}</tr>`).join('')}</tbody></table><div class="lesson-measure-feedback" id="lessonMeasureLive"></div>${data.checkedSignature===lessonCircuitSignature()?'<p class="lesson-learning-done" role="status">Schaltung erfolgreich geprüft. ✓</p>':''}<button class="lesson-action primary" type="button" data-lesson-action="check" ${data.checkedSignature!==lessonCircuitSignature()&&lessonAllEntered(task,data)&&!activeModuleId?'':'disabled'}>Schaltung prüfen</button></section>`;
+  }
+  function lessonReflectionMarkup(task,data){
+    const [question,choices,correct,explanation,hint]=LESSON_REFLECTIONS[task.id];
+    return `<section class="lesson-learning-card"><h3>3 · Warum funktioniert das?</h3><p>${esc(question)}</p>${choices.map((choice,i)=>`<button type="button" class="lesson-reflection-choice${data.reflectionChoice===i?(data.reflectionOk?' is-correct':data.reflectionAttempt?' is-incorrect':''):''}" data-lesson-action="reflect" data-choice="${i}" aria-pressed="${data.reflectionChoice===i}"><span>${String.fromCharCode(65+i)}</span><span>${esc(choice)}</span></button>`).join('')}${data.reflectionOk?`<p class="lesson-learning-done" role="status">Richtig! ${esc(explanation)} ✓</p>`:data.reflectionAttempt?`<p class="lesson-learning-note" role="status">${esc(hint)}</p>`:''}<button class="lesson-action primary" type="button" data-lesson-action="reflection-check" ${Number.isInteger(data.reflectionChoice)?'':'disabled'}>Antwort überprüfen</button></section>`;
+  }
+  function lessonLearningAction(action,button){
+    const task=lessonTask(lessonActiveId);if(!task||lessonShowCatalog)return;
+    const data=lessonRecordState(task),phase=lessonPhase(task,data);
+    const row=Number(button.dataset.row),col=Number(button.dataset.col),bit=Number(button.dataset.bit);
+    if(action==='restart-sequence'&&phase===2){lessonRestartSequence(task,data);return;}
+    if(action==='predict'&&phase===1&&!data.predictionOk&&data.prediction[row]&&col>=0&&col<task.outputs.length&&lessonValidAnswer(task,bit)){
+      data.prediction[row][col]=bit;
+    }else if(action==='prediction-check'&&phase===1&&!data.predictionOk){
+      if(!data.prediction.every(r=>r.every(v=>lessonValidAnswer(task,v))))return;
+      const errors=data.prediction.map((r,i)=>lessonSameBits(r,lessonExpected(task,i))?-1:i).filter(i=>i>=0);
+      data.predictionOk=errors.length===0;
+      if(data.predictionOk){delete data.predictionAdvanced;data.predictionErrorRows=[];lessonPhaseView=1;}
+      else{data.predictionFailures++;data.predictionErrorRows=data.predictionFailures>=2?errors:[];}
+    }else if(action==='observe'&&phase===2&&data.checkedSignature!==lessonCircuitSignature()&&lessonValidAnswer(task,bit)&&col>=0&&col<task.outputs.length){
+      renderLiveSimulation();const current=lessonCurrentMeasurement(task);
+      if(!current||current.row!==row||!current.connected||current.pending)return;
+      if(!Array.isArray(data.observations[row]))data.observations[row]=Array(task.outputs.length).fill(null);
+      if(!Array.isArray(data.observedSignals[row]))data.observedSignals[row]=[...data.observations[row]];
+      data.testSignature=lessonCircuitSignature();data.observations[row][col]=bit;data.observedSignals[row][col]=current.actual[col];
+      delete data.measurementChecked;delete data.retestNeeded;lessonResult=null;lessonResultFingerprint=null;
+      lessonSaveLearning();lessonSyncMeasurement();return;
+    }else if(action==='reflect'&&phase===3&&!data.reflectionOk){
+      data.reflectionChoice=Number(button.dataset.choice);data.reflectionAttempt=false;
+    }else if(action==='reflection-check'&&phase===3&&!data.reflectionOk){
+      if(data.reflectionChoice===LESSON_REFLECTIONS[task.id][2]){data.reflectionOk=true;data.reflectionAttempt=false;lessonPhaseView=3;lessonCompleted.add(task.id);lessonSaveProgress();}
+      else data.reflectionAttempt=true;
+    }else return;
+    lessonSaveLearning();renderLessonPanel();
+  }
+  // Deterministische Prüfung auf Kopien: stationäre Werte und beide Flanken.
+  // Die virtuelle Zeit verwendet dieselbe Transportverzögerung wie die Live-Simulation.
+  function lessonTimingGraph(task,inputNodes,outputNodes,connections,bits){
+    const graph=cloneJson(nodes),byId=new Map(graph.map(n=>[n.id,n]));
+    graph.filter(n=>n.type==='BUFFER').forEach(n=>{n.bufferQueue=[];n.bufferLastInput=null;n.bufferOutput=false;});
+    const setBits=values=>inputNodes.forEach((n,i)=>{const source=byId.get(n.id);source.type='INPUT';source.state=values[i];});
+    const read=()=>outputNodes.map(n=>{const v=byId.get(n.id)?.value;return task.displayOutput?lessonReadOutput(task,byId.get(n.id)):typeof v==='boolean'?v:null;});
+    let fault=false;
+    const step=now=>{const result=evaluateGraph(graph,connections,[],[],{advanceState:true,now});if(result.feedback?.length||result.logicFaults?.length)fault=true;return read();};
+    setBits(bits);
+    const settle=4000+Math.min(20,graph.filter(n=>n.type==='BUFFER').length)*2100;
+    for(let t=0;t<=settle;t+=50)step(t);
+    return {graph,setBits,step,read,settle,get fault(){return fault;}};
+  }
+  function lessonCheckTiming(task,inputNodes,outputNodes,connections){
+    const timing=task.timing,delay=Math.round(timing.delay*1000),immediate=new Set(timing.immediate||[]);
+    for(const old of [false,true]){
+      const sim=lessonTimingGraph(task,inputNodes,outputNodes,connections,[old]);
+      const before=task.expected([old]),after=task.expected([!old]);
+      if(sim.fault||!lessonSameBits(sim.read(),before))return false;
+      sim.setBits([!old]);const base=sim.settle+10;
+      for(let dt=0;dt<=delay+200;dt+=10){
+        const actual=sim.step(base+dt);
+        // Direct outputs must respond in the first step; delayed outputs
+        // must retain the old value until the target time. Two ticks of
+        // tolerance cover propagation through a chain of transport buffers.
+        if(sim.fault||actual.some((v,i)=>typeof v!=='boolean'||(immediate.has(i)?v!==after[i]:dt<delay?v!==before[i]:dt>=delay+20?v!==after[i]:false)))return false;
+      }
+    }
+    return true;
+  }
+  function lessonCheckMemory(task,inputNodes,outputNodes,connections){
+    if(!task.sequence)return true;
+    const d=task.id==='ff-d',clockIndex=task.inputs.length-1;
+    const expectedNext=(q,previousClock,bits)=>{
+      if(previousClock||!bits[clockIndex])return q;
+      if(d)return Number(bits[0]);
+      return bits[0]&&!bits[1]?1:bits[1]&&!bits[0]?0:q;
+    };
+    // Jeder gespeicherte Zustand, beide Taktpegel und alle Datenkombinationen.
+    // Der Zustand wird über Eingangswechsel vorbereitet, nicht in eine Lösung geschrieben.
+    for(const q of [0,1])for(const previousClock of [false,true])for(let i=0;i<(1<<task.inputs.length);i++){
+      const graph=cloneJson(nodes),index=new Map(graph.map(n=>[n.id,n]));
+      graph.filter(n=>meta(n).kind==='flipflop').forEach(n=>{n.q=false;n.clockWasHigh=false;});
+      const step=bits=>{
+        inputNodes.forEach((n,j)=>{index.get(n.id).state=!!bits[j];});
+        const r=evaluateGraph(graph,connections,[],[],{advanceState:true,now:0});
+        if(r.feedback?.length||r.logicFaults?.length)return null;
+        return lessonReadOutput(task,index.get(outputNodes[0].id));
+      };
+      const low=Array(task.inputs.length).fill(false);
+      if(step(low)!==0)return false;
+      if(q===1){const set=low.slice();set[0]=true;if(step(set)!==0)return false;set[clockIndex]=true;if(step(set)!==1)return false;set[clockIndex]=false;if(step(set)!==1)return false;}
+      const prepare=low.slice();if(d)prepare[0]=!!q;prepare[clockIndex]=previousClock;
+      if(step(prepare)!==q)return false;
+      const bits=task.inputs.map((_,j)=>!!(i&(1<<(task.inputs.length-j-1))));
+      if(step(bits)!==expectedNext(q,previousClock,bits))return false;
+    }
+    return true;
+  }
   function lessonCheck(){
     const task=lessonTask(lessonActiveId);if(!task)return;
-    const inputNodes=task.inputs.map((_,index)=>nodes.find(n=>n.id===`lesson-${task.id}-in-${index}`&&n.type==='INPUT'));
-    const outputNodes=task.outputs.map((_,index)=>nodes.find(n=>n.id===`lesson-${task.id}-out-${index}`&&n.type==='OUTPUT'));
+    const data=lessonRecordState(task),signature=lessonCircuitSignature();
+    if(activeModuleId||!data.predictionOk||data.testSignature!==signature||!lessonAllEntered(task,data)){showToast('Erst vorhersagen und alle Kombinationen im Hauptschaltkreis selbst messen.');return;}
+    data.measurementChecked=true;lessonSaveLearning();
+    if(!lessonAllMeasured(task,data)){lessonResult=null;lessonResultFingerprint=null;renderLessonPanel();$('lessonMeasureLive')?.scrollIntoView({block:'nearest'});return;}
+    const inputNodes=lessonInputNodes(task);
+    const outputNodes=lessonOutputNodes(task);
     if(activeModuleId||inputNodes.some(n=>!n)||outputNodes.some(n=>!n)){
-      lessonResult={passed:false,reason:'Mindestens ein vorbereiteter Schalter oder eine LED fehlt. Setze die Aufgabe über „Neu starten“ zurück.',rows:[]};
+      lessonResult={passed:false,reason:'Mindestens ein vorbereiteter Eingang oder Ausgang fehlt. Setze die Aufgabe über „Neu starten“ zurück.',rows:[]};
       lessonResultFingerprint=lessonCircuitSignature();
       renderLessonPanel();return;
     }
     const ids=new Set(nodes.map(n=>n.id));
     const connections=wires.filter(w=>ids.has(w.from.id)&&ids.has(w.to.id));
-    const unconnected=outputNodes.some(n=>!connections.some(w=>w.to.id===n.id&&w.to.port===0))||inputNodes.some(n=>!connections.some(w=>w.from.id===n.id));
+    const unconnected=outputNodes.some(n=>!lessonOutputConnected(task,n,connections))||inputNodes.some(n=>!connections.some(w=>w.from.id===n.id));
     const rows=[];let hasUnknown=false,hasFeedback=false;
-    for(let index=0;index<(1<<task.inputs.length);index++){
-      const bits=task.inputs.map((_,bit)=>!!(index&(1<<(task.inputs.length-bit-1))));
-      const graph=nodes.map(node=>typeof structuredClone==='function'?structuredClone(node):JSON.parse(JSON.stringify(node)));
+    const sequenceGraph=task.sequence?cloneJson(nodes):null;
+    if(sequenceGraph)sequenceGraph.filter(n=>meta(n).kind==='flipflop').forEach(n=>{n.q=false;n.clockWasHigh=false;});
+    for(let index=0;index<lessonRowCount(task);index++){
+      const bits=lessonBits(task,index);
+      const graph=sequenceGraph||cloneJson(nodes);
       const graphById=new Map(graph.map(node=>[node.id,node]));
-      inputNodes.forEach((node,i)=>{graphById.get(node.id).state=bits[i];});
+      inputNodes.forEach((node,i)=>{const source=graphById.get(node.id);source.type='INPUT';source.state=bits[i];});
       let result;
-      try{result=evaluateGraph(graph,connections,[],[],{advanceState:false});}
+      try{
+        if(!task.sequence&&(task.timing||graph.some(n=>n.type==='BUFFER'))){const sim=lessonTimingGraph(task,inputNodes,outputNodes,connections,bits);outputNodes.forEach((n,i)=>{graphById.get(n.id).value=sim.read()[i];});result={feedback:sim.fault?[true]:[],logicFaults:[]};}
+        else result=evaluateGraph(graph,connections,[],[],{advanceState:!!task.sequence});
+      }
       catch(_){hasUnknown=true;result={feedback:[],logicFaults:[]};}
       if(result.feedback?.length||result.logicFaults?.length)hasFeedback=true;
-      const expected=task.expected(bits).map(Boolean);
+      const expected=lessonExpected(task,index);
       const actual=outputNodes.map(node=>{
-        const value=graphById.get(node.id)?.value;
-        if(value!==true&&value!==false){hasUnknown=true;return null;}
+        const value=lessonReadOutput(task,graphById.get(node.id));
+        if(value===null)hasUnknown=true;
         return value;
       });
       rows.push({bits,expected,actual,correct:expected.every((value,i)=>value===actual[i])});
     }
-    const usesReadyXor=task.id==='xor'&&nodes.some(node=>node.type==='XOR');
-    const passed=!usesReadyXor&&!unconnected&&!hasUnknown&&!hasFeedback&&rows.every(row=>row.correct);
+    const allowed=lessonAllowedPaletteTypes();
+    const forbidden=nodes.find(node=>!(task.moduleKind&&node.id===`lesson-${task.id}-module`&&node.moduleId===`lesson-${task.id}-definition`)&&(!allowed?.has(node.type)||(meta(node).kind==='input'&&!inputNodes.includes(node))));
+    // Ein gefordertes Gatter muss tatsächlich im Signalweg zu einer Aufgaben-LED liegen.
+    const relevant=new Set(outputNodes.map(n=>n.id)),pending=[...relevant];
+    while(pending.length){const id=pending.pop();for(const w of connections)if(w.to.id===id&&!relevant.has(w.from.id)){relevant.add(w.from.id);pending.push(w.from.id);}}
+    const missingRequired=(task.required||[]).find(type=>!nodes.some(node=>node.type===type&&relevant.has(node.id)&&connections.some(w=>w.to.id===node.id)));
+    const missingModule=(task.moduleKind&&!relevant.has(`lesson-${task.id}-module`))||(task.fixedKind&&!relevant.has(`lesson-${task.id}-fixed-part`));
+    const configuredDelay=task.timing?.configuredDelay;
+    const bufferSettingCorrect=configuredDelay==null||nodes.some(n=>n.type==='BUFFER'&&relevant.has(n.id)&&connections.some(w=>w.to.id===n.id)&&normalizeBufferDelay(n.bufferDelay)===configuredDelay);
+    let timingCorrect=true;
+    if(task.timing&&bufferSettingCorrect&&!forbidden&&!missingRequired&&!unconnected&&!hasUnknown&&!hasFeedback&&rows.every(row=>row.correct)){try{timingCorrect=lessonCheckTiming(task,inputNodes,outputNodes,connections);}catch(_){timingCorrect=false;}}
+    let memoryCorrect=true;
+    if(task.sequence&&!forbidden&&!missingRequired&&!unconnected&&!hasUnknown&&!hasFeedback&&rows.every(row=>row.correct)){try{memoryCorrect=lessonCheckMemory(task,inputNodes,outputNodes,connections);}catch(_){memoryCorrect=false;}}
+    const passed=!forbidden&&!missingRequired&&!missingModule&&!unconnected&&!hasUnknown&&!hasFeedback&&bufferSettingCorrect&&timingCorrect&&memoryCorrect&&rows.every(row=>row.correct);
     const firstError=rows.find(row=>!row.correct);
-    let reason=passed?task.success:usesReadyXor?'In dieser Aufgabe sollst du die XOR-Funktion selbst bauen. Entferne das fertige XOR-Gatter und verwende NOT, AND und OR.':
-      unconnected?'Mindestens ein vorbereiteter Anschluss hat noch kein Kabel. Prüfe alle Schalter und LED-Eingänge.':
+    let reason=passed?task.success:forbidden?'Verwende nur freigeschaltete Bauteile und die vorbereiteten Eingänge.':missingRequired?`Verwende ${missingRequired==='BUFFER'?'einen Buffer':'das Bauteil '+(TYPES[missingRequired]?.label||missingRequired)} im Signalweg deiner Schaltung.`:missingModule?'Nutze den Ausgang des vorgegebenen Bausteins.':!bufferSettingCorrect?`Wähle den Buffer im Signalweg an und stelle rechts in den Eigenschaften die Verzögerung auf ${configuredDelay.toLocaleString('de-DE')} s.`:!timingCorrect?`Die stationären Werte stimmen, aber die Signalwechsel nicht. Prüfe die Verzögerung von ${task.timing.delay.toLocaleString('de-DE')} s und die Signalwege.`:
+      !memoryCorrect?'Die gezeigte Messfolge stimmt, aber nicht alle Speicher- und Taktbedingungen. Prüfe die Eingänge des Flip-Flops und die steigende Flanke.':
+      unconnected?'Mindestens ein vorbereiteter Anschluss hat noch kein Kabel. Prüfe alle Ein- und Ausgangsanschlüsse.':
       hasFeedback?'Die Schaltung enthält eine Rückkopplung. Für diese Aufgabe brauchen wir eine eindeutige Schaltung ohne Rückkopplung.':
       hasUnknown?'Mindestens ein Signal ist unbestimmt. Prüfe Verbindungen und Bauteile.':
-      firstError?`Noch nicht ganz: Bei ${task.inputs.map((name,i)=>`${name}=${firstError.bits[i]?1:0}`).join(', ')} stimmt mindestens ein LED-Ergebnis nicht.`:
+      firstError?`Noch nicht ganz: Bei ${task.inputs.map((name,i)=>`${name}=${firstError.bits[i]?1:0}`).join(', ')} stimmt mindestens ein Ausgabewert nicht.`:
       'Die Schaltung erfüllt noch nicht alle Bedingungen.';
     lessonResult={passed,reason,rows};lessonResultFingerprint=lessonCircuitSignature();
-    if(passed){lessonCompleted.add(task.id);lessonSaveProgress();}
+    if(passed){
+      if(data.predictionOk&&data.testSignature===signature&&lessonAllMeasured(task,data)&&data.checkedSignature!==signature){data.checkedSignature=signature;delete data.checkAdvanced;lessonPhaseView=2;lessonSaveLearning();}
+    }
     renderLessonPanel();
-    $('lessonContent').querySelector('.lesson-result')?.scrollIntoView({block:'nearest',behavior:'smooth'});
+    $('lessonContent').querySelector('.lesson-circuit-error')?.scrollIntoView({block:'nearest',behavior:'smooth'});
   }
-  function lessonTruthTable(task,result){
-    if(!result?.rows?.length)return '';
-    const headers=[...task.inputs,...task.outputs.map(name=>`${name} soll`),...task.outputs.map(name=>`${name} ist`)];
-    const actualStart=task.inputs.length+task.outputs.length;
-    return `<table class="lesson-truth" aria-label="Automatische Wahrheitstabellenprüfung"><thead><tr>${headers.map((name,i)=>`<th${i===actualStart?' class="lesson-truth-actual"':''}>${esc(name)}</th>`).join('')}</tr></thead><tbody>${result.rows.map(row=>`<tr>${row.bits.map(v=>`<td>${+v}</td>`).join('')}${row.expected.map(v=>`<td>${+v}</td>`).join('')}${row.actual.map((v,i)=>`<td class="${v===row.expected[i]?'match':'mismatch'}${i===0?' lesson-truth-actual':''}">${v===null?'?':+v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  function lessonCatalogMarkup(task,firstOpen){
+    const frontier=firstOpen<0?LESSON_UNITS.length-1:LESSON_UNITS.findIndex(unit=>unit.id===LESSON_TASKS[firstOpen].unit);
+    const units=LESSON_UNITS.filter((_,i)=>lessonTeacher||i<=frontier+1);
+    return `<p class="lesson-lead">Das hier ist die Levelübersicht. Wir starten ganz simpel mit genau einem Schalter und einer LED. Neue Konzepte und Bauteile kommen anschließend nach und nach dazu.</p><p class="lesson-lead">Stelle jeweils Vermutungen auf zu den Ergebnissen der Schaltkreise, baue und teste sie eigenständig, und erkläre anschließend ihre Funktionsweisen.</p>${units.map((unit,i)=>{
+      const preview=!lessonTeacher&&i>frontier;
+      const tasks=LESSON_TASKS.filter(t=>t.unit===unit.id);
+      return `<section${preview?' class="lesson-unit-preview" aria-label="Ausblick auf das nächste Kapitel"':''}><div class="lesson-unit-header">${esc(unit.name)}${preview?' <small>Ausblick</small>':''}</div><div class="lesson-list">${tasks.map((t,j)=>{
+        const canStart=!preview&&lessonCanStart(t.id),done=lessonCompleted.has(t.id),depth=tasks.length===1?1:j/(tasks.length-1);
+        return `<button class="lesson-list-btn${task?.id===t.id?' current':''}" type="button" data-lesson-action="start" data-lesson-id="${t.id}" ${canStart?'':'disabled title="Zuerst die vorherigen Aufgaben erfolgreich lösen"'}${preview?` style="--preview-blur:${(0.8+depth*2.6).toFixed(2)}px;--preview-opacity:${(0.62-depth*0.34).toFixed(2)}"`:''}><span class="lesson-step${done?' done':''}">${LESSON_TASKS.indexOf(t)+1}</span><span class="lesson-list-name">${esc(t.title)}</span>${done?'<span class="lesson-done-mark" aria-label="Abgeschlossen">✓</span>':canStart?'':'<span aria-hidden="true">🔒</span>'}</button>`;
+      }).join('')}</div></section>`;
+    }).join('')}`;
+  }
+  function syncLessonScrollJump(){
+    const content=$('lessonContent'),button=$('lessonScrollJump');
+    if(!content||!button)return;
+    button.hidden=!lessonPanelOpen||lessonPanelMinimized||content.scrollHeight-content.clientHeight-content.scrollTop<=2;
   }
   function renderLessonPanel(){
     if(!lessonPanelOpen)return;
     renderLessonHintOverlay();
-    const content=$('lessonContent'),task=lessonTask(lessonActiveId);
+    const content=$('lessonContent'),footer=$('lessonTaskFooter'),task=lessonTask(lessonActiveId),scrollTop=content.scrollTop;
+    const data=task&&!lessonShowCatalog?lessonRecordState(task):null;
     // Historische Übungsstände können aus der frei anwählbaren V121 stammen.
     // Der Balken zeigt nur die lückenlos hintereinander erreichten Schritte.
     const firstOpen=LESSON_TASKS.findIndex(t=>!lessonCompleted.has(t.id));
     const done=firstOpen<0?LESSON_TASKS.length:firstOpen;
+    $('lessonPanel').querySelector('.lesson-eyebrow').textContent=lessonTeacher?'Digitaltechnik · Lehrermodus':'Digitaltechnik entdecken';
     $('lessonHeaderProgress').innerHTML=`<div class="lesson-progress-track"><span style="width:${100*done/LESSON_TASKS.length}%"></span></div><span class="lesson-header-progress-count">${done} / ${LESSON_TASKS.length}</span>`;
     if(!task||lessonShowCatalog){
-      content.innerHTML=`<p class="lesson-lead"><strong>Digitale Schaltungen verstehen – Schritt für Schritt.</strong> Du startest mit genau einem Schalter und einer LED. Neue Ideen kommen nach und nach dazu. Jede Aufgabe kann überprüft werden.</p>${LESSON_UNITS.map(unit=>`<div class="lesson-unit-header">${esc(unit.name)}</div><div class="lesson-list">${LESSON_TASKS.filter(t=>t.unit===unit.id).map(t=>`<button class="lesson-list-btn${task?.id===t.id?' current':''}" type="button" data-lesson-action="start" data-lesson-id="${t.id}" ${lessonCanStart(t.id)?'':`disabled title="Zuerst die vorherigen Aufgaben erfolgreich lösen"`}><span class="lesson-step${lessonCompleted.has(t.id)?' done':''}">${LESSON_TASKS.indexOf(t)+1}</span><span class="lesson-list-name">${esc(t.title)}</span>${lessonCompleted.has(t.id)?'<span class="lesson-done-mark" aria-label="Abgeschlossen">✓</span>':lessonCanStart(t.id)?'':'<span aria-hidden="true">🔒</span>'}</button>`).join('')}</div>`).join('')}`;
+      footer.hidden=true;footer.innerHTML='';
+      content.innerHTML=lessonCatalogMarkup(task,firstOpen);
+      content.scrollTop=scrollTop;syncLessonScrollJump();
       return;
     }
-    const unit=lessonUnit(task.unit),index=LESSON_TASKS.indexOf(task),next=LESSON_TASKS[index+1];
-    const introVisible=unit&&!lessonIntroDismissed.has(unit.id);
-    const intro=introVisible?`<aside class="lesson-intro"><h3>💡 ${esc(unit.title)}</h3><p>${esc(unit.intro)}</p><button type="button" data-lesson-action="intro-hide">Einführung verstanden ✓</button></aside>`:`<button class="lesson-back" type="button" data-lesson-action="intro-show">↳ Einführung zur Einheit lesen</button>`;
-    const result=lessonResult?`<section class="lesson-result ${lessonResult.passed?'passed':'failed'}" aria-label="Prüfergebnis"><div class="lesson-result-head">${lessonResult.passed?'✓ Alle Kombinationen richtig':'↻ Noch einmal probieren'}</div><p>${esc(lessonResult.reason)}</p>${lessonTruthTable(task,lessonResult)}</section>`:'';
-    const nextAction=next?`<button class="lesson-action lesson-next-action" type="button" data-lesson-action="start" data-lesson-id="${next.id}" ${lessonCompleted.has(task.id)&&lessonCanStart(next.id)?'':'disabled title="Erst nach einer erfolgreich geprüften Schaltung verfügbar"'}>Nächste Aufgabe →</button>`:'';
-    content.innerHTML=`<div class="lesson-kicker">${esc(unit?.name||'Übung')} · Aufgabe ${index+1} von ${LESSON_TASKS.length}</div><div class="lesson-name-row"><h2 class="lesson-name">${esc(task.title)} ${lessonCompleted.has(task.id)?'<span style="color:#72deaa;font-size:14px" title="Schon einmal erfolgreich gelöst">✓</span>':''}</h2><button class="lesson-icon-btn lesson-reset-icon" type="button" data-lesson-action="reset" aria-label="Aufgabe neu starten" title="Aufgabe neu starten">↺</button></div>${intro}<p class="lesson-objective">${esc(task.goal)}</p><div class="lesson-actions"><button class="lesson-action primary" type="button" data-lesson-action="check">✓ Schaltung prüfen</button>${nextAction}</div>${result}`;
+    const unit=lessonUnit(task.unit),index=LESSON_TASKS.indexOf(task),next=LESSON_TASKS[index+1],previous=LESSON_TASKS[index-1];
+    const phase=lessonPhase(task,data),view=lessonDisplayedPhase(phase);
+    const canNext=lessonTeacher||lessonCompleted.has(task.id);
+    const continueAction=view===3?'':`<button class="lesson-action primary" type="button" data-lesson-action="continue" ${lessonCanContinue(task,data,view,phase)?'':'disabled'}>Weiter</button>`;
+    const nextAction=next?`<button class="lesson-action lesson-next-action" type="button" data-lesson-action="start" data-lesson-id="${next.id}" ${canNext&&lessonCanStart(next.id)?'':'disabled title="Erst nach erfolgreicher Reflexion verfügbar"'}>Nächste Aufgabe →</button>`:`<button class="lesson-action lesson-next-action" type="button" data-lesson-action="catalog" ${canNext?'':'disabled'}>Zur Übersicht</button>`;
+    let learning=view===0?lessonIntroMarkup(task):view===1?lessonPredictionMarkup(task,data):view===2?lessonTestMarkup(task,data):lessonReflectionMarkup(task,data);
+    const confirmedHere=view===1&&data.predictionOk||view===2&&data.checkedSignature===lessonCircuitSignature()||view===3&&data.reflectionOk;
+    if(view>0){
+      const review=view<phase||confirmedHere,preview=view>phase;
+      if(view===2&&(review||preview))learning=learning.replace('<div class="lesson-measure-feedback" id="lessonMeasureLive"></div>','');
+      learning=lessonPhaseFields(learning,review||preview);
+      if(preview)learning+='<p class="lesson-learning-note">Vorschau im Lehrermodus · Für den Lernfortschritt zuerst die vorherigen Schritte abschließen.</p>';
+    }
+    content.innerHTML=`<div class="lesson-detail-heading"><div class="lesson-kicker">${esc(unit?.name||'Übung')}</div><h2 class="lesson-name">${String(LESSON_TASKS.indexOf(task)+1).padStart(2,'0')} - ${esc(task.title)} ${lessonCompleted.has(task.id)?'<span style="color:#72deaa;font-size:14px" title="Schon einmal erfolgreich gelöst">✓</span>':''}</h2><button class="lesson-icon-btn lesson-reset-icon" type="button" data-lesson-action="reset" aria-label="Aufgabe neu starten" title="Aufgabe neu starten">↺</button></div>${lessonPhaseMarkup(phase,view,data)}<div id="lessonPhaseContent" role="tabpanel" aria-labelledby="lessonPhaseTab${view}">${view===1||view===2?`<p class="lesson-objective">${esc(view===1?task.predictionGoal:task.goal)}</p>`:''}${learning}</div>`;
+    const previousAction=`<button class="lesson-action lesson-prev-action" type="button" data-lesson-action="start" data-lesson-id="${previous?.id||''}" ${previous&&lessonCanStart(previous.id)?'':'disabled'}>← Vorherige Aufgabe</button>`;
+    footer.hidden=false;footer.innerHTML=continueAction+`<div class="lesson-task-navigation">${previousAction}${nextAction}</div>`;
+    lessonSyncMeasurement();
+    content.scrollTop=scrollTop;syncLessonScrollJump();
   }
+  function openLessonTeacher(){
+    if(lessonTeacher){lessonSwitchToTasks(true);return;}
+    clearArrowNavigation();cancelActiveGesture();clearPalettePlacement();
+    $('lessonTeacherCode').value='';$('lessonTeacherError').hidden=true;
+    $('lessonTeacherModal').classList.add('show');$('lessonTeacherCode').focus();
+  }
+  function closeLessonTeacher(){ $('lessonTeacherModal').classList.remove('show');$('lessonTeacherCode').value='';$('lessonTeacherError').hidden=true;document.querySelector('[data-menu="mode"] .menu-trigger')?.focus({preventScroll:true}); }
   function initLessonUI(){
+    const teacherModal=$('lessonTeacherModal');
+    $('lessonTeacherCancel').addEventListener('click',closeLessonTeacher);
+    teacherModal.addEventListener('click',event=>{if(event.target===teacherModal)closeLessonTeacher();});
+    teacherModal.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeLessonTeacher();}
+      else if(event.key==='Tab'){
+        const controls=[...teacherModal.querySelectorAll('input,button')],first=controls[0],last=controls[controls.length-1];
+        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+        else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+      }
+    });
+    const codeInput=$('lessonTeacherCode');
+    // Lokaler Freischaltcode, keine Anmeldung und kein Passwortformular.
+    if(window.CSS?.supports('-webkit-text-security','disc')){
+      codeInput.type='text';codeInput.style.webkitTextSecurity='disc';codeInput.autocomplete='off';
+    }
+    const confirmTeacherCode=()=>{
+      if(codeInput.value!=='Admin'){$('lessonTeacherError').hidden=false;codeInput.focus();codeInput.select();return;}
+      closeLessonTeacher();lessonSwitchToTasks(true);
+    };
+    $('lessonTeacherOpen').addEventListener('click',confirmTeacherCode);
+    codeInput.addEventListener('keydown',event=>{
+      if(event.key==='Enter'&&!event.isComposing){event.preventDefault();event.stopPropagation();confirmTeacherCode();}
+    });
+    const scrollContent=$('lessonContent');
+    scrollContent.addEventListener('click',event=>{
+      const el=event.target.closest?.('details[data-phase-help] > summary')?.parentElement;
+      if(!el)return;
+      event.preventDefault();el.open=!el.open;lessonPhaseHelpState.set(el.dataset.phaseHelp,el.open);syncLessonScrollJump();
+    });
+    scrollContent.addEventListener('scroll',syncLessonScrollJump,{passive:true});
+    $('lessonScrollJump').addEventListener('click',()=>scrollContent.scrollTo({top:scrollContent.scrollHeight,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}));
+    if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncLessonScrollJump).observe(scrollContent);
     $('lessonMinimize').addEventListener('click',()=>{
       lessonPanelMinimized=!lessonPanelMinimized;
       syncLessonPanelMinimized();
@@ -7206,6 +8051,10 @@
     resetModal.addEventListener('keydown',event=>{
       if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeReset();}
     });
+    $('lessonPanel').addEventListener('change',event=>{
+      const el=event.target.closest('[data-lesson-number]');if(!el||el.value==='')return;
+      lessonLearningAction(el.dataset.lessonNumber,{dataset:{row:el.dataset.row,col:el.dataset.col,bit:el.value}});
+    });
     $('lessonPanel').addEventListener('click',event=>{
       const button=event.target.closest('[data-lesson-action]');if(!button)return;
       const action=button.dataset.lessonAction;
@@ -7213,14 +8062,20 @@
       else if(action==='catalog'){lessonShowCatalog=true;lessonHintIndex=0;renderLessonPanel();$('lessonContent').scrollTop=0;}
       else if(action==='check')lessonCheck();
       else if(action==='reset')lessonReset();
-      else if(action==='intro-hide'){const task=lessonTask(lessonActiveId);if(task)lessonIntroDismissed.add(task.unit);renderLessonPanel();}
-      else if(action==='intro-show'){const task=lessonTask(lessonActiveId);if(task)lessonIntroDismissed.delete(task.unit);renderLessonPanel();}
+      else if(action==='phase'){
+        const task=lessonTask(lessonActiveId);if(!task)return;
+        const data=lessonRecordState(task),view=Number(button.dataset.phase);
+        lessonNavigatePhase(task,data,view);
+        $('lessonContent').querySelector(`#lessonPhaseTab${view}`)?.focus({preventScroll:true});
+      }
+      else if(action==='continue')lessonContinue();
+      else lessonLearningAction(action,button);
     });
     if(lessonActiveId&&!lessonTask(lessonActiveId)){
       lessonActiveId=null;try{localStorage.removeItem(LESSON_ACTIVE_KEY);}catch(_){}
     }
     if(lessonActiveId){
-      try{localStorage.setItem(LESSON_LAST_KEY,lessonActiveId);}catch(_){}
+      try{localStorage.setItem(lessonModeKey(LESSON_LAST_KEY),lessonActiveId);}catch(_){}
       lessonShowCatalog=true;lessonPanelVisibility(true);
     }
     else{syncLessonHintButtons();syncModeMenu();}
@@ -9193,6 +10048,7 @@ module.exports = QRCode;
     }
   }, true);
   function resetCircuit(){
+    if(lessonActiveId){$('newCircuitModal').classList.remove('show');lessonReset();return;}
     pendingPaste=null;collisionPreviewNodeIds.clear();projectName='Hauptschaltkreis';activeModuleId=null;moduleDefinitions=[];refreshCustomModuleTypes();
     nodes=[];wires=[];nodeDrawOrder=[];wireDrawOrder=[];mainBoardState={nodes,wires,nodeDrawOrder,wireDrawOrder,camera:{x:stage.clientWidth/2,y:stage.clientHeight/2,z:1}};
     clearSelection();armedFrom=null;selectedPaletteType=null;renderBoardTabs();renderPalette();document.querySelectorAll('.palette-item.selected').forEach(btn=>btn.classList.remove('selected'));
@@ -9200,6 +10056,7 @@ module.exports = QRCode;
   }
 
   function createNewCircuit() {
+    if(lessonActiveId){lessonReset();return;}
     const hasContent=nodes.length||wires.length||moduleDefinitions.some(def=>(def.nodes||[]).length||(def.wires||[]).length)||moduleDefinitions.length;
     if(hasContent) { $('newCircuitModal').classList.add('show'); $('cancelNewCircuit').focus(); return; }
     resetCircuit();
@@ -9233,7 +10090,8 @@ module.exports = QRCode;
       case 'paste': pasteSelection(); break;
       case 'duplicate': duplicateSelection(); break;
       case 'delete': deleteSelection(); break;
-      case 'modeLessons': lessonSwitchToTasks(); break;
+      case 'modeLessons': lessonSwitchToTasks(false); break;
+      case 'modeTeacher': openLessonTeacher(); break;
       case 'modeSandbox': if(lessonActiveId)lessonExit(); else lessonPanelVisibility(false); break;
       case 'fullscreen': toggleFullscreen(); break;
       case 'grid': setGridVisible(!gridVisible); break;
@@ -9349,6 +10207,7 @@ module.exports = QRCode;
   function insertNodeIntoWire(type,wireId,clientX,clientY,draft=null) {
     const wire=wires.find(item=>item.id===wireId);
     if(!wire||!TYPES[type]) return false;
+    if(lessonFixedWire(wireId)||lessonModuleView()){lessonWireFeedback();return false;}
     const source=byId(wire.from.id),dest=byId(wire.to.id);
     if(!source||!dest) return false;
     const probe=closestPointOnWire(wire,worldPoint(clientX,clientY));
@@ -9377,6 +10236,7 @@ module.exports = QRCode;
   function insertExistingNodeIntoWire(nodeId,wireId,clientX,clientY) {
     const node=byId(nodeId),wire=wires.find(item=>item.id===wireId);
     if(!node||!wire) return false;
+    if(lessonFixedWire(wireId)||lessonFixedNode(nodeId)){lessonWireFeedback();return false;}
     const inputPort=existingNodeInsertInputPort(node,wire);
     if(inputPort<0){showToast('Dieses Bauteil hat keinen freien, passenden Eingang oder sein Ausgang ist bereits belegt');return false;}
     const probe=closestPointOnWire(wire,worldPoint(clientX,clientY));
@@ -9447,12 +10307,6 @@ module.exports = QRCode;
   // Die Farbauswahl ist Teil des Einfügewerkzeugs, kein Klick auf das Raster.
   paletteLedPicker.addEventListener('pointerdown',e=>e.stopPropagation());
   paletteLedPicker.addEventListener('click',e=>{
-    if(e.target.closest('[data-palette-led-close]')){
-      e.preventDefault();e.stopPropagation();
-      closePaletteLedPicker();
-      updatePalettePlacementPreview(currentPointer.x,currentPointer.y);
-      return;
-    }
     const button=e.target.closest('[data-palette-led-color]');
     if(!button||paletteDraft?.type!=='OUTPUT')return;
     e.preventDefault();e.stopPropagation();
@@ -9974,7 +10828,7 @@ module.exports = QRCode;
   });
   document.addEventListener('scroll',()=>{closeObjectContextMenu();closeWireContextMenu();closeMinimapContextMenu();},true);
   $('objectContextMenu').addEventListener('click',e=>{
-    const button=e.target.closest('[data-object-action]');if(!button)return;
+    const button=e.target.closest('[data-object-action]');if(!button||button.disabled)return;
     const action=button.dataset.objectAction,targetNodeId=objectContextNodeId;closeObjectContextMenu();
     if(action==='simulate-current'||action==='simulate-default'){
       const node=byId(targetNodeId);
@@ -10181,6 +11035,84 @@ module.exports = QRCode;
   $('shareLinkTab').addEventListener('click',()=>setShareView('link'));
   $('shareQrTab').addEventListener('click',()=>setShareView('qr'));
   const PATCH_LOG = [
+    {version:'V169',title:'Zusammenhängende Schutzkonturen',items:[
+      'Text für nicht verbundene Ausgänge angepasst.',
+      'Vertikal ausgerichtete vorgegebene Bauteile werden in einem gemeinsamen, bei Bedarf abgestuften und gerundeten Schutzbereich zusammengefasst.',
+      'Schutzkonturen berücksichtigen die Gehäuse ohne Pins; links und rechts gleicher Abstand.'
+    ]},
+    {version:'V168',title:'Einheitliche Prüfrückmeldungen und Schutzrahmen',items:[
+      'Texte für Levelübersicht und noch nicht verbundene Ausgänge angepasst.',
+      'Schaltungsfehler ohne zusätzliche Überschrift im Rückmeldebereich oberhalb der Schaltungsprüfung; alte Ergebnisbox entfernt.',
+      'Alle vorgegebenen Objekte einschließlich einzelner Ein- und Ausgänge erhalten Schutzrahmen. Fest verbundene Objekte bleiben gemeinsam eingerahmt.'
+    ]},
+    {version:'V167',title:'Konsistente Lernkarten und Buffer-Einstellung',items:[
+      'Modulanschlüsse mit Namen oben, Typbeschriftung mittig; Seitengriffe auf die Schaltungsfläche zentriert.',
+      'Einheitliche Tabellenzeilen und kompakte Phasenabstände; aufklappbare Bedienhinweise in Vorhersage und Bau & Test.',
+      'Level 5 erfordert 1,5 s Buffer-Verzögerung einschließlich Eigenschafts- und Zeitprüfung; selbst entwickelte Logikfunktionen in Aufgabenstellungen benannt.'
+    ]},
+    {version:'V166',title:'Auswahl, Zahlenanzeige und Speicher',items:[
+      '27 Level in elf Kapiteln; Halbaddierer unmittelbar nach XOR. Taster, Clock und Momentaufnahmen aus Aufgaben entfernt, Sandbox unverändert.',
+      'Zwei Zahlenanzeige-, vier MUX/DEMUX- und zwei Flipflop-Aufgaben mit echten Simulationsprüfungen; Speicher über geordnete Signalfolgen.',
+      'Geschützte verbundene Bereiche markiert; Modul-Ein- und -Ausgänge auf 104 × 62 Einheiten vereinheitlicht.'
+    ]},
+    {version:'V165',title:'Lernfolge, Taster, Clock und robuste Zeitmessung',items:[
+      '19 Level thematisch und nach Schwierigkeit neu geordnet; Signalverzögerungen früher, NAND/NOR sowie XOR/XNOR zusammengeführt.',
+      'Vorgegebene Taster und Clock-Eingänge mit festgehaltenen Messmomenten; automatische Prüfung unabhängig von der realen Taktphase.',
+      'Buffer-Messwerte erst nach ausstehenden Übergängen erfassbar; weitere Buffer-Stufen werden auch nach einem fälligen Übergang aktualisiert. Zusätzliche Prüftabelle entfernt.'
+    ]},
+    {version:'V164',title:'Unterfunktionen, Signalverzögerungen und Messprüfung',items:[
+      'Messwerte werden erst bei der Prüfung bewertet; falsche Zellen bleiben bis zur Prüfung neutral. Lehrermodus verwendet dieselbe Lernprüfung.',
+      'Vier neue Aufgaben: zwei geschützte Unterfunktionen und zwei Buffer-Aufgaben mit virtueller Zeitprüfung beider Flanken.',
+      'Aufgabenkopf und Phasen kompakter positioniert.'
+    ]},
+    {version:'V163',title:'Kompakter Messbereich und Reset-Dialog',items:[
+      'Messfortschrittsanzeige oberhalb der Wahrheitstabelle entfernt; Messprüfung und Gesamtfortschritt unverändert.',
+      'Reset-Knopf zwei Pixel nach unten versetzt, Prüfknopf ohne Häkchen und Reset-Bestätigung gekürzt.'
+    ]},
+    {version:'V162',title:'Individuelle Level-Einstiege und einheitliche Navigation',items:[
+      'Individuelle Einführungen für alle 15 Level, überarbeitete Texte, Ausblick rechts und Statuszeichen am Textende.',
+      'Weiter und Aufgabennavigation mit einheitlichen aktiven und deaktivierten Farben. Vorherige Aufgabe ergänzt; gespeicherter Abschluss erlaubt Weiterwechsel auch nach Reset.',
+      'Bauteile beim Rückwärtswechsel weich ausblenden und verbleibende Karten animiert neu einsortieren.'
+    ]},
+    {version:'V161',title:'Ruhige Aufgabenoberfläche und animierte Bauteilfreischaltung',items:[
+      'Levelübersicht mit neuem Text und zwei Absätzen. Fließtexte im Blocksatz, gesperrte Vorschaukarten mit Nicht-verfügbar-Mauszeiger.',
+      'Kompakter Aufgabenkopf mit Reset oben rechts. Nächste Aufgabe bleibt nach erfolgreicher Reflexion in allen Lernphasen verfügbar.',
+      'Beim Aufgabenwechsel gleiten vorhandene Bauteilkarten an ihre neue Position; neu freigeschaltete Karten erscheinen mit zentrierter Pop-Animation. Reduzierte Bewegung wird respektiert.'
+    ]},
+    {version:'V160',title:'Stabile Lernkarten und direkte Phasenfreischaltung',items:[
+      'Einheitliche Lernkartenstruktur ohne Versatz nach der Vorhersageprüfung. Gesperrte Phasen sind diagonal schraffiert; bestandene Prüfungen schalten die nächste Phase direkt frei.',
+      'Aufgabenfenster ohne sichtbare Scrollbar, mit Sprungknopf zum Ende bei Überlauf. Aufgabenübersicht zeigt das nächste Kapitel als gestaffelten Ausblick; spätere Kapitel bleiben verborgen.',
+      'Einführungstext der Übersicht aktualisiert; Tipps sind ausschließlich in den Phasen 1 bis 3 verfügbar.'
+    ]},
+    {version:'V159',title:'Vier Lernphasen und gestufte Vorhersagehilfe',items:[
+      'Phase Fertig entfällt: Die richtige Reflexionsantwort schließt die Aufgabe ab. Vier farblich differenzierte Phasentabs ohne Textumbruch.',
+      'Vorhersage: Beim ersten Fehlversuch nur allgemeine Rückmeldung, ab dem zweiten Markierung der falsch beantworteten Zeilen. Texte angepasst.',
+      'Aufgabenüberschriften mit zweistelliger Nummer und einheitlicher Schriftgröße für Kapitel und Aufgabe.'
+    ]},
+    {version:'V158',title:'Verbindliche Lernschritte und korrekte Messungen',items:[
+      'Vorhersage und Schaltungsprüfung bleiben nach Erfolg sichtbar. Weiter und Nächste Aufgabe stehen im festen Fußbereich; Abschluss erst in Phase Fertig.',
+      'Messwerte zählen nur bei Übereinstimmung mit Sollwert und tatsächlichem Signal. Tabellenabmessungen bleiben beim Wechsel der Eingänge stabil.',
+      'Phasengerechte Aufgabenregeln, vereinfachte Rückmeldungen und Entfernung doppelter Ergebnisdarstellungen.'
+    ]},
+    {version:'V157',title:'Direkte Messwerte und einheitliche Lernnavigation',items:[
+      'Messwerte werden unmittelbar in der aktiven Tabellenzeile erfasst; einzelne Ausgänge, Ablesefehler und Soll-Ist-Abweichungen werden getrennt berücksichtigt.',
+      'Fester Aufgaben-Fußbereich, einheitlicher Weiter-Knopf, gelbe Reflexionsauswahl mit roter oder grüner Prüfrückmeldung und überarbeiteter Zugangsdialog.'
+    ]},
+    {version:'V156',title:'Lernphasen als Tabs und feste Aufgabennamen',items:[
+      'Einführung als Phase 0; alle fünf Lernphasen sind über Tabs erreichbar, bereits erreichte Schritte können nachgelesen werden. Texte und Einheitsüberschriften wurden vereinheitlicht.',
+      'Der Lehrermodus verwendet eine lokale maskierte Codeeingabe ohne Formularübermittlung. Aufgabenschaltkreisnamen sind geschützt.'
+    ]},
+    {version:'V155',title:'Lernpfad und Lehrermodus',items:[
+      '15 aufeinander aufbauende Aufgaben: Vorhersagen, konstruieren, eigene Messwerte protokollieren, automatisch prüfen und reflektieren. NAND, NOR und XNOR werden aufgebaut und anschließend als Bauteile angewendet.',
+      'Lehrermodus mit lokaler Codeabfrage, getrennten Übungsständen und direktem Zugriff auf alle Aufgaben. Sandbox und bisherige Schülerfortschritte bleiben erhalten.'
+    ]},
+    {version:'V154',title:'Konsistente Auswahl und Aufgabenbedienung',items:[
+      'Taster aktualisieren beim Greifen die Bauteil- und Kabelauswahl auf der Schaltungsfläche. Auch Schalter und freie Pins entfernen veraltete Kabelmarkierungen unmittelbar.',
+      'Hinweispfeile sind vertikal korrigiert. Löschen ist im Kontextmenü vorgegebener Aufgabenbauteile deaktiviert. Die LED-Farbauswahl besitzt keinen separaten Schließen-Knopf mehr.'
+    ]},
+    {version:'V153',title:'Einheitliche Signalzähler und Bit-Auswahl',items:[
+      'Signalzähler der Eingabequellen wurden vertikal angepasst und bei HIGH und LOW ergänzt. MUX und DEMUX zeigen 2, 4 oder 8 Bit im Auswahlfeld.'
+    ]},
     {version:'V152',title:'Einheitliche Bauteilbeschriftung',items:[
       'Bauteilnamen sind auf 15 Zeichen begrenzt. Leere Namen werden beim Übernehmen durch den Standardnamen ersetzt.',
       'LEDs zeigen oben den Namen, mittig die Lampe und unten den Signalzustand. Eingabequellen haben einen zentrierten Namen und darunter ihre bisherigen Symbole.',
@@ -11326,7 +12258,10 @@ module.exports = QRCode;
       if (e.shiftKey) { selectedNodes.add(id); wireImpliedNodeIds.delete(id); } else selectOnlyNode(id);
       n.state=true;
       gesture={kind:'push',id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY};
-      renderLiveSimulation(); renderInspector(); updateStatus();
+      // Beim Wechsel der Auswahl müssen beide SVG-Ebenen neu aufgebaut
+      // werden (inkl. Kabelgriffe und Zeichenreihenfolge). Reine Live-Updates
+      // genügen erst für die folgenden Zustandswechsel des Tasters.
+      evaluate(); renderWires(); renderNodes(); renderInspector(); updateStatus();
       try { scene.setPointerCapture(e.pointerId); } catch(_) {}
       e.preventDefault(); e.stopPropagation(); return;
     }
@@ -11340,7 +12275,7 @@ module.exports = QRCode;
       // Die Schalterstellung wird erst beim bestätigten Klick auf pointerup
       // geändert. Die Eigenschaften deshalb erst DANACH aktualisieren: sonst
       // blitzt beim ersten Auswählen kurz der bisherige LOW/HIGH-Wert auf.
-      renderNodes(); updateStatus();
+      renderWires(); renderNodes(); updateStatus();
       gesture = {kind:'toggle', id, startX:e.clientX, startY:e.clientY, moved:false};
       try { scene.setPointerCapture(e.pointerId); } catch(_) {}
       e.preventDefault(); e.stopPropagation(); return;
@@ -11408,14 +12343,14 @@ module.exports = QRCode;
       } else if (pin.dir === 'out') {
         gesture={kind:'wire',from:pin,snapTarget:null,startX:e.clientX,startY:e.clientY,moved:false,pointerId:e.pointerId};
         armedFrom=pin;
-        clearSelection(); renderNodes(); renderInspector(); updateStatus();
+        clearSelection(); renderWires(); renderNodes(); renderInspector(); updateStatus();
         try { scene.setPointerCapture(e.pointerId); } catch(_) {}
         updateTempWire();
       } else if (e.shiftKey) {
         const existing=incomingWire(pin.id,pin.port);
         gesture={kind:'wire-from-input',to:pin,existingWireId:existing?.id||null,snapTarget:null,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,moved:false};
         clearSelection();
-        renderNodes(); renderInspector(); updateStatus();
+        renderWires(); renderNodes(); renderInspector(); updateStatus();
         try { scene.setPointerCapture(e.pointerId); } catch(_) {}
         updateTempWire();
       } else {
@@ -11553,6 +12488,7 @@ module.exports = QRCode;
     if (gesture.kind==='input-rewire-candidate' || gesture.kind==='wire-end-candidate') {
       if (Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)>4) {
         const candidate=gesture;
+        if(lessonFixedWire(candidate.wireId)){gesture=null;clearArmedPin();lessonWireFeedback();return;}
         gesture={kind:'rewire',wireId:candidate.wireId,end:candidate.kind==='wire-end-candidate'?candidate.end:'to',snapTarget:null,pointerId:e.pointerId,moved:true};
         updateRewirePreview();
       }
@@ -11741,6 +12677,7 @@ module.exports = QRCode;
       const target = wire ? findRewireTarget(wire,done.end,e.clientX,e.clientY) : null;
       clearSnapHighlight(); tempLayer.innerHTML='';
       if (wire && target) {
+        if(lessonFixedWire(wire.id)||(done.end==='from'?lessonLockedSource(target):lessonLockedTarget(target)||lessonFixedWire(incomingWire(target.id,target.port)?.id))){lessonWireFeedback();render(false,false);return;}
         if (done.end==='from' && target.dir==='out') {
           const same=target.id===wire.from.id && (target.port||0)===(wire.from.port||0);
           if (same) { render(false,false); return; }
@@ -11896,6 +12833,7 @@ module.exports = QRCode;
   }
 
   window.addEventListener('keydown', e => {
+    if($('lessonTeacherModal').classList.contains('show')||$('lessonResetModal').classList.contains('show'))return;
     if(moduleSimulation){
       if(e.key==='Escape'){e.preventDefault();clearArrowNavigation();endModuleSimulation();return;}
       if(!editingTarget()){
@@ -12037,7 +12975,7 @@ module.exports = QRCode;
       renderEmpty();
       if(!syncPanelLayoutFrame())updateMinimap();
       if(inlineLabelEditor)positionInlineLabelEditor();
-      syncLessonHintButtons();
+      syncLessonViewport();syncLessonHintButtons();
     });
     stageLayoutObserver.observe(stage);
   }
@@ -12060,6 +12998,11 @@ module.exports = QRCode;
     }
     return false;
   }
+  function bufferHasUnseenInput(node){
+    const wire=incomingWire(node.id,0),source=wire?byId(wire.from.id):null;
+    const value=wire&&source?outputPortSignal(source,wire.from.port||0):false;
+    return typeof value==='boolean'&&node.bufferLastInput!==value;
+  }
   function tickSimulation() {
     const now=performance.now();
     let changed=false;
@@ -12073,7 +13016,8 @@ module.exports = QRCode;
       if(!!n.state!==nextState){n.state=nextState;changed=true;}
     }
     const bufferDue=graphHasDueBufferTransition(nodes,{},Date.now());
-    if (changed||bufferDue) renderLiveSimulation(now);
+    const bufferInputChanged=nodes.some(n=>n.type==='BUFFER'&&bufferHasUnseenInput(n));
+    if (changed||bufferDue||bufferInputChanged) renderLiveSimulation(now);
     else updateClockNeedles(now);
   }
   // Dekomprimieren ist asynchron. Veraltete Ladeanforderungen dürfen eine
@@ -12089,7 +13033,7 @@ module.exports = QRCode;
     try { linked=await loadHashConfig(); }catch(_){invalidLink=true;}
     try {
       if(linked){
-        if(lessonActiveId){lessonActiveId=null;try{localStorage.removeItem(LESSON_ACTIVE_KEY);}catch(_){}}
+        if(lessonActiveId){lessonActiveId=null;lessonTeacher=false;lessonReadModeData();try{localStorage.removeItem(LESSON_ACTIVE_KEY);localStorage.removeItem(LESSON_TEACHER_KEY);}catch(_){}}
         applyConfig(linked);
       }else{
         const saved=localStorage.getItem(STORAGE_KEY);
